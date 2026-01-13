@@ -1,0 +1,59 @@
+{
+  "template": "SonataSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Sorento de Sirena",
+        "en": "Siren Sorento",
+        "pt": "Sorento de Sereia"
+      },
+      "image_url": "/assets/sonata/1.webp",
+      "cost": 4,
+      "descriptions": {
+        "es": "General Marina de Sirena. Melodías que controlan las mentes.",
+        "en": "Marina General of Siren. Melodies that control minds.",
+        "pt": "General Marinho de Sereia. Melodias que controlam mentes."
+      },
+      "knight_stats": {
+        "attack": 6,
+        "defense": 5,
+        "health": 15,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Réquiem de Muerte",
+            "en": "Death Requiem",
+            "pt": "Réquiem da Morte"
+          },
+          "type": "activa",
+          "cosmos_cost": 4,
+          "descriptions": {
+            "es": "Inflige 5 de daño y aplica 'Confusión' al objetivo por 1 turno.",
+            "en": "Deals 5 damage and applies 'Confusion' to target for 1 turn.",
+            "pt": "Causa 5 de dano e aplica 'Confusão' ao alvo por 1 turno."
+          },
+          "conditions": {
+            "trigger": "on_activate"
+          },
+          "effects": [
+            {
+              "type": "damage",
+              "value": 5,
+              "target": "single_enemy"
+            },
+            {
+              "type": "apply_status",
+              "status": "confusion",
+              "duration_turns": 1,
+              "target": "single_enemy"
+            }
+          ]
+        },
+        "@Escamas Marinas"
+      ],
+      "tags": ["marina", "siren", "sorento", "control"]
+    }
+  ]
+}

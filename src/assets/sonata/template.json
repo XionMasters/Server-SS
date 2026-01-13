@@ -1,0 +1,42 @@
+{
+  "template": "SonataSeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Poseidon",
+    "element": "water",
+    "cost": 3,
+    "generate": 1,
+    "rarity": "rara",
+    "set": "SonataSeries",
+    "max_copies": 2,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es",
+    "common_abilities": {
+      "Escamas Marinas": {
+        "type": "pasiva",
+        "descriptions": {
+          "es": "Gana +1 Ar por cada escenario de tipo 'océano' activo.",
+          "en": "Gain +1 Ar for each active 'ocean' type stage.",
+          "pt": "Ganha +1 Ar para cada cenário de tipo 'oceano' ativo."
+        },
+        "conditions": {
+          "trigger": "continuous",
+          "check": "count_stages_with_type('ocean')"
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": "defense",
+            "operation": "add",
+            "value": 1,
+            "target": "self",
+            "per_stage": true,
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    }
+  }
+}

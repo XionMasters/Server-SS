@@ -1,0 +1,15 @@
+{
+  "template": "OccasionSeries",
+  "defaults": {
+    "type": "ocasion",
+    "cost": 1,
+    "generate": 0,
+    "rarity": "comun",
+    "set": "OccasionSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["instant"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

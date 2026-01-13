@@ -1,0 +1,45 @@
+{
+  "template": "ObjectSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Armadura Reparada",
+        "en": "Repaired Cloth",
+        "pt": "Armadura Reparada"
+      },
+      "image_url": "/assets/object/1.webp",
+      "faction": "Neutral",
+      "descriptions": {
+        "es": "Restaura la armadura de un caballero dañado.",
+        "en": "Restore a damaged knight's cloth.",
+        "pt": "Restaura a armadura de um cavaleiro danificado."
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Reparación",
+            "en": "Repair",
+            "pt": "Reparação"
+          },
+          "type": "activa",
+          "descriptions": {
+            "es": "Restaura 4 LP a un caballero aliado.",
+            "en": "Restore 4 LP to an allied knight.",
+            "pt": "Restaura 4 LP a um cavaleiro aliado."
+          },
+          "conditions": {
+            "trigger": "on_activate"
+          },
+          "effects": [
+            {
+              "type": "heal",
+              "value": 4,
+              "target": "single_ally"
+            }
+          ]
+        }
+      ],
+      "tags": ["object", "heal", "support"]
+    }
+  ]
+}

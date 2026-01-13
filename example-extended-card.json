@@ -1,0 +1,74 @@
+[
+  {
+    "id": "stcga-ald-001",
+    "card_name": "Taurus Aldebaran",
+    "image_url": "/assets/gold/Divine_Aldebaran_Taurus.webp",
+    "type": "knight",
+    "rarity": "legendary",
+    "element": "light",
+    "faction": "Divine Saint",
+    "cost": 0,
+    "generate": 0,
+    "description": "Aldebarán de Tauro en su God Cloth. Poder defensivo y efectos de regeneración y parálisis.",
+    "knight_stats": {
+      "attack": 13,
+      "defense": 10,
+      "health": 12,
+      "cosmos": 10
+    },
+    "abilities": [
+      {
+        "name": "Cosmic Wrap",
+        "type": "activa",
+        "description": "El próximo BA del usuario aplica la condición PAR a un soldado oponente.",
+        "conditions": {
+          "trigger": "on_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "apply_status",
+            "status": "PAR",
+            "duration_turns": 1,
+            "chance_percent": 100,
+            "target": "single_enemy"
+          }
+        ]
+      },
+      {
+        "name": "God Cloth",
+        "type": "pasiva",
+        "description": "Por cada 2 turnos que el usuario permanece en el campo, restaura 1 DLP.",
+        "conditions": {
+          "trigger": "on_turn_end",
+          "owner_only": true,
+          "check": "turns_on_field % 2 == 0",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "restore_resource",
+            "resource": "DLP",
+            "amount": 1,
+            "target": "self"
+          }
+        ]
+      }
+    ],
+    "max_copies": 0,
+    "unique": true,
+    "playable_zones": ["battlefield"],
+    "collection_id": "STCGA-ALD-001",
+    "artist": "Willytox",
+    "language": "es",
+    "balance_notes": "Carta defensiva legendaria con regeneración. El max_copies en 0 significa solo 1 en deck.",
+    "power_level": 95,
+    "tags": ["divine", "tauro", "regen", "paralysis"],
+    "card_set": "GodClothSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  }
+]

@@ -1,0 +1,52 @@
+{
+  "name": "server-ss",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate:cards": "ts-node src/scripts/generatesAllCards.ts",
+    "generate:packs": "ts-node src/scripts/generatePacks.ts",
+    "generate:images": "ts-node src/scripts/generateCardsWithAI.ts",
+    "generate:images:no-ai": "ts-node src/scripts/generateCardsWithAI.ts --no-ai",
+    "generate:all": "npm run generate:cards && npm run generate:packs && npm run generate:images"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "dependencies": {
+    "@types/socket.io": "^3.0.1",
+    "@types/ws": "^8.18.1",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.2",
+    "canvas": "^3.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7",
+    "sharp": "^0.34.5",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.9.2",
+    "@types/nodemailer": "^7.0.3",
+    "@types/ws": "^8.18.1",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

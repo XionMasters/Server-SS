@@ -1,0 +1,54 @@
+{
+  "template": "SteelSaintSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Shō de Acero",
+        "en": "Steel Shō",
+        "pt": "Shō de Aço"
+      },
+      "image_url": "/assets/steel/1.webp",
+      "descriptions": {
+        "es": "Caballero de Acero. Armadura tecnológica moderna.",
+        "en": "Steel Saint. Modern technological armor.",
+        "pt": "Cavaleiro de Aço. Armadura tecnológica moderna."
+      },
+      "knight_stats": {
+        "attack": 3,
+        "defense": 4,
+        "health": 10,
+        "cosmos": 8
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Tecnología Avanzada",
+            "en": "Advanced Technology",
+            "pt": "Tecnologia Avançada"
+          },
+          "type": "pasiva",
+          "descriptions": {
+            "es": "Gana +2 Ar contra técnicas basadas en cosmos puro.",
+            "en": "Gain +2 Ar against pure cosmos-based techniques.",
+            "pt": "Ganha +2 Ar contra técnicas baseadas em cosmo puro."
+          },
+          "conditions": {
+            "trigger": "on_receive_attack",
+            "check": "attack_is_cosmos_based"
+          },
+          "effects": [
+            {
+              "type": "modify_stat",
+              "stat": "defense",
+              "operation": "add",
+              "value": 2,
+              "target": "self",
+              "duration_condition": "during_attack"
+            }
+          ]
+        }
+      ],
+      "tags": ["steel", "technology", "defense"]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "template": "OccasionSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Cosmos Elevado",
+        "en": "Heightened Cosmos",
+        "pt": "Cosmo Elevado"
+      },
+      "image_url": "/assets/occasion/1.webp",
+      "faction": "Neutral",
+      "cost": 2,
+      "descriptions": {
+        "es": "Evento que restaura cosmos a los caballeros.",
+        "en": "Event that restores cosmos to knights.",
+        "pt": "Evento que restaura cosmo aos cavaleiros."
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Restauración",
+            "en": "Restoration",
+            "pt": "Restauração"
+          },
+          "type": "activa",
+          "descriptions": {
+            "es": "Restaura 3 Cp a tu jugador.",
+            "en": "Restore 3 Cp to your player.",
+            "pt": "Restaura 3 Cp ao seu jogador."
+          },
+          "conditions": {
+            "trigger": "on_play"
+          },
+          "effects": [
+            {
+              "type": "restore_cosmos",
+              "value": 3,
+              "target": "player"
+            }
+          ]
+        }
+      ],
+      "tags": ["occasion", "cosmos", "resource"]
+    }
+  ]
+}

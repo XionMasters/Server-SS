@@ -1,0 +1,15 @@
+{
+  "template": "TechniqueSeries",
+  "defaults": {
+    "type": "tecnica",
+    "cost": 2,
+    "generate": 0,
+    "rarity": "rara",
+    "set": "TechniqueSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

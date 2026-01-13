@@ -1,0 +1,28 @@
+{
+  "template": "TokenSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Token Cuervo",
+        "en": "Crow Token",
+        "pt": "Token Corvo"
+      },
+      "image_url": "/assets/tokens/1.webp",
+      "faction": "Black Saint",
+      "element": "dark",
+      "descriptions": {
+        "es": "Token invocado por Black Crow.",
+        "en": "Token summoned by Black Crow.",
+        "pt": "Token invocado por Black Crow."
+      },
+      "knight_stats": {
+        "attack": 1,
+        "defense": 0,
+        "health": 1,
+        "cosmos": 1
+      },
+      "abilities": [],
+      "tags": ["token", "crow", "black"]
+    }
+  ]
+}

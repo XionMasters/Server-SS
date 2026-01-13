@@ -1,0 +1,56 @@
+{
+  "template": "LegendarySeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Athena Saori",
+        "en": "Athena Saori",
+        "pt": "Atena Saori"
+      },
+      "image_url": "/assets/legendary/1.webp",
+      "descriptions": {
+        "es": "Diosa de la Sabiduría y la Guerra Justa. Protectora de la humanidad.",
+        "en": "Goddess of Wisdom and Just War. Protector of humanity.",
+        "pt": "Deusa da Sabedoria e da Guerra Justa. Protetora da humanidade."
+      },
+      "knight_stats": {
+        "attack": 10,
+        "defense": 12,
+        "health": 25,
+        "cosmos": 20
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Bendición Divina",
+            "en": "Divine Blessing",
+            "pt": "Bênção Divina"
+          },
+          "type": "activa",
+          "cosmos_cost": 5,
+          "descriptions": {
+            "es": "Restaura 5 LP a todos los aliados y elimina condiciones negativas.",
+            "en": "Restore 5 LP to all allies and remove negative conditions.",
+            "pt": "Restaura 5 LP a todos os aliados e remove condições negativas."
+          },
+          "conditions": {
+            "trigger": "on_activate"
+          },
+          "effects": [
+            {
+              "type": "heal",
+              "value": 5,
+              "target": "all_allies"
+            },
+            {
+              "type": "remove_status",
+              "status_type": "negative",
+              "target": "all_allies"
+            }
+          ]
+        }
+      ],
+      "tags": ["goddess", "athena", "divine", "support"]
+    }
+  ]
+}

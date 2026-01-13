@@ -1,0 +1,58 @@
+{
+  "template": "GoldSaintSeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Athena",
+    "element": "light",
+    "cost": 5,
+    "generate": 2,
+    "rarity": "legendaria",
+    "set": "GoldSaintSeries",
+    "max_copies": 1,
+    "unique": true,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es",
+    "common_abilities": {
+      "Armadura de Oro": {
+        "type": "pasiva",
+        "descriptions": {
+          "es": "Inmune a condiciones negativas aplicadas por caballeros de rango inferior (Bronze/Silver).",
+          "en": "Immune to negative conditions applied by lower rank knights (Bronze/Silver).",
+          "pt": "Imune a condições negativas aplicadas por cavaleiros de posto inferior (Bronze/Silver)."
+        },
+        "conditions": {
+          "trigger": "continuous"
+        },
+        "effects": [
+          {
+            "type": "grant_immunity",
+            "immunity_to": ["negative_conditions"],
+            "condition": "from_lower_rank",
+            "target": "self",
+            "duration_condition": "permanent"
+          }
+        ]
+      },
+      "Séptimo Sentido": {
+        "type": "pasiva",
+        "descriptions": {
+          "es": "Al recibir daño letal, sobrevive con 1 LP una vez por partida.",
+          "en": "When receiving lethal damage, survive with 1 LP once per match.",
+          "pt": "Ao receber dano letal, sobrevive com 1 LP uma vez por partida."
+        },
+        "conditions": {
+          "trigger": "on_lethal_damage",
+          "one_time": true
+        },
+        "effects": [
+          {
+            "type": "prevent_death",
+            "set_health": 1,
+            "target": "self"
+          }
+        ]
+      }
+    }
+  }
+}

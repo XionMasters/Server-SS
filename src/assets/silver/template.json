@@ -1,0 +1,41 @@
+{
+  "template": "SilverSaintSeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Athena",
+    "element": "steel",
+    "cost": 2,
+    "generate": 1,
+    "rarity": "rara",
+    "set": "SilverSaintSeries",
+    "max_copies": 2,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es",
+    "common_abilities": {
+      "Armadura de Plata": {
+        "type": "pasiva",
+        "descriptions": {
+          "es": "Aumenta Ar en 2 contra ataques de caballeros de Bronce.",
+          "en": "Increase Ar by 2 against attacks from Bronze knights.",
+          "pt": "Aumenta Ar em 2 contra ataques de cavaleiros de Bronze."
+        },
+        "conditions": {
+          "trigger": "on_receive_attack",
+          "check": "attacker_has_armor('Bronze Cloth')"
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": "defense",
+            "operation": "add",
+            "value": 2,
+            "target": "self",
+            "duration_condition": "during_attack"
+          }
+        ]
+      }
+    }
+  }
+}

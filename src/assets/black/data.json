@@ -1,0 +1,825 @@
+[
+  {
+    "id": "",
+    "card_name": {
+      "es": "Black Cygnus",
+      "en": "Black Cygnus",
+      "pt": "Black Cygnus"
+    },
+    "image_url": "/assets/black/Black_Cygnus.webp",
+    "type": "soldier",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "armor_class": "Dark Cloth",
+    "cost": 0,
+    "generate": 1,
+    "description": {
+      "es": "Black Cygnus. Efectos oscuros orientados a anular el cosmos del enemigo y aplicar condiciones.",
+      "en": "Black Cygnus. Dark effects focused on nullifying the enemy's cosmos and applying conditions.",
+      "pt": "Black Cygnus. Efeitos sombrios focados em anular o cosmo do inimigo e aplicar condições."
+    },
+    "knight_stats": {
+      "attack": 2,
+      "defense": 2,
+      "health": 8,
+      "cosmos": 8
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": {
+          "es": "El próximo Technique Attack reduce el atributo Cp del objetivo a 0.",
+          "en": "User's next Technique Attack reduces Cp attribute to 0.",
+          "pt": "O próximo ataque de técnica do usuário reduz o atributo Cp para 0."
+        },
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": "cosmos",
+            "operation": "set",
+            "value": 0,
+            "target": "single_enemy",
+            "duration_turns": 1,
+            "chance_percent": 100
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": {
+          "es": "Aumenta Ce/Ar en 3 si el caballero que está justo enfrente tiene armadura Bronze o Silver. El aumento se aplica a todos los ataques del portador.",
+          "en": "Increase Ce/Ar by 3 if the knight directly in front has Bronze or Silver armor. The increase applies to all attacks of the owner.",
+          "pt": "Aumenta Ce/Ar em 3 se o cavaleiro diretamente em frente tiver armadura Bronze ou Silver. O aumento aplica-se a todos os ataques do portador."
+        },
+        "conditions": {
+          "trigger": "continuous",
+          "check": "enemy_in_front_has_armor(['Bronze Cloth','Silver Cloth'])",
+          "owner_only": true
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true",
+            "apply_scope": "all_attacks"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": true,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black-saint",
+      "cygnus",
+      "rare"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "",
+    "card_name": "Black Altar Avido",
+    "image_url": "/assets/black/Black_Altar_Avido.webp",
+    "type": "soldier",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 6,
+    "generate": 0,
+    "description": "Black Altar Avido. Alchemy oscuro: intercambios mano/robo para ventaja de cartas.",
+    "knight_stats": {
+      "attack": 6,
+      "defense": 4,
+      "health": 10,
+      "cosmos": 10
+    },
+    "abilities": [
+      {
+        "name": "Black Alchemy",
+        "type": "activa",
+        "description": "Descarta 1 Black Saint de tu mano; roba 2 cartas.",
+        "conditions": {
+          "trigger": "on_activate",
+          "scope": "owner_action",
+          "one_time": false,
+          "cooldown_turns": 0,
+          "requirements": {
+            "hand_contains": {
+              "faction": "Black Saint",
+              "count": 1
+            }
+          }
+        },
+        "effects": [
+          {
+            "type": "cost",
+            "cost_type": "discard",
+            "requirements": {
+              "faction": "Black Saint",
+              "count": 1,
+              "from_zone": "hand"
+            }
+          },
+          {
+            "type": "draw_cards",
+            "amount": 2,
+            "target": "owner"
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "altar",
+      "card-advantage"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-003",
+    "card_name": "Shadow Phoenix",
+    "image_url": "/assets/black/Shadow_Phoenix.webp",
+    "type": "soldier",
+    "rarity": "common",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 0,
+    "generate": 0,
+    "description": "Shadow Phoenix. Efecto especial: puede invocar desde el mazo otro Shadow Phoenix si el rival controla al menos 2 soldados.",
+    "knight_stats": {
+      "attack": 1,
+      "defense": 1,
+      "health": 4,
+      "cosmos": 6
+    },
+    "abilities": [
+      {
+        "name": "Shadow Effect",
+        "type": "activa",
+        "description": "Extrae/llama desde el deck otro 'Shadow Phoenix' si el oponente controla al menos 2 soldados en campo.",
+        "conditions": {
+          "trigger": "on_activate",
+          "scope": "owner_action",
+          "one_time": false,
+          "cooldown_turns": 0,
+          "requirements": {
+            "opponent_min_soldiers_on_field": 2,
+            "deck_contains": {
+              "card_name": "Shadow Phoenix",
+              "count": 1
+            }
+          }
+        },
+        "effects": [
+          {
+            "type": "summon_from_deck",
+            "card_filter": {
+              "card_name": "Shadow Phoenix"
+            },
+            "amount": 1,
+            "target": "owner_battlefield",
+            "shuffle_deck_after": true
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "shadow",
+      "phoenix",
+      "summon-from-deck"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "",
+    "card_name": {
+      "es": "Black Dragon",
+      "en": "Black Dragon",
+      "pt": "Black Dragon"
+    },
+    "image_url": "/assets/black/Black_Dragon.webp",
+    "type": "soldier",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 0,
+    "generate": 0,
+    "description": {
+      "es": "Black Dragon. Efecto oscuro: el próximo ataque técnico reduce Ar del objetivo en 2.",
+      "en": "Black Dragon. Dark effect: the next technique attack reduces target's Ar by 2.",
+      "pt": "Black Dragon. Efeito sombrio: o próximo ataque de técnica reduz Ar do alvo em 2."
+    },
+    "knight_stats": {
+      "attack": 2,
+      "defense": 3,
+      "health": 8,
+      "cosmos": 6
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": {
+          "es": "El próximo Technique Attack reduce Ar del objetivo en 2.",
+          "en": "The next Technique Attack reduces target's Ar by 2.",
+          "pt": "O próximo ataque de técnica reduz Ar do alvo em 2."
+        },
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": "defense",
+            "operation": "add",
+            "value": -2,
+            "target": "single_enemy",
+            "duration_turns": 1,
+            "chance_percent": 100
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": {
+          "es": "Aumenta Ce/Ar en 3 si el caballero enfrente es Bronze o Silver.",
+          "en": "Increase Ce/Ar by 3 if the knight in front is Bronze or Silver.",
+          "pt": "Aumenta Ce/Ar em 3 se o cavaleiro em frente for Bronze ou Silver."
+        },
+        "conditions": {
+          "trigger": "continuous",
+          "check": "enemy_in_front_has_armor(['Bronze Cloth','Silver Cloth'])",
+          "owner_only": true
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true",
+            "apply_scope": "all_attacks"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "dragon",
+      "debuff"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-005",
+    "card_name": "Black Pegasus",
+    "image_url": "/assets/black/Black_Pegasus.webp",
+    "type": "caballero",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 0,
+    "generate": 2,
+    "description": "Black Pegasus. Efecto oscuro: el próximo Technique Attack causa PSN (veneno) a un enemigo.",
+    "knight_stats": {
+      "attack": 2,
+      "defense": 1,
+      "health": 9,
+      "cosmos": 8
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": "El próximo Technique Attack del usuario causa la condición PSN al soldado oponente objetivo.",
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "apply_status",
+            "status": "PSN",
+            "duration_turns": 2,
+            "chance_percent": 100,
+            "target": "single_enemy"
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "pegasus",
+      "poison"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-006",
+    "card_name": "Black Hound Yudo",
+    "image_url": "/assets/black/Black_Hound_Yudo.webp",
+    "type": "caballero",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 3,
+    "generate": 1,
+    "description": "Black Hound Yudo. Efecto oscuro: el próximo Technique Attack otorga inmunidad del usuario frente a condiciones negativas.",
+    "knight_stats": {
+      "attack": 3,
+      "defense": 2,
+      "health": 8,
+      "cosmos": 10
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": "El próximo Technique Attack del usuario le da inmunidad a condiciones negativas (duración corta).",
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "grant_immunity",
+            "immunity_to": [
+              "negative_conditions"
+            ],
+            "duration_turns": 1,
+            "target": "self",
+            "chance_percent": 100
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "hound",
+      "immunity"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-007",
+    "card_name": "Black Hound",
+    "image_url": "/assets/black/Black_Hound.webp",
+    "type": "caballero",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 2,
+    "generate": 2,
+    "description": "Black Hound. Efecto oscuro: el próximo Technique Attack revela la mano del oponente.",
+    "knight_stats": {
+      "attack": 2,
+      "defense": 2,
+      "health": 8,
+      "cosmos": 10
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": "El próximo Technique Attack del usuario revela la mano del oponente objetivo.",
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "reveal_hand",
+            "target": "single_enemy",
+            "duration_info": "reveal_now",
+            "chance_percent": 100
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "hound",
+      "reveal"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-008",
+    "card_name": "Black Andromeda",
+    "image_url": "/assets/black/Black_Andromeda.webp",
+    "type": "caballero",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 0,
+    "generate": 1,
+    "description": "Black Andromeda. Efecto oscuro: el próximo Technique Attack aplica PAR y PSN al objetivo.",
+    "knight_stats": {
+      "attack": 1,
+      "defense": 2,
+      "health": 8,
+      "cosmos": 10
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": "El próximo Technique Attack del usuario causa PAR y PSN al soldado oponente objetivo.",
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "apply_status",
+            "status": "PAR",
+            "duration_turns": 1,
+            "chance_percent": 100,
+            "target": "single_enemy"
+          },
+          {
+            "type": "apply_status",
+            "status": "PSN",
+            "duration_turns": 2,
+            "chance_percent": 100,
+            "target": "single_enemy"
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "andromeda",
+      "status"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  },
+  {
+    "id": "stcga-black-009",
+    "card_name": "Black Crow",
+    "image_url": "/assets/black/Black_Crow.webp",
+    "type": "caballero",
+    "rarity": "rare",
+    "element": "dark",
+    "faction": "Black Saint",
+    "cost": 2,
+    "generate": 2,
+    "description": "Black Crow. Efecto oscuro: el próximo Technique Attack invoca un token 'Crow' con estadísticas definidas.",
+    "knight_stats": {
+      "attack": 1,
+      "defense": 2,
+      "health": 8,
+      "cosmos": 8
+    },
+    "abilities": [
+      {
+        "name": "Dark Effect",
+        "type": "activa",
+        "description": "El próximo Technique Attack del usuario invoca un token 'Crow' (Lp=1 Ce=1 Ar=0 Cp=0).",
+        "conditions": {
+          "trigger": "on_technique_attack",
+          "scope": "next_attack",
+          "one_time": true,
+          "cooldown_turns": 0,
+          "requirements": null
+        },
+        "effects": [
+          {
+            "type": "summon_token",
+            "token": {
+              "card_name": "Crow Token",
+              "knight_stats": {
+                "attack": 1,
+                "defense": 0,
+                "health": 1,
+                "cosmos": 1
+              },
+              "faction": "Black Saint",
+              "tags": [
+                "token",
+                "crow"
+              ]
+            },
+            "amount": 1,
+            "target": "owner_battlefield",
+            "duration_turns": null
+          }
+        ]
+      },
+      {
+        "name": "Black Saint",
+        "type": "pasiva",
+        "description": "Aumenta Ce/Ar en 3 si el enemigo adversario es un soldado Bronze o Silver.",
+        "conditions": {
+          "trigger": "continuous",
+          "owner_only": true,
+          "check": "enemy_has_type_in_battlefield(['Bronze','Silver'])",
+          "one_time_per_check": false
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": [
+              "attack",
+              "defense"
+            ],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    ],
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": [
+      "battlefield"
+    ],
+    "collection_id": null,
+    "artist": "Willytox",
+    "language": "en",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": [
+      "black",
+      "crow",
+      "token"
+    ],
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox."
+  }
+]

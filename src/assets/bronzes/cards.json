@@ -1,0 +1,60 @@
+{
+  "template": "BronzeSaintSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Seiya de Pegaso",
+        "en": "Pegasus Seiya",
+        "pt": "Seiya de Pégaso"
+      },
+      "image_url": "/assets/bronzes/1.webp",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "descriptions": {
+        "es": "Caballero de Bronce de Pegaso. Golpes meteóricos devastadores.",
+        "en": "Bronze Saint of Pegasus. Devastating meteor strikes.",
+        "pt": "Cavaleiro de Bronze de Pégaso. Golpes meteóricos devastadores."
+      },
+      "knight_stats": {
+        "attack": 4,
+        "defense": 3,
+        "health": 12,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Meteoros de Pegaso",
+            "en": "Pegasus Meteor Fist",
+            "pt": "Meteoros de Pégaso"
+          },
+          "type": "activa",
+          "cosmos_cost": 3,
+          "descriptions": {
+            "es": "Inflige 6 de daño. Si el objetivo tiene más Ar que Ce, ignora la mitad de la defensa.",
+            "en": "Deals 6 damage. If target has more Ar than Ce, ignore half defense.",
+            "pt": "Causa 6 de dano. Se o alvo tiver mais Ar que Ce, ignora metade da defesa."
+          },
+          "conditions": {
+            "trigger": "on_activate",
+            "one_time": false
+          },
+          "effects": [
+            {
+              "type": "damage",
+              "value": 6,
+              "target": "single_enemy",
+              "conditional_pierce": {
+                "condition": "target_defense > target_attack",
+                "pierce_percentage": 50
+              }
+            }
+          ]
+        },
+        "@Cosmo de Bronce"
+      ],
+      "tags": ["bronze", "pegasus", "seiya", "protagonist"]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "template": "GoldSaintSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Mu de Aries",
+        "en": "Aries Mu",
+        "pt": "Mu de Áries"
+      },
+      "image_url": "/assets/golds/1.webp",
+      "cost": 4,
+      "descriptions": {
+        "es": "Caballero de Oro de Aries. Maestro de la telequinesis y reparación de armaduras.",
+        "en": "Gold Saint of Aries. Master of telekinesis and cloth repair.",
+        "pt": "Cavaleiro de Ouro de Áries. Mestre da telequinese e reparação de armaduras."
+      },
+      "knight_stats": {
+        "attack": 7,
+        "defense": 8,
+        "health": 18,
+        "cosmos": 15
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Extinción Estelar",
+            "en": "Starlight Extinction",
+            "pt": "Extinção Estelar"
+          },
+          "type": "activa",
+          "cosmos_cost": 5,
+          "descriptions": {
+            "es": "Inflige 8 de daño ignorando defensa. Restaura 2 LP a un aliado.",
+            "en": "Deals 8 damage ignoring defense. Restore 2 LP to an ally.",
+            "pt": "Causa 8 de dano ignorando defesa. Restaura 2 LP a um aliado."
+          },
+          "conditions": {
+            "trigger": "on_activate"
+          },
+          "effects": [
+            {
+              "type": "damage",
+              "value": 8,
+              "ignore_defense": true,
+              "target": "single_enemy"
+            },
+            {
+              "type": "heal",
+              "value": 2,
+              "target": "single_ally"
+            }
+          ]
+        },
+        "@Armadura de Oro",
+        "@Séptimo Sentido"
+      ],
+      "tags": ["gold", "aries", "mu", "support"]
+    }
+  ]
+}

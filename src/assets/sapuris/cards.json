@@ -1,0 +1,46 @@
+{
+  "template": "SapuriSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Kiki Aprendiz",
+        "en": "Kiki Apprentice",
+        "pt": "Kiki Aprendiz"
+      },
+      "image_url": "/assets/sapuris/1.webp",
+      "faction": "Athena",
+      "descriptions": {
+        "es": "Joven aprendiz de Mu. Ayuda con reparaciones y soporte.",
+        "en": "Young apprentice of Mu. Helps with repairs and support.",
+        "pt": "Jovem aprendiz de Mu. Ajuda com reparos e suporte."
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Asistencia",
+            "en": "Assistance",
+            "pt": "Assistência"
+          },
+          "type": "activa",
+          "descriptions": {
+            "es": "Una vez por turno, restaura 2 LP a un caballero aliado.",
+            "en": "Once per turn, restore 2 LP to an allied knight.",
+            "pt": "Uma vez por turno, restaura 2 LP a um cavaleiro aliado."
+          },
+          "conditions": {
+            "trigger": "on_activate",
+            "once_per_turn": true
+          },
+          "effects": [
+            {
+              "type": "heal",
+              "value": 2,
+              "target": "single_ally"
+            }
+          ]
+        }
+      ],
+      "tags": ["assistant", "kiki", "heal"]
+    }
+  ]
+}

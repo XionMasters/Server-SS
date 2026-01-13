@@ -1,0 +1,42 @@
+{
+  "template": "BronzeSaintSeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Athena",
+    "element": "earth",
+    "cost": 1,
+    "generate": 1,
+    "rarity": "common",
+    "set": "BronzeSaintSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es",
+    "common_abilities": {
+      "Cosmo de Bronce": {
+        "type": "pasiva",
+        "descriptions": {
+          "es": "Aumenta Ce en 1 por cada caballero de Bronce aliado en el campo.",
+          "en": "Increase Ce by 1 for each allied Bronze knight on the field.",
+          "pt": "Aumenta Ce em 1 para cada cavaleiro de Bronze aliado no campo."
+        },
+        "conditions": {
+          "trigger": "continuous",
+          "check": "count_allies_with_armor('Bronze Cloth')"
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": "attack",
+            "operation": "add",
+            "value": 1,
+            "target": "self",
+            "per_ally": true,
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    }
+  }
+}

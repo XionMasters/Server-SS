@@ -1,0 +1,17 @@
+{
+  "template": "SteelSaintSeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Athena",
+    "element": "steel",
+    "cost": 1,
+    "generate": 1,
+    "rarity": "comun",
+    "set": "SteelSaintSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

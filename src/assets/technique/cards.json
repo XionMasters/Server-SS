@@ -1,0 +1,50 @@
+{
+  "template": "TechniqueSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Golpe Cósmico",
+        "en": "Cosmic Strike",
+        "pt": "Golpe Cósmico"
+      },
+      "image_url": "/assets/technique/1.webp",
+      "faction": "Neutral",
+      "cost": 3,
+      "descriptions": {
+        "es": "Técnica básica que amplifica el próximo ataque.",
+        "en": "Basic technique that amplifies the next attack.",
+        "pt": "Técnica básica que amplifica o próximo ataque."
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Amplificación",
+            "en": "Amplification",
+            "pt": "Amplificação"
+          },
+          "type": "activa",
+          "descriptions": {
+            "es": "El próximo ataque del caballero equipado inflige +3 de daño.",
+            "en": "Equipped knight's next attack deals +3 damage.",
+            "pt": "O próximo ataque do cavaleiro equipado causa +3 de dano."
+          },
+          "conditions": {
+            "trigger": "on_attach",
+            "scope": "next_attack"
+          },
+          "effects": [
+            {
+              "type": "modify_stat",
+              "stat": "attack",
+              "operation": "add",
+              "value": 3,
+              "target": "equipped_knight",
+              "duration_attacks": 1
+            }
+          ]
+        }
+      ],
+      "tags": ["technique", "attack-boost", "basic"]
+    }
+  ]
+}

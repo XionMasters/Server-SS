@@ -1,0 +1,469 @@
+{
+    "template": "BlackSaintSeries",
+    "cards": [
+        {
+            "names": { "es": "Black Pegasus", "en": "Black Pegasus", "pt": "Pégaso Negro" },
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 2,
+            "descriptions": { "es": "Caballero oscuro capaz de potenciar ataques técnicos."},
+            "image_url": "/assets/black/Black_Pegasus.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 1,
+                "health": 9,
+                "cosmos": 8
+            },
+            "abilities": [
+                {
+                    "name": "Dark Effect",
+                    "type": "activa",
+                    "description": "El próximo Technique Attack del usuario causa la condición PSN al soldado oponente objetivo.",
+                    "conditions": {
+                        "trigger": "on_technique_attack",
+                        "scope": "next_attack",
+                        "one_time": true,
+                        "cooldown_turns": 0,
+                        "requirements": null
+                    },
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "status": "PSN",
+                            "duration_turns": 2,
+                            "chance_percent": 100,
+                            "target": "single_enemy"
+                        }
+                    ]
+                },
+                "@BlackSaintPassive"
+            ],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "pegasus",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Dragon", "en": "Black Dragon", "pt": "Dragão Negro"},
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 0,
+            "descriptions": {
+                "es": "Guerrero oscuro que puede ignorar armaduras enemigas."
+            },
+            "image_url": "/assets/black/Black_Dragon.webp",
+            "knight_stats": {
+                "attack": 2,
+                "defense": 3,
+                "health": 8,
+                "cosmos": 6
+            },
+            "abilities": [
+                {
+                    "names": {
+                        "es": "Efecto Oscuro"
+                    },
+                    "type": "activa",
+                    "descriptions": {
+                        "es": "Tu próximo ataque técnico ignora armadura."
+                    },
+                    "effects": [
+                        {
+                            "type": "ignore_armor",
+                            "value": true
+                        }
+                    ]
+                },
+                "@BlackSaintPassive"
+            ],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "dragon",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Cygnus", "en": "Black Cygnus", "pt": "Cisne Negro"
+            },
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 1,
+            "descriptions": {
+                "es": "Caballero oscuro capaz de anular el cosmos enemigo."
+            },
+            "image_url": "/assets/black/Black_Cygnus.webp",
+            "knight_stats": {
+                "attack": 2,
+                "defense": 2,
+                "health": 8,
+                "cosmos": 8
+            },
+            "abilities": [
+                {
+                    "names": {
+                        "es": "Efecto Oscuro"
+                    },
+                    "type": "activa",
+                    "descriptions": {
+                        "es": "Tu próximo ataque técnico reduce el Cosmos del objetivo a 0."
+                    },
+                    "effects": [
+                        {
+                            "type": "modify_stat",
+                            "stat": "cosmos",
+                            "operation": "set",
+                            "value": 0,
+                            "target": "single_enemy"
+                        }
+                    ]
+                },
+                "@BlackSaintPassive"
+            ],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "cygnus",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Andromeda", "en": "Black Andromeda", "pt": "Andromeda Negro"
+            },
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 1,
+            "descriptions": {
+                "es": "Reflejo oscuro de Andromeda que puede inmovilizar al enemigo."
+            },
+            "image_url": "/assets/black/Black_Andromeda.webp",
+            "knight_stats": {
+                "attack": 1,
+                "defense": 2,
+                "health": 8,
+                "cosmos": 10
+            },
+            "abilities": [
+                {
+                    "names": {
+                        "es": "Efecto Oscuro"
+                    },
+                    "type": "activa",
+                    "descriptions": {
+                        "es": "Tu próximo ataque técnico paraliza al objetivo."
+                    },
+                    "effects": [
+                        {
+                            "type": "apply_status",
+                            "status": "paralysis",
+                            "target": "single_enemy"
+                        }
+                    ]
+                },
+                "@BlackSaintPassive"
+            ],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "andromeda",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Phoenix"
+            },
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 0,
+            "descriptions": {
+                "es": "Malformación oscura del Fénix capaz de renacer."
+            },
+            "image_url": "/assets/black/Shadow_Phoenix.webp",
+            "knight_stats": {
+                "attack": 1,
+                "defense": 1,
+                "health": 4,
+                "cosmos": 6
+            },
+            "abilities": [
+                {
+                    "names": {
+                        "es": "Rebirth Dark"
+                    },
+                    "type": "pasiva",
+                    "descriptions": {
+                        "es": "Al morir, 50% de probabilidad de revivir con 1 PV."
+                    },
+                    "effects": [
+                        {
+                            "type": "revive",
+                            "chance": 50,
+                            "hp": 1
+                        }
+                    ]
+                }
+            ],
+            "unique": false,
+            "tags": [
+                "black-saint",
+                "phoenix",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Altar Avido", "en": "Black Altar Avido", "pt": "Altar Negro Ávido"
+            },
+            "rarity": "epica",
+            "armor_class": "Black Cloth",
+            "cost": 6,
+            "generate": 0,
+            "descriptions": {
+                "es": "Caballero oscuro de poder ritual."
+            },
+            "image_url": "/assets/black/Black_Altar.webp",
+            "knight_stats": {
+                "attack": 6,
+                "defense": 4,
+                "health": 10,
+                "cosmos": 10
+            },
+            "abilities": [
+                {
+                    "names": {
+                        "es": "Dark Ritual"
+                    },
+                    "type": "activa",
+                    "descriptions": {
+                        "es": "Duplica el daño de tu próximo ataque técnico."
+                    },
+                    "effects": [
+                        {
+                            "type": "damage_multiplier",
+                            "value": 2
+                        }
+                    ]
+                }
+            ],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "altar",
+                "epica"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Crow"
+            },
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 2,
+            "generate": 2,
+            "descriptions": {
+                "es": "Caballero oscuro de movimientos rápidos."
+            },
+            "image_url": "/assets/black/Black_Crow.webp",
+            "knight_stats": {
+                "attack": 1,
+                "defense": 2,
+                "health": 8,
+                "cosmos": 8
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "crow",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Hound Yudo", "en": "Black Hound Yudo", "pt": "Black Hound Yudo"},
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 3,
+            "generate": 1,
+            "descriptions": {
+                "es": "Caballero oscuro con agilidad aérea."
+            },
+            "image_url": "/assets/black/Black_Hound_Yudo.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 2,
+                "health": 8,
+                "cosmos": 10
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "hound",
+                "yudo",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Aquila", "en": "Black Aquila", "pt": "Águia Negra"},
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 2,
+            "descriptions": {
+                "es": "Caballero oscuro con agilidad aérea."
+            },
+            "image_url": "/assets/black/Black_Aquila.webp",
+            "knight_stats": {
+                "attack": 2,
+                "defense": 1,
+                "health": 8,
+                "cosmos": 9
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "aquila",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Hound", "en": "Black Hound", "pt": "Black Hound"},
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 2,
+            "generate": 2,
+            "descriptions": {
+                "es": "."
+            },
+            "image_url": "/assets/black/Black_Hound.webp",
+            "knight_stats": {
+                "attack": 2,
+                "defense": 2,
+                "health": 8,
+                "cosmos": 10
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "hound",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Lacerta", "en": "Black Lacerta", "pt": "Black Lacerta"},
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 3,
+            "generate": 0,
+            "descriptions": {
+                "es": "."
+            },
+            "image_url": "/assets/black/Black_Lacerta.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 1,
+                "health": 9,
+                "cosmos": 8
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "lacerta",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Ophiuchus", "en": "Black Ophiuchus", "pt": "Black Ophiuchus"},
+            "rarity": "comun",
+            "armor_class": "Black Cloth",
+            "cost": 3,
+            "generate": 2,
+            "descriptions": {
+                "es": "."
+            },
+            "image_url": "/assets/black/Black_Ophiuchus.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 2,
+                "health": 7,
+                "cosmos": 8
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "ophiuchus",
+                "comun"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Phoenix", "en": "Black Phoenix", "pt": "Black Phoenix"},
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 0,
+            "generate": 1,
+            "descriptions": {
+                "es": "."
+            },
+            "image_url": "/assets/black/Black_Phoenix.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 1,
+                "health": 8,
+                "cosmos": 7
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "phoenix",
+                "rara"
+            ]
+        },
+        {
+            "names": {
+                "es": "Black Whale Alegre", "en": "Black Whale Alegre", "pt": "Black Whale Alegre"},
+            "rarity": "rara",
+            "armor_class": "Black Cloth",
+            "cost": 3,
+            "generate": 1,
+            "descriptions": {
+                "es": "."
+            },
+            "image_url": "/assets/black/Black_Whale_Alegre.webp",
+            "knight_stats": {
+                "attack": 3,
+                "defense": 3,
+                "health": 8,
+                "cosmos": 8
+            },
+            "abilities": [],
+            "unique": true,
+            "tags": [
+                "black-saint",
+                "whale",
+                "rara"
+            ]
+        }
+    ]
+}

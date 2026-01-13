@@ -1,0 +1,17 @@
+{
+  "template": "LegendarySeries",
+  "defaults": {
+    "type": "caballero",
+    "faction": "Dioses",
+    "element": "divine",
+    "cost": 8,
+    "generate": 3,
+    "rarity": "divina",
+    "set": "LegendarySeries",
+    "max_copies": 1,
+    "unique": true,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

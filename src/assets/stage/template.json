@@ -1,0 +1,15 @@
+{
+  "template": "StageSeries",
+  "defaults": {
+    "type": "escenario",
+    "cost": 2,
+    "generate": 0,
+    "rarity": "rara",
+    "set": "StageSeries",
+    "max_copies": 2,
+    "unique": false,
+    "playable_zones": ["field"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

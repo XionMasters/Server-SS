@@ -1,0 +1,55 @@
+{
+  "template": "SilverSaintSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Misty de Lagarto",
+        "en": "Lizard Misty",
+        "pt": "Misty de Lagarto"
+      },
+      "image_url": "/assets/silver/1.webp",
+      "cost": 3,
+      "descriptions": {
+        "es": "Caballero de Plata de Lagarto. Experto en técnicas de evasión y niebla.",
+        "en": "Silver Saint of Lizard. Expert in evasion and mist techniques.",
+        "pt": "Cavaleiro de Prata de Lagarto. Especialista em técnicas de evasão e névoa."
+      },
+      "knight_stats": {
+        "attack": 5,
+        "defense": 4,
+        "health": 14,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Niebla de Mármol",
+            "en": "Marble Mist",
+            "pt": "Névoa de Mármore"
+          },
+          "type": "activa",
+          "cosmos_cost": 3,
+          "descriptions": {
+            "es": "Los próximos 2 ataques enemigos tienen 50% de probabilidad de fallar.",
+            "en": "Next 2 enemy attacks have 50% chance to miss.",
+            "pt": "Os próximos 2 ataques inimigos têm 50% de chance de falhar."
+          },
+          "conditions": {
+            "trigger": "on_activate"
+          },
+          "effects": [
+            {
+              "type": "apply_buff",
+              "buff": "evasion",
+              "value": 50,
+              "target": "self",
+              "duration_attacks": 2
+            }
+          ]
+        },
+        "@Armadura de Plata"
+      ],
+      "tags": ["silver", "lizard", "misty", "evasion"]
+    }
+  ]
+}

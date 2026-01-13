@@ -1,0 +1,15 @@
+{
+  "template": "ObjectSeries",
+  "defaults": {
+    "type": "objeto",
+    "cost": 1,
+    "generate": 0,
+    "rarity": "comun",
+    "set": "ObjectSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

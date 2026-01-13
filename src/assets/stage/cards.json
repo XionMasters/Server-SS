@@ -1,0 +1,50 @@
+{
+  "template": "StageSeries",
+  "cards": [
+    {
+      "names": {
+        "es": "Santuario de Athena",
+        "en": "Athena's Sanctuary",
+        "pt": "Santuário de Atena"
+      },
+      "image_url": "/assets/stage/1.webp",
+      "faction": "Athena",
+      "cost": 3,
+      "descriptions": {
+        "es": "El sagrado Santuario fortalece a los caballeros de Athena.",
+        "en": "The sacred Sanctuary strengthens Athena's knights.",
+        "pt": "O Santuário sagrado fortalece os cavaleiros de Atena."
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Bendición del Santuario",
+            "en": "Sanctuary's Blessing",
+            "pt": "Bênção do Santuário"
+          },
+          "type": "pasiva",
+          "descriptions": {
+            "es": "Todos los caballeros de Athena ganan +1 Ce y +1 Ar.",
+            "en": "All Athena knights gain +1 Ce and +1 Ar.",
+            "pt": "Todos os cavaleiros de Atena ganham +1 Ce e +1 Ar."
+          },
+          "conditions": {
+            "trigger": "continuous",
+            "check": "ally_has_faction('Athena')"
+          },
+          "effects": [
+            {
+              "type": "modify_stat",
+              "stat": ["attack", "defense"],
+              "operation": "add",
+              "value": 1,
+              "target": "all_allies_faction_athena",
+              "duration_condition": "while_stage_active"
+            }
+          ]
+        }
+      ],
+      "tags": ["stage", "athena", "buff"]
+    }
+  ]
+}

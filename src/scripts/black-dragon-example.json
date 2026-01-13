@@ -1,0 +1,57 @@
+{
+  "card_name": "Black Dragon",
+  "image_url": "/assets/black/1.webp",
+  "type": "caballero",
+  "rarity": "rara",
+  "element": "dark",
+  "faction": "Black Saints",
+  "cost": 2,
+  "description": "Dragón Negro de los Santos Negros. Un poderoso guerrero de las sombras con ataques devastadores.",
+  "knight_stats": {
+    "attack": 3,
+    "defense": 6,
+    "health": 8,
+    "cosmos": 2
+  },
+  "abilities": [
+    {
+      "name": "Dark Effect",
+      "type": "activa",
+      "description": "Envuelve al enemigo en oscuridad, reduciendo su defensa",
+      "conditions": {
+        "cosmos_required": 2
+      },
+      "effects": {
+        "defense_reduction": 2,
+        "target": "single_enemy",
+        "duration": 2
+      }
+    },
+    {
+      "name": "Black Saint",
+      "type": "pasiva",
+      "description": "Como Santo Negro, recibe +1 de ataque cuando hay otro Santo Negro en el campo",
+      "effects": {
+        "attack_boost": 1,
+        "condition": "black_saint_ally_present",
+        "faction_synergy": "Black Saints"
+      }
+    },
+    {
+      "name": "Shadow Strike",
+      "type": "activa",
+      "description": "Ataque de las sombras que ignora parte de la defensa enemiga",
+      "conditions": {
+        "cosmos_required": 3
+      },
+      "effects": {
+        "damage": 4,
+        "ignore_defense": 0.5,
+        "target": "single_enemy",
+        "element_bonus": {
+          "dark": 1
+        }
+      }
+    }
+  ]
+}

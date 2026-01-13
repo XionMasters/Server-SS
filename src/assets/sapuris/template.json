@@ -1,0 +1,16 @@
+{
+  "template": "SapuriSeries",
+  "defaults": {
+    "type": "ayudante",
+    "cost": 1,
+    "generate": 0,
+    "rarity": "comun",
+    "faction": "Neutral",
+    "set": "SapuriSeries",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["support"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

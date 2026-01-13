@@ -1,0 +1,15 @@
+{
+  "template": "TokenSeries",
+  "defaults": {
+    "type": "caballero",
+    "cost": 0,
+    "generate": 0,
+    "rarity": "comun",
+    "set": "TokenSeries",
+    "max_copies": 0,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es"
+  }
+}

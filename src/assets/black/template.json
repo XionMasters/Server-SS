@@ -1,0 +1,50 @@
+{
+  "template": "BlackSaintSeries",
+  "defaults": {
+    "type": "soldier",
+    "faction": "Black Saint",
+    "element": "dark",
+    "rarity": "comun",
+    "cost": 0,
+    "generate": 0,
+    "armor_class": "Black Cloth",
+    "artist": "Willytox",
+    "set": "BlackSaintSeries",
+    "release_year": 2012,
+    "notes": "Basada en carta STCGA (2008-2012) por Willytox.",
+    "max_copies": 3,
+    "unique": false,
+    "playable_zones": ["battlefield"],
+    "collection_id": null,
+    "language": "es",
+    "balance_notes": "",
+    "power_level": null,
+    "tags": ["black-saint"],
+
+    "common_abilities": {
+      "BlackSaintPassive": {
+        "type": "pasiva",
+        "cosmos_cost": 0,
+        "descriptions": {
+          "es": "Aumenta Ce/Ar en 3 si el enemigo justo enfrente es Bronze o Silver.",
+          "en": "Increase Ce/Ar by 3 if the opposing enemy is Bronze or Silver.",
+          "pt": "Aumenta Ce/Ar em 3 se o inimigo em frente for Bronze ou Silver."
+        },
+        "conditions": {
+          "trigger": "continuous",
+          "check": "opposite_enemy_armor_in(['Bronze','Silver'])"
+        },
+        "effects": [
+          {
+            "type": "modify_stat",
+            "stat": ["attack", "defense"],
+            "operation": "add",
+            "value": 3,
+            "target": "self",
+            "duration_condition": "while_condition_true"
+          }
+        ]
+      }
+    }
+  }
+}
