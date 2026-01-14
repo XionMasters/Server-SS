@@ -37,8 +37,31 @@ export const authenticateToken = async (
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error en autenticación:', error);
-    res.status(403).json({ error: 'Token inválido o expirado' });
+    
+    // Diferenciamos entre token expirado e inválido
+    if (error.name === 'TokenExpiredError') {
+      res.status(401).json({ 
+        error: 'Token expirado',
+        expiredAt: error.expiredAt,
+        code: 'TOKEN_EXPIRED'
+      });
+      return;
+    }
+    
+    if (error.name === 'JsonWebTokenError') {
+      res.status(401).json({ 
+        error: 'Token inválido',
+        code: 'TOKEN_INVALID'
+      });
+      return;
+    }
+    
+    // Otros errores
+    res.status(401).json({ 
+      error: 'No autorizado',
+      code: 'UNAUTHORIZED'
+    });
   }
 };
