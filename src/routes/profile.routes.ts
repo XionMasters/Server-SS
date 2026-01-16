@@ -5,13 +5,17 @@ import {
   getAvailableAvatars,
   updateAvatar,
   checkCardUnlocks,
-  getAvatarImage
+  getAvatarImage,
+  getPublicProfile
 } from '../controllers/profile.controller';
 
 const router = express.Router();
 
 // Ruta pública para obtener imagen de avatar
 router.get('/avatar/:id/image', getAvatarImage);
+
+// Ruta pública para obtener perfil/avatar de cualquier usuario
+router.get('/user/:userId', getPublicProfile);
 
 // Todas las rutas siguientes requieren autenticación
 router.use(authenticateToken);

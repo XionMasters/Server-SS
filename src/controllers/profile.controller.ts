@@ -254,3 +254,57 @@ export const getAvatarImage = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ error: 'Error obteniendo imagen de avatar' });
   }
 };
+
+export const getPublicProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params;
+
+    // Obtener perfil del usuario
+    let profile = await UserProfile.findOne({
+      where: { user_id: userId }
+    });
+
+    // Si no existe perfil, crear uno por defecto
+    if (!profile) {
+      const defaultAvatar = await ProfileAvatar.findOne({
+        where: { unlock_type: 'default', is_active: true }
+      });
+
+      if (defaultAvatar) {
+        profile = await UserProfile.create({
+          user_id: userId,
+          avatar_image_id: defaultAvatar.id
+        });
+
+        // Desbloquear avatar por defecto
+        await UserAvatarUnlock.create({
+          user_id: userId,
+          avatar_id: defaultAvatar.id,
+          unlock_source: 'initial_setup'
+        });
+      }
+    }
+
+    // Cargar avatar manualmente y construir URL absoluta
+    let avatarData: any = null;
+    if (profile && profile.avatar_image_id) {
+      const avatarRecord = await ProfileAvatar.findByPk(profile.avatar_image_id);
+      if (avatarRecord) {
+        avatarData = {
+          id: avatarRecord.id,
+          name: avatarRecord.name,
+          image_url: `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/profile/avatar/${avatarRecord.id}/image`
+        };
+      }
+    }
+
+    res.json({
+      avatar: avatarData,
+      message: 'Avatar obtenido correctamente'
+    });
+
+  } catch (error: any) {
+    console.error('Error obteniendo perfil público:', error);
+    res.status(500).json({ error: 'Error obteniendo perfil del usuario' });
+  }
+};
