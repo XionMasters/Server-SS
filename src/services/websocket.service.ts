@@ -511,42 +511,52 @@ export const initializeWebSocketServer = (server: any) => {
           console.log(`🧹 Partida inválida (falta jugador en BD), eliminando: ${activeMatch.id}`);
           await activeMatch.destroy();
         } else {
-          // Verificar que el OTRO jugador esté conectado
-          const otherPlayerId = activeMatch.player1_id === ws.userId ? activeMatch.player2_id : activeMatch.player1_id;
-          const otherPlayerSocket = userSockets.get(otherPlayerId!);
+          // Si es TEST MODE (player1 === player2), no validar segundo jugador conectado
+          const isTestMode = activeMatch.player1_id === activeMatch.player2_id;
           
-          if (!otherPlayerSocket) {
-            console.log(`🧹 Partida inválida (otro jugador desconectado), eliminando: ${activeMatch.id}`);
-            console.log(`   - ${player1.username} vs ${player2.username}`);
-            console.log(`   - Jugador desconectado: ${otherPlayerId === activeMatch.player1_id ? player1.username : player2.username}`);
-            await activeMatch.destroy();
-          } else {
-            console.log(`♻️ ${ws.username} tiene partida activa para reanudar:`);
+          if (isTestMode) {
+            console.log(`🧪 TEST MODE ACTIVO: ${ws.username} reanudando partida TEST`);
             console.log(`   - Match ID: ${activeMatch.id}`);
             console.log(`   - Fase: ${activeMatch.phase}`);
-            console.log(`   - ${player1?.username} vs ${player2?.username}`);
-            console.log(`   - Ambos jugadores CONECTADOS ✅`);
+          } else {
+            // Verificar que el OTRO jugador esté conectado (solo en multiplayer)
+            const otherPlayerId = activeMatch.player1_id === ws.userId ? activeMatch.player2_id : activeMatch.player1_id;
+            const otherPlayerSocket = userSockets.get(otherPlayerId!);
             
-            // Enviar información de la partida activa
-            sendEvent(ws, 'match_resumed', {
-              match_id: activeMatch.id,
-              phase: activeMatch.phase,
-              player1: {
-                id: activeMatch.player1_id,
-                username: player1?.username
-              },
-              player2: {
-                id: activeMatch.player2_id,
-                username: player2?.username
-              },
-              player1_life: activeMatch.player1_life,
-              player2_life: activeMatch.player2_life,
-              player1_cosmos: activeMatch.player1_cosmos,
-              player2_cosmos: activeMatch.player2_cosmos,
-              current_turn: activeMatch.current_turn,
-              current_player: activeMatch.current_player
-            });
+            if (!otherPlayerSocket) {
+              console.log(`🧹 Partida inválida (otro jugador desconectado), eliminando: ${activeMatch.id}`);
+              console.log(`   - ${player1.username} vs ${player2.username}`);
+              console.log(`   - Jugador desconectado: ${otherPlayerId === activeMatch.player1_id ? player1.username : player2.username}`);
+              await activeMatch.destroy();
+              return;
+            }
           }
+          
+          console.log(`♻️ ${ws.username} tiene partida activa para reanudar:`);
+          console.log(`   - Match ID: ${activeMatch.id}`);
+          console.log(`   - Fase: ${activeMatch.phase}`);
+          console.log(`   - ${player1?.username} vs ${player2?.username}`);
+          console.log(`   - Ambos jugadores CONECTADOS ✅`);
+          
+          // Enviar información de la partida activa
+          sendEvent(ws, 'match_resumed', {
+            match_id: activeMatch.id,
+            phase: activeMatch.phase,
+            player1: {
+              id: activeMatch.player1_id,
+              username: player1?.username
+            },
+            player2: {
+              id: activeMatch.player2_id,
+              username: player2?.username
+            },
+            player1_life: activeMatch.player1_life,
+            player2_life: activeMatch.player2_life,
+            player1_cosmos: activeMatch.player1_cosmos,
+            player2_cosmos: activeMatch.player2_cosmos,
+            current_turn: activeMatch.current_turn,
+            current_player: activeMatch.current_player
+          });
         }
       }
       
