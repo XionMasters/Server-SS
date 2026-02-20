@@ -71,12 +71,16 @@ export class CardManager {
    * Roba las 5 cartas iniciales de cada jugador
    */
   static async drawInitialHands(matchId: string): Promise<void> {
+    console.log(`📋 [drawInitialHands] Iniciando distribución de manos para match ${matchId}`);
+    
     // Robar 5 cartas para player 1
     const p1DeckCards = await CardInPlay.findAll({
       where: { match_id: matchId, player_number: 1, zone: 'deck' },
       order: [sequelize.fn('RANDOM')],
       limit: 5
     });
+
+    console.log(`🎯 [drawInitialHands] Player 1: ${p1DeckCards.length} cartas movidas a hand`);
 
     for (const card of p1DeckCards) {
       card.zone = 'hand';
@@ -90,68 +94,62 @@ export class CardManager {
       limit: 5
     });
 
+    console.log(`🎯 [drawInitialHands] Player 2: ${p2DeckCards.length} cartas movidas a hand`);
+
     for (const card of p2DeckCards) {
       card.zone = 'hand';
       await card.save();
     }
 
-    console.log(`🎲 Manos iniciales repartidas`);
+    console.log(`🎲 [drawInitialHands] ✅ Manos iniciales repartidas correctamente`);
   }
 
   /**
    * Crea todas las cartas en juego para ambos jugadores
    */
-  static async createCardsInPlay(matchId: string, deck1Cards: any[], deck2Cards: any[]): Promise<void> {
-    // Crear cartas para player 1
-    for (const deckCard of deck1Cards) {
-      const quantity = deckCard.quantity;
-      for (let i = 0; i < quantity; i++) {
-        const card = await Card.findByPk(deckCard.card_id, {
-          include: [{ model: CardKnight, as: 'card_knight' }]
-        });
+  static async createCardsInPlay(
+    matchId: string,
+    deckCards: any[],
+    playerNumber: number,
+    rules: any
+  ): Promise<void> {
+    for (const deckCard of deckCards) {
+      const quantity = deckCard.quantity || 1;
 
-        if (card) {
-          const knight = (card as any).card_knight;
-          await CardInPlay.create({
-            match_id: matchId,
-            card_id: card.id,
-            player_number: 1,
-            zone: 'deck',
-            position: 0,
-            current_attack: knight?.attack || 0,
-            current_defense: knight?.defense || 0,
-            current_health: knight?.health || 0,
-            current_cosmos: knight?.cosmos || 0
-          });
-        }
+      const card = await Card.findByPk(deckCard.card_id, {
+        include: [{ model: CardKnight, as: 'card_knight' }]
+      });
+
+      if (!card) continue;
+
+      const knight = (card as any).card_knight;
+
+      for (let i = 0; i < quantity; i++) {
+        await CardInPlay.create({
+          match_id: matchId,
+          card_id: card.id,
+          player_number: playerNumber,
+          zone: 'deck',
+          position: 0,
+
+          // Stats base
+          current_attack: knight?.attack ?? 0,
+          current_defense: knight?.defense ?? 0,
+          current_health: knight?.health ?? 0,
+          current_cosmos: knight?.cosmos ?? 0,
+
+          // Estados iniciales
+          is_defensive_mode: 'normal',
+          has_attacked_this_turn: false,
+          can_attack_this_turn: false,
+          attached_cards: '[]',
+          status_effects: '[]'
+        });
       }
     }
 
-    // Crear cartas para player 2
-    for (const deckCard of deck2Cards) {
-      const quantity = deckCard.quantity;
-      for (let i = 0; i < quantity; i++) {
-        const card = await Card.findByPk(deckCard.card_id, {
-          include: [{ model: CardKnight, as: 'card_knight' }]
-        });
-
-        if (card) {
-          const knight = (card as any).card_knight;
-          await CardInPlay.create({
-            match_id: matchId,
-            card_id: card.id,
-            player_number: 2,
-            zone: 'deck',
-            position: 0,
-            current_attack: knight?.attack || 0,
-            current_defense: knight?.defense || 0,
-            current_health: knight?.health || 0,
-            current_cosmos: knight?.cosmos || 0
-          });
-        }
-      }
-    }
-
-    console.log(`🎴 Cartas en juego creadas (${deck1Cards.length + deck2Cards.length} cartas total)`);
+    console.log(
+      `🎴 Cartas creadas para jugador ${playerNumber} en match ${matchId}`
+    );
   }
 }

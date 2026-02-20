@@ -11,6 +11,7 @@ import CardKnight from '../models/CardKnight';
 import User from '../models/User';
 import { validateExistingDeck } from '../utils/deckValidator';
 import { GameService } from '../services/game.service';
+import { StartMatchService } from '../services/startMatch.service';
 
 // Buscar partida (matchmaking simple)
 export const findMatch = async (req: Request, res: Response) => {
@@ -92,7 +93,7 @@ export const findMatch = async (req: Request, res: Response) => {
       await waitingMatch.save();
 
       // Inicializar el juego
-      await initializeMatch(waitingMatch.id);
+      await StartMatchService.createNewMatch(waitingMatch.player1_id, user.id, 'PVP');
 
       return res.json(waitingMatch);
     } else {
@@ -112,16 +113,6 @@ export const findMatch = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Error buscando partida' });
   }
 };
-
-// Inicializar partida - ahora delegada a GameService
-async function initializeMatch(matchId: string) {
-  try {
-    await GameService.initializeMatch(matchId);
-  } catch (error: any) {
-    console.error('Error inicializando partida en GameService:', error);
-    throw error;
-  }
-}
 
 // Obtener estado de la partida
 export const getMatchState = async (req: Request, res: Response) => {
@@ -349,73 +340,63 @@ async function cleanupOldWaitingMatches() {
   }
 }
 
-// TEST Match - Jugar contra la IA (o contra uno mismo)
+// TEST Match - Jugar contra uno mismo
 export const startTestMatch = async (req: Request, res: Response) => {
   try {
+    //
     const user = (req as any).user;
 
-    // Obtener el deck activo del usuario
-    const activeDeck = await Deck.findOne({
-      where: { user_id: user.id, is_active: true }
-    });
+    // Delegar toda la lógica al servicio especializado
+    const { StartMatchService } = await import('../services/startMatch.service');
+    const result = await StartMatchService.createNewMatch(user.id, user.id, 'TEST');
 
-    if (!activeDeck) {
-      return res.status(400).json({
-        error: 'No tienes un mazo activo. Marca un mazo como activo primero.',
-        code: 'NO_ACTIVE_DECK'
-      });
-    }
-
-    // Validar que el deck cumpla con las reglas
-    const validation = await validateExistingDeck(activeDeck.id);
-    
-    if (!validation.valid) {
-      return res.status(400).json({
-        error: 'Tu mazo activo no cumple con las reglas del juego',
-        code: 'INVALID_DECK',
-        deck_name: activeDeck.name,
-        validation_errors: validation.errors,
-        validation_warnings: validation.warnings
-      });
-    }
-
-    // Crear partida TEST: player1 = usuario, player2 = usuario (mismo)
-    const testMatch = await Match.create({
-      player1_id: user.id,
-      player2_id: user.id,  // El mismo usuario juega contra sí mismo
-      player1_deck_id: activeDeck.id,
-      player2_deck_id: activeDeck.id,  // Mismo deck para ambos
-      phase: 'starting',
-      current_turn: 1,
-      current_player: 1,
-      player1_life: 12,
-      player2_life: 12,
-      player1_cosmos: 0,
-      player2_cosmos: 0,
-      started_at: new Date()
-    });
-
-    console.log(`🎭 TEST Match creada: ${testMatch.id}`);
-
-    // Inicializar la partida (barajar, robar)
-    await initializeMatch(testMatch.id);
-
-    // Enviar notificación al cliente vía WebSocket
-    // Importar la función de broadcast
+    // Enviar notificación al cliente vía WebSocket (para sincronizar futuros cambios)
     const { broadcastMatchUpdate } = await import('../services/websocket.service');
-    await broadcastMatchUpdate(testMatch.id);
+    await broadcastMatchUpdate(result.match_id);
     
     return res.json({
       success: true,
-      match_id: testMatch.id,
-      message: 'Partida TEST iniciada'
+      match_id: result.match_id,
+      message: 'Partida TEST iniciada',
+      game_state: result.game_state
     });
 
   } catch (error: any) {
     console.error('Error en startTestMatch:', error);
-    return res.status(500).json({ 
-      error: 'Error creando partida TEST',
-      details: error.message 
+    
+    // Manejo de errores específicos
+    const statusCode = error.message.includes('rate limit') ? 429 : 400;
+    const errorCode = error.message.includes('rate limit') ? 'RATE_LIMIT_EXCEEDED' : 'TEST_MATCH_ERROR';
+
+    return res.status(statusCode).json({ 
+      error: error.message,
+      code: errorCode
+    });
+  }
+};
+
+// TEST Match - Reanudar partida existente
+export const resumeTestMatch = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+
+    // Delegar toda la lógica al servicio especializado
+    const { StartMatchService } = await import('../services/startMatch.service');
+    const result = await StartMatchService.resumeTestMatch(user.id);
+
+    return res.json({
+      success: true,
+      match_id: result.match_id,
+      message: 'Partida TEST reanudada',
+      game_state: result.game_state
+    });
+
+  } catch (error: any) {
+    console.error('Error en resumeTestMatch:', error);
+    
+    return res.status(400).json({ 
+      error: error.message,
+      code: 'RESUME_TEST_MATCH_ERROR'
     });
   }
 };
@@ -478,5 +459,79 @@ export const startFirstTurn = async (req: any, res: any) => {
   } catch (error: any) {
     console.error('❌ Error iniciando primer turno:', error.message);
     return res.status(400).json({ error: error.message });
+  }
+};
+
+// Abandonar partida
+export const abandonMatch = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const { id } = req.params; // match_id
+
+    // Buscar la partida
+    const match = await Match.findByPk(id);
+    
+    if (!match) {
+      return res.status(404).json({ 
+        error: 'Partida no encontrada',
+        code: 'MATCH_NOT_FOUND'
+      });
+    }
+
+    // Verificar que el usuario esté en la partida
+    if (match.player1_id !== user.id && match.player2_id !== user.id) {
+      return res.status(403).json({ 
+        error: 'No estás en esta partida',
+        code: 'UNAUTHORIZED'
+      });
+    }
+
+    // Verificar que la partida esté activa
+    if (!['starting', 'player1_turn', 'player2_turn'].includes(match.phase)) {
+      return res.status(400).json({ 
+        error: 'Esta partida ya ha finalizado',
+        code: 'MATCH_ALREADY_FINISHED'
+      });
+    }
+
+    // Determinar ganador (el otro jugador)
+    const winner_id = match.player1_id === user.id ? match.player2_id : match.player1_id;
+
+    // Validar que tengamos un ganador válido
+    if (!winner_id) {
+      return res.status(400).json({ 
+        error: 'Error: no se puede determinar el ganador',
+        code: 'INVALID_MATCH_STATE'
+      });
+    }
+
+    // Actualizar partida
+    console.log(`⏳ Cambiando fase de partida ${id} a 'finished'...`);
+    match.winner_id = winner_id as string;
+    match.phase = 'finished';
+    match.finished_at = new Date();
+    await match.save();
+
+    console.log(`✅ Partida abandonada: ${id}`);
+    console.log(`   🏆 Ganador: ${winner_id}`);
+    console.log(`   🚪 Abandonado por: ${user.id}`);
+    console.log(`   ✔️ Phase guardada como: ${match.phase}`);
+
+    // Pequeño delay para asegurar que la transacción se complete
+    // en la base de datos antes de responder al cliente
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return res.json({
+      success: true,
+      message: 'Partida abandonada correctamente',
+      match_id: id,
+      winner_id: winner_id
+    });
+  } catch (error: any) {
+    console.error('❌ Error abandonando partida:', error.message);
+    return res.status(400).json({ 
+      error: error.message,
+      code: 'ABANDON_ERROR'
+    });
   }
 };

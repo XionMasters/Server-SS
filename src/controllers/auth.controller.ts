@@ -11,6 +11,8 @@ import { assignStarterCards } from '../scripts/assignStarterCards';
 import ProfileAvatar from '../models/ProfileAvatar';
 import UserProfile from '../models/UserProfile';
 import UserAvatarUnlock from '../models/UserAvatarUnlock';
+import DeckBack from '../models/DeckBack';
+import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_muy_segura';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -106,6 +108,28 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       }
     } catch (avatarError) {
       console.error('Error asignando avatares por defecto:', avatarError);
+    }
+
+    // ✅ DESBLOQUEAR DORSOS POR DEFECTO
+    try {
+      const defaultDeckBacks = await DeckBack.findAll({ 
+        where: { unlock_type: 'default', is_active: true } 
+      });
+      for (const deckBack of defaultDeckBacks) {
+        await UserDeckBackUnlock.findOrCreate({
+          where: { 
+            user_id: user.id, 
+            deck_back_id: deckBack.id 
+          },
+          defaults: {
+            user_id: user.id,
+            deck_back_id: deckBack.id,
+            unlock_source: 'initial_setup'
+          }
+        });
+      }
+    } catch (deckBackError) {
+      console.error('Error asignando dorsos por defecto:', deckBackError);
     }
 
     // ✅ REGISTRAR TRANSACCIÓN DE MONEDAS INICIALES

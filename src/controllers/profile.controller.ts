@@ -2,8 +2,11 @@ import { Request, Response } from 'express';
 import UserProfile from '../models/UserProfile';
 import ProfileAvatar from '../models/ProfileAvatar';
 import UserAvatarUnlock from '../models/UserAvatarUnlock';
+import DeckBack from '../models/DeckBack';
+import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
 import Card from '../models/Card';
 import UserCard from '../models/UserCard';
+import Deck from '../models/Deck';
 import path from 'path';
 import fs from 'fs';
 
@@ -43,7 +46,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       if (avatarRecord) {
         avatarData = {
           ...avatarRecord.toJSON(),
-          image_url: `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/profile/avatar/${avatarRecord.id}/image`
+          image_url: `/profile/avatar/${avatarRecord.id}/image`
         };
       }
     }
@@ -82,7 +85,7 @@ export const getAvailableAvatars = async (req: Request, res: Response): Promise<
     const avatarsWithStatus = allAvatars.map(avatar => ({
       ...avatar.toJSON(),
       is_unlocked: unlockedIds.includes(avatar.id),
-      image_url: `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/profile/avatar/${avatar.id}/image`
+      image_url: `/profile/avatar/${avatar.id}/image`
     }));
     
     res.json({
@@ -270,6 +273,10 @@ export const getPublicProfile = async (req: Request, res: Response): Promise<voi
         where: { unlock_type: 'default', is_active: true }
       });
 
+      const defaultDeckBack = await DeckBack.findOne({
+        where: { unlock_type: 'default', is_active: true }
+      });
+
       if (defaultAvatar) {
         profile = await UserProfile.create({
           user_id: userId,
@@ -282,6 +289,15 @@ export const getPublicProfile = async (req: Request, res: Response): Promise<voi
           avatar_id: defaultAvatar.id,
           unlock_source: 'initial_setup'
         });
+
+        // Desbloquear dorso por defecto
+        if (defaultDeckBack) {
+          await UserDeckBackUnlock.create({
+            user_id: userId,
+            deck_back_id: defaultDeckBack.id,
+            unlock_source: 'initial_setup'
+          });
+        }
       }
     }
 
@@ -293,18 +309,128 @@ export const getPublicProfile = async (req: Request, res: Response): Promise<voi
         avatarData = {
           id: avatarRecord.id,
           name: avatarRecord.name,
-          image_url: `${process.env.API_BASE_URL || 'http://localhost:3000'}/api/profile/avatar/${avatarRecord.id}/image`
+          image_url: `/profile/avatar/${avatarRecord.id}/image`
         };
+      }
+    }
+
+    // Cargar dorso del deck activo del usuario
+    let deckBackData: any = null;
+    if (userId) {
+      const activeDeck = await Deck.findOne({
+        where: { user_id: userId, is_active: true }
+      });
+
+      if (activeDeck && activeDeck.current_deck_back_id) {
+        const deckBackRecord = await DeckBack.findByPk(activeDeck.current_deck_back_id);
+        if (deckBackRecord) {
+          deckBackData = {
+            id: deckBackRecord.id,
+            name: deckBackRecord.name,
+            image_url: deckBackRecord.image_url
+          };
+        }
+      }
+      
+      // Si no hay dorso asignado en el mazo activo, usar el dorso por defecto
+      if (!deckBackData) {
+        const defaultDeckBack = await DeckBack.findOne({
+          where: { unlock_type: 'default', is_active: true }
+        });
+        if (defaultDeckBack) {
+          deckBackData = {
+            id: defaultDeckBack.id,
+            name: defaultDeckBack.name,
+            image_url: defaultDeckBack.image_url
+          };
+        }
       }
     }
 
     res.json({
       avatar: avatarData,
-      message: 'Avatar obtenido correctamente'
+      deck_back: deckBackData,
+      message: 'Perfil obtenido correctamente'
     });
 
   } catch (error: any) {
     console.error('Error obteniendo perfil público:', error);
     res.status(500).json({ error: 'Error obteniendo perfil del usuario' });
+  }
+};
+
+export const getAvailableDeckBacks = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = (req as any).user;
+
+    // Obtener IDs de dorsos desbloqueados
+    const unlockedDeckBacks = await UserDeckBackUnlock.findAll({
+      where: { user_id: user.id }
+    });
+
+    const unlockedIds = unlockedDeckBacks.map(u => u.deck_back_id);
+
+    // Obtener todos los dorsos activos con info de desbloqueo
+    const allDeckBacks = await DeckBack.findAll({
+      where: { is_active: true },
+      raw: true
+    });
+
+    const formatted = allDeckBacks.map((db: any) => ({
+      ...db,
+      is_unlocked: unlockedIds.includes(db.id)
+    }));
+
+    res.json(formatted);
+
+  } catch (error: any) {
+    console.error('Error obteniendo dorsos disponibles:', error);
+    res.status(500).json({ error: 'Error obteniendo dorsos disponibles' });
+  }
+};
+
+export const updateDeckBack = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = (req as any).user;
+    const { deck_id, deck_back_id } = req.body;
+
+    if (!deck_id || !deck_back_id) {
+      res.status(400).json({ error: 'deck_id y deck_back_id son requeridos' });
+      return;
+    }
+
+    // Verificar que la baraja le pertenece al usuario
+    const deck = await Deck.findOne({
+      where: { id: deck_id, user_id: user.id }
+    });
+
+    if (!deck) {
+      res.status(404).json({ error: 'Baraja no encontrada' });
+      return;
+    }
+
+    // Verificar que el usuario tiene ese dorso desbloqueado
+    const unlock = await UserDeckBackUnlock.findOne({
+      where: { user_id: user.id, deck_back_id }
+    });
+
+    if (!unlock) {
+      res.status(403).json({ error: 'No tienes acceso a este dorso' });
+      return;
+    }
+
+    // Actualizar dorso de la baraja
+    deck.current_deck_back_id = deck_back_id;
+    await deck.save();
+
+    res.json({
+      success: true,
+      message: 'Dorso de la baraja actualizado correctamente',
+      current_deck_back_id: deck_back_id
+    });
+
+  } catch (error: any) {
+    console.error('Error actualizando dorso:', error);
+    res.status(500).json({ error: 'Error actualizando dorso' });
   }
 };

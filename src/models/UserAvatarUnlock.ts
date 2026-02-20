@@ -71,17 +71,4 @@ UserAvatarUnlock.init(
   }
 );
 
-// Asociaciones
-// @ts-ignore
-UserAvatarUnlock.associate = (models: any) => {
-  UserAvatarUnlock.belongsTo(models.ProfileAvatar, {
-    foreignKey: 'avatar_id',
-    as: 'avatar'
-  });
-  UserAvatarUnlock.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
-};
-
 export default UserAvatarUnlock;

@@ -53,7 +53,8 @@ class EmailService {
     username: string, 
     token: string
   ): Promise<void> {
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${token}`;
+    const apiBaseUrl = process.env.API_BASE_URL || 'http://localhost:3000';
+    const verificationUrl = `${apiBaseUrl}/api/auth/verify-email?token=${token}`;
     
     const mailOptions = {
       from: `"Caballeros Cósmicos" <${process.env.SMTP_USER}>`,

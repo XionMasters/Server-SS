@@ -52,17 +52,5 @@ UserProfile.init(
   }
 );
 
-// Asociaciones (se cargan después en index.ts)
-// @ts-ignore
-UserProfile.associate = (models: any) => {
-  UserProfile.belongsTo(models.ProfileAvatar, {
-    foreignKey: 'avatar_image_id',
-    as: 'avatar'
-  });
-  UserProfile.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
-};
 
 export default UserProfile;

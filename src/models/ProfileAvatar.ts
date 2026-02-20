@@ -74,13 +74,4 @@ ProfileAvatar.init(
   }
 );
 
-// Asociaciones
-// @ts-ignore
-ProfileAvatar.associate = (models: any) => {
-  ProfileAvatar.belongsTo(models.Card, {
-    foreignKey: 'required_card_id',
-    as: 'required_card'
-  });
-};
-
 export default ProfileAvatar;

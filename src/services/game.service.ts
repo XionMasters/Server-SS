@@ -164,46 +164,6 @@ export class GameService {
   }
 
   /**
-   * Inicializa una partida nueva
-   * - Crea cartas en juego
-   * - Distribuye mano inicial
-   * - Determina jugador inicial
-   * - NO inicia el turno (cliente lo hará cuando esté listo)
-   */
-  static async initializeMatch(matchId: string): Promise<void> {
-    try {
-      const match = await Match.findByPk(matchId);
-      if (!match) throw new Error('Match no encontrado');
-
-      // Obtener cartas de los mazos
-      const deck1Cards = await DeckCard.findAll({
-        where: { deck_id: match.player1_deck_id }
-      });
-
-      const deck2Cards = match.player2_deck_id
-        ? await DeckCard.findAll({ where: { deck_id: match.player2_deck_id } })
-        : [];
-
-      // Crear cartas en juego
-      await CardManager.createCardsInPlay(matchId, deck1Cards, deck2Cards);
-
-      // Repartir mano inicial (5 cartas cada uno)
-      await CardManager.drawInitialHands(matchId);
-
-      // Determinar jugador inicial
-      match.current_player = Math.random() < 0.5 ? 1 : 2;
-      match.phase = match.current_player === 1 ? 'player1_turn' : 'player2_turn';
-      await match.save();
-
-      // ✅ NOT starting turn - client will notify when ready
-      console.log(`✅ Match inicializado. Jugador inicial: ${match.current_player}. Esperando confirmación del cliente...`);
-    } catch (error: any) {
-      console.error(`❌ Error inicializando match:`, error.message);
-      throw error;
-    }
-  }
-
-  /**
    * Inicia el primer turno cuando el cliente está listo
    * El cliente llama esto después de cargar el tablero completamente
    * - Ejecuta: dar cosmos, robar carta, resetear flags

@@ -656,6 +656,9 @@ export const initializeWebSocketServer = (server: any) => {
           case 'end_turn':
             await handleEndTurn(ws, eventData);
             break;
+          case 'start_first_turn':
+            await handleStartFirstTurn(ws, eventData);
+            break;
           case 'chat_message':
             await handleChatMessage(ws, eventData);
             break;
@@ -1557,6 +1560,137 @@ async function handleEndTurn(ws: AuthenticatedWebSocket, data: any) {
   }
 }
 
+/**
+ * Iniciar el primer turno de una partida TEST
+ * Se llama después de que GameMatch está completamente cargado
+ */
+async function handleStartFirstTurn(ws: AuthenticatedWebSocket, data: any) {
+  try {
+    console.log(`🎮 ${ws.username} iniciando primer turno`);
+    
+    const { match_id } = data;
+    if (!match_id) {
+      console.error('❌ match_id no proporcionado');
+      return;
+    }
+
+    // Obtener la partida
+    const match = await Match.findByPk(match_id, {
+      include: [
+        { model: User, as: 'player1', attributes: ['id', 'username'] },
+        { model: User, as: 'player2', attributes: ['id', 'username'] }
+      ]
+    });
+
+    if (!match) {
+      console.error('❌ Partida no encontrada:', match_id);
+      sendEvent(ws, 'match_error', { message: 'Partida no encontrada' });
+      return;
+    }
+
+    // Verificar que está en fase "starting"
+    if (match.phase !== 'starting') {
+      console.warn(`⚠️ Partida no está en fase starting: ${match.phase}`);
+      sendEvent(ws, 'match_error', { message: 'Partida ya ha iniciado' });
+      return;
+    }
+
+    console.log(`✅ Iniciando primer turno de partida ${match_id}`);
+
+    // 1. Cambiar fase a player1_turn (Player 1 comienza)
+    match.phase = 'player1_turn';
+    match.current_player = 1;
+    match.current_turn = 1;
+    
+    // Dar cosmos inicial al jugador 1
+    match.player1_cosmos = Math.min(match.player1_cosmos + 1, 12);
+    
+    // 2. Robar 1 carta para player 1
+    const player1DeckOrder = JSON.parse((match as any).player1_deck_order || '[]');
+    let player1DeckIndex = (match as any).player1_deck_index || 5;
+    
+    if (player1DeckIndex < player1DeckOrder.length) {
+      player1DeckIndex++;
+      (match as any).player1_deck_index = player1DeckIndex;
+      console.log(`   🎴 Player 1 robó carta (índice ${player1DeckIndex})`);
+    }
+
+    await match.save();
+
+    // 3. Obtener estado completo de la partida
+    const cardsInPlay = await CardInPlay.findAll({
+      where: { match_id },
+      include: [
+        { 
+          model: Card, 
+          as: 'card',
+          attributes: ['id', 'name', 'type', 'rarity', 'cost', 'image_url', 'description']
+        }
+      ]
+    });
+
+    // Serializar cartas
+    const cardsData = cardsInPlay.map(cip => ({
+      id: cip.id,
+      card_id: cip.card_id,
+      instance_id: cip.id,
+      player_number: cip.player_number,
+      zone: cip.zone,
+      position: cip.position,
+      mode: cip.is_defensive_mode ? 'defense' : 'normal',
+      is_exhausted: cip.has_attacked_this_turn,
+      base_data: {
+        id: (cip.get('card') as any)?.id,
+        name: (cip.get('card') as any)?.name,
+        type: (cip.get('card') as any)?.type,
+        rarity: (cip.get('card') as any)?.rarity,
+        cost: (cip.get('card') as any)?.cost,
+        image_url: (cip.get('card') as any)?.image_url,
+        description: (cip.get('card') as any)?.description
+      }
+    }));
+
+    const player1HandCount = cardsData.filter(c => c.player_number === 1 && c.zone === 'hand').length;
+    const player2HandCount = cardsData.filter(c => c.player_number === 2 && c.zone === 'hand').length;
+    const player1DeckSize = cardsData.filter(c => c.player_number === 1 && c.zone === 'deck').length;
+    const player2DeckSize = cardsData.filter(c => c.player_number === 2 && c.zone === 'deck').length;
+
+    // Construir estado para enviar
+    const matchState = {
+      id: match.id,
+      player1_id: match.player1_id,
+      player1_name: (match.get('player1') as any)?.username,
+      player2_id: match.player2_id,
+      player2_name: (match.get('player2') as any)?.username,
+      current_turn: match.current_turn,
+      current_player: match.current_player,
+      current_phase: match.phase,
+      player1_life: match.player1_life,
+      player2_life: match.player2_life,
+      player1_cosmos: match.player1_cosmos,
+      player2_cosmos: match.player2_cosmos,
+      player1_hand_count: player1HandCount,
+      player2_hand_count: player2HandCount,
+      player1_deck_size: player1DeckSize,
+      player2_deck_size: player2DeckSize,
+      cards_in_play: cardsData
+    };
+
+    // 4. Enviar a ambos jugadores (en TEST es el mismo)
+    if (userSockets.has(match.player1_id)) {
+      sendEvent(userSockets.get(match.player1_id)!, 'turn_changed', matchState);
+    }
+    if (match.player2_id && userSockets.has(match.player2_id)) {
+      sendEvent(userSockets.get(match.player2_id)!, 'turn_changed', matchState);
+    }
+
+    console.log(`✅ Primer turno iniciado, partida ${match_id} en fase player1_turn`);
+  } catch (error) {
+    console.error('❌ Error en start_first_turn:', error);
+    sendEvent(ws, 'match_error', { message: 'Error iniciando primer turno' });
+  }
+}
+
 // =====================================
 // HANDLERS DE ADMIN
 // =====================================
@@ -1872,19 +2006,19 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
     // Guardar orden barajado en Match
     (testMatch as any).player1_deck_order = JSON.stringify(shuffledCards);
     (testMatch as any).player2_deck_order = JSON.stringify(shuffledCards);
-    (testMatch as any).player1_deck_index = 7;
-    (testMatch as any).player2_deck_index = 7;
+    (testMatch as any).player1_deck_index = 5;
+    (testMatch as any).player2_deck_index = 5;
     await testMatch.save();
 
-    console.log(`🔀 Mazos barajeados (7 cartas robadas)`);
+    console.log(`🔀 Mazos barajeados (5 cartas robadas)`);
 
     // 5. Crear cartas en juego
     const cardsInPlayData: any[] = [];
 
-    // Jugador 1: 7 cartas en mano, resto en deck
+    // Jugador 1: 5 cartas en mano, resto en deck
     for (let i = 0; i < shuffledCards.length; i++) {
-      const zone = i < 7 ? 'hand' : 'deck';
-      const position = i < 7 ? i : i - 7;
+      const zone = i < 5 ? 'hand' : 'deck';
+      const position = i < 5 ? i : i - 5;
       
       cardsInPlayData.push({
         match_id: testMatch.id,
@@ -1904,10 +2038,10 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       });
     }
 
-    // Jugador 2: 7 cartas en mano, resto en deck (mismo orden shuffled)
+    // Jugador 2: 5 cartas en mano, resto en deck (mismo orden shuffled)
     for (let i = 0; i < shuffledCards.length; i++) {
-      const zone = i < 7 ? 'hand' : 'deck';
-      const position = i < 7 ? i : i - 7;
+      const zone = i < 5 ? 'hand' : 'deck';
+      const position = i < 5 ? i : i - 5;
       
       cardsInPlayData.push({
         match_id: testMatch.id,
@@ -1969,7 +2103,7 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       match_id: testMatch.id,
       current_turn: testMatch.current_turn,
       current_player: testMatch.current_player,
-      current_phase: 'main',
+      current_phase: 'starting',
       player_number: 1,  // El cliente siempre es player 1 en TEST
       player1_id: testMatch.player1_id,
       player2_id: testMatch.player2_id,
@@ -1979,10 +2113,10 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       player2_life: testMatch.player2_life,
       player1_cosmos: testMatch.player1_cosmos,
       player2_cosmos: testMatch.player2_cosmos,
-      player1_hand_count: 7,
-      player2_hand_count: 7,
-      player1_deck_size: shuffledCards.length - 7,
-      player2_deck_size: shuffledCards.length - 7,
+      player1_hand_count: 5,
+      player2_hand_count: 5,
+      player1_deck_size: shuffledCards.length - 5,
+      player2_deck_size: shuffledCards.length - 5,
       cards_in_play: cardsData
     };
 

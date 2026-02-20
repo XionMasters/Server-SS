@@ -11,6 +11,8 @@
     "generate:packs": "ts-node src/scripts/generatePacks.ts",
     "generate:images": "ts-node src/scripts/generateCardsWithAI.ts",
     "generate:images:no-ai": "ts-node src/scripts/generateCardsWithAI.ts --no-ai",
+    "generate:deck-backs": "ts-node src/scripts/generateDeckBackImages.ts",
+    "seed:deck-backs": "ts-node src/scripts/seedDeckBacks-v2.ts",
     "generate:all": "npm run generate:cards && npm run generate:packs && npm run generate:images"
   },
   "keywords": [],

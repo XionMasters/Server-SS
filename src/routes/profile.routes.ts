@@ -6,7 +6,9 @@ import {
   updateAvatar,
   checkCardUnlocks,
   getAvatarImage,
-  getPublicProfile
+  getPublicProfile,
+  getAvailableDeckBacks,
+  updateDeckBack
 } from '../controllers/profile.controller';
 
 const router = express.Router();
@@ -28,6 +30,12 @@ router.get('/avatars', getAvailableAvatars);
 
 // Cambiar avatar actual
 router.put('/avatar', updateAvatar);
+
+// Obtener dorsos disponibles (desbloqueados y bloqueados)
+router.get('/deck-backs', getAvailableDeckBacks);
+
+// Cambiar dorso actual
+router.put('/deck-back', updateDeckBack);
 
 // Verificar y desbloquear avatares por cartas obtenidas
 router.post('/check-unlocks', checkCardUnlocks);

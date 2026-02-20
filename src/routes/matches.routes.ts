@@ -12,7 +12,8 @@ router.use(authenticateToken);
 router.get('/can-search', matchesController.canSearchMatch);
 
 // TEST Match
-router.post('/test', matchesController.startTestMatch);
+router.post('/init-match-test', matchesController.startTestMatch);
+router.get('/test/resume', matchesController.resumeTestMatch);
 
 // Matchmaking y gestión de partidas
 router.post('/find', matchesController.findMatch);
@@ -20,6 +21,7 @@ router.post('/cancel-search', matchesController.cancelSearch);
 router.get('/:id', matchesController.getMatchState);
 router.post('/:id/play-card', matchesController.playCard);
 router.post('/:id/pass-turn', matchesController.passTurn);
+router.post('/:id/abandon', matchesController.abandonMatch);
 
 // ⚔️ Sistema de combate
 router.post('/:id/attack', matchesController.attackKnight);

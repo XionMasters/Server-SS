@@ -4,6 +4,8 @@ import Card from '../models/Card';
 import UserCard from '../models/UserCard';
 import Deck from '../models/Deck';
 import DeckCard from '../models/DeckCard';
+import DeckBack from '../models/DeckBack';
+import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
 import transactionService from '../services/transactionService';
 import { 
   STARTER_DECK_CARDS, 
@@ -106,6 +108,36 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
     });
 
     console.log(`📦 Deck inicial creado: ${deck.id}`);
+
+    // Asignar dorso por defecto al deck
+    try {
+      const defaultDeckBack = await DeckBack.findOne({
+        where: { unlock_type: 'default', is_active: true }
+      });
+
+      if (defaultDeckBack) {
+        deck.current_deck_back_id = defaultDeckBack.id;
+        await deck.save();
+        console.log(`🎨 Dorso por defecto asignado al deck: ${defaultDeckBack.name}`);
+
+        // Desbloquear el dorso por defecto para el usuario
+        await UserDeckBackUnlock.findOrCreate({
+          where: { 
+            user_id: userId, 
+            deck_back_id: defaultDeckBack.id 
+          },
+          defaults: {
+            user_id: userId,
+            deck_back_id: defaultDeckBack.id,
+            unlock_source: 'initial_setup'
+          }
+        });
+        console.log(`🔓 Dorso desbloqueado para el usuario`);
+      }
+    } catch (deckBackError) {
+      console.warn('⚠️  Error asignando dorso por defecto:', deckBackError);
+      // No fallar si hay error con el dorso
+    }
 
     // Agregar las cartas al deck (DeckCard)
     const deckCardEntries = STARTER_DECK_CARDS

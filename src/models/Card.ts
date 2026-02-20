@@ -5,7 +5,7 @@ import { sequelize } from '../config/database';
 class Card extends Model {
   public id!: string;
   public name!: string;
-  public type!: 'knight' | 'technique' | 'item' | 'stage' | 'helper' | 'event';
+  public type!: 'knight' | 'technique' | 'item' | 'stage' | 'helper' | 'event' | 'caballero' | 'técnica' | 'objeto' | 'escenario' | 'ayudante' | 'ocasión' | 'tecnica' | 'ocasion';
   public rarity!: 'common' | 'rare' | 'epic' | 'legendary' | 'divine';
   public cost!: number;
   public generate!: number;
@@ -39,7 +39,7 @@ Card.init(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('knight', 'technique', 'item', 'stage', 'helper', 'event'),
+      type: DataTypes.ENUM('knight', 'technique', 'item', 'stage', 'helper', 'event', 'caballero', 'técnica', 'objeto', 'escenario', 'ayudante', 'ocasión', 'tecnica', 'ocasion'),
       allowNull: false,
     },
     rarity: {

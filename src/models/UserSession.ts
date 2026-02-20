@@ -62,8 +62,4 @@ UserSession.init(
   }
 );
 
-// Relaciones
-UserSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
-User.hasMany(UserSession, { foreignKey: 'user_id', as: 'sessions' });
-
 export default UserSession;

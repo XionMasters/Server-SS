@@ -14,6 +14,12 @@ import DeckCard from './DeckCard';
 import Match from './Match';
 import CardInPlay from './CardInPlay';
 import MatchAction from './MatchAction';
+import ProfileAvatar from './ProfileAvatar';
+import UserAvatarUnlock from './UserAvatarUnlock';
+import DeckBack from './DeckBack';
+import UserDeckBackUnlock from './UserDeckBackUnlock';
+import UserProfile from './UserProfile';
+import UserSession from './UserSession';
 
 // Configurar relaciones entre User y Card
 User.belongsToMany(Card, {
@@ -99,6 +105,31 @@ Match.hasMany(MatchAction, { foreignKey: 'match_id', as: 'actions' });
 MatchAction.belongsTo(Match, { foreignKey: 'match_id', as: 'match' });
 MatchAction.belongsTo(User, { foreignKey: 'player_id', as: 'player' });
 
+// Configurar relaciones de Avatares
+User.hasMany(UserAvatarUnlock, { foreignKey: 'user_id', as: 'avatar_unlocks' });
+ProfileAvatar.hasMany(UserAvatarUnlock, { foreignKey: 'avatar_id', as: 'user_unlocks' });
+UserAvatarUnlock.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+UserAvatarUnlock.belongsTo(ProfileAvatar, { foreignKey: 'avatar_id', as: 'avatar' });
+
+// Configurar relaciones de Dorsos de Decks
+User.hasMany(UserDeckBackUnlock, { foreignKey: 'user_id', as: 'deck_back_unlocks' });
+DeckBack.hasMany(UserDeckBackUnlock, { foreignKey: 'deck_back_id', as: 'user_unlocks' });
+UserDeckBackUnlock.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+UserDeckBackUnlock.belongsTo(DeckBack, { foreignKey: 'deck_back_id', as: 'deck_back' });
+
+// Configurar relaciones de Deck con DeckBack
+Deck.belongsTo(DeckBack, { foreignKey: 'current_deck_back_id', as: 'deck_back' });
+DeckBack.hasMany(Deck, { foreignKey: 'current_deck_back_id', as: 'decks' });
+
+// Configurar relaciones de UserProfile
+User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
+UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+UserProfile.belongsTo(ProfileAvatar, { foreignKey: 'avatar_image_id', as: 'avatar' });
+
+// Configurar relaciones de UserSession
+User.hasMany(UserSession, { foreignKey: 'user_id', as: 'sessions' });
+UserSession.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
 export { 
   User, 
   Card, 
@@ -114,5 +145,11 @@ export {
   DeckCard,
   Match,
   CardInPlay,
-  MatchAction
+  MatchAction,
+  ProfileAvatar,
+  UserAvatarUnlock,
+  DeckBack,
+  UserDeckBackUnlock,
+  UserProfile,
+  UserSession
 };
