@@ -13,6 +13,7 @@ import CardInPlay from '../models/CardInPlay';
 import ChatMessage from '../models/ChatMessage';
 import UserProfile from '../models/UserProfile';
 import ProfileAvatar from '../models/ProfileAvatar';
+import { MatchSetupService } from './matchSetup.service';
 import {
   handleEndTurnRefactored,
   handlePlayCardRefactored,
@@ -65,149 +66,6 @@ function sendEvent(ws: WebSocket, event: string, data: any = {}) {
 /**
  * Inicializa las cartas en juego cuando comienza la partida
  */
-async function initializeMatchCards(match: any, player1DeckId: string, player2DeckId: string) {
-  try {
-    console.log(`🎴 Inicializando cartas para partida ${match.id}...`);
-    
-    // Obtener todas las cartas del deck (respetando la cantidad/quantity)
-    const deck1Cards = await DeckCard.findAll({ where: { deck_id: player1DeckId } });
-    const deck2Cards = await DeckCard.findAll({ where: { deck_id: player2DeckId } });
-
-    // Expandir la lista según quantity para reflejar copias reales
-    const expandByQuantity = (cards: DeckCard[]) => {
-      const expanded: string[] = [];
-      for (const dc of cards) {
-        const qty = (dc as any).quantity ?? 1;
-        for (let i = 0; i < qty; i++) expanded.push((dc as any).card_id);
-      }
-      return expanded;
-    };
-
-    const deck1ExpandedIds = expandByQuantity(deck1Cards);
-    const deck2ExpandedIds = expandByQuantity(deck2Cards);
-
-    console.log(`   - Jugador 1: ${deck1ExpandedIds.length} cartas (expandidas por quantity)`);
-    console.log(`   - Jugador 2: ${deck2ExpandedIds.length} cartas (expandidas por quantity)`);
-    
-    // Función para hacer shuffle (Fisher-Yates)
-    function shuffleArray(array: any[]): any[] {
-      const shuffled = [...array];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      return shuffled;
-    }
-    
-    // Shuffle ambas decks
-    const shuffledDeck1 = shuffleArray(deck1ExpandedIds);
-    const shuffledDeck2 = shuffleArray(deck2ExpandedIds);
-    
-    // Guardar orden en Match
-    // Ya son IDs de carta
-    const deck1Order = shuffledDeck1;
-    const deck2Order = shuffledDeck2;
-    
-    match.player1_deck_order = JSON.stringify(deck1Order);
-    match.player2_deck_order = JSON.stringify(deck2Order);
-    match.player1_deck_index = 7; // Índice después de las 7 iniciales
-    match.player2_deck_index = 7;
-    await match.save();
-    
-    console.log(`✅ Deck shuffled y guardado en Match`);
-    
-    // Crear CardInPlay: 7 cartas en mano (índices 0-6), resto en deck
-    const cardsInPlayData: any[] = [];
-    
-    // Cartas del Jugador 1 - 7 en mano
-    for (let i = 0; i < 7; i++) {
-      cardsInPlayData.push({
-        match_id: match.id,
-        card_id: deck1Order[i],
-        player_number: 1,
-        zone: 'hand',
-        position: i,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-    
-    // Cartas del Jugador 1 - resto en deck
-    for (let i = 7; i < deck1Order.length; i++) {
-      cardsInPlayData.push({
-        match_id: match.id,
-        card_id: deck1Order[i],
-        player_number: 1,
-        zone: 'deck',
-        position: i - 7,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-    
-    // Cartas del Jugador 2 - 7 en mano
-    for (let i = 0; i < 7; i++) {
-      cardsInPlayData.push({
-        match_id: match.id,
-        card_id: deck2Order[i],
-        player_number: 2,
-        zone: 'hand',
-        position: i,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-    
-    // Cartas del Jugador 2 - resto en deck
-    for (let i = 7; i < deck2Order.length; i++) {
-      cardsInPlayData.push({
-        match_id: match.id,
-        card_id: deck2Order[i],
-        player_number: 2,
-        zone: 'deck',
-        position: i - 7,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-    
-    if (cardsInPlayData.length > 0) {
-      await CardInPlay.bulkCreate(cardsInPlayData);
-      console.log(`✅ ${cardsInPlayData.length} cartas creadas en CardInPlay (14 en mano, resto en deck)`);
-    }
-  } catch (error) {
-    console.error('❌ Error inicializando cartas:', error);
-  }
-}
-
 function serializeCardInPlay(cardInPlay: any) {
   const card = cardInPlay.get('card') as any;
   const knight = card?.card_knight;
@@ -938,7 +796,7 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
       
       // Inicializar cartas en juego (esto toma tiempo)
       console.log(`🎴 Inicializando cartas para ambos jugadores...`);
-      await initializeMatchCards(waitingMatch, waitingMatch.player1_deck_id, activeDeck.id);
+      await MatchSetupService.initializeMatchCards(waitingMatch, waitingMatch.player1_deck_id, activeDeck.id, 7);
       
       const cardsInPlay = await CardInPlay.findAll({
         where: { match_id: waitingMatch.id },
@@ -2027,90 +1885,10 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
 
     console.log(`✅ TEST Match creada: ${testMatch.id}`);
 
-    // 4. Inicializar cartas (barajar, robar)
-    // Obtener cartas del mazo
-    const deckCards = await DeckCard.findAll({ where: { deck_id: activeDeck.id } });
+    // 4. Inicializar cartas usando MatchSetupService (5 en mano para partidas TEST)
+    await MatchSetupService.initializeMatchCards(testMatch, activeDeck.id, activeDeck.id, 5);
 
-    // Expandir por cantidad
-    const expandedCardIds: string[] = [];
-    for (const dc of deckCards) {
-      const qty = (dc as any).quantity || 1;
-      for (let i = 0; i < qty; i++) {
-        expandedCardIds.push((dc as any).card_id);
-      }
-    }
-
-    console.log(`📋 Mazo expandido: ${expandedCardIds.length} cartas`);
-
-    // Shuffle (Fisher-Yates)
-    const shuffledCards = [...expandedCardIds];
-    for (let i = shuffledCards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffledCards[i], shuffledCards[j]] = [shuffledCards[j], shuffledCards[i]];
-    }
-
-    // Guardar orden barajado en Match
-    (testMatch as any).player1_deck_order = JSON.stringify(shuffledCards);
-    (testMatch as any).player2_deck_order = JSON.stringify(shuffledCards);
-    (testMatch as any).player1_deck_index = 5;
-    (testMatch as any).player2_deck_index = 5;
-    await testMatch.save();
-
-    console.log(`🔀 Mazos barajeados (5 cartas robadas)`);
-
-    // 5. Crear cartas en juego
-    const cardsInPlayData: any[] = [];
-
-    // Jugador 1: 5 cartas en mano, resto en deck
-    for (let i = 0; i < shuffledCards.length; i++) {
-      const zone = i < 5 ? 'hand' : 'deck';
-      const position = i < 5 ? i : i - 5;
-      
-      cardsInPlayData.push({
-        match_id: testMatch.id,
-        card_id: shuffledCards[i],
-        player_number: 1,
-        zone,
-        position,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-
-    // Jugador 2: 5 cartas en mano, resto en deck (mismo orden shuffled)
-    for (let i = 0; i < shuffledCards.length; i++) {
-      const zone = i < 5 ? 'hand' : 'deck';
-      const position = i < 5 ? i : i - 5;
-      
-      cardsInPlayData.push({
-        match_id: testMatch.id,
-        card_id: shuffledCards[i],
-        player_number: 2,
-        zone,
-        position,
-        is_defensive_mode: false,
-        current_attack: 0,
-        current_defense: 0,
-        current_health: 0,
-        current_cosmos: 0,
-        attached_cards: '[]',
-        status_effects: '[]',
-        can_attack_this_turn: true,
-        has_attacked_this_turn: false
-      });
-    }
-
-    await CardInPlay.bulkCreate(cardsInPlayData);
-    console.log(`✅ ${cardsInPlayData.length} cartas en juego creadas`);
-
-    // 6. Cargar cartas con info completa
+    // 5. Cargar cartas con info completa
     const cardsInPlay = await CardInPlay.findAll({
       where: { match_id: testMatch.id },
       include: [
@@ -2143,6 +1921,12 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       }
     }));
 
+    // Calcular contadores de mano y mazo
+    const player1HandCount = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'hand').length;
+    const player2HandCount = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'hand').length;
+    const player1DeckSize = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'deck').length;
+    const player2DeckSize = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'deck').length;
+
     // 8. Construir GameState para enviar al cliente
     const gameState = {
       id: testMatch.id,
@@ -2159,10 +1943,10 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       player2_life: testMatch.player2_life,
       player1_cosmos: testMatch.player1_cosmos,
       player2_cosmos: testMatch.player2_cosmos,
-      player1_hand_count: 5,
-      player2_hand_count: 5,
-      player1_deck_size: shuffledCards.length - 5,
-      player2_deck_size: shuffledCards.length - 5,
+      player1_hand_count: player1HandCount,
+      player2_hand_count: player2HandCount,
+      player1_deck_size: player1DeckSize,
+      player2_deck_size: player2DeckSize,
       cards_in_play: cardsData
     };
 

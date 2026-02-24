@@ -15,8 +15,8 @@
  * Patrón: Thin Coordinator, Fat RulesEngine
  */
 
-import { Match } from '../../models/Match';
-import { User } from '../../models/User';
+import  Match  from '../../models/Match';
+import  User  from '../../models/User';
 // import { GameStateBuilder } from './GameStateBuilder'; // TODO: Not implemented yet
 import { StartMatchService } from '../startMatch.service';
 
@@ -38,7 +38,7 @@ export class MatchesCoordinator {
    */
   static async startTestMatch(userId: string) {
     try {
-      return await StartMatchService.createTestMatch(userId);
+      return await StartMatchService.createNewMatch(userId, userId, 'TEST');
     } catch (error: any) {
       return { success: false, error: `Error creando test match: ${error?.message || 'Unknown error'}` };
     }

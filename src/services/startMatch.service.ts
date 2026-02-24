@@ -1,27 +1,23 @@
 // src/services/startMatch.service.ts
 /**
- * TestMatchService - Servicio dedicado para partidas TEST
+ * StartMatchService - Servicio dedicado para iniciar partidas, cualquier tipo.
  * 
  * Responsabilidades:
- * - Verificar si usuario tiene partida TEST activa
+ * - Verificar si usuario tiene partida activa
  * - Validar mazo del usuario
- * - Crear partida TEST
+ * - Crear partida
  * - Inicializar cartas y estado
  * - Rate limiting por usuario
  */
 
 import User from '../models/User';
-import Deck from '../models/Deck';
 import Match from '../models/Match';
-import CardInPlay from '../models/CardInPlay';
-import Card from '../models/Card';
-import DeckCard from '../models/DeckCard';
-import { GameService } from './game.service';
 import { Op } from 'sequelize';
 import { MatchMode } from '../game/rules/types';
 import { BASE_MATCH_RULES } from '../game/rules/base.rules';
-import { CardManager } from './game/cardManager';
 import { GameStateBuilder } from './game/GameStateBuilder ';
+import { DeckService } from './deck.service';
+import { MatchSetupService } from './matchSetup.service';
 
 // Rate limiting: {userId: lastCreatedAt}
 const testMatchRateLimits = new Map<string, number>();
@@ -65,18 +61,12 @@ export class StartMatchService {
       const deck2 = await this._getAndValidateActiveDeck(userId2);
 
       // 5️⃣ Crear partida TEST
-      const match = await this._createNewMatchState(userId1, deck1, userId2, deck2);
+      const match = await this._createNewMatchState(userId1, userId2, deck1.deck, deck2.deck);
 
-      // 6️⃣ Inicializar cartas
-      // TODO: Implement card initialization via WebSocket handlers or refactored CardManager
-      // await CardManager.createCardsInPlay(match.id, deck1.deckCards, 1, BASE_MATCH_RULES);
-      // await CardManager.createCardsInPlay(match.id, deck2.deckCards, 2, BASE_MATCH_RULES);
+      // 6️⃣ Inicializar cartas usando MatchSetupService
+      const initialHandSize = mode === 'TEST' ? 5 : BASE_MATCH_RULES.initial_hand_size;
+      await MatchSetupService.initializeMatchCards(match, deck1.deck.id, deck2.deck.id, initialHandSize);
 
-      // 6️⃣b Distribuir mano inicial (5 cartas a hand, resto a deck)
-      // TODO: Implement initial hand distribution via WebSocket handlers
-      // await CardManager.drawInitialHands(match.id);
-
-      // 7️⃣ Construir estado inicial
       // 7️⃣ Construir estado inicial
       const gameState = await GameStateBuilder.buildFromMatch(match, { perspectivePlayer: mode === 'TEST' ? 1 : undefined });
 
@@ -149,33 +139,15 @@ export class StartMatchService {
   /**
    * Obtiene mazo activo y valida que cumpla reglas
    */
-  private static async _getAndValidateActiveDeck(userId: string): Promise<any> {
-    const activeDeck = await Deck.findOne({
-      where: { user_id: userId, is_active: true },
-      include: [{ association: 'deckCards' }]
-    });
+  private static async _getAndValidateActiveDeck(userId: string) {
+    const result = await DeckService.getAndValidateActiveDeck(
+      userId,
+      BASE_MATCH_RULES.deck.min_cards,
+      BASE_MATCH_RULES.deck.max_cards
+    );
 
-    if (!activeDeck) {
-      throw new Error('No tienes un mazo activo. Marca un mazo como activo primero.');
-    }
-
-    // Validar que el mazo cumpla con las reglas básicas
-    const cardCount = (activeDeck as any).deckCards?.length || 0;
-
-    if (cardCount < 40) {
-      throw new Error(
-        `Tu mazo activo solo tiene ${cardCount} cartas. Necesita mínimo 40 cartas para jugar.`
-      );
-    }
-
-    if (cardCount > 100) {
-      throw new Error(
-        `Tu mazo activo tiene ${cardCount} cartas. El máximo permitido es 100.`
-      );
-    }
-
-    console.log(`✅ Mazo validado: ${activeDeck.name} (${cardCount} cartas)`);
-    return activeDeck;
+    console.log(`✅ Mazo validado: ${result.deck.name} (${result.totalCards} cartas)`);
+    return result;
   }
 
   /**
