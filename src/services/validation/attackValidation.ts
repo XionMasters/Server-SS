@@ -1,4 +1,4 @@
-﻿import CardInPlay from '../../models/CardInPlay';
+import CardInPlay from '../../models/CardInPlay';
 
 export class AttackValidation {
   static assertValidAttacker(

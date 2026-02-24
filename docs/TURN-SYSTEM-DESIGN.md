@@ -107,287 +107,344 @@ func _check_turn_end_timeout():
 
 ### 3️⃣ Fase: Procesamiento en Servidor
 
-**Endpoint:** `websocket.service.ts` - evento `end_turn`
+**Endpoint:** `websocket-integrations.ts` → `handleEndTurnRefactored()` (evento `end_turn`)
 
 **Validaciones del Servidor (CRÍTICAS):**
 
 ⚠️ **IMPORTANTE:** Nunca confíes en el cliente. Valida TODO como si fuera un atacante.
 
+La arquitectura actual delega las validaciones a componentes especializados:
+
 ```typescript
-async handleEndTurn(ws: WebSocket, data: any) {
-    const userId = ws.userId;
-    const matchId = data.match_id;
-    const clientActionId = data.action_id;  // Para idempotencia
-    
-    try {
-        // 🔒 Verificación 1: ¿El usuario e match existen?
-        const match = await Match.findByPk(matchId);
-        if (!match) {
-            this.sendError(ws, "Match no encontrado");
-            return;
-        }
-        
-        // 🔒 Verificación 2: ¿El usuario es jugador en este match?
-        const playerNumber = match.player1_id === userId ? 1 : 
-                            match.player2_id === userId ? 2 : null;
-        if (!playerNumber) {
-            this.sendError(ws, "No eres jugador de este match (acceso denegado)");
-            return;
-        }
-        
-        // 🔒 Verificación 3: ¿Es realmente su turno?
-        if (match.current_player !== playerNumber) {
-            this.sendError(ws, `No es tu turno. Es turno del jugador ${match.current_player}`);
-            return;
-        }
-        
-        // 🔒 Verificación 4: ¿El match está en estado válido?
-        if (match.phase !== 'playing' && match.phase !== 'ongoing') {
-            this.sendError(ws, `Match en fase inválida: ${match.phase}`);
-            return;
-        }
-        
-        // 🔒 Verificación 5: ¿No estamos en cooldown de acciones?
-        // (Para evitar spam)
-        const lastActionTime = match.last_action_timestamp;
-        const now = Date.now();
-        if (now - lastActionTime < 500) {  // Mínimo 500ms entre acciones
-            this.sendError(ws, "Acción muy rápida, intenta de nuevo");
-            return;
-        }
-        
-        // ✅ Todas las validaciones pasadas - proceder
-        await this.executeEndTurn(match, playerNumber, clientActionId);
-        
-    } catch (error) {
-        console.error(`❌ Error en handleEndTurn: ${error.message}`);
-        this.sendError(ws, "Error procesando fin de turno");
+// websocket-integrations.ts
+export async function handleEndTurnRefactored(
+  ws: AuthenticatedWebSocket,
+  data: {
+    match_id: string;
+    action_id?: string;  // UUID para idempotencia
+  }
+) {
+  try {
+    console.log(`⭐️ ${ws.username} termina turno (REFACTORED)`);
+
+    const { match_id, action_id = uuidv4() } = data;
+    const userId = ws.userId!;
+
+    // ========================================================================
+    // FASE 2: VALIDACIÓN DE CONTEXTO (CPSD)
+    // ========================================================================
+    const match = await Match.findByPk(match_id);
+    if (!match) {
+      sendEvent(ws, 'error', { message: 'Partida no encontrada', code: 'MATCH_NOT_FOUND' });
+      return;
     }
+
+    // 🔒 Verificación: ¿El usuario es jugador en este match?
+    const playerNumber =
+      match.player1_id === userId ? 1 : match.player2_id === userId ? 2 : null;
+
+    if (!playerNumber) {
+      sendEvent(ws, 'error', { message: 'No perteneces a este match', code: 'NOT_IN_MATCH' });
+      return;
+    }
+
+    // ========================================================================
+    // FASE 3: EJECUCIÓN CON IDEMPOTENCIA + TRANSACCIÓN (delegar a TurnManager)
+    // ========================================================================
+    const result = await TurnManager.endTurn(match, playerNumber, action_id);
+
+    if (!result.success) {
+      sendEvent(ws, 'error', { 
+        message: result.error || 'Error al terminar turno', 
+        code: 'END_TURN_FAILED' 
+      });
+      return;
+    }
+
+    // ========================================================================
+    // FASE 4: NOTIFICACIÓN A CLIENTES (⚠️ TODO: implementar broadcast)
+    // ========================================================================
+    sendEvent(ws, 'turn_ended', {
+      success: true,
+      action_id,
+      is_retry: result.isRetry,
+      message: result.isRetry ? 'Reintento exitoso' : 'Turno terminado',
+    });
+    
+    // TODO: Enviar match_updated a ambos jugadores vía WebSocketManager
+    // const broadcastData = {
+    //   match_id,
+    //   new_state: result.newState,
+    //   is_retry: result.isRetry
+    // };
+    // await WebSocketManager.broadcast(match_id, 'match_updated', broadcastData);
+
+  } catch (error) {
+    console.error('❌ Error en handleEndTurnRefactored:', error);
+    sendEvent(ws, 'error', {
+      message: 'Error interno del servidor',
+      code: 'INTERNAL_ERROR',
+    });
+  }
 }
+```
 ```
 
 **Orden de Operaciones (CRÍTICO - NO REORDENAR):**
 
-Este orden **DEBE** mantenerse para evitar aplicar efectos al jugador equivocado:
+El flujo detallado está implementado en `TurnRulesEngine.endTurn()`:
 
 ```
 ┌─ FIN DE TURNO DEL JUGADOR ACTUAL ──────────────────────┐
 │                                                          │
-│  1. Ejecutar efectos END_OF_TURN del jugador actual     │
+│  1. Validar precondiciones (TurnRulesEngine.validateEndTurn)
+│     - Match existe y está en estado válido              │
+│     - Usuario es jugador en el match                    │
+│     - Es realmente su turno                             │
+│                                                          │
+│  2. Mapear estado (MatchStateMapper.fromMatch)          │
+│     - Convertir Match DB → GameState puro               │
+│                                                          │
+│  3. Ejecutar efectos END_OF_TURN del jugador actual     │
 │     (ejemplo: venenos, maldiciones que se aplican)     │
 │                                                          │
-│  2. Resetear estados de cartas del jugador actual       │
+│  4. Resetear estados de cartas del jugador actual       │
 │     (is_exhausted = false)                             │
 │                                                          │
-│  3. Verificar win condition                            │
+│  5. Verificar win condition                            │
 │     (¿Ganó alguien? Si sí, terminar partida)          │
 │                                                          │
-│  4. Cambiar currentPlayerId (1 → 2 o 2 → 1)            │
+│  6. Cambiar currentPlayerId (1 → 2 o 2 → 1)            │
 │     Incrementar turnNumber                              │
 │                                                          │
 └─ INICIO DE TURNO DEL NUEVO JUGADOR ──────────────────┘
 │                                                          │
-│  5. Incrementar Recursos del nuevo jugador              │
-│     (+3 cosmos, reseteado a cap si necesario)          │
+│  7. Incrementar Recursos del nuevo jugador              │
+│     (+3 cosmos, resets a cap si es necesario)          │
 │                                                          │
-│  6. Robar Carta Automática para nuevo jugador           │
+│  8. Robar Carta Automática para nuevo jugador           │
+│     (si el deck tiene cartas disponibles)              │
 │                                                          │
-│  7. Ejecutar efectos START_OF_TURN del nuevo jugador    │
+│  9. Ejecutar efectos START_OF_TURN del nuevo jugador    │
 │     (bonificaciones, generadores, etc.)                │
+│                                                          │
+│  10. Aplicar cambios al Match DB (MatchRepository)      │
+│      - Guardar con transacción + lock pessimista        │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**Implementación:**
+**Implementación Actual (TurnManager):**
 
 ```typescript
-async executeEndTurn(match: Match, playerNumber: number, clientActionId: string) {
-    // Idempotencia: verificar si ya procesamos este action
-    const existingAction = await ProcessedAction.findOne({
-        where: { client_action_id: clientActionId, match_id: match.id }
-    });
-    if (existingAction) {
-        console.log("⚠️ Acción duplicada detectada, devolviendo resultado anterior");
-        return this.buildMatchStatePayload(match);
+// game/turnManager.ts
+static async endTurn(
+  match: any,
+  playerNumber: 1 | 2,
+  actionId: string
+): Promise<{
+  success: boolean;
+  newState: GameState | null;
+  error?: string;
+  isRetry?: boolean;
+}> {
+  try {
+    // ========================================================================
+    // PASO 0️⃣: IDEMPOTENCIA CHECK (ANTES de transacción - CRÍTICO)
+    // ========================================================================
+    const cached = await ProcessedActionsRegistry.find(actionId);
+    if (cached) {
+      console.log(`[TurnManager] Acción ${actionId} ya procesada (retry), retornando resultado cached`);
+      return {
+        success: true,
+        newState: cached.cached_result,
+        isRetry: true,
+      };
     }
-    
-    const matchId = match.id;
-    
-    // ════ FASE 1: FIN DEL TURNO ACTUAL ════
-    console.log(`🔄 Fase 1: Finalizando turno del Jugador ${playerNumber}`);
-    
-    // 1️⃣ Efectos END_OF_TURN del jugador actual
-    await this.gameEngine.executeEndOfTurnEffects(match, playerNumber);
-    
-    // 2️⃣ Resetear exhausted
-    const cardsInFieldPlayer = await CardInPlay.findAll({
-        where: {
-            match_id: matchId,
-            player_number: playerNumber,
-            zone: { [Op.in]: ['field_knight', 'field_technique'] }
+
+    // ========================================================================
+    // PASO 1: TRANSACCIÓN CON LOCK (pessimistic)
+    // ========================================================================
+    const result = await sequelize.transaction(
+      async (transaction) => {
+        // ====================================================================
+        // PASO 2: LOCK DE FILA
+        // ====================================================================
+        await match.reload({
+          lock: transaction.LOCK.UPDATE,
+          transaction,
+        });
+
+        // ====================================================================
+        // PASO 3: MAPEAR A ESTADO PURO
+        // ====================================================================
+        const currentState = MatchStateMapper.fromMatch(match);
+
+        // ====================================================================
+        // PASO 4: VALIDAR REGLAS
+        // ====================================================================
+        const validation = TurnRulesEngine.validateEndTurn(currentState, playerNumber);
+        if (!validation.valid) {
+          throw new Error(validation.error || 'Validación fallida');
         }
-    });
-    await Promise.all(cardsInFieldPlayer.map(card => 
-        card.update({ is_exhausted: false })
-    ));
-    
-    // 3️⃣ Verificar win condition
-    const winCheckResult = await this.gameEngine.checkWinConditions(match);
-    if (winCheckResult.winner) {
-        console.log(`🏆 ¡Jugador ${winCheckResult.winner} gana!`);
-        match.phase = 'ended';
-        match.winner_id = winCheckResult.winner === 1 ? match.player1_id : match.player2_id;
-        await match.save();
-        
-        // Guardar acción como procesada
-        await ProcessedAction.create({
-            match_id: match.id,
-            client_action_id: clientActionId,
-            action_type: 'end_turn',
-            result: 'game_ended'
-        });
-        
-        return this.buildMatchStatePayload(match);
-    }
-    
-    // 4️⃣ Cambiar jugador activo e incrementar turno
-    console.log(`🔄 Fase 2: Cambiando a Jugador ${match.current_player === 1 ? 2 : 1}`);
-    match.current_player = match.current_player === 1 ? 2 : 1;
-    match.turn_number += 1;
-    match.last_action_timestamp = Date.now();  // Timestamp del servidor
-    
-    const newPlayerNumber = match.current_player;
-    
-    // ════ FASE 2: INICIO DEL NUEVO TURNO ════
-    console.log(`🔄 Fase 3: Iniciando turno del Jugador ${newPlayerNumber}`);
-    
-    // 5️⃣ Incrementar recursos del nuevo jugador
-    const cosmosKey = newPlayerNumber === 1 ? 'player1_cosmos' : 'player2_cosmos';
-    match[cosmosKey] = Math.min(match[cosmosKey] + 3, 10);  // +3 cosmos, cap 10
-    
-    // 6️⃣ Robar carta
-    const deckKey = newPlayerNumber === 1 ? 'player1_deck' : 'player2_deck';
-    const deck = JSON.parse(match[deckKey]);
-    
-    if (deck.length > 0) {
-        const drawnCardId = deck.shift();
-        const cardsInHand = await CardInPlay.findAll({
-            where: {
-                match_id: matchId,
-                player_number: newPlayerNumber,
-                zone: 'hand'
-            }
-        });
-        
-        await CardInPlay.create({
-            match_id: matchId,
-            card_id: drawnCardId,
-            player_number: newPlayerNumber,
-            zone: 'hand',
-            position: cardsInHand.length,
-            instance_id: generateUUID()
-        });
-        
-        match[deckKey] = JSON.stringify(deck);
-    }
-    
-    // 7️⃣ Efectos START_OF_TURN del nuevo jugador
-    await this.gameEngine.executeStartOfTurnEffects(match, newPlayerNumber);
-    
-    // Guardar cambios
-    await match.save();
-    
-    // Registrar acción como procesada (idempotencia)
-    await ProcessedAction.create({
-        match_id: match.id,
-        client_action_id: clientActionId,
-        action_type: 'end_turn',
-        result: 'success',
-        turn_number: match.turn_number
-    });
-    
-    console.log(`✅ Turno completado: ${newPlayerNumber} inicia turno #${match.turn_number}`);
-    return this.buildMatchStatePayload(match);
+
+        // ====================================================================
+        // PASO 5: EJECUTAR REGLAS (puro, sin mutación de DB)
+        // ====================================================================
+        const execution = TurnRulesEngine.endTurn(currentState, playerNumber);
+        if (!execution.newState) {
+          throw new Error('Error al ejecutar reglas de turno');
+        }
+
+        // ====================================================================
+        // PASO 6: APLICAR CAMBIOS AL MODELO DE BD
+        // ====================================================================
+        await MatchRepository.applyState(match, execution.newState, transaction);
+
+        // ====================================================================
+        // PASO 7: REGISTRAR COMO PROCESADA (idempotencia)
+        // ====================================================================
+        await ProcessedActionsRegistry.register(
+          actionId,
+          match.id,
+          playerNumber,
+          execution.newState,
+          'turn_end',  // actionType
+          transaction
+        );
+
+        return execution.newState;
+      }
+    );
+
+    return {
+      success: true,
+      newState: result,
+    };
+  } catch (error) {
+    console.error('[TurnManager] Error en endTurn:', error);
+    return {
+      success: false,
+      newState: null,
+      error: error instanceof Error ? error.message : 'Error desconocido',
+    };
+  }
 }
 ```
 
-**Payload de Respuesta:**
+**Componentes Clave:**
 
-```typescript
-// Después de executar todas las operaciones:
+1. **TurnRulesEngine**: Lógica pura de reglas de juego
+   - `validateEndTurn(currentState, playerNumber)` - Valida precondiciones
+   - `endTurn(currentState, playerNumber)` - Calcula nuevo estado (sin mutación)
 
-const updatedGameState = {
-    match_id: match.id,
-    current_turn: match.turn_number,
-    current_player: match.current_player,
-    
-    // Estados actualizados
-    player1_cosmos: match.player1_cosmos,
-    player2_cosmos: match.player2_cosmos,
-    player1_hand_count: cardsP1Hand.length,
-    player2_hand_count: cardsP2Hand.length,
-    player1_deck_size: JSON.parse(match.player1_deck).length,
-    player2_deck_size: JSON.parse(match.player2_deck).length,
-    
-    // Cartas en juego (incluyendo la robada)
-    cards_in_play: [...],
-    
-    // Timestamp del servidor (para validación)
-    server_timestamp: Date.now()
-};
-
-// Broadcast a ambos jugadores
-this.broadcastToMatch(matchId, {
-    event: 'match_updated',
-    data: updatedGameState
-});
-```
+2. **MatchStateMapper**: Convierte entre capas
+   - `fromMatch(match)` - Match DB → GameState puro
+   
+3. **ProcessedActionsRegistry**: Control de idempotencia
+   - `find(actionId)` - Busca acciones ya procesadas
+   - `register(actionId, ...)` - Cachea resultado para reintentos
+   
+4. **MatchRepository**: Persistencia
+   - `applyState(match, newState, transaction)` - Aplica cambios al modelo DB
 
 ---
 
-### 4️⃣ Fase: Sincronización del Nuevo Turno (MatchSessionService)
+### 4️⃣ Fase: Sincronización del Nuevo Turno (WebSocket Broadcast)
 
-**⚠️ IMPORTANTE: Estrategia de Sincronización**
+**⚠️ IMPORTANTE: Estado Actual de Implementación**
 
-El servidor debe enviar **SNAPSHOT COMPLETO** del estado, no deltas parciales.
+El `handleEndTurnRefactored` actualmente:
+- ✅ Valida y procesa el end_turn
+- ✅ Ejecuta TurnRulesEngine y persiste cambios
+- ✅ Envía `turn_ended` al cliente que hizo la acción
+- ❌ **TODO**: Enviar `match_updated` a **ambos** jugadores con el nuevo estado
+
+**Flujo Esperado (cuando TODO esté implementado):**
 
 ```typescript
-// ✅ BIEN: Snapshot completo (seguro, aunque más pesado)
-{
-    event: 'match_updated',
-    data: {
-        turn_number: 7,           // 👈 Versionado
-        action_sequence: 42,      // 👈 Secuencia
-        current_player: 2,
-        
-        player1_cosmos: 8,
-        player2_cosmos: 6,
-        
-        cards_in_play: [
-            { instance_id: 'uuid1', card_id: 'card1', zone: 'field_knight', ... },
-            { instance_id: 'uuid2', card_id: 'card2', zone: 'hand', ... }
-        ],
-        
-        server_timestamp: 1645234567890
-    }
+// websocket-integrations.ts - después de TurnManager.endTurn() exitoso
+
+const result = await TurnManager.endTurn(match, playerNumber, action_id);
+
+if (!result.success) {
+  sendEvent(ws, 'error', { message: result.error, code: 'END_TURN_FAILED' });
+  return;
 }
+
+// ✅ Confirmar al jugador que accionó
+sendEvent(ws, 'turn_ended', {
+  success: true,
+  action_id,
+  is_retry: result.isRetry,
+});
+
+// ⚠️ TODO: Broadcast del nuevo estado a AMBOS jugadores
+// await WebSocketManager.broadcast(match_id, 'match_updated', {
+//   turn_number: result.newState.turn_number,
+//   current_player: result.newState.currentPlayerNumber,
+//   player1_cosmos: result.newState.p1Cosmos,
+//   player2_cosmos: result.newState.p2Cosmos,
+//   cards_in_play: result.newState.cardsInPlay,
+//   // ... resto del estado
+// });
 ```
 
-**Por qué snapshot completo:**
-- No hay riesgo de deltas parciales que se pierdan
-- Validación de orden clara (turn_number + action_sequence)
-- Reconciliación trivial
-- Más fácil de debuggear
+**¿Por qué snapshot completo?**
 
-**Flujo en Godot:**
+El servidor DEBE enviar estado versionado completo:
+- `turn_number` + `action_sequence` - Detectar eventos fuera de orden
+- Todas las cartas en juego - Reconciliación trivial
+- Recursos actuales - Sin cálculos del cliente
+- Validación de secuencia clara
+
+**Payload de Respuesta (cuando esté implementado):**
+
+```typescript
+// Después de TurnManager.endTurn() exitoso:
+
+const broadcastPayload = {
+  match_id: match.id,
+  turn_number: result.newState.turn_number,
+  action_sequence: result.newState.action_sequence,
+  current_player: result.newState.currentPlayerNumber,
+  
+  // Estados actualizados
+  player1_cosmos: result.newState.p1Cosmos,
+  player2_cosmos: result.newState.p2Cosmos,
+  player1_hand_count: result.newState.p1HandCount,
+  player2_hand_count: result.newState.p2HandCount,
+  player1_deck_size: result.newState.p1DeckSize,
+  player2_deck_size: result.newState.p2DeckSize,
+  
+  // Cartas en juego (incluyendo la robada)
+  cards_in_play: result.newState.cardsInPlay,
+  
+  // Timestamp del servidor (para validación)
+  server_timestamp: Date.now()
+};
+
+// Broadcast a ambos jugadores
+await WebSocketManager.broadcast(match_id, 'match_updated', broadcastPayload);
+```
+
+**Flujo en Godot (WebSocketManager + MatchManager):**
 
 ```gdscript
-func _on_match_updated(data: Dictionary):
+# En WebSocketManager (recibe evento del servidor)
+func _on_server_message(data: Dictionary):
+    match data.event:
+        "match_updated":
+            # Procesar snapshot completo del servidor
+            MatchManager._update_match_state(data.data)
+
+# En MatchManager (orquestador del estado)
+func _update_match_state(data: Dictionary):
     # El servidor nos envía SNAPSHOT COMPLETO
     
     # Detectar cambio de turno ANTES de actualizar
-    var old_turn = game_state.current_turn
-    var old_player = game_state.current_player
+    var old_turn = _current_match_state.turn_number
+    var old_player = _current_match_state.current_player
     
     # Validar secuencia ANTES de aplicar
     if not _is_valid_sequence(data):
@@ -396,53 +453,49 @@ func _on_match_updated(data: Dictionary):
         return
     
     # Aplicar snapshot completo
-    game_state.sync_from_server(data)
+    _current_match_state = GameState.from_server_data(data)
     
-    # MatchSessionService detecta cambios y emite signals
-    if game_state.current_turn > old_turn:
-        # Turn cambió, emitir signal
-        emit_signal("turn_changed", game_state.current_player)
+    # Emitir signals para que GameBoard reaccione
+    if _current_match_state.turn_number > old_turn:
+        # Turn cambió
+        turn_changed.emit(_current_match_state.current_player)
     
     # Siempre emitir actualización general
-    emit_signal("game_state_updated", game_state)
+    match_state_updated.emit(data)
 
 func _is_valid_sequence(data: Dictionary) -> bool:
     # Verificar que eventos llegan en orden
-    if data.turn_number < game_state.last_applied_turn:
+    var last_turn = _current_match_state.turn_number
+    var last_sequence = _current_match_state.action_sequence
+    
+    if data.turn_number < last_turn:
         return false  # Evento antiguo
     
-    if data.turn_number == game_state.last_applied_turn:
-        if data.action_sequence <= game_state.last_applied_sequence:
+    if data.turn_number == last_turn:
+        if data.action_sequence <= last_sequence:
             return false  # Duplicado o retraso
     
     return true
 ```
 
-**GameState ahora almacena versionado:**
+**GameState tiene versionado:**
 
 ```gdscript
 class_name GameState
 
-var current_turn: int                       # Número de turno (1, 2, 3...)
-var current_player: int                     # Jugador actual (1 o 2)
-var action_sequence: int = 0                # 👈 Secuencia dentro del turno
-var last_applied_turn: int = 0              # Para validar orden
-var last_applied_sequence: int = 0          # Para validar orden
+var turn_number: int                   # Versión del turno
+var current_player: int                # Jugador actual (1 o 2)
+var action_sequence: int               # Secuencia de acciones
+# ... resto del estado
 
-func sync_from_server(data: Dictionary):
-    # Almacenar versionado ANTES de cambiar estado
-    last_applied_turn = current_turn
-    last_applied_sequence = action_sequence
-    
-    # Aplicar nuevo snapshot
-    current_turn = data.turn_number
-    current_player = data.current_player
-    action_sequence = data.action_sequence
-    
-    player1_cosmos = data.player1_cosmos
-    player2_cosmos = data.player2_cosmos
-    
-    last_sync_timestamp = Time.get_ticks_msec()
+static func from_server_data(data: Dictionary, local_player_id: String) -> GameState:
+    # Factory method que crea GameState desde payload del servidor
+    var state = GameState.new()
+    state.turn_number = data.turn_number
+    state.current_player = data.current_player
+    state.action_sequence = data.action_sequence
+    # ... mapear resto de propiedades
+    return state
 ```
 
 ---
@@ -494,6 +547,110 @@ func _on_opponent_turn_starts():
 
 ---
 
+## 🏗️ Arquitectura Actual Implementada
+
+**Estado**: Refactorización en progreso (Diciembre 2025)
+
+### Componentes Principales
+
+La lógica de `end_turn` está distribuida en estos módulos:
+
+```
+websocket-integrations.ts
+└── handleEndTurnRefactored(ws, data)
+    │
+    └─▶ TurnManager.endTurn(match, playerNumber, actionId)
+        │
+        ├─▶ ProcessedActionsRegistry.find(actionId)
+        │   └─ Detecta reintentos (idempotencia)
+        │
+        ├─▶ sequelize.transaction()
+        │   │
+        │   ├─▶ match.reload({ lock: LOCK.UPDATE })
+        │   │   └─ Pessimistic locking (evita race conditions)
+        │   │
+        │   ├─▶ MatchStateMapper.fromMatch(match)
+        │   │   └─ Convierte Match DB → GameState puro
+        │   │
+        │   ├─▶ TurnRulesEngine.validateEndTurn(state, playerNumber)
+        │   │   └─ Valida precondiciones (sin mutación)
+        │   │
+        │   ├─▶ TurnRulesEngine.endTurn(state, playerNumber)
+        │   │   └─ Calcula nuevo estado (puro, sin mutación)
+        │   │
+        │   ├─▶ MatchRepository.applyState(match, newState)
+        │   │   └─ Aplica cambios al modelo Match
+        │   │
+        │   └─▶ ProcessedActionsRegistry.register(actionId, ...)
+        │       └─ Cachea resultado para próximos reintentos
+        │
+        └─▶ return { success, newState, isRetry }
+```
+
+### Responsabilidades por Archivo
+
+| Componente | Archivo | Responsabilidad |
+|-----------|---------|-----------------|
+| **WebSocket Handler** | `websocket-integrations.ts` | Recibe evento, valida usuario, delega a TurnManager |
+| **TurnManager** | `services/game/turnManager.ts` | Orquesta transacción atómica + idempotencia |
+| **TurnRulesEngine** | `engine/TurnRulesEngine.ts` | Lógica pura: validar y ejecutar end_turn |
+| **MatchStateMapper** | `services/mappers/MatchStateMapper.ts` | Convierte Match DB ↔ GameState (puro) |
+| **ProcessedActionsRegistry** | `services/registries/ProcessedActionsRegistry.ts` | Cacheo de acciones procesadas |
+| **MatchRepository** | `services/repositories/MatchRepository.ts` | CRUD de Match + persist cambios |
+
+### Flujo de Idempotencia
+
+```typescript
+// PASO 0: Chequeo rápido (sin lock)
+const cached = await ProcessedActionsRegistry.find(actionId);
+if (cached) {
+  // Si ya procesamos, devolver resultado cached sin hacer nada
+  return { success: true, newState: cached, isRetry: true };
+}
+
+// PASO 1-7: Transacción (si acción es nueva)
+const result = await sequelize.transaction(async (t) => {
+  // 2. Lock pessimista (impide que otro proceso modifique)
+  await match.reload({ lock: t.LOCK.UPDATE, transaction: t });
+  
+  // 3-5. Validar y ejecutar
+  const validation = TurnRulesEngine.validateEndTurn(...);
+  const execution = TurnRulesEngine.endTurn(...);
+  
+  // 6. Aplicar cambios
+  await MatchRepository.applyState(match, execution.newState, t);
+  
+  // 7. Registrar como procesada (si falla aquí = rollback todo)
+  await ProcessedActionsRegistry.register(actionId, ..., t);
+  
+  return execution.newState;
+});
+```
+
+### TODO: Broadcast Pendiente
+
+**Estado actual**: Después de TurnManager.endTurn(), el servidor:
+- ✅ Confirma al cliente con `turn_ended`
+- ❌ **FALTA**: Broadcast de `match_updated` a ambos jugadores
+
+**Trabajo pendiente**:
+```typescript
+// Después de TurnManager.endTurn() exitoso:
+
+// TODO: Implementar broadcast
+const broadcastData = {
+  match_id: match.id,
+  turn_number: result.newState.turn_number,
+  current_player: result.newState.currentPlayerNumber,
+  // ... resto del estado
+};
+
+// Enviar a AMBOS jugadores
+await WebSocketManager.broadcast(match_id, 'match_updated', broadcastData);
+```
+
+---
+
 ## Validaciones Clave
 
 ### Validaciones en Cliente (Seguridad UX)
@@ -501,20 +658,18 @@ func _on_opponent_turn_starts():
 |------------|-------|----------|
 | `is_player_turn()` | GameMatch | Evitar clicks accidentales |
 | `not is_animating()` | GameMatch | Evitar conflictos de animación |
-| `is_in_match` | MatchSessionService | Precondición básica |
-| `is_my_turn()` | MatchSessionService | Verificar antes de enviar |
+| `is_in_match` | MatchManager (Godot) | Precondición básica |
+| `is_my_turn()` | MatchManager (Godot) | Verificar antes de enviar |
 
 ### Validaciones en Servidor (Seguridad Real) 🔒
 
 | Validación | Dónde | Propósito | Crítico |
 |------------|-------|----------|---------|
-| Match existe | handleEndTurn | Evitar inyecciones | ⚠️ |
-| Usuario está en match (1 o 2) | handleEndTurn | **No truquear IDs** | 🔴 |
-| Es realmente su turno | handleEndTurn | **No atacar otro turno** | 🔴 |
-| Match está en fase válida | handleEndTurn | No end_turn en setup/finale | ⚠️ |
-| No hay cooldown de acciones | handleEndTurn | Prevenir spam | ⚠️ |
-| Acción no duplicada (idempotencia) | executeEndTurn | Rechazar reintentos | ⚠️ |
-| Timestamp no es del futuro | executeEndTurn | Validación de cordura | ⚠️ |
+| Match existe | handleEndTurnRefactored | Evitar inyecciones | ⚠️ |
+| Usuario está en match (1 o 2) | handleEndTurnRefactored | **No truquear IDs** | 🔴 |
+| Es realmente su turno | TurnRulesEngine.validateEndTurn | **No atacar otro turno** | 🔴 |
+| Match está en fase válida | TurnRulesEngine.validateEndTurn | No end_turn en setup/finale | ⚠️ |
+| Acción no duplicada (idempotencia) | ProcessedActionsRegistry | Rechazar reintentos | ⚠️ |
 
 🔴 = **Crítica**: El servidor SIEMPRE debe validar, sin excepciones.  
 ⚠️ = **Importante**: Validar en contextos críticos cuando sea posible.
@@ -1029,7 +1184,7 @@ app.get('/api/matches/:matchId/state', async (req, res) => {
 func _on_reconnected():
     print("🔌 Reconectando...")
     
-    var match_id = MatchSessionService.current_match.id
+    var match_id = MatchManager._current_match.id
     var response = await NetworkManager.get_request(
         "/api/matches/%s/state" % match_id
     )
@@ -1065,7 +1220,7 @@ WebSocketService (Comunicación)
 ├─ Llamar handlers
 └─ Broadcast resultados
 
-MatchSessionService (Orquestación)
+MatchManager - Godot (Orquestación de cliente)
 ├─ Validar precondiciones
 ├─ Construir payloads
 ├─ Coordinar componentes
@@ -1248,7 +1403,7 @@ async handleEndTurn() {
 - ❌ NO cambiar game_state
 - ❌ NO ejecutar lógica de juego
 
-### MatchSessionService (Orquestador - Godot)
+### MatchManager (Orquestador de Cliente - Godot)
 - ✅ Verificar precondiciones básicas antes de enviar
 - ✅ Generar action_id único para CADA acción
 - ✅ Construir payload con action_id + timestamp
@@ -1419,7 +1574,7 @@ ización de snapshot para después (si es necesario)
 
 ### Con End Turn Exitoso
 ```
-✅ Inicios en MatchSessionService.end_turn()
+✅ Iniciado desde MatchManager.end_turn() en Godot
    - Verificación: is_in_match = true
    - Verificación: is_my_turn() = true
    - Enviando evento "end_turn" al servidor

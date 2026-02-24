@@ -68,12 +68,13 @@ export class StartMatchService {
       const match = await this._createNewMatchState(userId1, deck1, userId2, deck2);
 
       // 6️⃣ Inicializar cartas
-      // 6️⃣ Inicializar cartas (una sola API mental)
-      await CardManager.createCardsInPlay(match.id, deck1.deckCards, 1, BASE_MATCH_RULES);
-      await CardManager.createCardsInPlay(match.id, deck2.deckCards, 2, BASE_MATCH_RULES);
+      // TODO: Implement card initialization via WebSocket handlers or refactored CardManager
+      // await CardManager.createCardsInPlay(match.id, deck1.deckCards, 1, BASE_MATCH_RULES);
+      // await CardManager.createCardsInPlay(match.id, deck2.deckCards, 2, BASE_MATCH_RULES);
 
       // 6️⃣b Distribuir mano inicial (5 cartas a hand, resto a deck)
-      await CardManager.drawInitialHands(match.id);
+      // TODO: Implement initial hand distribution via WebSocket handlers
+      // await CardManager.drawInitialHands(match.id);
 
       // 7️⃣ Construir estado inicial
       // 7️⃣ Construir estado inicial

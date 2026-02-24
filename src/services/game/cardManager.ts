@@ -1,155 +1,245 @@
-// src/services/game/cardManager.ts
-import CardInPlay from '../../models/CardInPlay';
-import Card from '../../models/Card';
-import Match from '../../models/Match';
-import CardKnight from '../../models/CardKnight';
-import sequelize from '../../config/database';
-import { SlotValidation } from '../validation/slotValidation';
-
 /**
- * CardManager - Gestiona cartas en juego
- * Responsabilidades:
- * - Jugar cartas
- * - Mover cartas
- * - Robar cartas iniciales
- * - Descartar cartas
+ * CardManager.ts
+ * 
+ * Orquestación transaccional para operaciones de cartas.
+ * Patrón igual que TurnManager:
+ * 
+ * 0. ProcessedActionsRegistry.find(actionId)
+ * 1. sequelize.transaction({lock})
+ * 2. MatchStateMapper.fromMatch()
+ * 3. CardRulesEngine.validate()
+ * 4. CardRulesEngine.execute()
+ * 5. MatchRepository.applyState()
+ * 6. ProcessedActionsRegistry.register()
  */
+
+import { sequelize } from '../../config/database';
+import Match from '../../models/Match';
+import { CardRulesEngine } from '../../engine/CardRulesEngine';
+import { MatchStateMapper } from '../mappers/MatchStateMapper';
+import { MatchRepository } from '../repositories/MatchRepository';
+import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
+import { GameState } from '../../engine/GameState';
 
 export class CardManager {
   /**
-   * Juega una carta desde la mano al campo
+   * Juega una carta desde mano al campo
    */
   static async playCard(
     match: any,
-    cardInPlayId: string,
-    playerNumber: number,
-    position: number
-  ): Promise<any> {
-    const cardInPlay = await CardInPlay.findOne({
-      where: { id: cardInPlayId, zone: 'hand', player_number: playerNumber },
-      include: [{ model: Card, as: 'card', include: [{ model: CardKnight, as: 'card_knight' }] }]
-    });
-
-    if (!cardInPlay) {
-      throw new Error('Carta no encontrada en la mano');
-    }
-
-    const card = (cardInPlay as any).card;
-    if (!card) {
-      throw new Error('Datos de carta no encontrados');
-    }
-
-    // Determinar zona destino según tipo de carta
-    let targetZone: 'field_knight' | 'field_support' | 'field_helper' = 'field_support';
-    if (card.type === 'caballero' || card.type === 'knight') {
-      targetZone = 'field_knight';
-    } else if (card.type === 'ayudante' || card.type === 'helper') {
-      targetZone = 'field_helper';
-    }
-
-    // ✅ Validar que hay espacio en la zona destino
-    SlotValidation.assertSlotAvailable(match.id, playerNumber, targetZone);
-
-    // Mover carta al campo
-    cardInPlay.zone = targetZone;
-    cardInPlay.position = position || 0;
-    await cardInPlay.save();
-
-    // Consumir cosmos
-    if (playerNumber === 1) {
-      match.player1_cosmos -= card.cost;
-    } else {
-      match.player2_cosmos -= card.cost;
-    }
-
-    console.log(`🃏 Carta jugada: ${card.name} (${targetZone}) - Cosmos: -${card.cost}`);
-
-    return cardInPlay;
-  }
-
-  /**
-   * Roba las 5 cartas iniciales de cada jugador
-   */
-  static async drawInitialHands(matchId: string): Promise<void> {
-    console.log(`📋 [drawInitialHands] Iniciando distribución de manos para match ${matchId}`);
-    
-    // Robar 5 cartas para player 1
-    const p1DeckCards = await CardInPlay.findAll({
-      where: { match_id: matchId, player_number: 1, zone: 'deck' },
-      order: [sequelize.fn('RANDOM')],
-      limit: 5
-    });
-
-    console.log(`🎯 [drawInitialHands] Player 1: ${p1DeckCards.length} cartas movidas a hand`);
-
-    for (const card of p1DeckCards) {
-      card.zone = 'hand';
-      await card.save();
-    }
-
-    // Robar 5 cartas para player 2
-    const p2DeckCards = await CardInPlay.findAll({
-      where: { match_id: matchId, player_number: 2, zone: 'deck' },
-      order: [sequelize.fn('RANDOM')],
-      limit: 5
-    });
-
-    console.log(`🎯 [drawInitialHands] Player 2: ${p2DeckCards.length} cartas movidas a hand`);
-
-    for (const card of p2DeckCards) {
-      card.zone = 'hand';
-      await card.save();
-    }
-
-    console.log(`🎲 [drawInitialHands] ✅ Manos iniciales repartidas correctamente`);
-  }
-
-  /**
-   * Crea todas las cartas en juego para ambos jugadores
-   */
-  static async createCardsInPlay(
-    matchId: string,
-    deckCards: any[],
-    playerNumber: number,
-    rules: any
-  ): Promise<void> {
-    for (const deckCard of deckCards) {
-      const quantity = deckCard.quantity || 1;
-
-      const card = await Card.findByPk(deckCard.card_id, {
-        include: [{ model: CardKnight, as: 'card_knight' }]
-      });
-
-      if (!card) continue;
-
-      const knight = (card as any).card_knight;
-
-      for (let i = 0; i < quantity; i++) {
-        await CardInPlay.create({
-          match_id: matchId,
-          card_id: card.id,
-          player_number: playerNumber,
-          zone: 'deck',
-          position: 0,
-
-          // Stats base
-          current_attack: knight?.attack ?? 0,
-          current_defense: knight?.defense ?? 0,
-          current_health: knight?.health ?? 0,
-          current_cosmos: knight?.cosmos ?? 0,
-
-          // Estados iniciales
-          is_defensive_mode: 'normal',
-          has_attacked_this_turn: false,
-          can_attack_this_turn: false,
-          attached_cards: '[]',
-          status_effects: '[]'
-        });
+    playerNumber: 1 | 2,
+    cardId: string,
+    targetZone: string,
+    position: number,
+    actionId: string
+  ): Promise<{
+    success: boolean;
+    newState: GameState | null;
+    error?: string;
+    isRetry?: boolean;
+  }> {
+    try {
+      // 0 IDEMPOTENCIA CHECK
+      const cached = await ProcessedActionsRegistry.find(actionId);
+      if (cached) {
+        console.log(`[CardManager] Acción ${actionId} ya procesada (retry)`);
+        return {
+          success: true,
+          newState: cached.cached_result,
+          isRetry: true,
+        };
       }
-    }
 
-    console.log(
-      `🎴 Cartas creadas para jugador ${playerNumber} en match ${matchId}`
-    );
+      // 1 TRANSACCIÓN CON LOCK
+      const result = await sequelize.transaction(
+
+        async (transaction) => {
+          // 2 LOCK DE FILA
+          await match.reload({
+            lock: transaction.LOCK.UPDATE,
+            transaction,
+          });
+
+          // 3 MAPEAR A ESTADO PURO
+          const currentState = MatchStateMapper.fromMatch(match);
+
+          // 4 VALIDAR
+          const validation = CardRulesEngine.validatePlayCard(
+            currentState,
+            playerNumber,
+            cardId,
+            targetZone,
+            position
+          );
+          if (!validation.valid) {
+            throw new Error(validation.error || 'Validación fallida');
+          }
+
+          // 5 EJECUTAR
+          const execution = CardRulesEngine.playCard(
+            currentState,
+            playerNumber,
+            cardId,
+            targetZone,
+            position
+          );
+
+          // 6 PERSISTIR
+          await MatchRepository.applyState(match, execution.newState, transaction);
+
+          // 7 REGISTRAR
+          await ProcessedActionsRegistry.register(
+            actionId,
+            match.id,
+            playerNumber,
+            execution.newState,
+            'card_play',
+            transaction
+          );
+
+          return execution.newState;
+        }
+      );
+
+      return { success: true, newState: result };
+    } catch (error) {
+      console.error('[CardManager] Error en playCard:', error);
+      return {
+        success: false,
+        newState: null,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
+  }
+
+  /**
+   * (FUTURO) Descartar carta
+   */
+  static async discardCard(
+    match: any,
+    playerNumber: 1 | 2,
+    cardId: string,
+    actionId: string
+  ): Promise<{
+    success: boolean;
+    newState: GameState | null;
+    error?: string;
+  }> {
+    try {
+      const cached = await ProcessedActionsRegistry.find(actionId);
+      if (cached) {
+        return {
+          success: true,
+          newState: cached.cached_result,
+        };
+      }
+
+      const result = await sequelize.transaction(
+        async (transaction) => {
+          await match.reload({
+            lock: transaction.LOCK.UPDATE,
+            transaction,
+          });
+
+          const currentState = MatchStateMapper.fromMatch(match);
+          const execution = CardRulesEngine.discardCard(currentState, playerNumber, cardId);
+
+          await MatchRepository.applyState(match, execution.newState, transaction);
+          await ProcessedActionsRegistry.register(
+            actionId,
+            match.id,
+            playerNumber,
+            execution.newState,
+            'card_discard',
+            transaction
+          );
+
+          return execution.newState;
+        }
+      );
+
+      return { success: true, newState: result };
+    } catch (error) {
+      console.error('[CardManager] Error en discardCard:', error);
+      return {
+        success: false,
+        newState: null,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
+  }
+
+  /**
+   * (FUTURO) Mover carta en el campo
+   */
+  static async moveCard(
+    match: any,
+    playerNumber: 1 | 2,
+    cardId: string,
+    fromZone: string,
+    toZone: string,
+    toPosition: number,
+    actionId: string
+  ): Promise<{
+    success: boolean;
+    newState: GameState | null;
+    error?: string;
+  }> {
+    try {
+      const cached = await ProcessedActionsRegistry.find(actionId);
+      if (cached) {
+        return { success: true, newState: cached.cached_result };
+      }
+
+      const result = await sequelize.transaction(
+        async (transaction) => {
+          await match.reload({
+            lock: transaction.LOCK.UPDATE,
+            transaction,
+          });
+
+          const currentState = MatchStateMapper.fromMatch(match);
+          const execution = CardRulesEngine.moveCard(
+            currentState,
+            playerNumber,
+            cardId,
+            fromZone,
+            toZone,
+            toPosition
+          );
+
+          await MatchRepository.applyState(match, execution.newState, transaction);
+          await ProcessedActionsRegistry.register(
+            actionId,
+            match.id,
+            playerNumber,
+            execution.newState,
+            'card_move',
+            transaction
+          );
+
+          return execution.newState;
+        }
+      );
+
+      return { success: true, newState: result };
+    } catch (error) {
+      console.error('[CardManager] Error en moveCard:', error);
+      return {
+        success: false,
+        newState: null,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
   }
 }
+
+/**
+ * Patrón de uso:
+ * 
+ * // En MatchCoordinator
+ * const result = await CardManager.playCard(match, playerNumber, cardId, zone, pos, actionId);
+ * if (result.success) {
+ *   await WebSocketManager.broadcast(matchId, 'card_played', result);
+ * }
+ */

@@ -1,0 +1,124 @@
+/**
+ * GameState.ts
+ * 
+ * Modelo puro de estado del juego.
+ * NO tiene métodos, NO toca BD, solo datos.
+ * Este es el contrato que recibe/retorna TurnRulesEngine y otros engines puros.
+ * 
+ * ✅ Determinístico - Misma entrada siempre = mismo resultado
+ * ✅ Serializable - Puede ser JSON stringify/parse
+ * ✅ Inmutable - Las mutaciones retornan nuevo estado
+ */
+
+export interface Player {
+  id: string;
+  number: 1 | 2;
+  life: number;
+  cosmos: number;
+  hand: CardInGameState[];
+  field_knights: CardInGameState[];
+  field_techniques: CardInGameState[];
+  field_helper: CardInGameState | null;
+  field_occasion: CardInGameState | null;
+  deck_count: number;
+  graveyard_count: number;
+  costos_count: number; // "Cositos" - pie de página
+}
+
+export interface CardInGameState {
+  instance_id: string;
+  card_id: string;
+  card_type: string; // 'knight', 'technique', 'item', etc.
+  player_number: 1 | 2;
+  zone: string; // 'hand', 'field_knight', 'field_technique', etc.
+  position: number; // Índice en la zona
+  mode: 'normal' | 'defense' | 'evasion' | null;
+  is_exhausted: boolean;
+  attacked_this_turn: boolean;
+  status_effects: string[]; // ['poison', 'burn', etc.]
+  buffs: Record<string, number>; // {'attack_bonus': 2, 'defense_bonus': 1}
+}
+
+export interface GameScenario {
+  instance_id: string;
+  card_id: string;
+  card_name: string;
+  effect: string;
+}
+
+export interface GameState {
+  // Identificadores
+  match_id: string;
+  
+  // Turno y fase
+  current_turn: number; // 1, 2, 3, ...
+  current_player: 1 | 2; // Quién juega ahora
+  phase: 'player1_turn' | 'player2_turn' | 'game_over';
+  
+  // Jugadores
+  player1: Player;
+  player2: Player;
+  
+  // Tablero compartido
+  scenario: GameScenario | null;
+  
+  // Metadata
+  created_at: number; // timestamp
+  updated_at: number; // timestamp
+}
+
+/**
+ * Factory: crear GameState vacío para testing/simulación
+ */
+export function createEmptyGameState(matchId: string): GameState {
+  return {
+    match_id: matchId,
+    current_turn: 1,
+    current_player: 1,
+    phase: 'player1_turn',
+    player1: {
+      id: 'player1',
+      number: 1,
+      life: 12,
+      cosmos: 0,
+      hand: [],
+      field_knights: [],
+      field_techniques: [],
+      field_helper: null,
+      field_occasion: null,
+      deck_count: 40,
+      graveyard_count: 0,
+      costos_count: 0,
+    },
+    player2: {
+      id: 'player2',
+      number: 2,
+      life: 12,
+      cosmos: 0,
+      hand: [],
+      field_knights: [],
+      field_techniques: [],
+      field_helper: null,
+      field_occasion: null,
+      deck_count: 40,
+      graveyard_count: 0,
+      costos_count: 0,
+    },
+    scenario: null,
+    created_at: Date.now(),
+    updated_at: Date.now(),
+  };
+}
+
+/**
+ * Validación básica de GameState
+ */
+export function validateGameState(state: GameState): { valid: boolean; error?: string } {
+  if (!state.match_id) return { valid: false, error: 'match_id requerido' };
+  if (state.current_turn < 1) return { valid: false, error: 'current_turn debe ser >= 1' };
+  if (![1, 2].includes(state.current_player)) return { valid: false, error: 'current_player debe ser 1 o 2' };
+  if (!state.player1 || !state.player2) return { valid: false, error: 'Ambos jugadores requeridos' };
+  if (state.player1.life < 0) return { valid: false, error: 'player1.life no puede ser negativo' };
+  if (state.player2.life < 0) return { valid: false, error: 'player2.life no puede ser negativo' };
+  return { valid: true };
+}

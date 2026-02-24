@@ -13,6 +13,12 @@ import CardInPlay from '../models/CardInPlay';
 import ChatMessage from '../models/ChatMessage';
 import UserProfile from '../models/UserProfile';
 import ProfileAvatar from '../models/ProfileAvatar';
+import {
+  handleEndTurnRefactored,
+  handlePlayCardRefactored,
+  handleAttackRefactored,
+  handleChangeDefensiveModeRefactored
+} from './websocket-integrations';
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -648,16 +654,38 @@ export const initializeWebSocketServer = (server: any) => {
             handleCancelSearch(ws);
             break;
           case 'play_card':
-            await handlePlayCard(ws, eventData);
+            await handlePlayCardRefactored(ws, {
+              match_id: eventData.match_id,
+              card_id: eventData.card_id,
+              zone: eventData.zone,
+              position: eventData.position,
+              action_id: eventData.action_id,
+            });
             break;
           case 'declare_attack':
-            await handleDeclareAttack(ws, eventData);
+            await handleAttackRefactored(ws, {
+              match_id: eventData.match_id,
+              attacker_card_id: eventData.attacker_id,
+              defender_card_id: eventData.defender_id,
+              action_id: eventData.action_id,
+            });
             break;
           case 'end_turn':
-            await handleEndTurn(ws, eventData);
+            await handleEndTurnRefactored(ws, {
+              match_id: eventData.match_id,
+              action_id: eventData.action_id,
+            });
             break;
           case 'start_first_turn':
             await handleStartFirstTurn(ws, eventData);
+            break;
+          case 'change_defensive_mode':
+            await handleChangeDefensiveModeRefactored(ws, {
+              match_id: eventData.match_id,
+              card_id: eventData.knight_id,
+              mode: eventData.mode,
+              action_id: eventData.action_id,
+            });
             break;
           case 'chat_message':
             await handleChatMessage(ws, eventData);
@@ -889,16 +917,29 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
       console.log(`   - Player 2: ${username} (${userId}) ✅ CONECTADO`);
       console.log(`   - Match ID: ${waitingMatch.id}`);
       
-      // Actualizar partida
+      // Actualizar partida a fase STARTING
       waitingMatch.player2_id = userId;
       waitingMatch.player2_deck_id = activeDeck.id;
       waitingMatch.phase = 'starting';
       await waitingMatch.save();
 
-      console.log(`✅ Partida actualizada a fase 'starting'`);
+      console.log(`✅ Partida actualizada a fase 'starting': ${waitingMatch.id}`);
       
-      // Inicializar cartas en juego
+      // 📤 Notificar a ambos jugadores que la partida está inicializando
+      const initializingData = {
+        match_id: waitingMatch.id,
+        phase: 'starting',
+        message: 'Inicializando juego...'
+      };
+      
+      console.log(`📤 Enviando 'match_initializing' a ambos jugadores...`);
+      sendEvent(ws, 'match_initializing', initializingData);
+      sendEvent(player1Socket, 'match_initializing', initializingData);
+      
+      // Inicializar cartas en juego (esto toma tiempo)
+      console.log(`🎴 Inicializando cartas para ambos jugadores...`);
       await initializeMatchCards(waitingMatch, waitingMatch.player1_deck_id, activeDeck.id);
+      
       const cardsInPlay = await CardInPlay.findAll({
         where: { match_id: waitingMatch.id },
         include: [
@@ -917,10 +958,16 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
           }
         ]
       });
+      
       const cardsData = cardsInPlay.map(serializeCardInPlay);
-      waitingMatch.phase = 'player1_turn';
-      awardBluePoint(waitingMatch, 1);
+      
+      // ⚠️ AHORA cambiar a primera fase de juego (player1_turn o player2_turn)
+      const firstPlayer = waitingMatch.current_player; // Puede ser 1 o 2
+      waitingMatch.phase = firstPlayer === 1 ? 'player1_turn' : 'player2_turn';
+      awardBluePoint(waitingMatch, firstPlayer);
       await waitingMatch.save();
+
+      console.log(`✅ Partida iniciada en fase: ${waitingMatch.phase}`);
 
       // Calcular contadores de mano y mazo
       const player1HandCount = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'hand').length;
@@ -950,11 +997,10 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
         cards_in_play: cardsData
       };
 
-      console.log(`📤 Enviando match_found a ${username}...`);
+      console.log(`📤 Enviando 'match_found' con fase: ${waitingMatch.phase}`);
       sendEvent(ws, 'match_found', matchData);
-
-      console.log(`📤 Enviando match_found a ${player1Data.username}...`);
       sendEvent(player1Socket, 'match_found', matchData);
+      
       
       // Actualizar stats de admin
       broadcastAdminStats();

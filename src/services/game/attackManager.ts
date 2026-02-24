@@ -1,159 +1,196 @@
-import Match from '../../models/Match';
-import CardInPlay from '../../models/CardInPlay';
-import MatchAction from '../../models/MatchAction';
-
 /**
- * 🔥 ATTACK MANAGER
- * Maneja toda la lógica de ataque entre caballeros
+ * AttackManager.ts
+ * 
+ * Orquestación transaccional para el sistema de combate.
+ * Mismo patrón que TurnManager Y CardManager.
  */
+
+import { sequelize } from '../../config/database';
+import Match from '../../models/Match';
+import { AttackRulesEngine } from '../../engine/AttackRulesEngine';
+import { MatchStateMapper } from '../mappers/MatchStateMapper';
+import { MatchRepository } from '../repositories/MatchRepository';
+import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
+import { GameState } from '../../engine/GameState';
+
 export class AttackManager {
   /**
-   * Ejecuta un ataque básico (BA)
-   * Fórmula: [CE_ATTACKER] - [AR_DEFENDER] = [DAMAGE]
-   * Mínimo daño: 1
-   *
-   * Casos especiales:
-   * - Si defensor está en evasión: 50% chance de fallar
-   * - Si defensor está en defensa: mitad del ataque del atacante
+   * Ejecuta un ataque de una carta contra otra
    */
-  static async performBasicAttack(
-    match: Match,
-    attackerCardInPlay: CardInPlay,
-    defenderCardInPlay: CardInPlay
-  ): Promise<{
-    damage: number;
-    hit: boolean;
-    reason?: string;
-  }> {
-    const attackerCard = (attackerCardInPlay as any).card;
-    const attackerKnight = (attackerCard as any).card_knight;
-
-    const defenderCard = (defenderCardInPlay as any).card;
-    const defenderKnight = (defenderCard as any).card_knight;
-
-    // Obtener valores de CE y AR
-    const attackCE = attackerKnight.attack || 0;
-    const defenseAR = defenderKnight.defense || 0;
-
-    // Comprobar modo evasión (50% chance de fallar)
-    if (defenderCardInPlay.is_defensive_mode === 'evasion') {
-      const coinFlip = Math.random() > 0.5; // true = hit, false = miss
-      if (!coinFlip) {
-        return {
-          damage: 0,
-          hit: false,
-          reason: 'EVASION_MISS'
-        };
-      }
-    }
-
-    // Comprobar modo defensa (reducir daño a la mitad)
-    let calculatedAttack = attackCE;
-    if (defenderCardInPlay.is_defensive_mode === 'defense') {
-      calculatedAttack = Math.floor(attackCE / 2);
-    }
-
-    // Calcular daño
-    let damage = calculatedAttack - defenseAR;
-    if (damage < 1) {
-      damage = 1; // Mínimo 1 de daño
-    }
-
-    return {
-      damage,
-      hit: true
-    };
-  }
-
-  /**
-   * Ejecuta ataque y actualiza salud del defensor
-   */
-  static async executeAttack(
-    match: Match,
-    attackerCardInPlay: CardInPlay,
-    defenderCardInPlay: CardInPlay
-  ): Promise<{
-    damage: number;
-    hit: boolean;
-    defenderHealth: number;
-    isKnockedOut: boolean;
-  }> {
-    // Calcular daño
-    const attackResult = await this.performBasicAttack(
-      match,
-      attackerCardInPlay,
-      defenderCardInPlay
-    );
-
-    if (!attackResult.hit) {
-      return {
-        damage: 0,
-        hit: false,
-        defenderHealth: defenderCardInPlay.current_health,
-        isKnockedOut: false
-      };
-    }
-
-    // Aplicar daño
-    const newHealth = Math.max(
-      0,
-      defenderCardInPlay.current_health - attackResult.damage
-    );
-    defenderCardInPlay.current_health = newHealth;
-    await defenderCardInPlay.save();
-
-    // Marcar atacante como que ya atacó este turno
-    attackerCardInPlay.has_attacked_this_turn = true;
-    await attackerCardInPlay.save();
-
-    return {
-      damage: attackResult.damage,
-      hit: true,
-      defenderHealth: newHealth,
-      isKnockedOut: newHealth <= 0
-    };
-  }
-
-  /**
-   * Cambia modo defensivo de un caballero
-   * Modos: 'normal', 'defense', 'evasion'
-   */
-  static async changeDefensiveMode(
-    cardInPlay: CardInPlay,
-    newMode: 'normal' | 'defense' | 'evasion'
-  ): Promise<void> {
-    const validModes = ['normal', 'defense', 'evasion'];
-    if (!validModes.includes(newMode)) {
-      throw new Error(`Modo inválido: ${newMode}`);
-    }
-
-    cardInPlay.is_defensive_mode = newMode;
-    await cardInPlay.save();
-  }
-
-  /**
-   * Registra una acción de ataque
-   */
-  static async recordAttack(
-    matchId: string,
-    userId: string,
+  static async attack(
+    match: any,
+    playerNumber: 1 | 2,
     attackerCardId: string,
     defenderCardId: string,
-    damage: number,
-    hit: boolean,
-    turnNumber: number
-  ): Promise<MatchAction> {
-    return await MatchAction.create({
-      match_id: matchId,
-      player_id: userId,
-      turn_number: turnNumber,
-      action_type: 'attack',
-      action_data: JSON.stringify({
-        attacker_card_id: attackerCardId,
-        defender_card_id: defenderCardId,
-        damage,
-        hit
-      })
-    });
+    actionId: string
+  ): Promise<{
+    success: boolean;
+    newState: GameState | null;
+    damage: number;
+    error?: string;
+    isRetry?: boolean;
+  }> {
+    try {
+      // 0️⃣ IDEMPOTENCIA CHECK
+      const cached = await ProcessedActionsRegistry.find(actionId);
+      if (cached) {
+        console.log(`[AttackManager] Acción ${actionId} ya procesada (retry)`);
+        return {
+          success: true,
+          newState: cached.cached_result,
+          damage: (cached as any).damage || 0,
+          isRetry: true,
+        };
+      }
+
+      // 1️⃣ TRANSACCIÓN CON LOCK
+      const result = await sequelize.transaction(
+        async (transaction) => {
+          // 2️⃣ LOCK DE FILA
+          await match.reload({
+            lock: transaction.LOCK.UPDATE,
+            transaction,
+          });
+
+          // 3️⃣ MAPEAR A ESTADO PURO
+          const currentState = MatchStateMapper.fromMatch(match);
+
+          // 4️⃣ VALIDAR
+          const validation = AttackRulesEngine.validateAttack(
+            currentState,
+            playerNumber,
+            attackerCardId,
+            defenderCardId
+          );
+          if (!validation.valid) {
+            throw new Error(validation.error || 'Validación fallida');
+          }
+
+          // 5️⃣ EJECUTAR
+          const execution = AttackRulesEngine.attack(
+            currentState,
+            playerNumber,
+            attackerCardId,
+            defenderCardId
+          );
+
+          // 6️⃣ PERSISTIR
+          await MatchRepository.applyState(match, execution.newState, transaction);
+
+          // 7️⃣ REGISTRAR (con damage en result)
+          const cacheData = { ...execution.newState, damage: execution.damage };
+          await ProcessedActionsRegistry.register(
+            actionId,
+            match.id,
+            playerNumber,
+            cacheData,
+            'attack',  // actionType
+            transaction
+          );
+
+          return { newState: execution.newState, damage: execution.damage };
+        }
+      );
+
+      return {
+        success: true,
+        newState: result.newState,
+        damage: result.damage,
+      };
+    } catch (error) {
+      console.error('[AttackManager] Error en attack:', error);
+      return {
+        success: false,
+        newState: null,
+        damage: 0,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
+  }
+
+  /**
+   * Cambia el modo defensivo de una carta
+   */
+  static async changeDefensiveMode(
+    match: any,
+    playerNumber: 1 | 2,
+    cardId: string,
+    mode: 'normal' | 'defense' | 'evasion',
+    actionId: string
+  ): Promise<{
+    success: boolean;
+    newState: GameState | null;
+    error?: string;
+    isRetry?: boolean;
+  }> {
+    try {
+      // 0️⃣ IDEMPOTENCIA CHECK
+      const cached = await ProcessedActionsRegistry.find(actionId);
+      if (cached) {
+        console.log(`[AttackManager] Acción ${actionId} ya procesada (retry)`);
+        return {
+          success: true,
+          newState: cached.cached_result,
+          isRetry: true,
+        };
+      }
+
+      // 1️⃣ TRANSACCIÓN
+      const result = await sequelize.transaction(
+        async (transaction) => {
+          // 2️⃣ LOCK
+          await match.reload({
+            lock: transaction.LOCK.UPDATE,
+            transaction,
+          });
+
+          // 3️⃣ MAPEAR
+          const currentState = MatchStateMapper.fromMatch(match);
+
+          // 4️⃣ EJECUTAR (sin validación compleja)
+          const execution = AttackRulesEngine.changeDefensiveMode(
+            currentState,
+            playerNumber,
+            cardId,
+            mode
+          );
+
+          // 5️⃣ PERSISTIR
+          await MatchRepository.applyState(match, execution.newState, transaction);
+
+          // 6️⃣ REGISTRAR
+          await ProcessedActionsRegistry.register(
+            actionId,
+            match.id,
+            playerNumber,
+            execution.newState,
+            'defensive_mode_change',  // actionType
+            transaction
+          );
+
+          return execution.newState;
+        }
+      );
+
+      return { success: true, newState: result };
+    } catch (error) {
+      console.error('[AttackManager] Error en changeDefensiveMode:', error);
+      return {
+        success: false,
+        newState: null,
+        error: error instanceof Error ? error.message : 'Error desconocido',
+      };
+    }
   }
 }
+
+/**
+ * Patrón de uso:
+ * 
+ * // En MatchCoordinator
+ * const result = await AttackManager.attack(match, 1, attId, defId, actionId);
+ * if (result.success) {
+ *   console.log(`Daño: ${result.damage}`);
+ *   await WebSocketManager.broadcast(matchId, 'attack_executed', result);
+ * }
+ */

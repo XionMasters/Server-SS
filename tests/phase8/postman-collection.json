@@ -1,0 +1,449 @@
+{
+  "info": {
+    "name": "Phase 8.2 - Caballeros Cósmicos API Tests",
+    "description": "Collection de tests para validar Phase 8.2 - WebSocket Integration & Idempotency",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1️⃣ WebSocket Connection Test",
+      "item": [
+        {
+          "name": "Connect & Authenticate",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Verificar que la conexión fue exitosa",
+                  "if (pm.response.code === 101) {",
+                  "  console.log('✅ WebSocket conectado exitosamente');",
+                  "}",
+                  "",
+                  "// Para WebSocket, usar wscat o similar:",
+                  "// wscat -c ws://localhost:3000 --execute 'ping'",
+                  "// Luego con authentication token en el handshake URL"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:3000?token={{AUTH_TOKEN}}",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{AUTH_TOKEN}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2️⃣ End Turn Test",
+      "item": [
+        {
+          "name": "End Turn (No Retry)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Generar nuevo action_id para cada solicitud",
+                  "const actionId = pm.utils.v4();",
+                  "pm.environment.set('ACTION_ID_END_TURN', actionId);",
+                  "console.log('Generated action_id:', actionId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Verificar respuesta exitosa",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('End turn returns success=true', () => {",
+                  "  pm.expect(response.success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('End turn returns action_id', () => {",
+                  "  pm.expect(response.action_id).to.exist;",
+                  "});",
+                  "",
+                  "pm.test('First call returns is_retry=false', () => {",
+                  "  pm.expect(response.is_retry).to.equal(false);",
+                  "});",
+                  "",
+                  "pm.test('Response time < 500ms', () => {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{AUTH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"end_turn\",\n  \"data\": {\n    \"match_id\": \"{{MATCH_ID}}\",\n    \"action_id\": \"{{ACTION_ID_END_TURN}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "ws://localhost:3000",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000"
+            }
+          }
+        },
+        {
+          "name": "End Turn (Idempotency Retry - Same action_id)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Verificar que se devuelve el resultado cacheado",
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Retry returns success=true', () => {",
+                  "  pm.expect(response.success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Retry returns SAME action_id', () => {",
+                  "  pm.expect(response.action_id).to.equal(pm.environment.get('ACTION_ID_END_TURN'));",
+                  "});",
+                  "",
+                  "pm.test('Retry returns is_retry=true ⭐ CRITICAL', () => {",
+                  "  pm.expect(response.is_retry).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Retry response contains cached_result', () => {",
+                  "  pm.expect(response).to.have.property('cached_result');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{AUTH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"end_turn\",\n  \"data\": {\n    \"match_id\": \"{{MATCH_ID}}\",\n    \"action_id\": \"{{ACTION_ID_END_TURN}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "ws://localhost:3000",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3️⃣ Play Card Test",
+      "item": [
+        {
+          "name": "Play Card (No Retry)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const actionId = pm.utils.v4();",
+                  "pm.environment.set('ACTION_ID_PLAY_CARD', actionId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Play card returns success=true', () => {",
+                  "  pm.expect(response.success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Play card returns is_retry=false', () => {",
+                  "  pm.expect(response.is_retry).to.equal(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{AUTH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"play_card\",\n  \"data\": {\n    \"match_id\": \"{{MATCH_ID}}\",\n    \"card_id\": \"{{CARD_ID}}\",\n    \"position\": 0,\n    \"action_id\": \"{{ACTION_ID_PLAY_CARD}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "ws://localhost:3000",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4️⃣ Attack Test",
+      "item": [
+        {
+          "name": "Declare Attack (No Retry)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const actionId = pm.utils.v4();",
+                  "pm.environment.set('ACTION_ID_ATTACK', actionId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Attack returns success=true', () => {",
+                  "  pm.expect(response.success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Attack returns damage value', () => {",
+                  "  pm.expect(response).to.have.property('damage');",
+                  "});",
+                  "",
+                  "pm.test('Attack returns is_retry=false', () => {",
+                  "  pm.expect(response.is_retry).to.equal(false);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{AUTH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"declare_attack\",\n  \"data\": {\n    \"match_id\": \"{{MATCH_ID}}\",\n    \"attacker_id\": \"{{ATTACKER_ID}}\",\n    \"defender_id\": \"{{DEFENDER_ID}}\",\n    \"action_id\": \"{{ACTION_ID_ATTACK}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "ws://localhost:3000",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5️⃣ Defensive Mode Test",
+      "item": [
+        {
+          "name": "Change Defensive Mode (No Retry)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const actionId = pm.utils.v4();",
+                  "pm.environment.set('ACTION_ID_DEFENSIVE', actionId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "",
+                  "pm.test('Defensive mode returns success=true', () => {",
+                  "  pm.expect(response.success).to.equal(true);",
+                  "});",
+                  "",
+                  "pm.test('Defensive mode returns mode value', () => {",
+                  "  pm.expect(response).to.have.property('mode');",
+                  "});",
+                  "",
+                  "pm.test('Mode is one of: normal, defense, evasion', () => {",
+                  "  pm.expect(['normal', 'defense', 'evasion']).to.include(response.mode);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{AUTH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"change_defensive_mode\",\n  \"data\": {\n    \"match_id\": \"{{MATCH_ID}}\",\n    \"knight_id\": \"{{KNIGHT_ID}}\",\n    \"mode\": \"defense\",\n    \"action_id\": \"{{ACTION_ID_DEFENSIVE}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "ws://localhost:3000",
+              "protocol": "ws",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6️⃣ Database Validation",
+      "item": [
+        {
+          "name": "Query processed_actions table",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/api/debug/processed-actions?match_id={{MATCH_ID}}",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "api",
+                "debug",
+                "processed-actions"
+              ],
+              "query": [
+                {
+                  "key": "match_id",
+                  "value": "{{MATCH_ID}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "AUTH_TOKEN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "MATCH_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "CARD_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "KNIGHT_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ATTACKER_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "DEFENDER_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ACTION_ID_END_TURN",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ACTION_ID_PLAY_CARD",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ACTION_ID_ATTACK",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ACTION_ID_DEFENSIVE",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

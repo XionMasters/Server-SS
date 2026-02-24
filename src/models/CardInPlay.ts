@@ -1,4 +1,4 @@
-﻿// src/models/CardInPlay.ts
+// src/models/CardInPlay.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
