@@ -1846,121 +1846,36 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
     
     const userId = ws.userId!;
 
-    // 1. Obtener mazo activo del usuario
-    const activeDeck = await Deck.findOne({
-      where: { user_id: userId, is_active: true }
-    });
+    // Usar StartMatchService que centraliza toda la lógica
+    const { StartMatchService } = await import('./startMatch.service');
+    const result = await StartMatchService.createNewMatch(userId, userId, 'TEST');
 
-    if (!activeDeck) {
-      sendEvent(ws, 'match_error', { 
-        message: 'No tienes un mazo activo. Marca un mazo como activo primero.',
-        code: 'NO_ACTIVE_DECK'
-      });
-      console.log('❌ Usuario sin mazo activo');
-      return;
-    }
-
-    // 2. Validar mazo
-    const user = await User.findByPk(userId);
-    if (!user) {
-      sendEvent(ws, 'match_error', { message: 'Usuario no encontrado' });
-      return;
-    }
-
-    // 3. Crear partida TEST
-    const testMatch = await Match.create({
-      player1_id: userId,
-      player2_id: userId,  // El mismo usuario vs sí mismo
-      player1_deck_id: activeDeck.id,
-      player2_deck_id: activeDeck.id,  // Mismo mazo
-      phase: 'starting',
-      current_turn: 1,
-      current_player: 1,
-      player1_life: 12,
-      player2_life: 12,
-      player1_cosmos: 0,
-      player2_cosmos: 0,
-      started_at: new Date()
-    });
-
-    console.log(`✅ TEST Match creada: ${testMatch.id}`);
-
-    // 4. Inicializar cartas usando MatchSetupService (5 en mano para partidas TEST)
-    await MatchSetupService.initializeMatchCards(testMatch, activeDeck.id, activeDeck.id, 5);
-
-    // 5. Cargar cartas con info completa
-    const cardsInPlay = await CardInPlay.findAll({
-      where: { match_id: testMatch.id },
-      include: [
-        {
-          model: Card,
-          as: 'card',
-          attributes: ['id', 'name', 'type', 'rarity', 'cost', 'image_url', 'description']
-        }
-      ]
-    });
-
-    // 7. Serializar para el cliente
-    const cardsData = cardsInPlay.map((cip: any) => ({
-      id: cip.id,
-      card_id: cip.card_id,
-      instance_id: cip.id,
-      player_number: cip.player_number,
-      zone: cip.zone,
-      position: cip.position,
-      mode: cip.is_defensive_mode ? 'defense' : 'normal',
-      is_exhausted: cip.has_attacked_this_turn,
-      base_data: {
-        id: cip.card.id,
-        name: cip.card.name,
-        type: cip.card.type,
-        rarity: cip.card.rarity,
-        cost: cip.card.cost,
-        image_url: cip.card.image_url,
-        description: cip.card.description
-      }
-    }));
-
-    // Calcular contadores de mano y mazo
-    const player1HandCount = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'hand').length;
-    const player2HandCount = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'hand').length;
-    const player1DeckSize = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'deck').length;
-    const player2DeckSize = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'deck').length;
-
-    // 8. Construir GameState para enviar al cliente
-    const gameState = {
-      id: testMatch.id,
-      match_id: testMatch.id,
-      current_turn: testMatch.current_turn,
-      current_player: testMatch.current_player,
-      current_phase: 'starting',
-      player_number: 1,  // El cliente siempre es player 1 en TEST
-      player1_id: testMatch.player1_id,
-      player2_id: testMatch.player2_id,
-      player1_name: user.username,
-      player2_name: user.username,
-      player1_life: testMatch.player1_life,
-      player2_life: testMatch.player2_life,
-      player1_cosmos: testMatch.player1_cosmos,
-      player2_cosmos: testMatch.player2_cosmos,
-      player1_hand_count: player1HandCount,
-      player2_hand_count: player2HandCount,
-      player1_deck_size: player1DeckSize,
-      player2_deck_size: player2DeckSize,
-      cards_in_play: cardsData
-    };
-
-    // 9. Enviar match_found event al cliente
-    console.log(`📡 Preparando enviar match_found a ${ws.username}...`);
-    console.log(`   WebSocket readyState: ${ws.readyState}, WebSocket.OPEN: ${WebSocket.OPEN}`);
-    console.log(`   gameState: ${JSON.stringify(gameState).substring(0, 100)}...`);
-    sendEvent(ws, 'match_found', gameState);
-    console.log(`📡 match_found enviada a ${ws.username}`);
+    // Enviar match_found event al cliente con el estado construido
+    console.log(`📡 Enviando match_found a ${ws.username}...`);
+    sendEvent(ws, 'match_found', result.game_state);
+    console.log(`✅ match_found enviada a ${ws.username}`);
 
   } catch (error: any) {
     console.error('❌ Error en handleRequestTestMatch:', error);
+    
+    // Adaptar mensajes de error comunes
+    let errorMessage = 'Error creando partida TEST';
+    let errorCode = 'TEST_MATCH_ERROR';
+    
+    if (error.message.includes('mazo activo')) {
+      errorCode = 'NO_ACTIVE_DECK';
+      errorMessage = error.message;
+    } else if (error.message.includes('partida activa')) {
+      errorCode = 'ALREADY_IN_MATCH';
+      errorMessage = error.message;
+    } else if (error.message.includes('esperando')) {
+      errorCode = 'RATE_LIMIT';
+      errorMessage = error.message;
+    }
+    
     sendEvent(ws, 'match_error', { 
-      message: 'Error creando partida TEST',
+      code: errorCode,
+      message: errorMessage,
       error: error.message 
     });
   }
