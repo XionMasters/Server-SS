@@ -17,12 +17,13 @@
  * entre mundo HTTP (matchId, userId) y mundo de lógica (match, playerNumber)
  */
 
-import { Match } from '../../models/Match';
+import  Match  from '../../models/Match';
 import { TurnManager } from '../game/turnManager';
 import { CardManager } from '../game/cardManager';
 import { AttackManager } from '../game/attackManager';
 
 export class MatchCoordinator {
+
   /**
    * Fin de turno
    * DELEGA: Lógica de turno a TurnManager
@@ -46,7 +47,7 @@ export class MatchCoordinator {
     }
 
     // 3️⃣ Validar contexto (¿match activo?)
-    if (match.status !== 'active') {
+    if (match.phase === 'finished') {
       return { success: false, error: 'Match no está activo' };
     }
 
@@ -63,7 +64,8 @@ export class MatchCoordinator {
     userId: string,
     cardId: string,
     zone: string,
-    position: number
+    position: number,
+    actionId: string
   ) {
     const match = await Match.findByPk(matchId);
     if (!match) {
@@ -75,11 +77,11 @@ export class MatchCoordinator {
       return { success: false, error: 'No eres jugador de este match' };
     }
 
-    if (match.status !== 'active') {
+    if (match.phase === 'finished') {
       return { success: false, error: 'Match no está activo' };
     }
 
-    return await CardManager.playCard(match, playerNumber, cardId, zone, position);
+    return await CardManager.playCard(match, playerNumber, cardId, zone, position, actionId);
   }
 
   /**
@@ -90,7 +92,8 @@ export class MatchCoordinator {
     matchId: string,
     userId: string,
     attackerId: string,
-    defenderId: string
+    defenderId: string,
+    actionId: string
   ) {
     const match = await Match.findByPk(matchId);
     if (!match) {
@@ -102,11 +105,11 @@ export class MatchCoordinator {
       return { success: false, error: 'No eres jugador de este match' };
     }
 
-    if (match.status !== 'active') {
+    if (match.phase === 'finished') {
       return { success: false, error: 'Match no está activo' };
     }
 
-    return await AttackManager.performAttack(match, playerNumber, attackerId, defenderId);
+    return await AttackManager.attack(match, playerNumber, attackerId, defenderId, actionId);
   }
 
   /**
@@ -117,7 +120,8 @@ export class MatchCoordinator {
     matchId: string,
     userId: string,
     cardId: string,
-    mode: 'normal' | 'defense' | 'evasion'
+    mode: 'normal' | 'defense' | 'evasion',
+    actionId: string
   ) {
     const match = await Match.findByPk(matchId);
     if (!match) {
@@ -129,11 +133,11 @@ export class MatchCoordinator {
       return { success: false, error: 'No eres jugador de este match' };
     }
 
-    if (match.status !== 'active') {
+    if (match.phase === 'finished') {
       return { success: false, error: 'Match no está activo' };
     }
 
-    return await CardManager.changeDefensiveMode(match, playerNumber, cardId, mode);
+      return await AttackManager.changeDefensiveMode(match, playerNumber, cardId, mode, actionId);
   }
 
   /**

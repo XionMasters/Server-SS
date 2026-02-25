@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import Match from '../models/Match';
 import CardInPlay from '../models/CardInPlay';
 import CardKnight from '../models/CardKnight';
-import { broadcastMatchUpdate } from '../services/websocket.service';
+import { broadcastMatchUpdate } from '../services/websocket/websocket.service';
 
 /**
  * Calcular daño según el modo de combate

@@ -2,7 +2,7 @@
 import { createServer } from 'http';
 import app from './app';
 import { connectDatabase } from './config/database';
-import { initializeWebSocketServer } from './services/websocket.service';
+import { initializeWebSocketServer } from './services/websocket/websocket.service';
 
 const PORT = process.env.PORT || 3000;
 
@@ -22,6 +22,7 @@ const startServer = async () => {
       console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/health`);
       console.log(`🔌 WebSocket server ready on ws://localhost:${PORT}`);
+      console.log(`👨‍💻 Admin Portal: http://localhost:${PORT}/admin`);
     });
   } catch (error) {
     console.error('❌ Error al iniciar servidor:', error);

@@ -6,7 +6,6 @@
  */
 
 import { sequelize } from '../../config/database';
-import Match from '../../models/Match';
 import { AttackRulesEngine } from '../../engine/AttackRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';

@@ -1,4 +1,4 @@
-// src/services/startMatch.service.ts
+// src/services/match/startMatch.service.ts
 /**
  * StartMatchService - Servicio dedicado para iniciar partidas, cualquier tipo.
  * 
@@ -10,20 +10,139 @@
  * - Rate limiting por usuario
  */
 
-import User from '../models/User';
-import Match from '../models/Match';
+import User from '../../models/User';
+import Match from '../../models/Match';
+import Deck from '../../models/Deck';
+import Card from '../../models/Card';
+import CardInPlay from '../../models/CardInPlay';
 import { Op } from 'sequelize';
-import { MatchMode } from '../game/rules/types';
-import { BASE_MATCH_RULES } from '../game/rules/base.rules';
-import { GameStateBuilder } from './game/GameStateBuilder ';
-import { DeckService } from './deck.service';
-import { MatchSetupService } from './matchSetup.service';
+import { MatchMode } from '../../game/rules/types';
+import { BASE_MATCH_RULES } from '../../game/rules/base.rules';
+import { GameStateBuilder } from '../game/GameStateBuilder ';
+import { DeckService } from '../deck.service';
+import { MatchSetupService } from '../matchSetup.service';
+import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
 
 // Rate limiting: {userId: lastCreatedAt}
 const testMatchRateLimits = new Map<string, number>();
 const RATE_LIMIT_MS = 5000; // 5 segundos entre partidas TEST
 
 export class StartMatchService {
+  /**
+   * Crea partida en espera (cola matchmaking)
+   */
+  static async createWaitingMatch(userId: string): Promise<Match> {
+    const activeDeck = await Deck.findOne({
+      where: { user_id: userId, is_active: true }
+    });
+
+    if (!activeDeck) {
+      throw new Error('No tienes un deck activo. Activa uno primero.');
+    }
+
+    const newMatch = await Match.create({
+      player1_id: userId,
+      player1_deck_id: activeDeck.id,
+      player2_id: null as any,
+      player2_deck_id: null as any,
+      phase: 'waiting',
+      player1_life: 12,
+      player2_life: 12,
+      player1_cosmos: 0,
+      player2_cosmos: 0,
+      current_turn: 1,
+      current_player: 1
+    });
+
+    console.log(`⏳ Nueva partida en espera creada: ${newMatch.id}`);
+    return newMatch;
+  }
+
+  /**
+   * Completa una partida encontrada en cola e inicializa estado de juego.
+   */
+  static async startWaitingMatch(waitingMatch: Match, player2Id: string): Promise<any> {
+    const player2Deck = await Deck.findOne({
+      where: { user_id: player2Id, is_active: true }
+    });
+
+    if (!player2Deck) {
+      throw new Error('No tienes un deck activo. Activa uno primero.');
+    }
+
+    waitingMatch.player2_id = player2Id;
+    waitingMatch.player2_deck_id = player2Deck.id;
+    waitingMatch.phase = 'starting';
+    await waitingMatch.save();
+
+    await MatchSetupService.initializeMatchCards(
+      waitingMatch,
+      waitingMatch.player1_deck_id,
+      player2Deck.id,
+      7
+    );
+
+    const firstPlayer = waitingMatch.current_player;
+    waitingMatch.phase = firstPlayer === 1 ? 'player1_turn' : 'player2_turn';
+
+    if (firstPlayer === 1) {
+      waitingMatch.player1_cosmos = Math.min((waitingMatch.player1_cosmos ?? 0) + 1, 12);
+    } else {
+      waitingMatch.player2_cosmos = Math.min((waitingMatch.player2_cosmos ?? 0) + 1, 12);
+    }
+    await waitingMatch.save();
+
+    const cardsInPlay = await CardInPlay.findAll({
+      where: { match_id: waitingMatch.id },
+      include: [
+        {
+          model: Card,
+          as: 'card',
+          attributes: ['id', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element'],
+          include: [
+            {
+              model: (await import('../../models/CardKnight')).default,
+              as: 'card_knight',
+              attributes: ['attack', 'defense', 'health', 'cosmos', 'can_defend', 'defense_reduction'],
+              required: false
+            }
+          ]
+        }
+      ]
+    });
+
+    const cardsData = cardsInPlay.map(serializeCardInPlay);
+    const player1HandCount = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'hand').length;
+    const player2HandCount = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'hand').length;
+    const player1DeckSize = cardsInPlay.filter(c => c.player_number === 1 && c.zone === 'deck').length;
+    const player2DeckSize = cardsInPlay.filter(c => c.player_number === 2 && c.zone === 'deck').length;
+
+    const player1 = await User.findByPk(waitingMatch.player1_id, { attributes: ['id', 'username'] });
+    const player2 = await User.findByPk(player2Id, { attributes: ['id', 'username'] });
+
+    return {
+      match_id: waitingMatch.id,
+      player1: {
+        id: waitingMatch.player1_id,
+        username: (player1 as any)?.username
+      },
+      player2: {
+        id: player2Id,
+        username: (player2 as any)?.username
+      },
+      phase: waitingMatch.phase,
+      current_turn: waitingMatch.current_turn,
+      current_player: waitingMatch.current_player,
+      player1_cosmos: waitingMatch.player1_cosmos,
+      player2_cosmos: waitingMatch.player2_cosmos,
+      player1_hand_count: player1HandCount,
+      player2_hand_count: player2HandCount,
+      player1_deck_size: player1DeckSize,
+      player2_deck_size: player2DeckSize,
+      cards_in_play: cardsData
+    };
+  }
+
   /**
    * Crear una partida para los usuarios
    * - Verifica que no tenga partida activa

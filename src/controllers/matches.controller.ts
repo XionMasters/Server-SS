@@ -11,7 +11,8 @@ import CardKnight from '../models/CardKnight';
 import User from '../models/User';
 import { validateExistingDeck } from '../utils/deckValidator';
 import { GameService } from '../services/game.service';
-import { StartMatchService } from '../services/startMatch.service';
+import { StartMatchService } from '../services/match/startMatch.service';
+import { MatchesCoordinator } from '../services/coordinators/matchesCoordinator';
 
 // Buscar partida (matchmaking simple)
 export const findMatch = async (req: Request, res: Response) => {
@@ -120,31 +121,16 @@ export const getMatchState = async (req: Request, res: Response) => {
     const user = (req as any).user;
     const { id } = req.params;
 
-    const match = await Match.findOne({
-      where: { id },
-      include: [
-        { model: User, as: 'player1', attributes: ['id', 'username'] },
-        { model: User, as: 'player2', attributes: ['id', 'username'] },
-        { 
-          model: CardInPlay, 
-          as: 'cards_in_play',
-          include: [
-            { model: Card, as: 'card', include: [{ model: CardKnight, as: 'card_knight' }] }
-          ]
-        }
-      ]
-    });
+    const result = await MatchesCoordinator.getMatchState(id, user.id);
 
-    if (!match) {
-      return res.status(404).json({ error: 'Partida no encontrada' });
+    if (!result.success) {
+      return res.status((result as any).statusCode || 500).json({
+        error: result.error || 'Error obteniendo estado de partida',
+        code: (result as any).code || 'MATCH_STATE_ERROR'
+      });
     }
 
-    // Verificar que el usuario sea parte de la partida
-    if (match.player1_id !== user.id && match.player2_id !== user.id) {
-      return res.status(403).json({ error: 'No eres parte de esta partida' });
-    }
-
-    return res.json(match);
+    return res.json(result.data);
   } catch (error: any) {
     console.error('Error obteniendo estado de partida:', error);
     return res.status(500).json({ error: 'Error obteniendo estado de partida' });
@@ -190,99 +176,8 @@ export const canSearchMatch = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
-    // Verificar si ya está en una partida activa o buscando
-    const existingMatch = await Match.findOne({
-      where: {
-        [Op.or]: [
-          { 
-            player1_id: user.id, 
-            phase: { [Op.in]: ['waiting', 'starting', 'player1_turn', 'player2_turn'] } 
-          },
-          { 
-            player2_id: user.id, 
-            phase: { [Op.in]: ['starting', 'player1_turn', 'player2_turn'] } 
-          }
-        ]
-      },
-      include: [
-        { model: User, as: 'player1', attributes: ['id', 'username'] },
-        { model: User, as: 'player2', attributes: ['id', 'username'] }
-      ]
-    });
-
-    if (existingMatch) {
-      const isSearching = existingMatch.phase === 'waiting';
-      
-      // Si está en waiting (solo esperando), permitir buscar de nuevo (se limpiará al buscar)
-      if (isSearching) {
-        console.log(`ℹ️ Usuario ${user.username} tiene partida en waiting, se limpiará al buscar`);
-      } else {
-        // Está en partida activa - verificar que el otro jugador esté disponible
-        // Si no está, se limpiará al conectarse al WebSocket
-        return res.json({
-          can_search: false,
-          reason: 'ALREADY_IN_MATCH',
-          message: 'Ya estás en una partida activa',
-          match: {
-            id: existingMatch.id,
-            phase: existingMatch.phase
-          }
-        });
-      }
-    }
-
-    // Obtener el deck activo del usuario
-    const activeDeck = await Deck.findOne({
-      where: { user_id: user.id, is_active: true },
-      include: [
-        {
-          model: Card,
-          as: 'cards',
-          through: { attributes: ['quantity'] }
-        }
-      ]
-    });
-
-    if (!activeDeck) {
-      return res.json({
-        can_search: false,
-        reason: 'NO_ACTIVE_DECK',
-        message: 'No tienes un mazo marcado como activo',
-        deck: null
-      });
-    }
-
-    // Validar el deck
-    const validation = await validateExistingDeck(activeDeck.id);
-
-    if (!validation.valid) {
-      return res.json({
-        can_search: false,
-        reason: 'INVALID_DECK',
-        message: 'Tu mazo activo no cumple con las reglas',
-        deck: {
-          id: activeDeck.id,
-          name: activeDeck.name
-        },
-        errors: validation.errors,
-        warnings: validation.warnings
-      });
-    }
-
-    // Todo está OK
-    return res.json({
-      can_search: true,
-      reason: 'OK',
-      message: 'Listo para buscar partida',
-      deck: {
-        id: activeDeck.id,
-        name: activeDeck.name,
-        total_cards: (activeDeck as any).cards?.reduce((sum: number, card: any) => {
-          return sum + (card.DeckCard?.quantity || 0);
-        }, 0) || 0
-      },
-      warnings: validation.warnings
-    });
+    const result = await MatchesCoordinator.canSearchMatch(user.id, user.username);
+    return res.json(result.data);
 
   } catch (error: any) {
     console.error('Error verificando si puede buscar partida:', error);
@@ -347,11 +242,11 @@ export const startTestMatch = async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     // Delegar toda la lógica al servicio especializado
-    const { StartMatchService } = await import('../services/startMatch.service');
+    const { StartMatchService } = await import('../services/match/startMatch.service');
     const result = await StartMatchService.createNewMatch(user.id, user.id, 'TEST');
 
     // Enviar notificación al cliente vía WebSocket (para sincronizar futuros cambios)
-    const { broadcastMatchUpdate } = await import('../services/websocket.service');
+    const { broadcastMatchUpdate } = await import('../services/websocket/websocket.service');
     await broadcastMatchUpdate(result.match_id);
     
     return res.json({
@@ -381,7 +276,7 @@ export const resumeTestMatch = async (req: Request, res: Response) => {
     const user = (req as any).user;
 
     // Delegar toda la lógica al servicio especializado
-    const { StartMatchService } = await import('../services/startMatch.service');
+    const { StartMatchService } = await import('../services/match/startMatch.service');
     const result = await StartMatchService.resumeTestMatch(user.id);
 
     return res.json({
@@ -468,64 +363,20 @@ export const abandonMatch = async (req: Request, res: Response) => {
     const user = (req as any).user;
     const { id } = req.params; // match_id
 
-    // Buscar la partida
-    const match = await Match.findByPk(id);
-    
-    if (!match) {
-      return res.status(404).json({ 
-        error: 'Partida no encontrada',
-        code: 'MATCH_NOT_FOUND'
+    const result = await MatchesCoordinator.abandonMatch(id, user.id);
+
+    if (!result.success) {
+      return res.status((result as any).statusCode || 400).json({
+        error: result.error || 'Error abandonando partida',
+        code: (result as any).code || 'ABANDON_ERROR'
       });
     }
-
-    // Verificar que el usuario esté en la partida
-    if (match.player1_id !== user.id && match.player2_id !== user.id) {
-      return res.status(403).json({ 
-        error: 'No estás en esta partida',
-        code: 'UNAUTHORIZED'
-      });
-    }
-
-    // Verificar que la partida esté activa
-    if (!['starting', 'player1_turn', 'player2_turn'].includes(match.phase)) {
-      return res.status(400).json({ 
-        error: 'Esta partida ya ha finalizado',
-        code: 'MATCH_ALREADY_FINISHED'
-      });
-    }
-
-    // Determinar ganador (el otro jugador)
-    const winner_id = match.player1_id === user.id ? match.player2_id : match.player1_id;
-
-    // Validar que tengamos un ganador válido
-    if (!winner_id) {
-      return res.status(400).json({ 
-        error: 'Error: no se puede determinar el ganador',
-        code: 'INVALID_MATCH_STATE'
-      });
-    }
-
-    // Actualizar partida
-    console.log(`⏳ Cambiando fase de partida ${id} a 'finished'...`);
-    match.winner_id = winner_id as string;
-    match.phase = 'finished';
-    match.finished_at = new Date();
-    await match.save();
-
-    console.log(`✅ Partida abandonada: ${id}`);
-    console.log(`   🏆 Ganador: ${winner_id}`);
-    console.log(`   🚪 Abandonado por: ${user.id}`);
-    console.log(`   ✔️ Phase guardada como: ${match.phase}`);
-
-    // Pequeño delay para asegurar que la transacción se complete
-    // en la base de datos antes de responder al cliente
-    await new Promise(resolve => setTimeout(resolve, 500));
 
     return res.json({
       success: true,
-      message: 'Partida abandonada correctamente',
-      match_id: id,
-      winner_id: winner_id
+      message: result.message || 'Partida abandonada correctamente',
+      match_id: result.match_id || id,
+      winner_id: result.winner_id
     });
   } catch (error: any) {
     console.error('❌ Error abandonando partida:', error.message);
