@@ -15,6 +15,8 @@
 
 import { sequelize } from '../../config/database';
 import Match from '../../models/Match';
+import CardInPlay from '../../models/CardInPlay';
+import Card from '../../models/Card';
 import { CardRulesEngine } from '../../engine/CardRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
@@ -51,55 +53,62 @@ export class CardManager {
       }
 
       // 1 TRANSACCIÓN CON LOCK
-      const result = await sequelize.transaction(
+      const result = await sequelize.transaction(async (transaction) => {
+        // 2 LOCK DE FILA
+        await match.reload({ lock: transaction.LOCK.UPDATE, transaction });
 
-        async (transaction) => {
-          // 2 LOCK DE FILA
-          await match.reload({
-            lock: transaction.LOCK.UPDATE,
+        // 3 VALIDAR: carta existe en la mano del jugador (query directo)
+        const cardInPlay = await CardInPlay.findOne({
+          where: { id: cardId, match_id: match.id, player_number: playerNumber, zone: 'hand' },
+          include: [{ model: Card, as: 'card' }],
+          transaction,
+        });
+        if (!cardInPlay) {
+          throw new Error('Carta no encontrada en la mano');
+        }
+
+        // 4 VALIDAR: cosmos suficiente
+        const cosmosField = `player${playerNumber}_cosmos`;
+        const cardCost: number = (cardInPlay as any).card?.cost || 0;
+        const currentCosmos: number = match[cosmosField] || 0;
+        if (currentCosmos < cardCost) {
+          throw new Error(`Cosmos insuficiente. Requiere: ${cardCost}, tienes: ${currentCosmos}`);
+        }
+
+        // 4b VALIDAR: zona no llena (máx 5 para knight/technique)
+        const zonaConLimite = ['field_knight', 'field_technique'];
+        if (zonaConLimite.includes(targetZone)) {
+          const fieldCount = await CardInPlay.count({
+            where: { match_id: match.id, player_number: playerNumber, zone: targetZone },
             transaction,
           });
-
-          // 3 MAPEAR A ESTADO PURO
-          const currentState = MatchStateMapper.fromMatch(match);
-
-          // 4 VALIDAR
-          const validation = CardRulesEngine.validatePlayCard(
-            currentState,
-            playerNumber,
-            cardId,
-            targetZone,
-            position
-          );
-          if (!validation.valid) {
-            throw new Error(validation.error || 'Validación fallida');
+          if (fieldCount >= 5) {
+            throw new Error(`Zona ${targetZone} está llena (máximo 5)`);
           }
-
-          // 5 EJECUTAR
-          const execution = CardRulesEngine.playCard(
-            currentState,
-            playerNumber,
-            cardId,
-            targetZone,
-            position
-          );
-
-          // 6 PERSISTIR
-          await MatchRepository.applyState(match, execution.newState, transaction);
-
-          // 7 REGISTRAR
-          await ProcessedActionsRegistry.register(
-            actionId,
-            match.id,
-            playerNumber,
-            execution.newState,
-            'card_play',
-            transaction
-          );
-
-          return execution.newState;
         }
-      );
+
+        // 5 EJECUTAR: mover carta al campo
+        (cardInPlay as any).zone = targetZone;
+        (cardInPlay as any).position = position;
+        await (cardInPlay as any).save({ transaction });
+
+        // 6 DECREMENTAR cosmos en el modelo Match
+        match[cosmosField] = currentCosmos - cardCost;
+        await match.save({ transaction });
+
+        // 7 REGISTRAR (idempotencia) - usamos estado mapeado del match actualizado
+        const newState = MatchStateMapper.fromMatch(match);
+        await ProcessedActionsRegistry.register(
+          actionId,
+          match.id,
+          playerNumber,
+          newState,
+          'card_play',
+          transaction
+        );
+
+        return newState;
+      });
 
       return { success: true, newState: result };
     } catch (error) {

@@ -21,6 +21,7 @@
 
 import ProcessedAction from '../../models/ProcessedAction';
 import { GameState } from '../../engine/GameState';
+import { validate as isUuid } from 'uuid';
 
 export class ProcessedActionsRegistry {
   /**
@@ -35,6 +36,11 @@ export class ProcessedActionsRegistry {
    * @returns ProcessedAction | null
    */
   static async find(actionId: string): Promise<ProcessedAction | null> {
+    if (!isUuid(actionId)) {
+      console.warn(`[Registry] actionId inválido (no UUID): ${actionId}`);
+      return null; // evita query inválida a Postgres
+    }
+
     try {
       const processed = await ProcessedAction.findOne({
         where: { action_id: actionId },

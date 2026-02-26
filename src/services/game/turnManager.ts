@@ -49,6 +49,7 @@ import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
 import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
 import { GameState } from '../../engine/GameState';
+import { CardDrawService } from './CardDrawService';
 
 export class TurnManager {
   /**
@@ -121,6 +122,10 @@ export class TurnManager {
           // PASO 6: APLICAR CAMBIOS AL MODELO DE BD
           // ====================================================================
           await MatchRepository.applyState(match, execution.newState, transaction);
+
+          // PASO 6b: ROBAR CARTA para el siguiente jugador
+          const nextPlayer = playerNumber === 1 ? 2 : 1;
+          await CardDrawService.drawCard(match.id, nextPlayer, transaction);
 
           // ====================================================================
           // PASO 7: REGISTRAR COMO PROCESADA (idempotencia)

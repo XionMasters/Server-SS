@@ -133,11 +133,11 @@ export class TurnRulesEngine {
     //   });
     // });
 
-    // 6️⃣ (FUTURO) Robar carta
-    // if (nextPlayerObj.deck_count > 0) {
-    //   nextPlayerObj.deck_count -= 1;
-    //   nextPlayerObj.hand.push(/* nueva carta */);
-    // }
+    // 6️⃣ Robar carta: decrementar deck_count en el estado puro
+    // La carta real se mueve en CardInPlay (BD) dentro de TurnManager
+    if (nextPlayerObj.deck_count > 0) {
+      nextPlayerObj.deck_count -= 1;
+    }
 
     // Actualizar timestamp
     newState.updated_at = Date.now();

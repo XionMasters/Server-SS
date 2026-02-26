@@ -2,6 +2,7 @@ import Match from '../../models/Match';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
 import User from '../../models/User';
+import { applyHandVisibility } from '../serializers/handVisibility';
 
 interface BuildOptions {
   perspectivePlayer?: number; // 1 o 2
@@ -87,7 +88,11 @@ export class GameStateBuilder {
 
       perspective_player: perspectivePlayer,
 
-      cards_in_play: cardsData
+      cards_in_play: applyHandVisibility(
+        cardsData,
+        perspectivePlayer,
+        match.player1_id === match.player2_id ? 2 : undefined  // DEBUG TEST: revelar 3ra carta del oponente
+      )
     };
   }
 }

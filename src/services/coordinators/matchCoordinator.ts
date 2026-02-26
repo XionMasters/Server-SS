@@ -143,8 +143,14 @@ export class MatchCoordinator {
   /**
    * HELPER: Obtiene número de jugador
    * (búsqueda simple, NO es validación compleja)
+   * 
+   * Caso especial TEST: player1_id === player2_id → usar current_player
    */
   private static _getPlayerNumber(match: Match, userId: string): 1 | 2 | null {
+    const isTestMatch = match.player1_id === match.player2_id;
+    if (isTestMatch && match.player1_id === userId) {
+      return match.current_player as 1 | 2;
+    }
     if (match.player1_id === userId) return 1;
     if (match.player2_id === userId) return 2;
     return null;

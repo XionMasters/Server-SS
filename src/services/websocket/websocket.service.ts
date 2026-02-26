@@ -49,6 +49,12 @@ router.registerMany({
   request_test_match: async (ws) => {
     await handleRequestTestMatch(ws as AuthenticatedWebSocket);
   },
+  resume_test_match: async (ws) => {
+    await handleResumeTestMatch(ws as AuthenticatedWebSocket);
+  },
+  abandon_test_match: async (ws, data) => {
+    await handleAbandonTestMatch(ws as AuthenticatedWebSocket, data as { match_id: string });
+  },
   search_match: async (ws) => {
     await handleSearchMatch(ws as AuthenticatedWebSocket);
   },
@@ -499,7 +505,7 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
 
     // Enviar match_found event al cliente con el estado construido
     console.log(`📡 Enviando match_found a ${ws.username}...`);
-    presenceService.sendToSocket(ws, 'match_found', result.game_state);
+    presenceService.sendToSocket(ws, 'match_found', result);
     console.log(`✅ match_found enviada a ${ws.username}`);
 
   } catch (error: any) {
@@ -512,7 +518,7 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
     if (error.message.includes('mazo activo')) {
       errorCode = 'NO_ACTIVE_DECK';
       errorMessage = error.message;
-    } else if (error.message.includes('partida activa')) {
+    } else if (error.message.includes('activa en curso') || error.message.includes('partida activa') || error.message.includes('ALREADY_IN_MATCH')) {
       errorCode = 'ALREADY_IN_MATCH';
       errorMessage = error.message;
     } else if (error.message.includes('esperando')) {
@@ -524,6 +530,52 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       code: errorCode,
       message: errorMessage,
       error: error.message 
+    });
+  }
+}
+
+/**
+ * Reanudar partida TEST activa
+ */
+async function handleResumeTestMatch(ws: AuthenticatedWebSocket) {
+  try {
+    console.log(`♻️ ${ws.username} solicita reanudar partida TEST`);
+    const { StartMatchService } = await import('../match/startMatch.service');
+    const result = await StartMatchService.resumeTestMatch(ws.userId!);
+
+    presenceService.sendToSocket(ws, 'match_found', result);
+    console.log(`✅ match_found (resume) enviada a ${ws.username}`);
+  } catch (error: any) {
+    console.error('❌ Error en handleResumeTestMatch:', error);
+    presenceService.sendToSocket(ws, 'match_error', {
+      code: 'RESUME_ERROR',
+      message: error.message || 'Error reanudando partida TEST',
+      error: error.message
+    });
+  }
+}
+
+/**
+ * Abandonar partida TEST activa y crear una nueva
+ */
+async function handleAbandonTestMatch(ws: AuthenticatedWebSocket, data: { match_id: string }) {
+  try {
+    console.log(`🗑️ ${ws.username} abandonando partida TEST: ${data.match_id}`);
+    const result = await MatchesCoordinator.abandonMatch(data.match_id, ws.userId!);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Error abandonando partida');
+    }
+
+    console.log(`✅ Partida abandonada, creando nueva TEST...`);
+    // Crear nueva partida TEST inmediatamente
+    await handleRequestTestMatch(ws);
+  } catch (error: any) {
+    console.error('❌ Error en handleAbandonTestMatch:', error);
+    presenceService.sendToSocket(ws, 'match_error', {
+      code: 'ABANDON_ERROR',
+      message: error.message || 'Error abandonando partida TEST',
+      error: error.message
     });
   }
 }

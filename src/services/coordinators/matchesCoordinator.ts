@@ -18,6 +18,7 @@
 
 // import { GameStateBuilder } from './GameStateBuilder'; // TODO: Not implemented yet
 import { StartMatchService } from '../match/startMatch.service';
+import { applyHandVisibility } from '../serializers/handVisibility';
 import { SearchMatchService } from '../match/searchMatch.service';
 import { AbandonMatchService } from '../match/abandonMatch.service';
 import { MatchStateService } from '../match/matchState.service';
@@ -78,6 +79,70 @@ export class MatchesCoordinator {
     };
   }
 
+  private async _buildMatchUpdateResult(actionResult: any, matchId: string, userId: string) {
+    if (!actionResult?.success) {
+      return this.normalizeEvents(actionResult, userId);
+    }
+
+    // Construir estado actualizado desde BD para broadcast a ambos jugadores
+    const stateResult = await MatchStateService.buildBroadcastMatchState(matchId);
+
+    if (!stateResult.success || !stateResult.data) {
+      console.warn('[MatchesCoordinator] No se pudo construir match_update:', stateResult.error);
+      return { success: true };
+    }
+
+    const matchData = stateResult.data;
+    const player1Id = matchData.player1?.id || matchData.player1_id;
+    const player2Id = matchData.player2?.id || matchData.player2_id;
+    const isTestMatch = player1Id && player1Id === player2Id;
+
+    if (isTestMatch) {
+      // En TEST: el jugador activo ve su mano; el inactivo ve dorsos
+      const activePlayer: number = matchData.current_player || 1;
+
+      const testMatchData = {
+        ...matchData,
+        perspective_player: activePlayer,
+        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer, 2)  // DEBUG: revelar 3ra carta del oponente
+      };
+
+      return {
+        success: true,
+        events: [
+          {
+            type: 'match_update',
+            payload: testMatchData,
+            recipients: { type: 'users', userIds: [player1Id] }
+          }
+        ]
+      };
+    }
+
+    // PvP normal: cada jugador ve su propia mano, la del rival como dorsos
+    const forPlayer = (playerNumber: number) => ({
+      ...matchData,
+      perspective_player: playerNumber,
+      cards_in_play: applyHandVisibility(matchData.cards_in_play || [], playerNumber)
+    });
+
+    return {
+      success: true,
+      events: [
+        {
+          type: 'match_update',
+          payload: forPlayer(1),
+          recipients: { type: 'users', userIds: [player1Id].filter(Boolean) }
+        },
+        {
+          type: 'match_update',
+          payload: forPlayer(2),
+          recipients: { type: 'users', userIds: [player2Id].filter(Boolean) }
+        }
+      ]
+    };
+  }
+
   async handleAction(input: { userId: string; action: any }): Promise<any> {
     const userId = input.userId;
     const action = input.action || {};
@@ -101,7 +166,7 @@ export class MatchesCoordinator {
         }
 
         const result = await MatchCoordinator.endTurn(matchId, userId, actionId);
-        return this.normalizeEvents(result, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId);
       }
 
       case 'PLAY_CARD': {
@@ -117,7 +182,7 @@ export class MatchesCoordinator {
           action.position,
           actionId
         );
-        return this.normalizeEvents(result, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId);
       }
 
       case 'ATTACK': {
@@ -132,7 +197,7 @@ export class MatchesCoordinator {
           action.defenderCardId || action.defender_card_id || action.defender_id,
           actionId
         );
-        return this.normalizeEvents(result, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId);
       }
 
       case 'CHANGE_DEFENSIVE_MODE': {
@@ -147,7 +212,7 @@ export class MatchesCoordinator {
           action.mode,
           actionId
         );
-        return this.normalizeEvents(result, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId);
       }
 
       case 'START_FIRST_TURN': {

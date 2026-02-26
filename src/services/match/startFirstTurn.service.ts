@@ -1,5 +1,6 @@
 import Match from '../../models/Match';
 import { MatchStateService } from './matchState.service';
+import { applyHandVisibility } from '../serializers/handVisibility';
 
 export class StartFirstTurnService {
   static async execute(matchId: string, userId: string): Promise<any> {
@@ -54,16 +55,47 @@ export class StartFirstTurnService {
         };
       }
 
+      const matchData = matchStateResult.data;
+      const isTestMatch = match.player1_id === match.player2_id;
+
+      if (isTestMatch) {
+        // TEST: player1 arranca con turno → ve su mano, player2 ve dorsos
+        const payload = {
+          ...matchData,
+          perspective_player: 1,
+          cards_in_play: applyHandVisibility(matchData.cards_in_play || [], 1, 2)  // DEBUG: revelar 3ra carta del oponente
+        };
+        return {
+          success: true,
+          events: [
+            {
+              type: 'turn_changed',
+              payload,
+              recipients: { type: 'users', userIds: [match.player1_id].filter(Boolean) }
+            }
+          ]
+        };
+      }
+
+      // PvP: cada jugador ve su propia mano, la del rival como dorsos
+      const forPlayer = (playerNumber: number) => ({
+        ...matchData,
+        perspective_player: playerNumber,
+        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], playerNumber)
+      });
+
       return {
         success: true,
         events: [
           {
             type: 'turn_changed',
-            payload: matchStateResult.data,
-            recipients: {
-              type: 'users',
-              userIds: [match.player1_id, match.player2_id].filter(Boolean)
-            }
+            payload: forPlayer(1),
+            recipients: { type: 'users', userIds: [match.player1_id].filter(Boolean) }
+          },
+          {
+            type: 'turn_changed',
+            payload: forPlayer(2),
+            recipients: { type: 'users', userIds: [match.player2_id].filter(Boolean) }
           }
         ]
       };

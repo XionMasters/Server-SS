@@ -180,7 +180,7 @@ export class StartMatchService {
       const deck2 = await this._getAndValidateActiveDeck(userId2);
 
       // 5️⃣ Crear partida TEST
-      const match = await this._createNewMatchState(userId1, userId2, deck1.deck, deck2.deck);
+      const match = await this._createNewMatchState(userId1, userId2, deck1.deck, deck2.deck, mode === 'TEST');
 
       // 6️⃣ Inicializar cartas usando MatchSetupService
       const initialHandSize = mode === 'TEST' ? 5 : BASE_MATCH_RULES.initial_hand_size;
@@ -272,7 +272,7 @@ export class StartMatchService {
   /**
    * Crea el registro de Match en BD
    */
-  private static async _createNewMatchState(userId1: string, userId2: string, deck1: any, deck2: any): Promise<any> {
+  private static async _createNewMatchState(userId1: string, userId2: string, deck1: any, deck2: any, isTest: boolean): Promise<any> {
     const newMatch = await Match.create({
       player1_id: userId1,
       player2_id: userId2,
@@ -281,7 +281,7 @@ export class StartMatchService {
       phase: 'starting',
       current_turn: 1,
       //Random para definir que jugador inicia primero
-      current_player: Math.random() < 0.5 ? 1 : 2,
+      current_player: isTest ? 1 : Math.random() < 0.5 ? 1 : 2,
       player1_life: BASE_MATCH_RULES.initial_life,
       player2_life: BASE_MATCH_RULES.initial_life,
       player1_cosmos: BASE_MATCH_RULES.initial_cosmos,
@@ -318,8 +318,10 @@ export class StartMatchService {
       }
 
       // 2️⃣ Construir estado desde la BD
+      // Usar la perspectiva del jugador activo (quien tiene el turno)
+      const perspectivePlayer = activeMatch.phase === 'player2_turn' ? 2 : 1;
       const gameState = await GameStateBuilder.buildFromMatch(activeMatch, {
-        perspectivePlayer: 1 // en TEST el cliente siempre es player 1
+        perspectivePlayer
       });
 
       console.log(`✅ TestMatch reanudada exitosamente: ${activeMatch.id}`);
