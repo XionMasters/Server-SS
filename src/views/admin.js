@@ -132,10 +132,10 @@ function updateUserList(elementId, users, searching = false) {
                     <div class="user-id">${user.id}</div>
                 </div>
                 <div class="user-actions">
-                    <button class="btn-disconnect" onclick="disconnectUser('${user.id}', '${user.username}')" title="Desconectar">
+                    <button class="btn-disconnect" data-action="disconnect" data-user-id="${user.id}" data-username="${user.username}" title="Desconectar">
                         🔌
                     </button>
-                    <button class="btn-block" onclick="blockUser('${user.id}', '${user.username}')" title="Bloquear">
+                    <button class="btn-block" data-action="block" data-user-id="${user.id}" data-username="${user.username}" title="Bloquear">
                         🚫
                     </button>
                 </div>
@@ -161,7 +161,7 @@ function updateMatchList(matches) {
         const player2Name = match.player2_username || '(vacío)';
 
         return `
-            <li class="match-item ${isWaiting ? 'waiting' : ''}" onclick="inspectMatch('${match.id}')" id="match-item-${match.id}">
+            <li class="match-item ${isWaiting ? 'waiting' : ''}" data-match-id="${match.id}" id="match-item-${match.id}">
                 <div class="match-header">
                     <div>
                         <div class="match-info">
@@ -190,6 +190,28 @@ window.onload = () => {
     document.getElementById('loginButton').addEventListener('click', login);
     document.getElementById('passwordInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') login();
+    });
+
+    // Refresh inspector
+    document.getElementById('refreshInspector').addEventListener('click', () => {
+        if (currentInspectMatchId) inspectMatch(currentInspectMatchId);
+    });
+
+    // Event delegation: click en partida de la lista
+    document.getElementById('matchList').addEventListener('click', (e) => {
+        const li = e.target.closest('[data-match-id]');
+        if (li) inspectMatch(li.dataset.matchId);
+    });
+
+    // Event delegation: botones disconnect/block en listas de usuarios
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const userId = btn.dataset.userId;
+        const username = btn.dataset.username;
+        if (action === 'disconnect') disconnectUser(userId, username);
+        if (action === 'block') blockUser(userId, username);
     });
 };
 
