@@ -285,6 +285,167 @@
             justify-content: space-between;
             align-items: center;
         }
+
+        /* ===== MATCH INSPECTOR ===== */
+        .match-item {
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .match-item:hover {
+            background: #e0e7ff;
+        }
+        .match-item.selected {
+            border-left-color: #7c3aed;
+            background: #ede9fe;
+        }
+        .inspector-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .inspector-panel h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .inspector-meta {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .inspector-meta-item {
+            text-align: center;
+        }
+        .inspector-meta-item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            font-weight: bold;
+        }
+        .inspector-meta-item .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #374151;
+        }
+        .inspector-meta-item .value.cosmos { color: #2563eb; }
+        .inspector-meta-item .value.life   { color: #dc2626; }
+        .inspector-meta-item .value.turn   { color: #7c3aed; }
+        .players-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 18px;
+        }
+        .player-box {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 14px;
+        }
+        .player-box.active-player {
+            border-color: #7c3aed;
+            background: #faf5ff;
+        }
+        .player-box h3 {
+            font-size: 15px;
+            color: #374151;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .player-box h3 .turn-badge {
+            background: #7c3aed;
+            color: white;
+            font-size: 11px;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+        .player-stats {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+        .stat-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .stat-chip .num { font-size: 22px; font-weight: bold; }
+        .stat-chip .lbl { font-size: 10px; color: #9ca3af; text-transform: uppercase; }
+        .stat-chip.life  .num { color: #dc2626; }
+        .stat-chip.cosmos .num { color: #2563eb; }
+        .stat-chip.deck   .num { color: #059669; }
+        .zones-section h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin: 10px 0 6px;
+            font-weight: bold;
+        }
+        .zone-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 28px;
+        }
+        .card-chip {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            padding: 4px 8px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            max-width: 120px;
+        }
+        .card-chip .cname {
+            font-weight: bold;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 11px;
+        }
+        .card-chip .cmeta {
+            font-size: 10px;
+            color: #6b7280;
+        }
+        .card-chip.rarity-rare       { border-left: 3px solid #3b82f6; }
+        .card-chip.rarity-epic       { border-left: 3px solid #8b5cf6; }
+        .card-chip.rarity-legendary  { border-left: 3px solid #f59e0b; }
+        .card-chip.rarity-divine     { border-left: 3px solid #ec4899; }
+        .card-chip.mode-defense      { background: #dbeafe; }
+        .card-chip.mode-evasion      { background: #d1fae5; }
+        .zone-empty {
+            font-size: 11px;
+            color: #d1d5db;
+            font-style: italic;
+            padding: 3px 0;
+        }
+        .btn-refresh {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn-refresh:hover { background: #5568d3; }
+        .inspector-placeholder {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -334,6 +495,17 @@
                 <h2>🎮 Partidas Activas</h2>
                 <div class="stat-number" id="matchesCount">0</div>
                 <ul class="match-list" id="matchList"></ul>
+            </div>
+        </div>
+
+        <!-- Match Inspector -->
+        <div class="inspector-panel">
+            <h2>
+                🔍 Match Inspector
+                <button class="btn-refresh" id="refreshInspector" onclick="refreshInspector()" style="display:none">↻ Actualizar</button>
+            </h2>
+            <div id="inspectorContent">
+                <div class="inspector-placeholder">← Hacé click en una partida para inspeccionar su estado</div>
             </div>
         </div>
     </div>

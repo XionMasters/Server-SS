@@ -1,5 +1,6 @@
 let ws = null;
 const API_URL = window.location.origin;
+let currentInspectMatchId = null;
 
 // ==================== LOGIN ====================
 async function login() {
@@ -160,14 +161,14 @@ function updateMatchList(matches) {
         const player2Name = match.player2_username || '(vacío)';
 
         return `
-            <li class="match-item ${isWaiting ? 'waiting' : ''}">
+            <li class="match-item ${isWaiting ? 'waiting' : ''}" onclick="inspectMatch('${match.id}')" id="match-item-${match.id}">
                 <div class="match-header">
                     <div>
                         <div class="match-info">
                             <strong>${player1Name}</strong>
                             ${!isWaiting ? ` vs <strong>${player2Name}</strong>` : ` (esperando oponente)`}
                         </div>
-                        <div class="timestamp">${new Date(match.created_at).toLocaleString()}</div>
+                        <div class="timestamp">Turno ${match.current_turn} &bull; ${new Date(match.created_at).toLocaleString()}</div>
                     </div>
                     <span class="badge ${badge}">${badgeText}</span>
                 </div>
@@ -191,6 +192,113 @@ window.onload = () => {
         if (e.key === 'Enter') login();
     });
 };
+
+// ==================== MATCH INSPECTOR ====================
+async function inspectMatch(matchId) {
+    const token = sessionStorage.getItem('adminToken');
+    if (!token) return;
+
+    // Marcar item seleccionado
+    document.querySelectorAll('.match-item').forEach(el => el.classList.remove('selected'));
+    const item = document.getElementById(`match-item-${matchId}`);
+    if (item) item.classList.add('selected');
+
+    currentInspectMatchId = matchId;
+    document.getElementById('refreshInspector').style.display = 'inline-block';
+    document.getElementById('inspectorContent').innerHTML = '<div class="inspector-placeholder">⏳ Cargando...</div>';
+
+    try {
+        const res = await fetch(`${API_URL}/api/admin/matches/${matchId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        renderInspector(data);
+    } catch (err) {
+        document.getElementById('inspectorContent').innerHTML =
+            `<div class="inspector-placeholder">❌ Error: ${err.message}</div>`;
+    }
+}
+
+function refreshInspector() {
+    if (currentInspectMatchId) inspectMatch(currentInspectMatchId);
+}
+
+function renderInspector(d) {
+    const phaseLabel = {
+        player1_turn: '🎯 Turno J1', player2_turn: '🎯 Turno J2',
+        starting: '🚀 Iniciando', waiting: '⏳ Esperando', finished: '🏁 Terminada'
+    }[d.phase] || d.phase;
+
+    const renderZone = (cards, zoneName) => {
+        if (!cards || cards.length === 0) return `<span class="zone-empty">vacío</span>`;
+        return cards.map(c => {
+            const modeCls = c.mode !== 'normal' ? `mode-${c.mode}` : '';
+            const rarCls = `rarity-${c.rarity}`;
+            const modeIcon = c.mode === 'defense' ? '🛡️' : c.mode === 'evasion' ? '💨' : '';
+            const stats = c.knight ? `CE:${c.knight.ce} AR:${c.knight.ar} HP:${c.knight.hp}` : `cost:${c.cost}`;
+            const posLabel = (zoneName === 'field_knight' || zoneName === 'field_support') ? ` [${c.position}]` : '';
+            return `<div class="card-chip ${rarCls} ${modeCls}" title="${c.instance_id}">
+                <span class="cname">${modeIcon}${c.name}${posLabel}</span>
+                <span class="cmeta">${c.type} · ${stats}</span>
+            </div>`;
+        }).join('');
+    };
+
+    const renderPlayer = (p, zones, isActive) => {
+        const zoneDefs = [
+            { key: 'hand',         label: '🤚 Mano' },
+            { key: 'field_knight', label: '⚔️ Campo (Caballeros)' },
+            { key: 'field_support',label: '✨ Campo (Técnicas/Soporte)' },
+            { key: 'field_helper', label: '🧑‍🤝‍🧑 Helper' },
+            { key: 'yomotsu',      label: '💀 Yomotsu' },
+            { key: 'cositos',      label: '🔮 Cositos' },
+        ];
+        return `
+            <div class="player-box ${isActive ? 'active-player' : ''}">
+                <h3>
+                    👤 ${p.username}
+                    ${isActive ? '<span class="turn-badge">SU TURNO</span>' : ''}
+                </h3>
+                <div class="player-stats">
+                    <div class="stat-chip life"><span class="num">${p.life}</span><span class="lbl">Vida</span></div>
+                    <div class="stat-chip cosmos"><span class="num">${p.cosmos}</span><span class="lbl">Cosmos</span></div>
+                    <div class="stat-chip deck"><span class="num">${p.deck_remaining}</span><span class="lbl">Mazo</span></div>
+                </div>
+                <div class="zones-section">
+                    ${zoneDefs.map(z => `
+                        <h4>${z.label} (${(zones[z.key] || []).length})</h4>
+                        <div class="zone-row">${renderZone(zones[z.key], z.key)}</div>
+                    `).join('')}
+                </div>
+            </div>`;
+    };
+
+    document.getElementById('inspectorContent').innerHTML = `
+        <div class="inspector-meta">
+            <div class="inspector-meta-item">
+                <div class="label">Turno</div>
+                <div class="value turn">${d.current_turn}</div>
+            </div>
+            <div class="inspector-meta-item">
+                <div class="label">Fase</div>
+                <div class="value">${phaseLabel}</div>
+            </div>
+            <div class="inspector-meta-item">
+                <div class="label">ID</div>
+                <div class="value" style="font-size:11px;font-family:monospace;color:#6b7280">${d.id}</div>
+            </div>
+            <div class="inspector-meta-item">
+                <div class="label">Creada</div>
+                <div class="value" style="font-size:13px">${new Date(d.created_at).toLocaleString()}</div>
+            </div>
+        </div>
+        <div class="players-row">
+            ${renderPlayer(d.player1, d.zones.player1, d.current_player === 1)}
+            ${renderPlayer(d.player2, d.zones.player2, d.current_player === 2)}
+        </div>
+    `;
+}
 
 // ==================== ADMIN ACTIONS ====================
 function disconnectUser(userId, username) {
