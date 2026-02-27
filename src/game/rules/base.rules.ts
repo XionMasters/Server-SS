@@ -19,6 +19,6 @@ export const BASE_MATCH_RULES: MatchRules = {
     draw_per_turn: 1,
 
     // Por ahora fijo, pero deja la puerta abierta a escalado
-    cosmos_per_turn: 1
+    cosmos_per_turn: 3
   }
 };

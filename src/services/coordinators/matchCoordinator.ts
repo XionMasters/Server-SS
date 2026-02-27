@@ -21,6 +21,7 @@ import  Match  from '../../models/Match';
 import { TurnManager } from '../game/turnManager';
 import { CardManager } from '../game/cardManager';
 import { AttackManager } from '../game/attackManager';
+import { KnightManager } from '../game/knightManager';
 
 export class MatchCoordinator {
 
@@ -138,6 +139,69 @@ export class MatchCoordinator {
     }
 
       return await AttackManager.changeDefensiveMode(match, playerNumber, cardId, mode, actionId);
+  }
+
+  /**
+   * Cargar Cosmo: otorga cosmos_per_turn CP al jugador activo.
+   * DELEGA: KnightManager
+   */
+  static async chargeKnightCosmos(
+    matchId: string,
+    userId: string,
+    actionId: string
+  ) {
+    const match = await Match.findByPk(matchId);
+    if (!match) return { success: false, error: 'Match no encontrado' };
+
+    const playerNumber = this._getPlayerNumber(match, userId);
+    if (!playerNumber) return { success: false, error: 'No eres jugador de este match' };
+
+    if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
+
+    return await KnightManager.chargeKnightCosmos(match, playerNumber, actionId);
+  }
+
+  /**
+   * Sacrificar Caballero: -1 vida y mueve la carta al yomotsu.
+   * DELEGA: KnightManager
+   */
+  static async sacrificeKnight(
+    matchId: string,
+    userId: string,
+    cardInPlayId: string,
+    actionId: string
+  ) {
+    const match = await Match.findByPk(matchId);
+    if (!match) return { success: false, error: 'Match no encontrado' };
+
+    const playerNumber = this._getPlayerNumber(match, userId);
+    if (!playerNumber) return { success: false, error: 'No eres jugador de este match' };
+
+    if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
+
+    return await KnightManager.sacrificeKnight(match, playerNumber, cardInPlayId, actionId);
+  }
+
+  /**
+   * Mover Caballero: cambia de posición en el campo (0–4).
+   * DELEGA: KnightManager
+   */
+  static async moveKnight(
+    matchId: string,
+    userId: string,
+    cardInPlayId: string,
+    targetPosition: number,
+    actionId: string
+  ) {
+    const match = await Match.findByPk(matchId);
+    if (!match) return { success: false, error: 'Match no encontrado' };
+
+    const playerNumber = this._getPlayerNumber(match, userId);
+    if (!playerNumber) return { success: false, error: 'No eres jugador de este match' };
+
+    if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
+
+    return await KnightManager.moveKnight(match, playerNumber, cardInPlayId, targetPosition, actionId);
   }
 
   /**

@@ -2,6 +2,12 @@ let ws = null;
 const API_URL = window.location.origin;
 let currentInspectMatchId = null;
 
+function fmtDate(val) {
+    if (!val) return 'N/D';
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? 'N/D' : d.toLocaleString();
+}
+
 // ==================== LOGIN ====================
 async function login() {
     const password = document.getElementById('passwordInput').value;
@@ -168,7 +174,7 @@ function updateMatchList(matches) {
                             <strong>${player1Name}</strong>
                             ${!isWaiting ? ` vs <strong>${player2Name}</strong>` : ` (esperando oponente)`}
                         </div>
-                        <div class="timestamp">Turno ${match.current_turn} &bull; ${new Date(match.created_at).toLocaleString()}</div>
+                        <div class="timestamp">Turno ${match.current_turn} &bull; ${fmtDate(match.created_at)}</div>
                     </div>
                     <span class="badge ${badge}">${badgeText}</span>
                 </div>
@@ -312,7 +318,7 @@ function renderInspector(d) {
             </div>
             <div class="inspector-meta-item">
                 <div class="label">Creada</div>
-                <div class="value" style="font-size:13px">${new Date(d.created_at).toLocaleString()}</div>
+                <div class="value" style="font-size:13px">${fmtDate(d.created_at)}</div>
             </div>
         </div>
         <div class="players-row">

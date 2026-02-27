@@ -194,7 +194,7 @@ export class MatchesCoordinator {
           matchId,
           userId,
           action.attackerCardId || action.attacker_card_id || action.attacker_id,
-          action.defenderCardId || action.defender_card_id || action.defender_id,
+          (action.defenderCardId || action.defender_card_id || action.defender_id) || null,
           actionId
         );
         return this._buildMatchUpdateResult(result, matchId, userId);
@@ -210,6 +210,49 @@ export class MatchesCoordinator {
           userId,
           action.cardId || action.card_id || action.knight_id,
           action.mode,
+          actionId
+        );
+        return this._buildMatchUpdateResult(result, matchId, userId);
+      }
+
+      case 'CHARGE_COSMOS': {
+        if (!actionId) {
+          return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
+        }
+
+        const result = await MatchCoordinator.chargeKnightCosmos(matchId, userId, actionId);
+        return this._buildMatchUpdateResult(result, matchId, userId);
+      }
+
+      case 'SACRIFICE_KNIGHT': {
+        if (!actionId) {
+          return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
+        }
+
+        const result = await MatchCoordinator.sacrificeKnight(
+          matchId,
+          userId,
+          action.cardId || action.card_id || action.card_in_play_id,
+          actionId
+        );
+        return this._buildMatchUpdateResult(result, matchId, userId);
+      }
+
+      case 'MOVE_KNIGHT': {
+        if (!actionId) {
+          return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
+        }
+
+        const targetPosition = action.targetPosition ?? action.target_position ?? action.position;
+        if (typeof targetPosition !== 'number') {
+          return { success: false, code: 'TARGET_POSITION_REQUIRED', error: 'targetPosition es requerido (0–4)' };
+        }
+
+        const result = await MatchCoordinator.moveKnight(
+          matchId,
+          userId,
+          action.cardId || action.card_id || action.card_in_play_id,
+          targetPosition,
           actionId
         );
         return this._buildMatchUpdateResult(result, matchId, userId);

@@ -18,17 +18,7 @@
  */
 
 import { GameState } from './GameState';
-
-// Import de configuración centralizada
-// Si no existe todavía, pon valores por defecto
-const BASE_MATCH_RULES = {
-  turn: {
-    cosmos_per_turn: 3,
-  },
-  initial_life: 12,
-  initial_cosmos: 0,
-  initial_deck_size: 40,
-};
+import { BASE_MATCH_RULES } from '../game/rules/base.rules';
 
 export class TurnRulesEngine {
   /**
@@ -118,20 +108,22 @@ export class TurnRulesEngine {
     }
 
     // 4️⃣ Otorgar cosmos al siguiente jugador
-    const cosmosIncrease = BASE_MATCH_RULES.turn.cosmos_per_turn || 3;
+    const cosmosPerTurn = BASE_MATCH_RULES.turn.cosmos_per_turn;
+    const cosmosIncrease = typeof cosmosPerTurn === 'function' ? cosmosPerTurn(newState.current_turn) : cosmosPerTurn;
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
     nextPlayerObj.cosmos += cosmosIncrease;
 
-    // 5️⃣ (FUTURO) Resetear flags de ataque del siguiente jugador
-    // const fieldsToReset = [
-    //   nextPlayerObj.field_knights,
-    //   nextPlayerObj.field_techniques,
-    // ];
-    // fieldsToReset.forEach(field => {
-    //   field?.forEach(card => {
-    //     card.attacked_this_turn = false;
-    //   });
-    // });
+    // 5️⃣ Resetear flags de exhaust del siguiente jugador (puede volver a atacar)
+    const fieldsToReset = [
+      nextPlayerObj.field_knights,
+      nextPlayerObj.field_techniques,
+    ];
+    fieldsToReset.forEach(field => {
+      field?.forEach(card => {
+        card.is_exhausted = false;
+        card.attacked_this_turn = false;
+      });
+    });
 
     // 6️⃣ Robar carta: decrementar deck_count en el estado puro
     // La carta real se mueve en CardInPlay (BD) dentro de TurnManager

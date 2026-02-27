@@ -84,7 +84,7 @@ router.get('/matches', requireAdmin, async (req: Request, res: Response) => {
       player2_life: m.player2_life,
       player1_cosmos: m.player1_cosmos,
       player2_cosmos: m.player2_cosmos,
-      created_at: m.created_at,
+      created_at: (m as any).createdAt ?? (m as any).created_at ?? null,
     })));
   } catch (err) {
     console.error('[Admin] Error listing matches:', err);
@@ -158,7 +158,7 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
       phase: match.phase,
       current_turn: match.current_turn,
       current_player: match.current_player,
-      created_at: match.created_at,
+      created_at: (match as any).createdAt ?? (match as any).created_at ?? null,
       player1: {
         id: match.player1_id,
         username: match.player1?.username || '?',

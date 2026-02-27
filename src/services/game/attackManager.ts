@@ -11,6 +11,12 @@ import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
 import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
 import { GameState } from '../../engine/GameState';
+import CardInPlay from '../../models/CardInPlay';
+
+/** Include para cargar cartas de campo junto con el match */
+const CARDS_IN_PLAY_INCLUDE = [
+  { model: CardInPlay, as: 'cards_in_play' }
+];
 
 export class AttackManager {
   /**
@@ -20,12 +26,13 @@ export class AttackManager {
     match: any,
     playerNumber: 1 | 2,
     attackerCardId: string,
-    defenderCardId: string,
+    defenderCardId: string | null,
     actionId: string
   ): Promise<{
     success: boolean;
     newState: GameState | null;
     damage: number;
+    evaded: boolean;
     error?: string;
     isRetry?: boolean;
   }> {
@@ -38,6 +45,7 @@ export class AttackManager {
           success: true,
           newState: cached.cached_result,
           damage: (cached as any).damage || 0,
+          evaded: (cached as any).evaded || false,
           isRetry: true,
         };
       }
@@ -49,6 +57,7 @@ export class AttackManager {
           await match.reload({
             lock: transaction.LOCK.UPDATE,
             transaction,
+            include: CARDS_IN_PLAY_INCLUDE,
           });
 
           // 3️⃣ MAPEAR A ESTADO PURO
@@ -87,7 +96,7 @@ export class AttackManager {
             transaction
           );
 
-          return { newState: execution.newState, damage: execution.damage };
+        return { newState: execution.newState, damage: execution.damage, evaded: execution.evaded };
         }
       );
 
@@ -95,6 +104,7 @@ export class AttackManager {
         success: true,
         newState: result.newState,
         damage: result.damage,
+        evaded: result.evaded,
       };
     } catch (error) {
       console.error('[AttackManager] Error en attack:', error);
@@ -102,6 +112,7 @@ export class AttackManager {
         success: false,
         newState: null,
         damage: 0,
+        evaded: false,
         error: error instanceof Error ? error.message : 'Error desconocido',
       };
     }
@@ -141,6 +152,7 @@ export class AttackManager {
           await match.reload({
             lock: transaction.LOCK.UPDATE,
             transaction,
+            include: CARDS_IN_PLAY_INCLUDE,
           });
 
           // 3️⃣ MAPEAR

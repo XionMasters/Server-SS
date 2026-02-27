@@ -19,10 +19,10 @@
  */
 
 import { GameState, Player, CardInGameState, createEmptyGameState } from '../../engine/GameState';
+import CardInPlay from '../../models/CardInPlay';
 
 // Asume que existen estos modelos
 type Match = any;
-type CardInPlay = any;
 
 export class MatchStateMapper {
   /**
@@ -86,6 +86,23 @@ export class MatchStateMapper {
     state.created_at = match.createdAt?.getTime() || Date.now();
     state.updated_at = match.updatedAt?.getTime() || Date.now();
 
+    // Ganador
+    state.winner_id = match.winner_id ?? null;
+
+    // Cartas en juego (si el match fue cargado con include: cards_in_play)
+    const cards: any[] = match.cards_in_play ?? match.cardsInPlay ?? [];
+    for (const card of cards) {
+      const cardState = this._mapCardToState(card);
+      const targetPlayer = card.player_number === 1 ? state.player1 : state.player2;
+
+      switch (card.zone) {
+        case 'hand':         targetPlayer.hand.push(cardState); break;
+        case 'field_knight': targetPlayer.field_knights.push(cardState); break;
+        case 'field_support':targetPlayer.field_techniques.push(cardState); break;
+        case 'field_helper': targetPlayer.field_helper = cardState; break;
+      }
+    }
+
     return state;
   }
 
@@ -108,6 +125,8 @@ export class MatchStateMapper {
       current_turn: state.current_turn,
       current_player: state.current_player,
       phase: state.phase,
+      winner_id: state.winner_id ?? null,
+      finished_at: state.phase === 'game_over' ? new Date() : undefined,
       updated_at: new Date(),
     };
   }
@@ -115,7 +134,7 @@ export class MatchStateMapper {
   /**
    * (FUTURO) Convierte CardInPlay (BD) → CardInGameState (estado puro)
    */
-  private static _mapCardToState(card: CardInPlay): CardInGameState {
+  private static _mapCardToState(card: any): CardInGameState {
     return {
       instance_id: card.id,
       card_id: card.card_id,
@@ -123,11 +142,14 @@ export class MatchStateMapper {
       player_number: card.player_number as 1 | 2,
       zone: card.zone,
       position: card.position,
-      mode: card.mode,
-      is_exhausted: card.is_exhausted,
-      attacked_this_turn: card.attacked_this_turn || false,
-      status_effects: card.status_effects || [],
-      buffs: card.buffs || {},
+      mode: (card.is_defensive_mode as any) || 'normal',
+      is_exhausted: card.has_attacked_this_turn ?? false,
+      attacked_this_turn: card.has_attacked_this_turn ?? false,
+      status_effects: (() => { try { return JSON.parse(card.status_effects || '[]'); } catch { return []; } })(),
+      buffs: {},
+      ce: card.current_attack ?? 0,
+      ar: card.current_defense ?? 0,
+      current_health: card.current_health ?? 0,
     };
   }
 }

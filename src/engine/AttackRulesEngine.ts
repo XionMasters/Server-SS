@@ -1,39 +1,34 @@
 /**
  * AttackRulesEngine.ts
- * 
+ *
  * Lógica pura para el sistema de combate.
- * 
+ *
  * Responsabilidades:
- * ✅ Validar ataque (atacante existe, defensor existe)
+ * ✅ Validar ataque (atacante existe, defensor existe o es daño directo)
  * ✅ Calcular daño (según modos defensivos)
- * ✅ Aplicar efectos de ataque
+ * ✅ Aplicar daño al jugador defensor
+ * ✅ Detectar ganador (life <= 0)
  * ✅ Ejecutar cambios sin mutación (immutable)
- * 
+ *
  * Patrón:
- * - validateAttack(state, attacker, defender) → {valid, error?}
- * - attack(state, attacker, defender) → {newState, damage}
- * 
+ * - validateAttack(state, attacker, defender|null) → {valid, error?}
+ * - attack(state, attacker, defender|null)         → {newState, damage, evaded}
+ *
  * 100% puro: sin await, sin BD, sin side effects
  */
 
-import { GameState, CardInGameState } from './GameState';
-import { BASE_MATCH_RULES } from '../game/rules/base.rules';
+import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
 
 export class AttackRulesEngine {
   /**
-   * Valida que un ataque sea posible
-   * 
-   * @param state GameState actual
-   * @param playerNumber Jugador atacante (1 o 2)
-   * @param attackerCardId ID de carta atacante
-   * @param defenderCardId ID de carta defensora
-   * @returns {valid, error?}
+   * Valida que un ataque sea posible.
+   * Si defenderCardId es null → ataque directo al jugador (sin bloqueador).
    */
   static validateAttack(
     state: GameState,
     playerNumber: 1 | 2,
     attackerCardId: string,
-    defenderCardId: string
+    defenderCardId: string | null
   ): { valid: boolean; error?: string } {
     const attackerPlayer = playerNumber === 1 ? state.player1 : state.player2;
     const defenderPlayer = playerNumber === 1 ? state.player2 : state.player1;
@@ -45,121 +40,131 @@ export class AttackRulesEngine {
     }
 
     // Validar que no esté exhausto
-    if ((attacker as any).is_exhausted) {
+    if (attacker.is_exhausted) {
       return { valid: false, error: 'Carta atacante está exhausto' };
     }
 
-    // Validar que defensor existe
-    const defender = this._findCardInField(defenderPlayer, defenderCardId);
-    if (!defender) {
-      return { valid: false, error: 'Carta defensora no encontrada' };
+    // Si se especifica defensor, validar que exista
+    if (defenderCardId !== null) {
+      const defender = this._findCardInField(defenderPlayer, defenderCardId);
+      if (!defender) {
+        return { valid: false, error: 'Carta defensora no encontrada en campo' };
+      }
     }
-
-    // Validar que no esté en modo evasión (50% chance - puede defenderse)
-    // Nota: Evasión se evalúa en EJECUCIÓN, no en validación
 
     return { valid: true };
   }
 
   /**
-   * Ejecuta un ataque entre dos cartas
-   * Retorna nuevo GameState + daño infligido
-   * 
-   * @param state GameState actual
-   * @param playerNumber Jugador atacante
-   * @param attackerCardId Carta atacante
-   * @param defenderCardId Carta defensora
-   * @returns {newState, damage}
+   * Ejecuta un ataque.
+   * Si defenderCardId es null → daño directo al jugador (CE del atacante, sin AR).
    */
   static attack(
     state: GameState,
     playerNumber: 1 | 2,
     attackerCardId: string,
-    defenderCardId: string
-  ): { newState: GameState; damage: number } {
+    defenderCardId: string | null
+  ): { newState: GameState; damage: number; evaded: boolean } {
     const newState = structuredClone(state);
     const attackerPlayer = playerNumber === 1 ? newState.player1 : newState.player2;
     const defenderPlayer = playerNumber === 1 ? newState.player2 : newState.player1;
 
     const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
-    const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
+    const attackerCE: number = attacker.ce ?? 0;
 
-    // Obtener stats del atacante (CE - Combat Effectiveness)
-    const attackerCE = (attacker as any).ce || 0;
+    let damage = 0;
+    let evaded = false;
 
-    // Obtener modo defensivo del defensor
-    const defenderMode = (defender as any).mode || 'normal';
+    if (defenderCardId === null) {
+      // ── DAÑO DIRECTO ──────────────────────────────────────────────────────
+      damage = Math.max(1, attackerCE);
+    } else {
+      // ── COMBATE NORMAL ────────────────────────────────────────────────────
+      const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
+      const defenderMode: string = defender.mode || 'normal';
+      const defenderAR: number = defender.ar ?? 0;
 
-    // Calcular daño según modo
-    let damage = attackerCE;
+      switch (defenderMode) {
+        case 'defense':
+          damage = Math.max(1, Math.floor(attackerCE / 2) - defenderAR);
+          break;
 
-    if (defenderMode === 'defense') {
-      // Modo Defensa: daño reducido a la mitad
-      damage = Math.floor(attackerCE / 2);
-    } else if (defenderMode === 'evasion') {
-      // Modo Evasión: 50% chance de evitar (coin flip)
-      const coinFlip = Math.random() < 0.5; // true=heads (hit), false=tails (miss)
-      if (!coinFlip) {
-        damage = 0; // Ataque evitado
+        case 'evasion': {
+          // Solo BA (ataque básico) puede ser evitado al 50 %
+          const coinFlip = Math.random() < 0.5; // true = golpea, false = esquiva
+          if (coinFlip) {
+            damage = Math.max(1, attackerCE - defenderAR);
+          } else {
+            damage = 0;
+            evaded = true;
+          }
+          break;
+        }
+
+        default:
+          damage = Math.max(1, attackerCE - defenderAR);
+          break;
       }
     }
 
-    // Restar AR (Armor) del defensor
-    const defenderAR = (defender as any).ar || 0;
-    damage = Math.max(1, damage - defenderAR); // Mínimo 1 de daño
-
-    // Aplicar daño: reducir vida del defensor
-    defenderPlayer.life -= damage;
-
-    // Marcar atacante como exhausto (ya atacó)
-    (attacker as any).is_exhausted = true;
-
-    // Validar si alguien ganó
-    if (defenderPlayer.life <= 0) {
-      defenderPlayer.life = 0;
-      newState.phase = 'game_over';
-      // TODO: Implementar lógica de ganador
+    // Aplicar daño al jugador defensor
+    if (!evaded) {
+      defenderPlayer.life = Math.max(0, defenderPlayer.life - damage);
     }
 
-    return { newState, damage };
+    // Marcar atacante como exhausto
+    attacker.is_exhausted = true;
+    attacker.attacked_this_turn = true;
+
+    // Verificar ganador
+    resolveWinCondition(newState);
+
+    newState.updated_at = Date.now();
+
+    return { newState, damage, evaded };
   }
 
   /**
-   * (FUTURO) Cambiar modo defensivo
+   * Cambia el modo defensivo de una carta en campo (normal / defense / evasion).
    */
   static changeDefensiveMode(
     state: GameState,
     playerNumber: 1 | 2,
     cardId: string,
     mode: 'normal' | 'defense' | 'evasion'
-  ): { newState: GameState } {
+  ): { newState: GameState; error?: string } {
     const newState = structuredClone(state);
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
     const card = this._findCardInField(player, cardId);
-    if (card) {
-      (card as any).mode = mode;
+    if (!card) {
+      return { newState, error: 'Carta no encontrada en campo' };
     }
+
+    card.mode = mode;
+    newState.updated_at = Date.now();
 
     return { newState };
   }
 
-  // ====================================================================
+  // ══════════════════════════════════════════════════════════════════════════
   // Helpers privados
-  // ====================================================================
+  // ══════════════════════════════════════════════════════════════════════════
 
-  private static _findCardInField(player: any, cardId: string): CardInGameState | null {
-    // Buscar en todas las zonas del jugador
-    for (const zone of [
+  /** Busca una carta en todas las zonas de campo del jugador por instance_id. */
+  private static _findCardInField(player: Player, cardId: string): CardInGameState | null {
+    const zones: (CardInGameState[] | CardInGameState | null)[] = [
       player.field_knights,
       player.field_techniques,
-      player.helper,
-      player.special_card,
-    ]) {
+      player.field_helper,
+      player.field_occasion,
+    ];
+
+    for (const zone of zones) {
       if (Array.isArray(zone)) {
-        const found = zone.find((c: any) => c.id === cardId);
+        const found = zone.find(c => c.instance_id === cardId);
         if (found) return found;
-      } else if (zone && (zone as any).id === cardId) {
+      } else if (zone && zone.instance_id === cardId) {
         return zone;
       }
     }
@@ -169,22 +174,10 @@ export class AttackRulesEngine {
 
 /**
  * NOTAS:
- * 
- * 1. AttackRulesEngine NO conoce:
- *    - Sequelize
- *    - Base de datos
- *    - Transacciones
- *    - WebSocket
- * 
- * 2. Entrada: GameState (puro)
- *    Salida: Nuevo GameState (immutable via structuredClone)
- * 
- * 3. Evasión (50% chance):
- *    - Se resuelve AQUÍ, no en coordinador
- *    - Math.random() válido porque es dentro de engine (no BD)
- *    - Cliente podría predicción en local, servidor es autoridad
- * 
- * 4. Usar en AttackManager:
- *    const result = AttackRulesEngine.attack(state, ...)
- *    await MatchRepository.applyState(match, result.newState, transaction)
+ *
+ * 1. CE / AR se almacenan en CardInGameState via la propiedad extendida
+ *    que MatchStateMapper rellena al construir el GameState desde BD.
+ * 2. Modo evasión solo aplica a BA (ataque básico).
+ *    Para TA (técnicas) tratar siempre como 'normal'.
+ * 3. AttackRulesEngine NO conoce: Sequelize, BD, Transacciones, WebSocket.
  */

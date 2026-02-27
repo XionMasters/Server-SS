@@ -37,6 +37,10 @@ export interface CardInGameState {
   attacked_this_turn: boolean;
   status_effects: string[]; // ['poison', 'burn', etc.]
   buffs: Record<string, number>; // {'attack_bonus': 2, 'defense_bonus': 1}
+  // Stats de combate (CE / AR) – se popula desde CardInPlay al construir el estado
+  ce: number; // Combat Effectiveness (current_attack en BD)
+  ar: number; // Armor Rating (current_defense en BD)
+  current_health: number;
 }
 
 export interface GameScenario {
@@ -61,6 +65,9 @@ export interface GameState {
   
   // Tablero compartido
   scenario: GameScenario | null;
+  
+  // Ganador (null si partida en curso)
+  winner_id: string | null;
   
   // Metadata
   created_at: number; // timestamp
@@ -105,9 +112,33 @@ export function createEmptyGameState(matchId: string): GameState {
       costos_count: 0,
     },
     scenario: null,
+    winner_id: null,
     created_at: Date.now(),
     updated_at: Date.now(),
   };
+}
+
+/**
+ * Verifica la condición de victoria: si algún jugador tiene vida <= 0,
+ * establece phase='game_over' y winner_id en el estado.
+ *
+ * Debe llamarse después de cualquier operación que pueda reducir la vida
+ * de un jugador (ataque, sacrificio, etc.).
+ *
+ * IMPORTANTE: Muta `state` directamente. Llámalo sobre un structuredClone.
+ */
+export function resolveWinCondition(state: GameState): void {
+  if (state.phase === 'game_over') return; // ya decidido
+
+  if (state.player1.life <= 0) {
+    state.player1.life = 0;
+    state.phase = 'game_over';
+    state.winner_id = state.player2.id;
+  } else if (state.player2.life <= 0) {
+    state.player2.life = 0;
+    state.phase = 'game_over';
+    state.winner_id = state.player1.id;
+  }
 }
 
 /**
