@@ -258,7 +258,7 @@ function renderInspector(d) {
             const modeCls = c.mode !== 'normal' ? `mode-${c.mode}` : '';
             const rarCls = `rarity-${c.rarity}`;
             const modeIcon = c.mode === 'defense' ? '🛡️' : c.mode === 'evasion' ? '💨' : '';
-            const stats = c.knight ? `CE:${c.knight.ce} AR:${c.knight.ar} HP:${c.knight.hp}` : `cost:${c.cost}`;
+            const stats = c.knight ? `ATK:${c.knight.atk} DEF:${c.knight.ar} HP:${c.knight.hp} CE:${c.knight.ce}` : `cost:${c.cost}`;
             const posLabel = (zoneName === 'field_knight' || zoneName === 'field_support') ? ` [${c.position}]` : '';
             return `<div class="card-chip ${rarCls} ${modeCls}" title="${c.instance_id}">
                 <span class="cname">${modeIcon}${c.name}${posLabel}</span>

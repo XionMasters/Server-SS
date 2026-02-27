@@ -106,7 +106,7 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
             model: Card,
             as: 'card',
             attributes: ['id', 'name', 'type', 'rarity', 'cost', 'element', 'faction', 'image_url'],
-            include: [{ model: CardKnight, as: 'card_knight', attributes: ['cosmos_energy', 'armor_resistance', 'health_points'] }],
+            include: [{ model: CardKnight, as: 'card_knight', attributes: ['attack', 'defense', 'health', 'cosmos'] }],
           }],
         },
       ],
@@ -138,7 +138,7 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
             element: c.card?.element || '',
             image_url: c.card?.image_url || '',
             knight: c.card?.card_knight
-              ? { ce: c.card.card_knight.cosmos_energy, ar: c.card.card_knight.armor_resistance, hp: c.card.card_knight.health_points }
+              ? { ce: c.card.card_knight.cosmos, ar: c.card.card_knight.defense, hp: c.card.card_knight.health, atk: c.card.card_knight.attack }
               : null,
           }));
       }
