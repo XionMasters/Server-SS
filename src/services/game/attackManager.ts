@@ -13,11 +13,6 @@ import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry
 import { GameState } from '../../engine/GameState';
 import CardInPlay from '../../models/CardInPlay';
 
-/** Include para cargar cartas de campo junto con el match */
-const CARDS_IN_PLAY_INCLUDE = [
-  { model: CardInPlay, as: 'cards_in_play' }
-];
-
 export class AttackManager {
   /**
    * Ejecuta un ataque de una carta contra otra
@@ -57,8 +52,14 @@ export class AttackManager {
           await match.reload({
             lock: transaction.LOCK.UPDATE,
             transaction,
-            include: CARDS_IN_PLAY_INCLUDE,
           });
+
+          const cardsInPlay = await CardInPlay.findAll({
+            where: { match_id: match.id },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+          });
+          (match as any).cards_in_play = cardsInPlay;
 
           // 3️⃣ MAPEAR A ESTADO PURO
           const currentState = MatchStateMapper.fromMatch(match);
@@ -152,8 +153,14 @@ export class AttackManager {
           await match.reload({
             lock: transaction.LOCK.UPDATE,
             transaction,
-            include: CARDS_IN_PLAY_INCLUDE,
           });
+
+          const cardsInPlay = await CardInPlay.findAll({
+            where: { match_id: match.id },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+          });
+          (match as any).cards_in_play = cardsInPlay;
 
           // 3️⃣ MAPEAR
           const currentState = MatchStateMapper.fromMatch(match);

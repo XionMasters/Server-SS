@@ -24,6 +24,18 @@ import CardInPlay from '../../models/CardInPlay';
 // Asume que existen estos modelos
 type Match = any;
 
+function toEnginePhase(dbPhase: string): GameState['phase'] {
+  if (dbPhase === 'finished') return 'game_over';
+  if (dbPhase === 'player2_turn') return 'player2_turn';
+  return 'player1_turn';
+}
+
+function toDbPhase(enginePhase: GameState['phase']): 'player1_turn' | 'player2_turn' | 'finished' {
+  if (enginePhase === 'game_over') return 'finished';
+  if (enginePhase === 'player2_turn') return 'player2_turn';
+  return 'player1_turn';
+}
+
 export class MatchStateMapper {
   /**
    * Convierte Match (modelo BD) → GameState (estado puro)
@@ -53,7 +65,7 @@ export class MatchStateMapper {
     // Llenar datos del turno
     state.current_turn = match.current_turn;
     state.current_player = match.current_player;
-    state.phase = match.phase;
+    state.phase = toEnginePhase(match.phase);
 
     // (FUTURO) Llenar cartas en juego
     // if (match.cardsInPlay && match.cardsInPlay.length > 0) {
@@ -124,7 +136,7 @@ export class MatchStateMapper {
       player2_deck_size: state.player2.deck_count,
       current_turn: state.current_turn,
       current_player: state.current_player,
-      phase: state.phase,
+      phase: toDbPhase(state.phase),
       winner_id: state.winner_id ?? null,
       finished_at: state.phase === 'game_over' ? new Date() : undefined,
       updated_at: new Date(),
