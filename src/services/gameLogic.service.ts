@@ -1,10 +1,9 @@
 import Match from '../models/Match';
 import MatchAction from '../models/MatchAction';
-import { v4 as uuidv4 } from 'uuid';
 
 // 🎮 Servicios de juego
 import { TurnManager } from './game/turnManager';
-import { GameStateBuilder } from './game/GameStateBuilder ';
+import { GameStateBuilder } from './game/GameStateBuilder';
 
 /**
  * GameLogicService
@@ -121,8 +120,7 @@ export async function endTurn(
     const matchState = await GameStateBuilder.buildFromMatch(match);
 
     // 5️⃣ REGISTRAR ACCIÓN (auditoría)
-    await logMatchAction(matchId, playerNumber, 'end_turn', {
-      turn_number: match.current_turn,
+    await logMatchAction(matchId, userId, match.current_turn ?? 1, 'pass_turn', {
       next_player: match.current_player
     });
 
@@ -145,25 +143,25 @@ export async function endTurn(
 
 // ==================== LOGGING ====================
 
+type MatchActionType = 'play_card' | 'attack' | 'defend' | 'change_mode' | 'activate_ability' | 'pass_turn' | 'surrender';
+
 /**
  * Registra acciones del jugador (auditoría)
  */
 async function logMatchAction(
   matchId: string,
-  playerNumber: 1 | 2,
-  actionType: string,
+  userId: string,
+  turnNumber: number,
+  actionType: MatchActionType,
   actionData: any
 ): Promise<void> {
   try {
-    const actionId = uuidv4();
-
     await MatchAction.create({
-      id: actionId,
       match_id: matchId,
-      player_number: playerNumber,
+      player_id: userId,
+      turn_number: turnNumber,
       action_type: actionType,
-      action_data: JSON.stringify(actionData),
-      created_at: new Date()
+      action_data: JSON.stringify(actionData)
     });
 
     console.log(`   📝 Acción registrada: ${actionType}`);

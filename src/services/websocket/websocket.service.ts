@@ -6,7 +6,7 @@ import Match from '../../models/Match';
 import UserProfile from '../../models/UserProfile';
 import ProfileAvatar from '../../models/ProfileAvatar';
 import { MatchStateService } from '../match/matchState.service';
-import { MatchesCoordinator } from '../coordinators/matchesCoordinator';
+import { matchesCoordinator } from '../coordinators/matchesCoordinator';
 import { authenticateSocket } from './websocket-auth.service';
 import { WebSocketPresenceService } from './websocket-presence.service';
 import { WebSocketChatService } from './websocket-chat.service';
@@ -27,7 +27,6 @@ interface AuthenticatedWebSocket extends WebSocket {
 
 const presenceService = new WebSocketPresenceService();
 const chatService = new WebSocketChatService(presenceService);
-const matchesCoordinator = new MatchesCoordinator();
 const router = new WebSocketRouter(matchesCoordinator, presenceService);
 
 const withAdmin = (handler: RouterEventHandler): RouterEventHandler => {
@@ -171,7 +170,7 @@ export const initializeWebSocketServer = (server: any) => {
         return; // No continuar con autenticación de usuario normal
       }
 
-      const recoveryResult = await MatchesCoordinator.recoverOnSocketConnect(
+      const recoveryResult = await matchesCoordinator.recoverOnSocketConnect(
         ws.userId!,
         (userId: string) => presenceService.isUserOnline(userId)
       );
@@ -303,7 +302,7 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
     console.log(`🔍 ${username} busca partida...`);
 
     // 🎯 DELEGAMOS TODA LA LÓGICA AL COORDINADOR
-    const result = await MatchesCoordinator.findMatchOrCreate(
+    const result = await matchesCoordinator.findMatchOrCreate(
       userId,
       presenceService.getPrimarySocketsMap(),
       presenceService.getSocketSetsMap()
@@ -402,7 +401,7 @@ async function handleRequestMatchState(ws: AuthenticatedWebSocket, data: any) {
       return;
     }
 
-    const result = await MatchesCoordinator.getMatchState(matchId, userId);
+    const result = await matchesCoordinator.getMatchState(matchId, userId);
 
     if (!result.success) {
       presenceService.sendToSocket(ws, 'error', {
@@ -561,7 +560,7 @@ async function handleResumeTestMatch(ws: AuthenticatedWebSocket) {
 async function handleAbandonTestMatch(ws: AuthenticatedWebSocket, data: { match_id: string }) {
   try {
     console.log(`🗑️ ${ws.username} abandonando partida TEST: ${data.match_id}`);
-    const result = await MatchesCoordinator.abandonMatch(data.match_id, ws.userId!);
+    const result = await matchesCoordinator.abandonMatch(data.match_id, ws.userId!);
 
     if (!result.success) {
       throw new Error(result.error || 'Error abandonando partida');

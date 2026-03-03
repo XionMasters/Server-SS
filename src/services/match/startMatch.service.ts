@@ -18,7 +18,7 @@ import CardInPlay from '../../models/CardInPlay';
 import { Op } from 'sequelize';
 import { MatchMode } from '../../game/rules/types';
 import { BASE_MATCH_RULES } from '../../game/rules/base.rules';
-import { GameStateBuilder } from '../game/GameStateBuilder ';
+import { GameStateBuilder } from '../game/GameStateBuilder';
 import { DeckService } from '../deck.service';
 import { MatchSetupService } from '../matchSetup.service';
 import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';

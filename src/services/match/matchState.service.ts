@@ -2,7 +2,7 @@ import Match from '../../models/Match';
 import Card from '../../models/Card';
 import CardInPlay from '../../models/CardInPlay';
 import User from '../../models/User';
-import { GameStateBuilder } from '../game/GameStateBuilder ';
+import { GameStateBuilder } from '../game/GameStateBuilder';
 import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
 
 export class MatchStateService {

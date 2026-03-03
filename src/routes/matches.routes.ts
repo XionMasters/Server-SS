@@ -21,8 +21,6 @@ function withDeprecationNotice(handler: any, message: string) {
 // Todas las rutas requieren autenticación
 router.use(authenticateToken);
 
-// Verificar si puede buscar partida
-router.get('/can-search', matchesController.canSearchMatch);
 
 // TEST Match
 router.post(
@@ -41,30 +39,7 @@ router.post(
 	...withDeprecationNotice(matchesController.cancelSearch, 'Deprecated HTTP endpoint. Use WebSocket event cancel_search.')
 );
 router.get('/:id', matchesController.getMatchState);
-router.post(
-	'/:id/play-card',
-	...withDeprecationNotice(matchesController.playCard, 'Deprecated HTTP endpoint. Use WebSocket event play_card.')
-);
-router.post(
-	'/:id/pass-turn',
-	...withDeprecationNotice(matchesController.passTurn, 'Deprecated HTTP endpoint. Use WebSocket event end_turn.')
-);
+
 router.post('/:id/abandon', matchesController.abandonMatch);
-
-// ⚔️ Sistema de combate
-router.post(
-	'/:id/attack',
-	...withDeprecationNotice(matchesController.attackKnight, 'Deprecated HTTP endpoint. Use WebSocket event attack.')
-);
-router.post(
-	'/:id/change-mode',
-	...withDeprecationNotice(matchesController.changeDefensiveMode, 'Deprecated HTTP endpoint. Use WebSocket event change_defensive_mode.')
-);
-
-// 🎮 Inicialización de turno
-router.post(
-	'/:id/start-first-turn',
-	...withDeprecationNotice(matchesController.startFirstTurn, 'Deprecated HTTP endpoint. Use WebSocket game flow initialization.')
-);
 
 export default router;

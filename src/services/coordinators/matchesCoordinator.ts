@@ -26,6 +26,7 @@ import { CanSearchMatchService } from '../match/canSearchMatch.service';
 import { MatchRecoveryService } from '../match/matchRecovery.service';
 import { StartFirstTurnService } from '../match/startFirstTurn.service';
 import { MatchCoordinator } from './matchCoordinator';
+import { ActionResolver } from '../game/ActionResolver';
 
 export class MatchesCoordinator {
   private normalizeEvents(result: any, userId: string) {
@@ -93,6 +94,13 @@ export class MatchesCoordinator {
     }
 
     const matchData = stateResult.data;
+    // Inyectar valid_actions ANTES de separar por perspectiva, para que ActionResolver
+    // vea TODAS las cartas en campo (propias + rivales) y calcule targets correctos.
+    matchData.cards_in_play = ActionResolver.resolve(
+      matchData.cards_in_play || [],
+      matchData
+    );
+
     const player1Id = matchData.player1?.id || matchData.player1_id;
     const player2Id = matchData.player2?.id || matchData.player2_id;
     const isTestMatch = player1Id && player1Id === player2Id;
@@ -284,7 +292,7 @@ export class MatchesCoordinator {
    * - { success: true, status: 'searching', match_id: '...' }
    * - { success: false, error: '...' }
    */
-  static async findMatchOrCreate(userId: string, userSockets?: Map<string, any>, userSocketSets?: Map<string, Set<any>>): Promise<{
+  async findMatchOrCreate(userId: string, userSockets?: Map<string, any>, userSocketSets?: Map<string, Set<any>>): Promise<{
     success: boolean;
     status: 'searching' | 'match_found';
     match_id: string;
@@ -335,7 +343,7 @@ export class MatchesCoordinator {
    * Busca rival disponible OR crea nueva partida en espera
    * DELEGA: Todas las validaciones a SearchMatchService y StartMatchService
    */
-  static async findMatch(userId: string) {
+  async findMatch(userId: string) {
     // Reemplazado por findMatchOrCreate
     return await this.findMatchOrCreate(userId);
   }
@@ -345,7 +353,7 @@ export class MatchesCoordinator {
    * Crea match de prueba/test (para desarrollo)
    * DELEGA: Toda la lógica a StartMatchService
    */
-  static async startTestMatch(userId: string) {
+  async startTestMatch(userId: string) {
     try {
       return await StartMatchService.createNewMatch(userId, userId, 'TEST');
     } catch (error: any) {
@@ -357,7 +365,7 @@ export class MatchesCoordinator {
    * Usuario abandona match
    * DELEGA: Toda la lógica a AbandonMatchService
    */
-  static async abandonMatch(matchId: string, userId: string) {
+  async abandonMatch(matchId: string, userId: string) {
     return await AbandonMatchService.abandonMatch(matchId, userId);
   }
 
@@ -367,7 +375,7 @@ export class MatchesCoordinator {
    * 
    * TODO: Implementar GameStateBuilder
    */
-  static async getMatchState(matchId: string, userId: string) {
+  async getMatchState(matchId: string, userId: string) {
     return await MatchStateService.getMatchStateForUser(matchId, userId);
   }
 
@@ -375,7 +383,7 @@ export class MatchesCoordinator {
    * Verifica si el usuario puede buscar partida.
    * DELEGA: CanSearchMatchService
    */
-  static async canSearchMatch(userId: string, username?: string) {
+  async canSearchMatch(userId: string, username?: string) {
     try {
       const data = await CanSearchMatchService.evaluate(userId, username);
       return { success: true, data };
@@ -405,7 +413,7 @@ export class MatchesCoordinator {
    * Recupera contexto de partida al reconectar socket.
    * DELEGA: MatchRecoveryService
    */
-  static async recoverOnSocketConnect(
+  async recoverOnSocketConnect(
     userId: string,
     isUserOnline: (userId: string) => boolean
   ) {
@@ -420,3 +428,6 @@ export class MatchesCoordinator {
     }
   }
 }
+
+// Singleton compartido entre HTTP controllers y WebSocket service
+export const matchesCoordinator = new MatchesCoordinator();

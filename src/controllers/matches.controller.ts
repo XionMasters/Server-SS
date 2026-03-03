@@ -2,17 +2,11 @@
 import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import Match from '../models/Match';
-import CardInPlay from '../models/CardInPlay';
-import MatchAction from '../models/MatchAction';
 import Deck from '../models/Deck';
-import DeckCard from '../models/DeckCard';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
 import User from '../models/User';
 import { validateExistingDeck } from '../utils/deckValidator';
-import { GameService } from '../services/game.service';
 import { StartMatchService } from '../services/match/startMatch.service';
-import { MatchesCoordinator } from '../services/coordinators/matchesCoordinator';
+import { matchesCoordinator } from '../services/coordinators/matchesCoordinator';
 
 // Buscar partida (matchmaking simple)
 export const findMatch = async (req: Request, res: Response) => {
@@ -121,7 +115,7 @@ export const getMatchState = async (req: Request, res: Response) => {
     const user = (req as any).user;
     const { id } = req.params;
 
-    const result = await MatchesCoordinator.getMatchState(id, user.id);
+    const result = await matchesCoordinator.getMatchState(id, user.id);
 
     if (!result.success) {
       return res.status((result as any).statusCode || 500).json({
@@ -137,46 +131,12 @@ export const getMatchState = async (req: Request, res: Response) => {
   }
 };
 
-// Jugar carta - ahora delegada a GameService
-export const playCard = async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    const { id } = req.params; // match_id
-    const { card_in_play_id, position } = req.body;
-
-    const result = await GameService.playCard(id, user.id, card_in_play_id, position);
-    
-    return res.json({ 
-      message: 'Carta jugada exitosamente', 
-      match: result.match, 
-      cardInPlay: result.cardInPlay 
-    });
-  } catch (error: any) {
-    console.error('❌ Error jugando carta:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
-
-// Pasar turno - ahora delegada a GameService
-export const passTurn = async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    const { id } = req.params;
-
-    const result = await GameService.passTurn(id, user.id);
-    return res.json(result);
-  } catch (error: any) {
-    console.error('❌ Error pasando turno:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
-
 // Verificar si el jugador puede buscar partida
 export const canSearchMatch = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
-    const result = await MatchesCoordinator.canSearchMatch(user.id, user.username);
+    const result = await matchesCoordinator.canSearchMatch(user.id, user.username);
     return res.json(result.data);
 
   } catch (error: any) {
@@ -238,16 +198,9 @@ async function cleanupOldWaitingMatches() {
 // TEST Match - Jugar contra uno mismo
 export const startTestMatch = async (req: Request, res: Response) => {
   try {
-    //
     const user = (req as any).user;
 
-    // Delegar toda la lógica al servicio especializado
-    const { StartMatchService } = await import('../services/match/startMatch.service');
     const result = await StartMatchService.createNewMatch(user.id, user.id, 'TEST');
-
-    // Enviar notificación al cliente vía WebSocket (para sincronizar futuros cambios)
-    const { broadcastMatchUpdate } = await import('../services/websocket/websocket.service');
-    await broadcastMatchUpdate(result.match_id);
     
     return res.json({
       success: true,
@@ -259,9 +212,8 @@ export const startTestMatch = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error en startTestMatch:', error);
     
-    // Manejo de errores específicos
-    const statusCode = error.message.includes('rate limit') ? 429 : 400;
-    const errorCode = error.message.includes('rate limit') ? 'RATE_LIMIT_EXCEEDED' : 'TEST_MATCH_ERROR';
+    const statusCode = error.message?.includes('rate limit') ? 429 : 400;
+    const errorCode = error.message?.includes('rate limit') ? 'RATE_LIMIT_EXCEEDED' : 'TEST_MATCH_ERROR';
 
     return res.status(statusCode).json({ 
       error: error.message,
@@ -275,8 +227,6 @@ export const resumeTestMatch = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
 
-    // Delegar toda la lógica al servicio especializado
-    const { StartMatchService } = await import('../services/match/startMatch.service');
     const result = await StartMatchService.resumeTestMatch(user.id);
 
     return res.json({
@@ -296,66 +246,6 @@ export const resumeTestMatch = async (req: Request, res: Response) => {
   }
 };
 
-// Atacar caballero
-export const attackKnight = async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    const { id } = req.params; // match_id
-    const { attacker_card_in_play_id, defender_card_in_play_id } = req.body;
-
-    const result = await GameService.attackKnight(
-      id,
-      user.id,
-      attacker_card_in_play_id,
-      defender_card_in_play_id
-    );
-
-    return res.json(result);
-  } catch (error: any) {
-    console.error('❌ Error atacando:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
-
-// Cambiar modo defensivo
-export const changeDefensiveMode = async (req: Request, res: Response) => {
-  try {
-    const user = (req as any).user;
-    const { id } = req.params; // match_id
-    const { card_in_play_id, new_mode } = req.body;
-
-    const result = await GameService.changeDefensiveMode(
-      id,
-      user.id,
-      card_in_play_id,
-      new_mode
-    );
-
-    return res.json({
-      success: true,
-      message: `Modo cambiado a: ${new_mode}`,
-      card: result
-    });
-  } catch (error: any) {
-    console.error('❌ Error cambiando modo:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
-
-export const startFirstTurn = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const user = (req as any).user;
-
-    const result = await GameService.startFirstTurn(id, user.id);
-
-    // El servicio ya devuelve solo los campos necesarios
-    return res.json(result);
-  } catch (error: any) {
-    console.error('❌ Error iniciando primer turno:', error.message);
-    return res.status(400).json({ error: error.message });
-  }
-};
 
 // Abandonar partida
 export const abandonMatch = async (req: Request, res: Response) => {
@@ -363,7 +253,7 @@ export const abandonMatch = async (req: Request, res: Response) => {
     const user = (req as any).user;
     const { id } = req.params; // match_id
 
-    const result = await MatchesCoordinator.abandonMatch(id, user.id);
+    const result = await matchesCoordinator.abandonMatch(id, user.id);
 
     if (!result.success) {
       return res.status((result as any).statusCode || 400).json({
