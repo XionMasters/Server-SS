@@ -44,8 +44,10 @@ export class GameStateBuilder {
       player_number: cip.player_number,
       zone: cip.zone,
       position: cip.position,
-      mode: cip.is_defensive_mode ? 'defense' : 'normal',
+      // is_defensive_mode puede ser string ('normal','defense','evasion') o bool legacy (false)
+      mode: (!cip.is_defensive_mode || cip.is_defensive_mode === 'normal') ? 'normal' : String(cip.is_defensive_mode),
       is_exhausted: cip.has_attacked_this_turn,
+      has_attacked_this_turn: cip.has_attacked_this_turn,
 
       base_data: {
         id: cip.card.id,

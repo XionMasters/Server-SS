@@ -44,6 +44,8 @@
 
 import { sequelize } from '../../config/database';
 import Match from '../../models/Match';
+import CardInPlay from '../../models/CardInPlay';
+import Card from '../../models/Card';
 import { TurnRulesEngine } from '../../engine/TurnRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
@@ -90,11 +92,18 @@ export class TurnManager {
       const result = await sequelize.transaction(
         async (transaction) => {
           // ====================================================================
-          // PASO 2: LOCK DE FILA
+          // PASO 2: LOCK DE FILA (con cartas para que el engine pueda operar)
           // ====================================================================
           await match.reload({
             lock: transaction.LOCK.UPDATE,
             transaction,
+            include: [
+              {
+                model: CardInPlay,
+                as: 'cards_in_play',
+                include: [{ model: Card, as: 'card' }]
+              }
+            ]
           });
 
           // ====================================================================
