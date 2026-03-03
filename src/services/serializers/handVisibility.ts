@@ -18,8 +18,7 @@
 
 export function applyHandVisibility(
   cards: any[],
-  visiblePlayerNumber: number,
-  debugRevealPosition?: number  // DEBUG: revelar carta del oponente en esta posición (0-based)
+  visiblePlayerNumber: number
 ): any[] {
   return cards.map(card => {
     if (card.zone !== 'hand') {
@@ -29,11 +28,6 @@ export function applyHandVisibility(
     const isVisible = card.player_number === visiblePlayerNumber;
 
     if (isVisible) {
-      return { ...card, hidden: false };
-    }
-
-    // DEBUG: revelar una carta específica del oponente por posición
-    if (debugRevealPosition !== undefined && card.position === debugRevealPosition) {
       return { ...card, hidden: false };
     }
 

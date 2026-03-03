@@ -19,6 +19,7 @@
  */
 
 import { GameState, Player, CardInGameState, createEmptyGameState } from '../../engine/GameState';
+import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../engine/StatusEffects';
 import CardInPlay from '../../models/CardInPlay';
 
 // Asume que existen estos modelos
@@ -144,9 +145,17 @@ export class MatchStateMapper {
   }
 
   /**
-   * (FUTURO) Convierte CardInPlay (BD) → CardInGameState (estado puro)
+   * Convierte CardInPlay (BD) → CardInGameState (estado puro).
+   * El mode y los stats con boost se DERIVAN de status_effects.
    */
   private static _mapCardToState(card: any): CardInGameState {
+    // Parsear efectos de estado desde JSON
+    const effects: StatusEffect[] = parseStatusEffects(card.status_effects);
+
+    // Stats base (sin boosts)
+    const base_ce: number = card.current_attack  ?? card.base_ce  ?? 0;
+    const base_ar: number = card.current_defense ?? card.base_ar  ?? 0;
+
     return {
       instance_id: card.id,
       card_id: card.card_id,
@@ -154,13 +163,20 @@ export class MatchStateMapper {
       player_number: card.player_number as 1 | 2,
       zone: card.zone,
       position: card.position,
-      mode: (card.is_defensive_mode as any) || 'normal',
+
+      // Mode derivado de status_effects (fuente de verdad)
+      mode: deriveModeFromEffects(effects),
+
       is_exhausted: card.has_attacked_this_turn ?? false,
       attacked_this_turn: card.has_attacked_this_turn ?? false,
-      status_effects: (() => { try { return JSON.parse(card.status_effects || '[]'); } catch { return []; } })(),
-      buffs: {},
-      ce: card.current_attack ?? 0,
-      ar: card.current_defense ?? 0,
+
+      status_effects: effects,
+
+      // Stats con boosts aplicados
+      base_ce,
+      base_ar,
+      ce:   base_ce + computeCeBonus(effects),
+      ar:   base_ar + computeArBonus(effects),
       current_health: card.current_health ?? 0,
     };
   }

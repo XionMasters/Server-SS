@@ -90,8 +90,7 @@ export class GameStateBuilder {
 
       cards_in_play: applyHandVisibility(
         cardsData,
-        perspectivePlayer,
-        match.player1_id === match.player2_id ? 2 : undefined  // DEBUG TEST: revelar 3ra carta del oponente
+        perspectivePlayer
       )
     };
   }

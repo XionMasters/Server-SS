@@ -25,22 +25,39 @@ export interface Player {
   costos_count: number; // "Cositos" - pie de página
 }
 
+// Re-exportar desde StatusEffects.ts para compatibilidad con importaciones existentes
+export { StatusEffectType, StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects, tickStatusEffects, setModeEffect } from './StatusEffects';
+import { StatusEffect } from './StatusEffects';
+
+// ─────────────────────────────────────────────────────
+// CARTA EN PARTIDA
+// ─────────────────────────────────────────────────────
+
 export interface CardInGameState {
   instance_id: string;
   card_id: string;
   card_type: string; // 'knight', 'technique', 'item', etc.
   player_number: 1 | 2;
   zone: string; // 'hand', 'field_knight', 'field_technique', etc.
-  position: number; // Índice en la zona
-  mode: 'normal' | 'defense' | 'evasion' | null;
+  position: number;
+
+  /** Modo de combate DERIVADO de status_effects. No se persiste directamente. */
+  mode: 'normal' | 'defense' | 'evasion' | 'prayer';
+
   is_exhausted: boolean;
   attacked_this_turn: boolean;
-  status_effects: string[]; // ['poison', 'burn', etc.]
-  buffs: Record<string, number>; // {'attack_bonus': 2, 'defense_bonus': 1}
-  // Stats de combate (CE / AR) – se popula desde CardInPlay al construir el estado
-  ce: number; // Combat Effectiveness (current_attack en BD)
-  ar: number; // Armor Rating (current_defense en BD)
+
+  /** Efectos de estado activos. Source of truth para mode y boosts. */
+  status_effects: StatusEffect[];
+
+  // Stats de combate — base + boosts, calculados al mapear desde BD
+  ce: number;   // Combat Effectiveness (base + ce_boost activos)
+  ar: number;   // Armor Rating (base + ar_boost activos)
   current_health: number;
+
+  /** Stats base, sin boosts. Necesarios para recomputar al expirar efectos. */
+  base_ce: number;
+  base_ar: number;
 }
 
 export interface GameScenario {

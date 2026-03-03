@@ -18,6 +18,7 @@
  */
 
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
+import { StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
 
 export class AttackRulesEngine {
   /**
@@ -125,7 +126,12 @@ export class AttackRulesEngine {
   }
 
   /**
-   * Cambia el modo defensivo de una carta en campo (normal / defense / evasion).
+   * Cambia el modo defensivo de una carta en campo.
+   * Implementado como StatusEffect con remaining_turns = 1:
+   *   - El efecto es activo durante el turno del rival que le sigue.
+   *   - Al inicio del próximo turno propio, se decrementa → expira.
+   *
+   * Pasar mode = 'normal' elimina cualquier efecto de modo activo (cancelar defensa/evasión).
    */
   static changeDefensiveMode(
     state: GameState,
@@ -141,9 +147,23 @@ export class AttackRulesEngine {
       return { newState, error: 'Carta no encontrada en campo' };
     }
 
-    card.mode = mode;
-    newState.updated_at = Date.now();
+    // Reemplazar efecto de modo (elimina previo y aplica el nuevo)
+    if (mode !== 'normal') {
+      card.status_effects = setModeEffect(card.status_effects ?? [], mode, 1);
+    } else {
+      card.status_effects = (card.status_effects ?? []).filter(
+        e => !MODE_EFFECT_TYPES.includes(e.type)
+      );
+    }
 
+    // Recomputar modo desde los efectos actualizados
+    card.mode = deriveModeFromEffects(card.status_effects);
+
+    // Marcar como exhausto (usar acción de modo consume el turno del caballero)
+    card.is_exhausted = true;
+    card.attacked_this_turn = true;
+
+    newState.updated_at = Date.now();
     return { newState };
   }
 

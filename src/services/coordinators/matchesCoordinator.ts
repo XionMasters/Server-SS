@@ -112,7 +112,7 @@ export class MatchesCoordinator {
       const testMatchData = {
         ...matchData,
         perspective_player: activePlayer,
-        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer, 2)  // DEBUG: revelar 3ra carta del oponente
+        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer)
       };
 
       return {

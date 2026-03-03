@@ -18,6 +18,7 @@
  */
 
 import { GameState } from './GameState';
+import { deriveModeFromEffects, computeCeBonus, computeArBonus, tickStatusEffects } from './StatusEffects';
 import { BASE_MATCH_RULES } from '../game/rules/base.rules';
 
 export class TurnRulesEngine {
@@ -113,7 +114,25 @@ export class TurnRulesEngine {
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
     nextPlayerObj.cosmos += cosmosIncrease;
 
-    // 5️⃣ Resetear flags de exhaust del siguiente jugador (puede volver a atacar)
+    // 5️⃣ Procesar status_effects del siguiente jugador:
+    //    - Decrementar remaining_turns de cada efecto
+    //    - Eliminar efectos expirados (remaining_turns <= 0)
+    //    - Recomputar mode, ce y ar desde los efectos restantes
+    const allNextPlayerCards = [
+      ...nextPlayerObj.field_knights,
+      ...nextPlayerObj.field_techniques,
+      ...(nextPlayerObj.field_helper ? [nextPlayerObj.field_helper] : []),
+      ...(nextPlayerObj.field_occasion ? [nextPlayerObj.field_occasion] : []),
+    ];
+
+    for (const card of allNextPlayerCards) {
+      card.status_effects = tickStatusEffects(card.status_effects ?? []);
+      card.mode = deriveModeFromEffects(card.status_effects);
+      card.ce   = card.base_ce + computeCeBonus(card.status_effects);
+      card.ar   = card.base_ar + computeArBonus(card.status_effects);
+    }
+
+    // Resetear flags de exhaust del siguiente jugador (puede volver a atacar)
     const fieldsToReset = [
       nextPlayerObj.field_knights,
       nextPlayerObj.field_techniques,

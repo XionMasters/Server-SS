@@ -65,7 +65,7 @@ export class StartFirstTurnService {
         const payload = {
           ...matchData,
           perspective_player: 1,
-          cards_in_play: applyHandVisibility(matchData.cards_in_play || [], 1, 2)  // DEBUG: revelar 3ra carta del oponente
+          cards_in_play: applyHandVisibility(matchData.cards_in_play || [], 1)
         };
         return {
           success: true,

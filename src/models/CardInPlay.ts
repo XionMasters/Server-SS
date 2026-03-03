@@ -9,7 +9,7 @@ interface CardInPlayAttributes {
   player_number: number; // 1 o 2
   zone: 'hand' | 'field_knight' | 'field_support' | 'field_helper' | 'yomotsu' | 'cositos' | 'deck';
   position: number; // Posición en la zona (0-4 para caballeros)
-  is_defensive_mode: 'normal' | 'defense' | 'evasion';
+  is_defensive_mode: 'normal' | 'defense' | 'evasion' | 'prayer';
   current_attack: number;
   current_defense: number;
   current_health: number;
@@ -31,7 +31,7 @@ class CardInPlay extends Model<CardInPlayAttributes, CardInPlayCreationAttribute
   public player_number!: number;
   public zone!: 'hand' | 'field_knight' | 'field_support' | 'field_helper' | 'yomotsu' | 'cositos' | 'deck';
   public position!: number;
-  public is_defensive_mode!: 'normal' | 'defense' | 'evasion';
+  public is_defensive_mode!: 'normal' | 'defense' | 'evasion' | 'prayer';
   public current_attack!: number;
   public current_defense!: number;
   public current_health!: number;
@@ -85,9 +85,12 @@ CardInPlay.init(
       defaultValue: 0
     },
     is_defensive_mode: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-      allowNull: false
+      type: DataTypes.STRING(20),
+      defaultValue: 'normal',
+      allowNull: false,
+      validate: {
+        isIn: [['normal', 'defense', 'evasion', 'prayer']]
+      }
     },
     current_attack: {
       type: DataTypes.INTEGER,

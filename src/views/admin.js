@@ -261,14 +261,38 @@ function renderInspector(d) {
     const renderZone = (cards, zoneName) => {
         if (!cards || cards.length === 0) return `<span class="zone-empty">vacío</span>`;
         return cards.map(c => {
-            const modeCls = c.mode !== 'normal' ? `mode-${c.mode}` : '';
-            const rarCls = `rarity-${c.rarity}`;
-            const modeIcon = c.mode === 'defense' ? '🛡️' : c.mode === 'evasion' ? '💨' : '';
-            const stats = c.knight ? `ATK:${c.knight.atk} DEF:${c.knight.ar} HP:${c.knight.hp} CE:${c.knight.ce}` : `cost:${c.cost}`;
+            const rarCls = `rarity-${c.rarity || 'common'}`;
+            const stats  = c.knight ? `ATK:${c.knight.atk} DEF:${c.knight.ar} HP:${c.knight.hp} CE:${c.knight.ce}` : `cost:${c.cost}`;
             const posLabel = (zoneName === 'field_knight' || zoneName === 'field_support') ? ` [${c.position}]` : '';
-            return `<div class="card-chip ${rarCls} ${modeCls}" title="${c.instance_id}">
-                <span class="cname">${modeIcon}${c.name}${posLabel}</span>
+
+            let extraHtml = '';
+            if (zoneName === 'field_knight') {
+                const hasActed = c.valid_actions ? c.valid_actions.has_acted : c.is_exhausted;
+                const actedBadge = hasActed
+                    ? `<span class="acted-badge acted">✗ YA ACTUÓ</span>`
+                    : `<span class="acted-badge free">✓ LIBRE</span>`;
+
+                const modeRaw = c.mode;
+                const modeStr = (!modeRaw || modeRaw === false) ? 'normal'
+                              : (modeRaw === true) ? 'defense' : String(modeRaw);
+                const modeLabel = { normal: '—', defense: '🛡️ Defensa', evasion: '💨 Evasión', prayer: '🙏 Oración' }[modeStr] || modeStr;
+                const modeBadge = modeStr !== 'normal' ? `<span class="mode-badge">${modeLabel}</span>` : '';
+
+                const effects = Array.isArray(c.status_effects) ? c.status_effects : [];
+                const effectsHtml = effects.length > 0
+                    ? effects.map(e => {
+                        const label = { defense: 'DEFENSA', evasion: 'EVASION', prayer: 'ORACION', ce_boost: `CE+${e.value}`, ar_boost: `AR+${e.value}`, hp_boost: `HP+${e.value}` }[e.type] || e.type.toUpperCase();
+                        return `<span class="effect-tag">${label} [${e.remaining_turns}t]</span>`;
+                      }).join('')
+                    : '';
+
+                extraHtml = `<div class="knight-status-row">${actedBadge}${modeBadge}</div>${effectsHtml ? `<div class="effects-row">${effectsHtml}</div>` : ''}`;
+            }
+
+            return `<div class="card-chip ${rarCls}" title="${c.instance_id}">
+                <span class="cname">${c.name}${posLabel}</span>
                 <span class="cmeta">${c.type} · ${stats}</span>
+                ${extraHtml}
             </div>`;
         }).join('');
     };

@@ -19,6 +19,7 @@
 import { GameState } from '../../engine/GameState';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import Match from '../../models/Match';
+import CardInPlay from '../../models/CardInPlay';
 
 export class MatchRepository {
   /**
@@ -42,6 +43,36 @@ export class MatchRepository {
 
       // 3️⃣ Guardar en BD (dentro de la transacción)
       await match.save({ transaction });
+
+      // 4️⃣ Persistir estado de cartas (is_exhausted, attacked_this_turn, mode, health)
+      const allCards = [
+        ...newState.player1.field_knights,
+        ...newState.player1.field_techniques,
+        ...newState.player1.hand,
+        ...newState.player2.field_knights,
+        ...newState.player2.field_techniques,
+        ...newState.player2.hand,
+      ];
+      if (newState.player1.field_helper) allCards.push(newState.player1.field_helper);
+      if (newState.player2.field_helper) allCards.push(newState.player2.field_helper);
+
+      for (const card of allCards) {
+        await CardInPlay.update(
+          {
+            has_attacked_this_turn: card.attacked_this_turn,
+            can_attack_this_turn: !card.is_exhausted,
+            // is_defensive_mode sincronizado desde status_effects (fuente de verdad)
+            is_defensive_mode: card.mode ?? 'normal',
+            // status_effects persistido como JSON (fuente de verdad para modo y boosts)
+            status_effects: JSON.stringify(card.status_effects ?? []),
+            // Guardar stats resultado de boosts activos
+            current_health: card.current_health,
+            current_attack: card.ce,
+            current_defense: card.ar,
+          },
+          { where: { id: card.instance_id }, transaction }
+        );
+      }
 
       return { success: true };
     } catch (error) {

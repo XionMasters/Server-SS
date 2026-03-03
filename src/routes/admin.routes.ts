@@ -3,6 +3,7 @@ import path from 'path';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { Match, CardInPlay, Card, User, CardKnight } from '../models/associations';
+import { ActionResolver } from '../services/game/ActionResolver';
 
 const router = Router();
 
@@ -114,6 +115,31 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
 
     if (!match) { res.status(404).json({ error: 'Partida no encontrada' }); return; }
 
+    // Enriquecer cards_in_play con valid_actions usando ActionResolver (mismo que el cliente)
+    // Admin: calculamos para AMBOS jugadores para tener visibilidad completa del campo.
+    const rawCards = match.cards_in_play.map((c: any) => ({
+      id: c.id,
+      player_number: c.player_number,
+      zone: c.zone,
+      position: c.position,
+      is_defensive_mode: c.is_defensive_mode,
+      can_attack_this_turn: c.can_attack_this_turn,
+      has_attacked_this_turn: c.has_attacked_this_turn,
+      card: c.card ? { type: c.card.type, cost: c.card.cost, card_knight: c.card.card_knight } : undefined,
+    }));
+    const matchMeta = {
+      player1_life: match.player1_life,
+      player2_life: match.player2_life,
+      player1_cosmos: match.player1_cosmos,
+      player2_cosmos: match.player2_cosmos,
+    };
+    // Correr el resolver una vez por cada jugador como activo y fusionar
+    const enrichedAsP1 = ActionResolver.resolve(rawCards, { ...matchMeta, current_player: 1 });
+    const enrichedAsP2 = ActionResolver.resolve(rawCards, { ...matchMeta, current_player: 2 });
+    const validActionsMap = new Map<string, any>();
+    enrichedAsP1.forEach((c: any) => { if (c.valid_actions !== null) validActionsMap.set(c.id, c.valid_actions); });
+    enrichedAsP2.forEach((c: any) => { if (c.valid_actions !== null) validActionsMap.set(c.id, c.valid_actions); });
+
     const zones = ['hand', 'field_knight', 'field_support', 'field_helper', 'yomotsu', 'cositos', 'deck'];
     const buildZones = (playerNum: number) => {
       const result: Record<string, any[]> = {};
@@ -126,8 +152,11 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
             card_id: c.card_id,
             position: c.position,
             mode: c.is_defensive_mode,
+            is_exhausted: c.has_attacked_this_turn || !c.can_attack_this_turn,
             can_attack: c.can_attack_this_turn,
             has_attacked: c.has_attacked_this_turn,
+            status_effects: (() => { try { return JSON.parse(c.status_effects || '[]'); } catch { return []; } })(),
+            valid_actions: validActionsMap.get(c.id) ?? null,
             atk: c.current_attack,
             def: c.current_defense,
             hp: c.current_health,
