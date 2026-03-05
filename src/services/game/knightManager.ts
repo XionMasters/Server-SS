@@ -24,7 +24,7 @@ export class KnightManager {
   // ══════════════════════════════════════════════════════════════════════════
 
   /**
-   * Cargar Cosmo: otorga cosmos_per_turn CP al jugador (3 según BASE_MATCH_RULES).
+   * Cargar Cosmo: otorga cosmos_per_charge CP al jugador (3 según BASE_MATCH_RULES).
    */
   static async chargeKnightCosmos(
     match: any,

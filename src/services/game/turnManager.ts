@@ -95,7 +95,7 @@ export class TurnManager {
           // PASO 2: LOCK DE FILA (con cartas para que el engine pueda operar)
           // ====================================================================
           await match.reload({
-            lock: transaction.LOCK.UPDATE,
+            lock: { level: transaction.LOCK.UPDATE, of: Match },
             transaction,
             include: [
               {

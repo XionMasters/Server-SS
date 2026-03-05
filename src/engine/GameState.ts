@@ -85,7 +85,10 @@ export interface GameState {
   
   // Ganador (null si partida en curso)
   winner_id: string | null;
-  
+
+  // Semilla del RNG determinista (avanza con cada acción aleatoria)
+  rng_seed: number;
+
   // Metadata
   created_at: number; // timestamp
   updated_at: number; // timestamp
@@ -130,6 +133,7 @@ export function createEmptyGameState(matchId: string): GameState {
     },
     scenario: null,
     winner_id: null,
+    rng_seed: 0,
     created_at: Date.now(),
     updated_at: Date.now(),
   };

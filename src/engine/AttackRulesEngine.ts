@@ -17,6 +17,9 @@
  * 100% puro: sin await, sin BD, sin side effects
  */
 
+import { CombatModeResolvers } from './combat/CombatResolvers';
+import { CombatContext } from './combat/CombatTypes';
+import { SeededRNG } from './combat/RNG';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
 import { StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
 
@@ -61,70 +64,79 @@ export class AttackRulesEngine {
    * Si defenderCardId es null → daño directo al jugador (CE del atacante, sin AR).
    */
   static attack(
-    state: GameState,
-    playerNumber: 1 | 2,
-    attackerCardId: string,
-    defenderCardId: string | null
-  ): { newState: GameState; damage: number; evaded: boolean } {
-    const newState = structuredClone(state);
-    const attackerPlayer = playerNumber === 1 ? newState.player1 : newState.player2;
-    const defenderPlayer = playerNumber === 1 ? newState.player2 : newState.player1;
+  state: GameState,
+  playerNumber: 1 | 2,
+  attackerCardId: string,
+  defenderCardId: string | null
+) {
+  const newState = structuredClone(state);
+  const rng = new SeededRNG(newState.rng_seed);
 
-    const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
-    const attackerCE: number = attacker.ce ?? 0;
+  const attackerPlayer = playerNumber === 1 ? newState.player1 : newState.player2;
+  const defenderPlayer = playerNumber === 1 ? newState.player2 : newState.player1;
 
-    let damage = 0;
-    let evaded = false;
+  const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
 
-    if (defenderCardId === null) {
-      // ── DAÑO DIRECTO ──────────────────────────────────────────────────────
-      damage = Math.max(1, attackerCE);
-    } else {
-      // ── COMBATE NORMAL ────────────────────────────────────────────────────
-      const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
-      const defenderMode: string = defender.mode || 'normal';
-      const defenderAR: number = defender.ar ?? 0;
+  let damageToCard = 0;
+  let damageToPlayer = 0;
+  let evaded = false;
 
-      switch (defenderMode) {
-        case 'defense':
-          damage = Math.max(1, Math.floor(attackerCE / 2) - defenderAR);
-          break;
+  if (!defenderCardId) {
+    damageToPlayer = 2; // regla fija
+  } else {
+    const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
 
-        case 'evasion': {
-          // Solo BA (ataque básico) puede ser evitado al 50 %
-          const coinFlip = Math.random() < 0.5; // true = golpea, false = esquiva
-          if (coinFlip) {
-            damage = Math.max(1, attackerCE - defenderAR);
-          } else {
-            damage = 0;
-            evaded = true;
-          }
-          break;
-        }
+    const ctx: CombatContext = {
+      state: newState,
+      attacker,
+      defender,
+      defenderPlayer
+    };
 
-        default:
-          damage = Math.max(1, attackerCE - defenderAR);
-          break;
+    const resolver =
+      CombatModeResolvers[defender.mode ?? "normal"] ??
+      CombatModeResolvers.normal;
+
+    const result = resolver(ctx, rng);
+
+    damageToCard = result.damageToCard;
+    evaded = result.evaded;
+
+    if (!evaded) {
+      defender.current_health -= damageToCard;
+
+      if (defender.current_health <= 0) {
+        defenderPlayer.field_knights =
+          defenderPlayer.field_knights.filter(
+            c => c.instance_id !== defenderCardId
+          );
+
+        defender.zone = "yomotsu";
+        defenderPlayer.graveyard_count += 1;
+
+        damageToPlayer = 1; // regla fija
       }
     }
-
-    // Aplicar daño al jugador defensor
-    if (!evaded) {
-      defenderPlayer.life = Math.max(0, defenderPlayer.life - damage);
-    }
-
-    // Marcar atacante como exhausto
-    attacker.is_exhausted = true;
-    attacker.attacked_this_turn = true;
-
-    // Verificar ganador
-    resolveWinCondition(newState);
-
-    newState.updated_at = Date.now();
-
-    return { newState, damage, evaded };
   }
 
+  defenderPlayer.life = Math.max(
+    0,
+    defenderPlayer.life - damageToPlayer
+  );
+
+  attacker.is_exhausted = true;
+  attacker.attacked_this_turn = true;
+
+  newState.rng_seed = rng.getSeed();
+
+  resolveWinCondition(newState);
+
+  return {
+    newState,
+    damage: damageToCard,
+    evaded
+  };
+}
   /**
    * Cambia el modo defensivo de una carta en campo.
    * Implementado como StatusEffect con remaining_turns = 1:

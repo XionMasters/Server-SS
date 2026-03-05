@@ -18,7 +18,10 @@ export const BASE_MATCH_RULES: MatchRules = {
   turn: {
     draw_per_turn: 1,
 
-    // Por ahora fijo, pero deja la puerta abierta a escalado
-    cosmos_per_turn: 3
+    // Cosmos automático al inicio de cada turno
+    cosmos_on_turn_start: 1,
+
+    // Cosmos ganado al usar la acción Cargar Cosmo
+    cosmos_per_charge: 1
   }
 };

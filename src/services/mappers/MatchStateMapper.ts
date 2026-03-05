@@ -20,6 +20,7 @@
 
 import { GameState, Player, CardInGameState, createEmptyGameState } from '../../engine/GameState';
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../engine/StatusEffects';
+import { xmur3 } from '../../engine/combat/RNG';
 import CardInPlay from '../../models/CardInPlay';
 
 // Asume que existen estos modelos
@@ -101,6 +102,12 @@ export class MatchStateMapper {
 
     // Ganador
     state.winner_id = match.winner_id ?? null;
+
+    // Semilla RNG: derivada deterministicamente del estado de la partida.
+    // Se recalcula en cada carga; no necesita columna en BD.
+    // Cambia con cada acción porque graveyard_count y cosmos avanzan.
+    const graveyardTotal = (match.player1_graveyard_count || 0) + (match.player2_graveyard_count || 0);
+    state.rng_seed = xmur3(`${match.id}:${match.current_turn}:${graveyardTotal}:${match.player1_cosmos || 0}:${match.player2_cosmos || 0}`);
 
     // Cartas en juego (si el match fue cargado con include: cards_in_play)
     const cards: any[] = match.cards_in_play ?? match.cardsInPlay ?? [];

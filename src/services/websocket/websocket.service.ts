@@ -123,6 +123,10 @@ router.registerMany({
   admin_block_user: withAdmin(async (_ws, data) => {
     await handleAdminBlockUser(data, presenceService.getPrimarySocketsMap());
   }),
+  ping: (ws) => {
+    // Responder al heartbeat del cliente
+    presenceService.sendToSocket(ws as WebSocket, 'pong', { ts: Date.now() });
+  },
 });
 
 // Matchmaking handler implementado más abajo (handleSearchMatch)

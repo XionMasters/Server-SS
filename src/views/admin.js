@@ -262,7 +262,16 @@ function renderInspector(d) {
         if (!cards || cards.length === 0) return `<span class="zone-empty">vacío</span>`;
         return cards.map(c => {
             const rarCls = `rarity-${c.rarity || 'common'}`;
-            const stats  = c.knight ? `ATK:${c.knight.atk} DEF:${c.knight.ar} HP:${c.knight.hp} CE:${c.knight.ce}` : `cost:${c.cost}`;
+            let stats;
+            if (c.knight) {
+                const hpStr  = c.hp  != null ? `${c.hp}/${c.knight.hp}`   : `${c.knight.hp}`;
+                const ceStr  = c.atk != null ? `${c.atk}`                  : `${c.knight.atk}`;
+                const arStr  = c.def != null ? `${c.def}`                  : `${c.knight.ar}`;
+                const cpStr  = c.cosmos != null ? `${c.cosmos}/${c.knight.ce}` : `${c.knight.ce}`;
+                stats = `HP:${hpStr} CE:${ceStr} AR:${arStr} CP:${cpStr}`;
+            } else {
+                stats = `cost:${c.cost}`;
+            }
             const posLabel = (zoneName === 'field_knight' || zoneName === 'field_support') ? ` [${c.position}]` : '';
 
             let extraHtml = '';

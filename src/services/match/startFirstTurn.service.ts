@@ -2,8 +2,6 @@ import Match from '../../models/Match';
 import { MatchStateService } from './matchState.service';
 import { applyHandVisibility } from '../serializers/handVisibility';
 
-const COSMOS_PER_TURN = 3;
-
 export class StartFirstTurnService {
   static async execute(matchId: string, userId: string): Promise<any> {
     try {
@@ -36,7 +34,7 @@ export class StartFirstTurnService {
       match.phase = 'player1_turn';
       match.current_player = 1;
       match.current_turn = 1;
-      match.player1_cosmos = (match.player1_cosmos || 0) + COSMOS_PER_TURN;
+      match.player1_cosmos = Math.min((match.player1_cosmos || 0) + 1, 12);
 
       const player1DeckOrder = JSON.parse((match as any).player1_deck_order || '[]');
       let player1DeckIndex = (match as any).player1_deck_index || 5;

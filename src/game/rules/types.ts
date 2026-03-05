@@ -11,7 +11,10 @@ export interface DeckRules {
 
 export interface TurnRules {
   draw_per_turn: number;
-  cosmos_per_turn: number | ((turnNumber: number) => number);
+  /** Cosmos otorgado automáticamente al inicio de cada turno */
+  cosmos_on_turn_start: number | ((turnNumber: number) => number);
+  /** Cosmos ganado por la acción Cargar Cosmo (Carregar Cosmo) */
+  cosmos_per_charge: number | ((turnNumber: number) => number);
 }
 
 export interface MatchRules {

@@ -17,6 +17,7 @@ import { sequelize } from '../../config/database';
 import Match from '../../models/Match';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
+import CardKnight from '../../models/CardKnight';
 import { CardRulesEngine } from '../../engine/CardRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
@@ -60,7 +61,11 @@ export class CardManager {
         // 3 VALIDAR: carta existe en la mano del jugador (query directo)
         const cardInPlay = await CardInPlay.findOne({
           where: { id: cardId, match_id: match.id, player_number: playerNumber, zone: 'hand' },
-          include: [{ model: Card, as: 'card' }],
+          include: [{
+            model: Card,
+            as: 'card',
+            include: [{ model: CardKnight, as: 'card_knight' }],
+          }],
           transaction,
         });
         if (!cardInPlay) {
@@ -75,21 +80,47 @@ export class CardManager {
           throw new Error(`Cosmos insuficiente. Requiere: ${cardCost}, tienes: ${currentCosmos}`);
         }
 
-        // 4b VALIDAR: zona no llena (máx 5 para knight/technique)
-        const zonaConLimite = ['field_knight', 'field_technique'];
-        if (zonaConLimite.includes(targetZone)) {
+        // 4b VALIDAR: zona no llena (máx 5 para knight/technique, máx 1 para helper)
+        // Traducir zona del cliente a zona interna de BD para la query
+        const dbZoneForCount = targetZone === 'field_technique' ? 'field_support' : targetZone;
+        const zonaConLimite: { [key: string]: number } = {
+          'field_knight': 5,
+          'field_technique': 5,
+          'field_helper': 1,
+        };
+        if (zonaConLimite[targetZone] !== undefined) {
           const fieldCount = await CardInPlay.count({
-            where: { match_id: match.id, player_number: playerNumber, zone: targetZone },
+            where: { match_id: match.id, player_number: playerNumber, zone: dbZoneForCount },
             transaction,
           });
-          if (fieldCount >= 5) {
-            throw new Error(`Zona ${targetZone} está llena (máximo 5)`);
+          if (fieldCount >= zonaConLimite[targetZone]) {
+            throw new Error(`Zona ${targetZone} está llena (máximo ${zonaConLimite[targetZone]})`);
           }
         }
 
         // 5 EJECUTAR: mover carta al campo
-        (cardInPlay as any).zone = targetZone;
+        // Traducir zona del cliente a zona interna de BD
+        const dbZone = targetZone === 'field_technique' ? 'field_support' : targetZone;
+        (cardInPlay as any).zone = dbZone;
         (cardInPlay as any).position = position;
+
+        // Inicializar stats desde CardKnight si la carta es un caballero y aún son 0
+        const knight: CardKnight | null = (cardInPlay as any).card?.card_knight ?? null;
+        if (knight && (cardInPlay as any).card?.type === 'knight') {
+          if ((cardInPlay as any).current_health === 0) {
+            (cardInPlay as any).current_health  = knight.health;
+          }
+          if ((cardInPlay as any).current_attack === 0) {
+            (cardInPlay as any).current_attack  = knight.attack;
+          }
+          if ((cardInPlay as any).current_defense === 0) {
+            (cardInPlay as any).current_defense = knight.defense;
+          }
+          if ((cardInPlay as any).current_cosmos === 0) {
+            (cardInPlay as any).current_cosmos  = knight.cosmos;
+          }
+        }
+
         await (cardInPlay as any).save({ transaction });
 
         // 6 DECREMENTAR cosmos en el modelo Match

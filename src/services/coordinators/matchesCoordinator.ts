@@ -101,6 +101,23 @@ export class MatchesCoordinator {
       matchData
     );
 
+    // DEBUG: log field knights before broadcast
+    const fieldKnights = (matchData.cards_in_play || []).filter((c: any) => c.zone === 'field_knight');
+    if (fieldKnights.length > 0) {
+      console.log('[MatchesCoordinator] 🃏 FIELD KNIGHTS antes de enviar:');
+      for (const c of fieldKnights) {
+        const bd = c.base_data || c.card || {};
+        const ck = bd.card_knight;
+        console.log(
+          `  [P${c.player_number} pos${c.position}] ${bd.name ?? '?'} | ` +
+          `HP: ${c.current_health}/${c.max_health} | ` +
+          `CE: ${c.current_attack} | AR: ${c.current_defense} | ` +
+          `CP: ${c.current_cosmos}/${c.max_cosmos} | ` +
+          `base_knight: ${ck ? JSON.stringify({atk:ck.attack,def:ck.defense,hp:ck.health,cp:ck.cosmos}) : 'AUSENTE'}`
+        );
+      }
+    }
+
     const player1Id = matchData.player1?.id || matchData.player1_id;
     const player2Id = matchData.player2?.id || matchData.player2_id;
     const isTestMatch = player1Id && player1Id === player2Id;

@@ -130,11 +130,10 @@ export class ActionResolver {
       ? this._resolveAttackTargets(opponentKnights)
       : null;
 
-    const canMove = canActAtAll && emptySlots.length > 0;
-    // Move targets: slots vacíos excluyendo la posición propia (ya está ocupada, pero por claridad)
-    const moveTargets = canMove
-      ? emptySlots.filter(i => i !== knight.position)
-      : [];
+    // Move targets: solo casillas adyacentes (±1) que estén vacías
+    const adjacentEmptySlots = emptySlots.filter(i => Math.abs(i - knight.position) === 1);
+    const canMove = canActAtAll && adjacentEmptySlots.length > 0;
+    const moveTargets = canMove ? adjacentEmptySlots : [];
 
     const canCharge   = canActAtAll;
     const canEvade    = canActAtAll

@@ -1,8 +1,10 @@
 import Match from '../../models/Match';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
+import CardKnight from '../../models/CardKnight';
 import User from '../../models/User';
 import { applyHandVisibility } from '../serializers/handVisibility';
+import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
 
 interface BuildOptions {
   perspectivePlayer?: number; // 1 o 2
@@ -23,7 +25,11 @@ export class GameStateBuilder {
 
     const cardsInPlay = await CardInPlay.findAll({
       where: { match_id: match.id },
-      include: [{ model: Card, as: 'card' }]
+      include: [{
+        model: Card,
+        as: 'card',
+        include: [{ model: CardKnight, as: 'card_knight' }]
+      }]
     });
 
     return this._build(matchWithUsers || match, cardsInPlay, options);
@@ -36,29 +42,8 @@ export class GameStateBuilder {
   ): any {
     const perspectivePlayer = options.perspectivePlayer ?? 1;
 
-    // Serializar cartas
-    const cardsData = cardsInPlay.map((cip: any) => ({
-      id: cip.id,
-      instance_id: cip.id,
-      card_id: cip.card_id,
-      player_number: cip.player_number,
-      zone: cip.zone,
-      position: cip.position,
-      // is_defensive_mode puede ser string ('normal','defense','evasion') o bool legacy (false)
-      mode: (!cip.is_defensive_mode || cip.is_defensive_mode === 'normal') ? 'normal' : String(cip.is_defensive_mode),
-      is_exhausted: cip.has_attacked_this_turn,
-      has_attacked_this_turn: cip.has_attacked_this_turn,
-
-      base_data: {
-        id: cip.card.id,
-        name: cip.card.name,
-        type: cip.card.type,
-        rarity: cip.card.rarity,
-        cost: cip.card.cost,
-        image_url: cip.card.image_url,
-        description: cip.card.description
-      }
-    }));
+    // Serializar cartas usando la fuente única de verdad
+    const cardsData = cardsInPlay.map(serializeCardInPlay);
 
     // Contadores
     const count = (player: number, zone: string) =>

@@ -108,9 +108,9 @@ export class TurnRulesEngine {
       newState.current_turn += 1;
     }
 
-    // 4️⃣ Otorgar cosmos al siguiente jugador
-    const cosmosPerTurn = BASE_MATCH_RULES.turn.cosmos_per_turn;
-    const cosmosIncrease = typeof cosmosPerTurn === 'function' ? cosmosPerTurn(newState.current_turn) : cosmosPerTurn;
+    // 4️⃣ Otorgar cosmos al siguiente jugador (automático al inicio de turno)
+    const cosmosOnTurnStart = BASE_MATCH_RULES.turn.cosmos_on_turn_start;
+    const cosmosIncrease = typeof cosmosOnTurnStart === 'function' ? cosmosOnTurnStart(newState.current_turn) : cosmosOnTurnStart;
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
     nextPlayerObj.cosmos += cosmosIncrease;
 

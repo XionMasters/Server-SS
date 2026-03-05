@@ -37,7 +37,7 @@ export class KnightRulesEngine {
   }
 
   /**
-   * Otorga cosmos_per_turn al jugador (según BASE_MATCH_RULES).
+   * Otorga cosmos_per_charge al jugador (según BASE_MATCH_RULES).
    * Acción: Cargar Cosmo (Carregar Cosmo).
    */
   static chargeKnightCosmos(
@@ -47,8 +47,8 @@ export class KnightRulesEngine {
     const newState = structuredClone(state);
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
-    const cosmosPerTurn = BASE_MATCH_RULES.turn.cosmos_per_turn;
-    const cosmosGained = typeof cosmosPerTurn === 'function' ? cosmosPerTurn(state.current_turn) : cosmosPerTurn;
+    const cosmosPerCharge = BASE_MATCH_RULES.turn.cosmos_per_charge;
+    const cosmosGained = typeof cosmosPerCharge === 'function' ? cosmosPerCharge(state.current_turn) : cosmosPerCharge;
     player.cosmos += cosmosGained;
 
     newState.updated_at = Date.now();

@@ -160,6 +160,7 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
             atk: c.current_attack,
             def: c.current_defense,
             hp: c.current_health,
+            cosmos: c.current_cosmos,
             name: c.card?.name || '?',
             type: c.card?.type || '?',
             rarity: c.card?.rarity || '?',

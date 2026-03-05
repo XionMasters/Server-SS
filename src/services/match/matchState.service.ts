@@ -1,5 +1,6 @@
 import Match from '../../models/Match';
 import Card from '../../models/Card';
+import CardKnight from '../../models/CardKnight';
 import CardInPlay from '../../models/CardInPlay';
 import User from '../../models/User';
 import { GameStateBuilder } from '../game/GameStateBuilder';
@@ -37,7 +38,8 @@ export class MatchStateService {
           {
             model: Card,
             as: 'card',
-            attributes: ['id', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description']
+            attributes: ['id', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element'],
+            include: [{ model: CardKnight, as: 'card_knight' }]
           }
         ]
       });
@@ -48,6 +50,8 @@ export class MatchStateService {
       const player2HandCount = cardsInPlay.filter((c: any) => c.player_number === 2 && c.zone === 'hand').length;
       const player1DeckSize = cardsInPlay.filter((c: any) => c.player_number === 1 && c.zone === 'deck').length;
       const player2DeckSize = cardsInPlay.filter((c: any) => c.player_number === 2 && c.zone === 'deck').length;
+      const player1GraveyardCount = cardsInPlay.filter((c: any) => c.player_number === 1 && c.zone === 'yomotsu').length;
+      const player2GraveyardCount = cardsInPlay.filter((c: any) => c.player_number === 2 && c.zone === 'yomotsu').length;
 
       return {
         success: true,
@@ -70,6 +74,8 @@ export class MatchStateService {
           player2_hand_count: player2HandCount,
           player1_deck_size: player1DeckSize,
           player2_deck_size: player2DeckSize,
+          player1_graveyard_count: player1GraveyardCount,
+          player2_graveyard_count: player2GraveyardCount,
           cards_in_play: cardsData
         }
       };

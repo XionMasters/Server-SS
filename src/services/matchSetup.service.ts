@@ -1,5 +1,8 @@
+import { Op } from 'sequelize';
 import Match from '../models/Match';
 import CardInPlay from '../models/CardInPlay';
+import Card from '../models/Card';
+import CardKnight from '../models/CardKnight';
 import { DeckService } from './deck.service';
 
 export class MatchSetupService {
@@ -34,7 +37,24 @@ export class MatchSetupService {
 
       console.log(`✅ Decks barajados y guardados en Match`);
 
-      // Crear CardInPlay records
+      // Cargar stats de CardKnight para todos los card_id únicos de ambos decks
+      const allCardIds = [...new Set([...shuffledDeck1, ...shuffledDeck2])];
+      const knightRows = await CardKnight.findAll({
+        where: { card_id: { [Op.in]: allCardIds } }
+      });
+      const knightMap = new Map<string, CardKnight>();
+      for (const k of knightRows) knightMap.set(k.card_id, k);
+
+      // Helper local para obtener stats base de una carta
+      const knightStats = (cardId: string) => {
+        const k = knightMap.get(cardId);
+        return {
+          current_attack:  k?.attack  ?? 0,
+          current_defense: k?.defense ?? 0,
+          current_health:  k?.health  ?? 0,
+          current_cosmos:  k?.cosmos  ?? 0,
+        };
+      };
       const cardsInPlayData: any[] = [];
 
       // Jugador 1 - cartas en mano
@@ -46,10 +66,7 @@ export class MatchSetupService {
           zone: 'hand',
           position: i,
           is_defensive_mode: false,
-          current_attack: 0,
-          current_defense: 0,
-          current_health: 0,
-          current_cosmos: 0,
+          ...knightStats(shuffledDeck1[i]),
           attached_cards: '[]',
           status_effects: '[]',
           can_attack_this_turn: true,
@@ -66,10 +83,7 @@ export class MatchSetupService {
           zone: 'deck',
           position: i - initialHandSize,
           is_defensive_mode: false,
-          current_attack: 0,
-          current_defense: 0,
-          current_health: 0,
-          current_cosmos: 0,
+          ...knightStats(shuffledDeck1[i]),
           attached_cards: '[]',
           status_effects: '[]',
           can_attack_this_turn: true,
@@ -86,10 +100,7 @@ export class MatchSetupService {
           zone: 'hand',
           position: i,
           is_defensive_mode: false,
-          current_attack: 0,
-          current_defense: 0,
-          current_health: 0,
-          current_cosmos: 0,
+          ...knightStats(shuffledDeck2[i]),
           attached_cards: '[]',
           status_effects: '[]',
           can_attack_this_turn: true,
@@ -106,10 +117,7 @@ export class MatchSetupService {
           zone: 'deck',
           position: i - initialHandSize,
           is_defensive_mode: false,
-          current_attack: 0,
-          current_defense: 0,
-          current_health: 0,
-          current_cosmos: 0,
+          ...knightStats(shuffledDeck2[i]),
           attached_cards: '[]',
           status_effects: '[]',
           can_attack_this_turn: true,

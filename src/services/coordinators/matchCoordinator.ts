@@ -142,7 +142,7 @@ export class MatchCoordinator {
   }
 
   /**
-   * Cargar Cosmo: otorga cosmos_per_turn CP al jugador activo.
+   * Cargar Cosmo: otorga cosmos_per_charge CP al jugador activo.
    * DELEGA: KnightManager
    */
   static async chargeKnightCosmos(
