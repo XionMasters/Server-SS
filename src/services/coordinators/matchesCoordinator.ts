@@ -80,7 +80,7 @@ export class MatchesCoordinator {
     };
   }
 
-  private async _buildMatchUpdateResult(actionResult: any, matchId: string, userId: string) {
+  private async _buildMatchUpdateResult(actionResult: any, matchId: string, userId: string, lastAction: Record<string, any> | null = null) {
     if (!actionResult?.success) {
       return this.normalizeEvents(actionResult, userId);
     }
@@ -122,12 +122,15 @@ export class MatchesCoordinator {
     const player2Id = matchData.player2?.id || matchData.player2_id;
     const isTestMatch = player1Id && player1Id === player2Id;
 
+    console.log(`[MatchesCoordinator] 📡 Recipients → P1: ${player1Id} | P2: ${player2Id} | test: ${isTestMatch}`);
+
     if (isTestMatch) {
       // En TEST: el jugador activo ve su mano; el inactivo ve dorsos
       const activePlayer: number = matchData.current_player || 1;
 
       const testMatchData = {
         ...matchData,
+        last_action: lastAction ?? null,
         perspective_player: activePlayer,
         cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer)
       };
@@ -147,6 +150,7 @@ export class MatchesCoordinator {
     // PvP normal: cada jugador ve su propia mano, la del rival como dorsos
     const forPlayer = (playerNumber: number) => ({
       ...matchData,
+      last_action: lastAction ?? null,
       perspective_player: playerNumber,
       cards_in_play: applyHandVisibility(matchData.cards_in_play || [], playerNumber)
     });
@@ -191,7 +195,7 @@ export class MatchesCoordinator {
         }
 
         const result = await MatchCoordinator.endTurn(matchId, userId, actionId);
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId, { type: 'end_turn' });
       }
 
       case 'PLAY_CARD': {
@@ -199,15 +203,14 @@ export class MatchesCoordinator {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
         }
 
-        const result = await MatchCoordinator.playCard(
-          matchId,
-          userId,
-          action.cardId || action.card_id,
-          action.zone,
-          action.position,
-          actionId
-        );
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        const cardId = action.cardId || action.card_id;
+        const result = await MatchCoordinator.playCard(matchId, userId, cardId, action.zone, action.position, actionId);
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'play_card',
+          card_id: cardId,
+          zone: action.zone,
+          position: action.position,
+        });
       }
 
       case 'ATTACK': {
@@ -215,14 +218,17 @@ export class MatchesCoordinator {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
         }
 
-        const result = await MatchCoordinator.attack(
-          matchId,
-          userId,
-          action.attackerCardId || action.attacker_card_id || action.attacker_id,
-          (action.defenderCardId || action.defender_card_id || action.defender_id) || null,
-          actionId
-        );
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        const attackerCardId = action.attackerCardId || action.attacker_card_id || action.attacker_id;
+        const defenderCardId = (action.defenderCardId || action.defender_card_id || action.defender_id) || null;
+        const result = await MatchCoordinator.attack(matchId, userId, attackerCardId, defenderCardId, actionId);
+        const attackResult = result as any;
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'attack',
+          attacker_id: attackerCardId,
+          defender_id: defenderCardId,
+          damage: attackResult.damage ?? 0,
+          evaded: attackResult.evaded ?? false,
+        });
       }
 
       case 'CHANGE_DEFENSIVE_MODE': {
@@ -230,14 +236,13 @@ export class MatchesCoordinator {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
         }
 
-        const result = await MatchCoordinator.changeDefensiveMode(
-          matchId,
-          userId,
-          action.cardId || action.card_id || action.knight_id,
-          action.mode,
-          actionId
-        );
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        const cardId = action.cardId || action.card_id || action.knight_id;
+        const result = await MatchCoordinator.changeDefensiveMode(matchId, userId, cardId, action.mode, actionId);
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'change_mode',
+          card_id: cardId,
+          mode: action.mode,
+        });
       }
 
       case 'CHARGE_COSMOS': {
@@ -246,7 +251,7 @@ export class MatchesCoordinator {
         }
 
         const result = await MatchCoordinator.chargeKnightCosmos(matchId, userId, actionId);
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        return this._buildMatchUpdateResult(result, matchId, userId, { type: 'charge_cosmos' });
       }
 
       case 'SACRIFICE_KNIGHT': {
@@ -254,13 +259,9 @@ export class MatchesCoordinator {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
         }
 
-        const result = await MatchCoordinator.sacrificeKnight(
-          matchId,
-          userId,
-          action.cardId || action.card_id || action.card_in_play_id,
-          actionId
-        );
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        const cardId = action.cardId || action.card_id || action.card_in_play_id;
+        const result = await MatchCoordinator.sacrificeKnight(matchId, userId, cardId, actionId);
+        return this._buildMatchUpdateResult(result, matchId, userId, { type: 'sacrifice', card_id: cardId });
       }
 
       case 'MOVE_KNIGHT': {
@@ -273,14 +274,13 @@ export class MatchesCoordinator {
           return { success: false, code: 'TARGET_POSITION_REQUIRED', error: 'targetPosition es requerido (0–4)' };
         }
 
-        const result = await MatchCoordinator.moveKnight(
-          matchId,
-          userId,
-          action.cardId || action.card_id || action.card_in_play_id,
-          targetPosition,
-          actionId
-        );
-        return this._buildMatchUpdateResult(result, matchId, userId);
+        const cardId = action.cardId || action.card_id || action.card_in_play_id;
+        const result = await MatchCoordinator.moveKnight(matchId, userId, cardId, targetPosition, actionId);
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'move',
+          card_id: cardId,
+          to_position: targetPosition,
+        });
       }
 
       case 'START_FIRST_TURN': {

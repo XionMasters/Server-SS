@@ -3,6 +3,7 @@
 import { IncomingMessage } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import Match from '../../models/Match';
+import { GameStateBuilder } from '../game/GameStateBuilder';
 import UserProfile from '../../models/UserProfile';
 import ProfileAvatar from '../../models/ProfileAvatar';
 import { MatchStateService } from '../match/matchState.service';
@@ -136,8 +137,8 @@ router.registerMany({
  * Inicializa el servidor de WebSockets nativos
  */
 export const initializeWebSocketServer = (server: any) => {
-  const wss = new WebSocketServer({ 
-    server, 
+  const wss = new WebSocketServer({
+    server,
     path: '/ws'  // Ruta específica para WebSocket
   });
 
@@ -161,7 +162,7 @@ export const initializeWebSocketServer = (server: any) => {
 
   wss.on('connection', async (ws: AuthenticatedWebSocket, req: IncomingMessage) => {
     ws.isAlive = true;
-    
+
     ws.on('pong', () => {
       ws.isAlive = true;
     });
@@ -217,14 +218,14 @@ export const initializeWebSocketServer = (server: any) => {
       broadcastOnlineUsers();
 
       console.log(`✅ Usuario conectado: ${ws.username} (${ws.userId})`);
-      
-      presenceService.sendToSocket(ws, 'connected', { 
+
+      presenceService.sendToSocket(ws, 'connected', {
         message: 'Conectado al servidor',
         user_id: ws.userId,
         username: ws.username,
         has_active_match: !!(recoveryResult.success && recoveryResult.data?.matchResumed)
       });
-      
+
       // Actualizar stats de admin
       await broadcastAdminStats(presenceService.getPrimarySocketsMap());
 
@@ -245,8 +246,11 @@ export const initializeWebSocketServer = (server: any) => {
         const parsed = JSON.parse(raw.toString());
         if (!parsed.event) return;
 
-        console.log(`📨 Evento recibido: ${parsed.event} de ${ws.username}`);
+        if (parsed.event != 'ping') {
+          console.log(`📨 Evento recibido: ${parsed.event} de ${ws.username}`);
+        }
         await router.route(ws as any, parsed.event, parsed.data || {});
+
 
       } catch (error: any) {
         console.error('Error procesando mensaje:', error);
@@ -268,7 +272,7 @@ export const initializeWebSocketServer = (server: any) => {
         presenceService.removeConnection(ws);
         const userStillOnline = presenceService.isUserOnline(ws.userId);
         broadcastOnlineUsers();
-        
+
         if (!userStillOnline) {
           const waitingMatch = await Match.findOne({
             where: {
@@ -282,7 +286,7 @@ export const initializeWebSocketServer = (server: any) => {
             console.log(`🧹 Partida en espera eliminada: ${waitingMatch.id}`);
           }
         }
-        
+
         // Actualizar stats de admin
         await broadcastAdminStats(presenceService.getPrimarySocketsMap());
       }
@@ -320,18 +324,34 @@ async function handleSearchMatch(ws: AuthenticatedWebSocket) {
       });
     }
 
-    // ✅ Match encontrado - notificar al cliente y al rival
+    // ✅ Match encontrado - notificar a cada jugador con su propia perspectiva
     if (result.status === 'match_found') {
       console.log(`✅ Match encontrado: ${result.match_id}`);
-      
+
       const matchData = result.data;
-      const recipients = [matchData.player1.id, matchData.player2.id].filter(Boolean);
-      presenceService.broadcastToUsers(recipients, 'match_found', matchData);
-    } 
+      const player1Id = matchData.player1.id as string;
+      const player2Id = matchData.player2.id as string;
+
+      // Construir estado por perspectiva para cada jugador
+      const matchRecord = await Match.findByPk(result.match_id);
+
+      if (matchRecord) {
+        const [gs1, gs2] = await Promise.all([
+          GameStateBuilder.buildFromMatch(matchRecord, { perspectivePlayer: 1 }),
+          GameStateBuilder.buildFromMatch(matchRecord, { perspectivePlayer: 2 })
+        ]);
+        presenceService.broadcastToUsers([player1Id], 'match_found', { match_id: result.match_id, game_state: gs1 });
+        presenceService.broadcastToUsers([player2Id], 'match_found', { match_id: result.match_id, game_state: gs2 });
+      } else {
+        // Fallback: enviar datos originales (sin game_state) — iniciará con error gracioso
+        const recipients = [player1Id, player2Id].filter(Boolean);
+        presenceService.broadcastToUsers(recipients, 'match_found', matchData);
+      }
+    }
     // ⏳ En espera de rival
     else {
       console.log(`⏳ ${username} esperando rival... (Match ID: ${result.match_id})`);
-      
+
       presenceService.sendToSocket(ws, 'searching', {
         message: 'Buscando rival...',
         match_id: result.match_id
@@ -368,12 +388,12 @@ async function handleCancelSearch(ws: AuthenticatedWebSocket) {
       console.log(`   - Partida encontrada: ${waitingMatch.id}`);
       await waitingMatch.destroy();
       console.log(`✅ ${username} canceló la búsqueda exitosamente`);
-      
+
       presenceService.sendToSocket(ws, 'search_cancelled', {
         success: true,
         message: 'Búsqueda cancelada'
       });
-      
+
       // Actualizar stats de admin
       await broadcastAdminStats(presenceService.getPrimarySocketsMap());
     } else {
@@ -431,7 +451,7 @@ async function handleUpdateStatus(ws: WebSocket, data: any) {
   try {
     const { status } = data;
     const userId = (ws as any).userId;
-    
+
     if (!['online', 'in_match', 'away'].includes(status)) {
       presenceService.sendToSocket(ws, 'error', { error: 'Estado inválido' });
       return;
@@ -499,7 +519,7 @@ export async function broadcastMatchUpdate(matchId: string) {
 async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
   try {
     console.log(`🎭 ${ws.username} solicita partida TEST`);
-    
+
     const userId = ws.userId!;
 
     // Usar StartMatchService que centraliza toda la lógica
@@ -513,11 +533,11 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
 
   } catch (error: any) {
     console.error('❌ Error en handleRequestTestMatch:', error);
-    
+
     // Adaptar mensajes de error comunes
     let errorMessage = 'Error creando partida TEST';
     let errorCode = 'TEST_MATCH_ERROR';
-    
+
     if (error.message.includes('mazo activo')) {
       errorCode = 'NO_ACTIVE_DECK';
       errorMessage = error.message;
@@ -528,11 +548,11 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
       errorCode = 'RATE_LIMIT';
       errorMessage = error.message;
     }
-    
-    presenceService.sendToSocket(ws, 'match_error', { 
+
+    presenceService.sendToSocket(ws, 'match_error', {
       code: errorCode,
       message: errorMessage,
-      error: error.message 
+      error: error.message
     });
   }
 }
