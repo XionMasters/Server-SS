@@ -1,0 +1,32 @@
+{
+  "saga": "Santuario",
+  "type": "occasion",
+  "cards": [
+    {
+      "code": "athena_blessing",
+      "name": "Bendición de Athena",
+      "rarity": "rare",
+      "cost": 2,
+      "faction": "Athena",
+      "element": "light",
+      "image": "occasions/athena_blessing.webp",
+
+      "abilities": [
+        {
+          "name": "Divine Protection",
+          "type": "instant",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "heal",
+                "amount": 3,
+                "target": "all_allies"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

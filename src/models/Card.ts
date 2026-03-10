@@ -4,6 +4,7 @@ import { sequelize } from '../config/database';
 
 class Card extends Model {
   public id!: string;
+  public code!: string;
   public name!: string;
   public type!: 'knight' | 'technique' | 'item' | 'stage' | 'helper' | 'event' | 'caballero' | 'técnica' | 'objeto' | 'escenario' | 'ayudante' | 'ocasión' | 'tecnica' | 'ocasion';
   public rarity!: 'common' | 'rare' | 'epic' | 'legendary' | 'divine';
@@ -33,6 +34,11 @@ Card.init(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
+    },
+    code: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
     },
     name: {
       type: DataTypes.STRING(100),

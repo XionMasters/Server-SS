@@ -7,18 +7,22 @@
  * DISEÑO:
  * ─ Solo calcula para el jugador activo (current_player).  El inactivo recibe valid_actions = null.
  * ─ Sin acceso a BD: trabaja únicamente con los arrays de cartas y el estado del match.
- * ─ Extensible: cada acción tiene su propio método privado → agregar habilidades es agregar casos.
+ * ─ Las habilidades activas de carta viven en `src/game/abilities/`.
+ *   ActionResolver NUNCA conoce habilidades individuales: delega en AbilityRegistry.
  *
  * FLUJO:
  *   matchesCoordinator → ActionResolver.resolve(cards, matchState) → cards enriquecidas
  *
- * FUTURO:
- * ─ Habilidad "Defensor": _resolveAttackTargets filtrará solo defensores
- * ─ Habilidad "Sin evasión": _noScenarioPreventsEvasion leerá el escenario en juego
- * ─ Técnicas: _resolveTechniqueTargets calculará qué técnicas puede activar cada knight
- * ─ Habilidades activas de carta: un nuevo bloque "active_abilities" por carta
+ * AGREGAR UNA HABILIDAD NUEVA:
+ *   1. Crear src/game/abilities/mi_habilidad.ability.ts
+ *   2. Importarla en AbilityRegistry.ts
+ *   → Este archivo no se toca.
  */
-
+import { ResolvedAbility } from '../../game/abilities/AbilityTypes';
+import { AbilityEngine } from '../../engine/abilities/AbilityEngine';
+import { parseAbilityDef, getCosmosCost, requiresClientTarget } from '../../engine/abilities/AbilityDefinition';
+import { type ConditionContext } from '../../engine/conditions/ConditionRegistry';
+import { GameEventType, type GameEvent } from '../../engine/events/GameEvents';
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,6 +43,11 @@ export interface KnightValidActions {
   can_evade: boolean;    // Modo Evasão
   can_defend: boolean;   // Modo Defesa
   can_sacrifice: boolean;
+
+  /** Habilidades activas de carta disponibles */
+  can_use_ability: boolean;
+  /** Lista de habilidades activas disponibles con nombre y costo en CP */
+  active_abilities: { ability_name: string; cosmos_cost: number }[];
 
   /** Para más adelante — siempre false hasta implementar */
   can_use_technique: boolean;
@@ -144,6 +153,11 @@ export class ActionResolver {
       && (knight.card?.card_knight?.can_defend !== false);
     const canSacrifice = !hasActed; // El sacrificio siempre usa la acción del caballero
 
+    // ── Habilidades activas ─────────────────────────────────────────────
+    // Delegado al AbilityRegistry; este método no crece al agregar cartas nuevas.
+    const activeAbilities = this._resolveAbilities(knight, matchState, opponentKnights);
+    const canUseAbility = activeAbilities.length > 0;
+
     return {
       has_acted: hasActed,
       can_attack: canAttack,
@@ -154,6 +168,8 @@ export class ActionResolver {
       can_evade: canEvade,
       can_defend: canDefend,
       can_sacrifice: canSacrifice,
+      can_use_ability: canUseAbility,
+      active_abilities: activeAbilities,
       // ─── Por implementar ───────────────────────────────────────────────────
       can_use_technique: false,
       technique_targets: [],
@@ -193,6 +209,68 @@ export class ActionResolver {
     if (!raw || raw === false) return 'normal';
     if (raw === true)           return 'defense'; // legacy bool
     return String(raw);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ABILITY RESOLUTION
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Evalúa qué habilidades activas del caballero están disponibles en este momento.
+   * Lee las definiciones desde card_abilities.effects (JSONB) y delega a AbilityEngine.
+   * No hay lógica específica de cartas aquí — todo viene del JSONB en BD.
+   */
+  private static _resolveAbilities(
+    knight: any,
+    matchState: any,
+    _opponentKnights: any[]
+  ): ResolvedAbility[] {
+    const result: ResolvedAbility[] = [];
+    const abilities: any[] = knight.card?.card_abilities ?? [];
+
+    for (const raw of abilities) {
+      if (raw.type !== 'activa') continue;
+
+      const def = parseAbilityDef(raw.effects);
+      if (!def) continue;
+
+      const statusEffects = (() => {
+        try { return JSON.parse(knight.status_effects ?? '[]'); }
+        catch { return []; }
+      })();
+
+      const hand: any[] = matchState[`player${knight.player_number}_hand`] ?? [];
+
+      const event: GameEvent = {
+        type: GameEventType.ACTIVE,
+        playerNumber: knight.player_number as 1 | 2,
+        sourceCardId: knight.id,
+      };
+
+      const ctx: ConditionContext = {
+        sourceCard: {
+          status_effects: statusEffects,
+          current_cosmos: knight.current_cosmos ?? 0,
+          zone: knight.zone,
+        },
+        player: {
+          hand,
+          field_knights: [],
+        },
+        event,
+      };
+
+      const check = AbilityEngine.canActivateFromContext(def, ctx, event);
+      if (check.valid) {
+        result.push({
+          ability_name: (raw.name as string).toLowerCase().replace(/\s+/g, '_'),
+          cosmos_cost: getCosmosCost(def),
+          ...(requiresClientTarget(def) ? { requires_target: true } : {}),
+        });
+      }
+    }
+
+    return result;
   }
 
 
@@ -253,10 +331,19 @@ export class ActionResolver {
 
       case 'event':    // "occasion" en servidor
       case 'occasion': {
+        // Eventos/ocasiones: slot único por jugador, efecto inmediato y descarte.
         const hasOccasion = cardsInPlay.some(
           c => c.player_number === playerNumber && c.zone === 'field_occasion'
         );
         return hasOccasion ? [] : [0];
+      }
+
+      case 'item': {
+        // Objetos/equipamiento: comparten los 5 slots de la fila de técnicas.
+        // Son permanentes; se asocian al caballero en el mismo slot (misma posición).
+        // Si el caballero muere, el objeto pasa al yomotsu (TODO: implementar en KnightManager).
+        const occupied = this._occupiedPositions(cardsInPlay, playerNumber, 'field_technique');
+        return [0, 1, 2, 3, 4].filter(i => !occupied.has(i));
       }
 
       case 'stage': {

@@ -205,6 +205,29 @@ export class MatchCoordinator {
   }
 
   /**
+   * Usar habilidad activa de un caballero (ej. "Match 1" de Jabu de Unicornio).
+   * DELEGA: KnightManager
+   */
+  static async useKnightAbility(
+    matchId: string,
+    userId: string,
+    cardInPlayId: string,
+    abilityName: string,
+    actionId: string,
+    targetId?: string
+  ) {
+    const match = await Match.findByPk(matchId);
+    if (!match) return { success: false, error: 'Match no encontrado' };
+
+    const playerNumber = this._getPlayerNumber(match, userId);
+    if (!playerNumber) return { success: false, error: 'No eres jugador de este match' };
+
+    if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
+
+    return await KnightManager.useAbility(match, playerNumber, cardInPlayId, abilityName, actionId, targetId);
+  }
+
+  /**
    * HELPER: Obtiene número de jugador
    * (búsqueda simple, NO es validación compleja)
    * 

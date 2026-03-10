@@ -6,6 +6,8 @@ class CardAbility extends Model {
   public id!: string;
   public card_id!: string;
   public name!: string;
+  /** Slug estable para comparación por código. Ej: 'justice_fist', 'match_1'. */
+  public ability_key!: string | null;
   public type!: 'activa' | 'pasiva' | 'equipamiento' | 'campo';
   public description!: string;
   public conditions!: object;
@@ -30,6 +32,12 @@ CardAbility.init(
     name: {
       type: DataTypes.STRING(100),
       allowNull: false
+    },
+    ability_key: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      defaultValue: null,
+      comment: 'Slug estable para matching por código. Ej: justice_fist, match_1',
     },
     type: {
       type: DataTypes.ENUM('activa', 'pasiva', 'equipamiento', 'campo'),

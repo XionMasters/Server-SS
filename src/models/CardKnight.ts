@@ -2,6 +2,15 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/database';
 
+export type KnightRank =
+  | 'Bronze Saint'
+  | 'Steel Saint'
+  | 'Silver Saint'
+  | 'Gold Saint'
+  | 'Sonata Saint'
+  | 'Sapuris Saint'
+  | 'Black Saint';
+
 class CardKnight extends Model {
   public card_id!: string;
   public attack!: number;
@@ -10,6 +19,7 @@ class CardKnight extends Model {
   public cosmos!: number;
   public can_defend!: boolean;
   public defense_reduction!: number;
+  public rank!: KnightRank | null;
 }
 
 CardKnight.init(
@@ -45,6 +55,18 @@ CardKnight.init(
     defense_reduction: {
       type: DataTypes.DECIMAL(3,2),
       defaultValue: 0.5
+    },
+    rank: {
+      type: DataTypes.ENUM(
+        'Bronze Saint',
+        'Steel Saint',
+        'Silver Saint',
+        'Gold Saint',
+        'Sonata Saint',
+        'Sapuris Saint',
+        'Black Saint'
+      ),
+      allowNull: true,
     }
   },
   {

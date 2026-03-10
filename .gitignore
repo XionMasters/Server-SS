@@ -16,3 +16,5 @@ dist/
 *.pyc
 .python-version
 .env.*.local
+*auth_token*
+*.pem

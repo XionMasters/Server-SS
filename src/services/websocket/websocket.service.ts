@@ -103,6 +103,15 @@ router.registerMany({
       action_id: data.action_id
     });
   },
+  use_ability: async (ws, data) => {
+    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
+      type: 'USE_ABILITY',
+      match_id: data.match_id,
+      card_id: data.card_id,
+      ability_name: data.ability_name,
+      action_id: data.action_id
+    });
+  },
   request_match_state: async (ws, data) => {
     await handleRequestMatchState(ws as AuthenticatedWebSocket, data);
   },

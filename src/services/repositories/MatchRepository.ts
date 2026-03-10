@@ -73,6 +73,7 @@ export class MatchRepository {
             current_health: card.current_health,
             current_attack: card.ce,
             current_defense: card.ar,
+            current_cosmos: card.current_cosmos,
           },
           { where: { id: card.instance_id }, transaction }
         );

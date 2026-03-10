@@ -54,6 +54,7 @@ export interface CardInGameState {
   ce: number;   // Combat Effectiveness (base + ce_boost activos)
   ar: number;   // Armor Rating (base + ar_boost activos)
   current_health: number;
+  current_cosmos: number; // CP actuales de la carta (se usa para habilidades que cuestan CP)
 
   /** Stats base, sin boosts. Necesarios para recomputar al expirar efectos. */
   base_ce: number;

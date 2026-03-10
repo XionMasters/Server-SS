@@ -1,0 +1,715 @@
+{
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Santuario",
+  "type": "knight",
+  "rank": "Bronze Saint",
+  "cards": [
+    {
+      "code": "seiya_pegasus_v1",
+      "name": "Seiya de Pegaso",
+      "rarity": "epic",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "bronzes/1.webp",
+      "description": "El caballero de bronce más determinado, protector de Athena.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Inner Determination",
+          "type": "pasiva",
+          "description": "Si este caballero recibe un golpe letal, permanece en el campo un turno adicional immune a todo daño.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "last_stand",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Justice Fist",
+          "type": "activa",
+          "description": "Descarta una carta de tu mano; el próximo BA de este caballero ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "discard",
+                "target": "self_hand"
+              }
+            ],
+            "conditions": [
+              {
+                "type": "has_status",
+                "status": "last_stand"
+              },
+              {
+                "type": "hand_not_empty"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "shiryu_dragon",
+      "name": "Shiryu de Dragón",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "bronzes/2.webp",
+      "description": "El caballero más defensivo, maestro del Rozan Shoryu Ha.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.3
+      },
+      "abilities": [
+        {
+          "name": "Escudo del Dragón",
+          "type": "pasiva",
+          "description": "El escudo del dragón fortalece la AR de Shiryu desde que entra en juego.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Rozan Shoryu Ha",
+          "type": "activa",
+          "description": "Paga 3 CP; el próximo BA de este caballero ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "hyoga_cygnus",
+      "name": "Hyoga de Cisne",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "bronzes/3.webp",
+      "description": "Maestro del hielo, con ataques que congelan al enemigo.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Frialdad Absoluta",
+          "type": "pasiva",
+          "description": "El frío extremo endurece la armadura de Hyoga al entrar en juego.",
+          "_pending": "Fase 2: adicionar inmunidad real a status negativos (burn). Por ahora aplica ar_boost.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Polvo de Diamantes",
+          "type": "activa",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN (1 daño/turno, 3 turnos) al caballero objetivo.",
+          "_pending": "Fase 2: reemplazar burn por status 'frozen' cuando se implemente en el motor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  {
+                    "type": "apply_status",
+                    "status": "burn",
+                    "target": "target",
+                    "value": 1,
+                    "duration": 3
+                  }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "shun_andromeda",
+      "name": "Shun de Andrómeda",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/4.webp",
+      "description": "El más gentil de los caballeros, pero letal con sus cadenas.",
+      "_note_stats": "Stats corregidos respecto al seed (seed tenía valores placeholder 90/110/160/4).",
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Corazón Bondadoso",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Shun fortalece levemente a todos sus aliados en campo.",
+          "_pending": "Fase 2: implementar acción 'heal_allies' en ActionRegistry (requiere TURN_START trigger). Por ahora aplica ce_boost a self.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cadena Espiral",
+          "type": "activa",
+          "description": "Paga 3 CP; las cadenas de Andrómeda potencian el próximo ataque de Shun.",
+          "_pending": "Fase 2: implementar ce_boost temporal (N turnos) y debuff de AR al objetivo.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "ikki_phoenix",
+      "name": "Ikki de Fénix",
+      "rarity": "epic",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/5.webp",
+      "description": "El caballero inmortal del Fénix. Sus llamas arden sin fin y ningún Yomotsu puede retenerlo.",
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Return",
+          "type": "pasiva",
+          "description": "Cuando un caballero aliado muere, Ikki regresa al campo de batalla desde el Yomotsu.",
+          "_pending": "Fase 3: trigger ALLY_DIED requiere EventBus. Por ahora aplica marcador phoenix_rebirth que habilita Phoenix Flames.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "phoenix_rebirth",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Phoenix Flames",
+          "type": "activa",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, inflige BRN al caballero objetivo (1 daño/turno, 3 turnos). Si cruz, los CP se pierden igual.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "has_status",
+                "status": "phoenix_rebirth"
+              }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  {
+                    "type": "apply_status",
+                    "status": "burn",
+                    "target": "target",
+                    "value": 1,
+                    "duration": 3
+                  }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "jabu_unicorn",
+      "name": "Jabu de Unicornio",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/6.webp",
+      "description": "Caballero de bronce leal con un cuerno perforador capaz de atravesar cualquier defensa.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 6,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Cuerno de Unicornio",
+          "type": "pasiva",
+          "description": "Los BA realizados por el portador causan 1 DIP de Daño Directo adicional al jugador rival.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "unicorn_horn",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA del portador ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "nachi_wolf",
+      "name": "Nachi de Lobo",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/7.webp",
+      "description": "Caballero de bronce ágil e instintivo. Cada golpe directo al rival desencadena el poder de la manada.",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Efecto Manada",
+          "type": "pasiva",
+          "description": "Cuando los BA del portador causan DIP directo al jugador rival, causan 1 DIP extra adicional.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "herd_effect",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA del portador ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "geki_bear",
+      "name": "Geki de Oso",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "bronzes/12.webp",
+      "description": "Caballero de gran fuerza física que domina el combate cuerpo a cuerpo.",
+      "_note_stats": "",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Melee Advantage",
+          "type": "passive",
+          "description": "Cuando este caballero realiza BA contra un enemigo, su CE se duplica.",
+          "effects": {
+            "trigger": "DAMAGE_DEALT",
+            "conditions": [
+              {
+                "type": "target_is_enemy"
+              }
+            ],
+            "actions": [
+              {
+                "type": "modify_attack",
+                "multiplier": 2,
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Match 1",
+          "type": "active",
+          "description": "Consume 3 CP; el próximo BA ignora armadura.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor_next_attack",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "ban_lion",
+      "name": "Ban de León Menor",
+      "rarity": "common",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/9.webp",
+      "description": "Caballero ágil con garras afiladas.",
+      "_note_stats": "Stats corregidos respecto al seed (seed tenía valores placeholder 90/50/90/2).",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 5,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Garra del León",
+          "type": "activa",
+          "description": "Paga 1 CP; lanza una moneda. Si cara, inflige BRN (sangrado) al caballero objetivo (1 daño/turno, 2 turnos).",
+          "_pending": "Fase 2: reemplazar burn por status 'bleed' cuando se implemente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 1
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 1
+              }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  {
+                    "type": "apply_status",
+                    "status": "burn",
+                    "target": "target",
+                    "value": 1,
+                    "duration": 2
+                  }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        },
+        {
+          "name": "Match 1",
+          "type": "active",
+          "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor_next_attack",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "code": "ichi_hydra",
+      "name": "Ichi de Hidra",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/17.webp",
+      "description": "Caballero de bronce cuyos ataques pueden envenenar al enemigo.",
+      "_note_stats": "",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Poisoned Claws",
+          "type": "passive",
+          "description": "Los ataques BA aplican condición de veneno.",
+          "effects": {
+            "trigger": "DAMAGE_DEALT",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "poison",
+                "target": "target",
+                "duration": 3,
+                "value": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Match 1",
+          "type": "active",
+          "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor_next_attack",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

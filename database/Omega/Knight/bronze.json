@@ -1,0 +1,590 @@
+{
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Omega",
+  "type": "knight",
+  "rank": "Bronze Saint",
+  "cards": [
+
+    {
+      "code": "koga_pegasus",
+      "name": "Koga de Pegaso",
+      "rarity": "epic",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "bronzes/11.webp",
+      "description": "Nuevo caballero de Pegaso, portador de la esperanza de Athena en la era Omega.",
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Cosmo Omega",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Koga potencia su CE con el poder del Cosmo Omega.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Meteor Punch Omega",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Koga ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "yuna_eagle",
+      "name": "Yuna de Águila",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/12.webp",
+      "description": "Caballera ágil de Águila, combatiente veloz capaz de esquivar ataques con facilidad.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Evasión de Aguila",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Yuna adopta Modo Evasión.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "evasion", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Eagle Dive",
+          "type": "activa",
+          "description": "Paga 2 CP; el siguiente BA de Yuna ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 2 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 2 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "souma_lion",
+      "name": "Souma de León",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "bronzes/13.webp",
+      "description": "Caballero de León de espíritu ardiente, heredero del fuego de su padre.",
+      "stats": {
+        "attack": 4,
+        "defense": 1,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Llama Hereditaria",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Souma incrementa su CE con el fuego heredado.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Leo Explosion",
+          "type": "activa",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN al caballero objetivo (1 daño/turno, 2 turnos).",
+          "_pending": "Fase 2: reemplazar burn por efecto de fuego específico.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  { "type": "apply_status", "status": "burn", "target": "target", "value": 1, "duration": 2 }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "haruto_wolf",
+      "name": "Haruto de Lobo",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/14.webp",
+      "description": "Silencioso caballero de Lobo, maestro de ninpo y ataques encubiertos.",
+      "stats": {
+        "attack": 3,
+        "defense": 1,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Instinto del Lobo",
+          "type": "pasiva",
+          "description": "Los BA realizados por Haruto causan 1 DIP de Daño Directo adicional al jugador rival.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "unicorn_horn", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Shadow Stitch",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Haruto ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "ryuho_dragon",
+      "name": "Ryuho de Dragón",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "bronzes/15.webp",
+      "description": "Hijo de Shiryu, heredero del escudo del Dragón y la templanza de su padre.",
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.3
+      },
+      "abilities": [
+        {
+          "name": "Escudo del Dragón Omega",
+          "type": "pasiva",
+          "description": "Al entrar en juego, el escudo del Dragón refuerza la armadura de Ryuho.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Rozan Rising Dragon",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Ryuho ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "eden_andromeda",
+      "name": "Eden de Andrómeda",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/16.webp",
+      "description": "Caballero de Andrómeda de carácter frío y calculador, descendiente de una larga estirpe.",
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Cadena Omega",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Eden refuerza su armadura con el poder de Andrómeda.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Nebula Chain",
+          "type": "activa",
+          "description": "Paga 3 CP; potencia el ataque de Eden para el siguiente BA.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "subaru_sagittarius",
+      "name": "Subaru de Sagitario",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "bronzes/17.webp",
+      "description": "Portador de la armadura de Sagitario, el arma más poderosa del Santuario.",
+      "_note": "El portador de la armadura Gold hace de este bronce un epico especial.",
+      "stats": {
+        "attack": 4,
+        "defense": 3,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Armadura Sagrada",
+          "type": "pasiva",
+          "description": "La armadura de Sagitario potencia tanto el ataque como la defensa de Subaru al entrar en juego.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Sagittarius Arrow",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Subaru ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "aria_cosmo",
+      "name": "Aria",
+      "rarity": "epic",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "bronzes/18.webp",
+      "description": "La hija de Athena de la era Omega. Su Cosmo sagrado puede sanar y proteger a los aliados.",
+      "_note": "No es caballero formalmente, pero usa armadura y pelea. Tipo helper puede ser más apropiado en el futuro.",
+      "stats": {
+        "attack": 1,
+        "defense": 4,
+        "health": 7,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Cosmo Divino",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Aria potencia la AR de todos los aliados.",
+          "_pending": "Fase 2: implementar apply_status target all_allies desde pasiva CARD_PLAYED. Por ahora aplica ar_boost a sí misma.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 2 }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "sonia_pavo_real",
+      "name": "Sonia de Pavo Real",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 1,
+      "faction": "Marte",
+      "element": "dark",
+      "image_url": "bronzes/19.webp",
+      "description": "Caballera del dios Marte, rival de Koga. Sus plumas de Pavo Real son armas mortales.",
+      "_note": "Facción Marte (antagonista). Primer caballero no-Athena del set Omega.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Plumas Cortantes",
+          "type": "pasiva",
+          "description": "Los BA de Sonia causan 1 DIP de Daño Directo adicional al jugador rival.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "unicorn_horn", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Peacock Blizzard",
+          "type": "activa",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN al objetivo (1 daño/turno, 2 turnos).",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  { "type": "apply_status", "status": "burn", "target": "target", "value": 1, "duration": 2 }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "miguel_angel",
+      "name": "Miguel de Ángel",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 1,
+      "faction": "Marte",
+      "element": "light",
+      "image_url": "bronzes/20.webp",
+      "description": "Guerrero celestial al servicio de Marte, de poder comparable a un caballero de oro.",
+      "stats": {
+        "attack": 4,
+        "defense": 3,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Alas Celestiales",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Miguel fortalece su armadura con el poder celestial.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Holy Sword",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Miguel ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 3 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "integra_shield",
+      "name": "Integra de Escudo",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/21.webp",
+      "description": "Caballera de carácter fuerte, defensora de sus compañeros.",
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.3
+      },
+      "abilities": [
+        {
+          "name": "Guardia de Hierro",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Integra fortalece su armadura.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+            ]
+          }
+        }
+      ]
+    },
+
+    {
+      "code": "geki_bear_omega",
+      "name": "Geki de Oso (Omega)",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "bronzes/22.webp",
+      "description": "Nuevo portador de la armadura de Oso en la era Omega.",
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 5,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Abrazo del Oso Omega",
+          "type": "activa",
+          "description": "Paga 2 CP; potencia el ataque de Geki para el siguiente BA.",
+          "_pending": "Fase 2: implementar grapple (inmovilización del rival).",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              { "type": "cosmos", "amount": 2 }
+            ],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 2 }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }
+            ]
+          }
+        }
+      ]
+    }
+
+  ]
+}

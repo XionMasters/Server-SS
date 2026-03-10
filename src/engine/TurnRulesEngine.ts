@@ -126,6 +126,12 @@ export class TurnRulesEngine {
     ];
 
     for (const card of allNextPlayerCards) {
+      // Aplicar daño de BRN (burn) ANTES del tick para que el turno en que se cuentea 0 aún haga daño
+      const burnEffect = (card.status_effects ?? []).find(e => e.type === 'burn');
+      if (burnEffect?.value) {
+        card.current_health = Math.max(0, (card.current_health ?? 0) - burnEffect.value);
+      }
+
       card.status_effects = tickStatusEffects(card.status_effects ?? []);
       card.mode = deriveModeFromEffects(card.status_effects);
       card.ce   = card.base_ce + computeCeBonus(card.status_effects);

@@ -283,6 +283,31 @@ export class MatchesCoordinator {
         });
       }
 
+      case 'USE_ABILITY': {
+        if (!actionId) {
+          return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
+        }
+
+        const cardId = action.cardId || action.card_id || action.card_in_play_id;
+        const abilityName: string = (action.abilityName || action.ability_name || '').toLowerCase();
+        const targetId: string | undefined = action.targetId || action.target_id || undefined;
+        if (!cardId) {
+          return { success: false, code: 'CARD_ID_REQUIRED', error: 'cardId es requerido' };
+        }
+        if (!abilityName) {
+          return { success: false, code: 'ABILITY_NAME_REQUIRED', error: 'abilityName es requerido' };
+        }
+
+        const result = await MatchCoordinator.useKnightAbility(matchId, userId, cardId, abilityName, actionId, targetId);
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'use_ability',
+          card_id: cardId,
+          ability_name: abilityName,
+          target_id: targetId,
+          ...((result as any).extras ?? {}),
+        });
+      }
+
       case 'START_FIRST_TURN': {
         const result = await this.startFirstTurn(matchId, userId);
         return this.normalizeEvents(result, userId);

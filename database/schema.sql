@@ -116,6 +116,7 @@ CREATE TABLE users (
 -- -------------------------------------------------------------
 CREATE TABLE cards (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    code            VARCHAR(100)        NOT NULL UNIQUE,
     name            VARCHAR(100)        NOT NULL,
     type            card_type_enum      NOT NULL,
     rarity          card_rarity_enum    NOT NULL,
@@ -197,6 +198,16 @@ CREATE TABLE packs (
     image_url           VARCHAR(255),
     created_at          TIMESTAMPTZ                  NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ                  NOT NULL DEFAULT NOW()
+);
+
+-- -------------------------------------------------------------
+-- pack_cards  (pool de cartas disponibles en cada pack)
+-- -------------------------------------------------------------
+CREATE TABLE pack_cards (
+    pack_id     UUID        NOT NULL REFERENCES packs(id) ON DELETE CASCADE,
+    card_id     UUID        NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+    weight      INTEGER     NOT NULL DEFAULT 1 CHECK (weight >= 1),
+    PRIMARY KEY (pack_id, card_id)
 );
 
 -- -------------------------------------------------------------
@@ -496,3 +507,6 @@ CREATE INDEX idx_user_card_tx_user      ON user_card_transactions(user_id);
 CREATE INDEX idx_user_card_tx_card      ON user_card_transactions(card_id);
 
 CREATE INDEX idx_card_translations_card ON card_translations(card_id);
+
+CREATE INDEX idx_pack_cards_pack  ON pack_cards(pack_id);
+CREATE INDEX idx_pack_cards_card  ON pack_cards(card_id);

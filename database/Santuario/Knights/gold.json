@@ -1,0 +1,43 @@
+{
+  "saga": "Santuario",
+  "type": "knight",
+  "rank": "Gold",
+  "cards": [
+    {
+      "code": "aiolia_leo",
+      "name": "Aiolia de Leo",
+      "rarity": "legendary",
+      "cost": 6,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image": "knights/aiolia_leo.webp",
+
+      "stats": {
+        "attack": 7,
+        "defense": 5,
+        "health": 12,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.6
+      },
+
+      "abilities": [
+        {
+          "name": "Lightning Plasma",
+          "type": "active",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              {
+                "type": "damage",
+                "amount": 4,
+                "target": "enemy"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

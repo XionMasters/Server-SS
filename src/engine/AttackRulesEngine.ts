@@ -21,7 +21,7 @@ import { CombatModeResolvers } from './combat/CombatResolvers';
 import { CombatContext } from './combat/CombatTypes';
 import { SeededRNG } from './combat/RNG';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
-import { StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
+import { StatusEffect, StatusEffectType, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
 
 export class AttackRulesEngine {
   /**
@@ -77,6 +77,11 @@ export class AttackRulesEngine {
 
   const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
 
+  // Detectar habilidades activas ANTES de resolución (en estado no-clonado de attacker)
+  const hadIgnoreArmor = (attacker.status_effects ?? []).some(e => e.type === 'ignore_armor');
+  const hasUnicornHorn = (attacker.status_effects ?? []).some(e => e.type === 'unicorn_horn');
+  const hasHerdEffect  = (attacker.status_effects ?? []).some(e => e.type === 'herd_effect');
+
   let damageToCard = 0;
   let damageToPlayer = 0;
   let evaded = false;
@@ -85,6 +90,9 @@ export class AttackRulesEngine {
     damageToPlayer = 2; // regla fija
   } else {
     const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
+
+    // Determinación Interior: si el defensor tiene last_stand_active, es inmune a todo daño
+    const hasLastStandActive = (defender.status_effects ?? []).some(e => e.type === 'last_stand_active');
 
     const ctx: CombatContext = {
       state: newState,
@@ -102,27 +110,56 @@ export class AttackRulesEngine {
     damageToCard = result.damageToCard;
     evaded = result.evaded;
 
-    if (!evaded) {
+    if (!evaded && !hasLastStandActive) {
       defender.current_health -= damageToCard;
 
       if (defender.current_health <= 0) {
-        defenderPlayer.field_knights =
-          defenderPlayer.field_knights.filter(
-            c => c.instance_id !== defenderCardId
-          );
+        const hasLastStand = (defender.status_effects ?? []).some(e => e.type === 'last_stand');
 
-        defender.zone = "yomotsu";
-        defenderPlayer.graveyard_count += 1;
+        if (hasLastStand) {
+          // Determinación Interior: sobrevive con 1 HP e inmunidad total durante 1 turno
+          defender.current_health = 1;
+          defender.status_effects = [
+            ...(defender.status_effects ?? []).filter(e => e.type !== 'last_stand'),
+            { type: 'last_stand_active' as StatusEffectType, remaining_turns: 1 },
+          ];
+          // No va al yomotsu, no causa DIP
+        } else {
+          defenderPlayer.field_knights =
+            defenderPlayer.field_knights.filter(
+              c => c.instance_id !== defenderCardId
+            );
 
-        damageToPlayer = 1; // regla fija
+          defender.zone = "yomotsu";
+          defenderPlayer.graveyard_count += 1;
+
+          damageToPlayer = 1; // regla fija
+        }
       }
     }
+  }
+
+  // Cuerno de Unicornio: +1 DIP al jugador rival solo si el ataque conectó (no esquivado)
+  if (hasUnicornHorn && !evaded) {
+    damageToPlayer += 1;
+  }
+
+  // Efecto Manada: +1 DIP extra si el AB ya está causando DIP (el origen no importa)
+  if (hasHerdEffect && damageToPlayer > 0) {
+    damageToPlayer += 1;
   }
 
   defenderPlayer.life = Math.max(
     0,
     defenderPlayer.life - damageToPlayer
   );
+
+  // Consumir ignore_armor (efecto de un solo uso por ataque)
+  if (hadIgnoreArmor) {
+    attacker.status_effects = (attacker.status_effects ?? []).filter(
+      e => e.type !== 'ignore_armor'
+    );
+  }
 
   attacker.is_exhausted = true;
   attacker.attacked_this_turn = true;

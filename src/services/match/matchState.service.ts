@@ -66,6 +66,7 @@ export class MatchStateService {
           current_player: match.current_player,
           phase: match.phase,
           current_phase: match.phase,
+          winner_id: match.winner_id ?? null,
           player1_life: match.player1_life,
           player2_life: match.player2_life,
           player1_cosmos: match.player1_cosmos,
