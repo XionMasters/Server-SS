@@ -5,7 +5,6 @@
   "type": "knight",
   "rank": "Bronze Saint",
   "cards": [
-
     {
       "code": "koga_pegasus",
       "name": "Koga de Pegaso",
@@ -32,7 +31,12 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -43,20 +47,39 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "yuna_eagle",
       "name": "Yuna de Águila",
@@ -83,7 +106,11 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "evasion", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "evasion",
+                "target": "self"
+              }
             ]
           }
         },
@@ -94,20 +121,39 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 2 }
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 2 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "souma_lion",
       "name": "Souma de León",
@@ -134,7 +180,12 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -146,25 +197,43 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
             ],
             "actions": [
               {
                 "type": "coin_flip_then",
                 "on_heads": [
-                  { "type": "apply_status", "status": "burn", "target": "target", "value": 1, "duration": 2 }
+                  {
+                    "type": "apply_status",
+                    "status": "burn",
+                    "target": "target",
+                    "value": 1,
+                    "duration": 2
+                  }
                 ],
                 "on_fail": []
               }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "haruto_wolf",
       "name": "Haruto de Lobo",
@@ -191,7 +260,11 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "unicorn_horn", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "unicorn_horn",
+                "target": "self"
+              }
             ]
           }
         },
@@ -202,20 +275,1132 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
+    {
+      "code": "junkers_wolf",
+      "name": "Wolf Junkers",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/1.webp",
+      "description": "Caballero de Bronce que lidera a sus aliados con impulso de combate y presión ofensiva.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Wolf Junkers ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Morale Rise",
+          "type": "pasiva",
+          "description": "Al entrar en juego, los aliados reciben +2 CE temporal.",
+          "_pending": "El motor no soporta adyacencia; temporalmente aplica +2 CE a todos los aliados durante 1 turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "curtis_hydra",
+      "name": "Hydra Curtis",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/2.webp",
+      "description": "Caballero de Hidra enfocado en apoyo táctico y protección del escuadrón.",
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Hydra Curtis ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Morale Heal",
+          "type": "pasiva",
+          "description": "Al entrar en juego, los aliados adyacentes ganan inmunidad a PAR y PSN.",
+          "_pending": "El motor no soporta adyacencia ni estados PAR/PSN todavía. Placeholder sin efecto hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "belriot_lionet",
+      "name": "Lionet Belriot",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "bronzes/3.webp",
+      "description": "Caballero de Lionet que fortalece la postura defensiva de su escuadrón.",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 6,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Lionet Belriot ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Morale Up",
+          "type": "pasiva",
+          "description": "Al final del turno propio, los aliados adyacentes entran en Modo Defensa.",
+          "_pending": "El motor no soporta adyacencia; temporalmente aplica Modo Defensa a todos los aliados durante 1 turno.",
+          "effects": {
+            "trigger": "TURN_END",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "defense",
+                "target": "all_allies",
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "paradise_apus",
+      "name": "Apus Paradise",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "bronzes/4.webp",
+      "description": "Caballero de Apus que protege a su escuadrón con maniobras evasivas al entrar en combate.",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Apus Paradise ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Air Effect",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, los aliados entran en Modo Evasión.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "evasion",
+                "target": "all_allies",
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "guney_delphinus",
+      "name": "Delphinus Guney",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "bronzes/5.webp",
+      "description": "Caballero de Delphinus orientado a proteger la línea aliada al entrar en combate.",
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Delphinus Guney ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Water Protection",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, un aliado entra en Modo Defensa.",
+          "_pending": "El motor no permite seleccionar un aliado individual en pasivas; temporalmente aplica Modo Defensa a todos los aliados durante 1 turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "defense",
+                "target": "all_allies",
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "dali_corona_borealis",
+      "name": "Corona Borealis Dali",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/6.webp",
+      "description": "Caballero de Corona Borealis con estilo impredecible y contraataques tácticos.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Corona Borealis Dali ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Whirlwind",
+          "type": "pasiva",
+          "description": "Cuando recibe BA, lanza una moneda; si sale cara, el atacante vuelve a la mano de su dueño.",
+          "_pending": "El motor actual no soporta trigger directo de BA recibido ni acción de regresar cartas a la mano. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "DAMAGE_DEALT",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "hooke_compass",
+      "name": "Compass Hooke",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "bronzes/7.webp",
+      "description": "Caballero de Compass que entorpece la ofensiva enemiga con trampas de terreno.",
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Compass Hooke ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Ground Trap",
+          "type": "pasiva",
+          "description": "Los caballeros rivales no pueden usar BA el mismo turno en que entran al campo de batalla.",
+          "_pending": "El motor actual no soporta marcar 'summoning sickness' para BA enemigo al entrar. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "spear_dorado",
+      "name": "Dorado Spear",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "bronzes/8.webp",
+      "description": "Caballero de Dorado especializado en fortalecer la defensa del equipo al entrar en batalla.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Dorado Spear ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Water Surroundings",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, los aliados reciben +2 AR durante 2 turnos.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "value": 2,
+                "duration": 2
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "mirapolos_lynx",
+      "name": "Lynx Mirapolos",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/9.webp",
+      "description": "Caballero de Lynx que arriesga su vida para evitar castigos letales sobre su jugador.",
+      "stats": {
+        "attack": 1,
+        "defense": 1,
+        "health": 6,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Lynx Mirapolos ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Young Death",
+          "type": "pasiva",
+          "description": "Si este caballero es eliminado, su jugador no recibe daño de penalidad DIP.",
+          "_pending": "El motor actual no soporta interceptar/anular la penalidad DIP por muerte del caballero. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "yoshiomi_wolf",
+      "name": "Wolf Yoshiomi",
+      "rarity": "rare",
+      "cost": 4,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "image_url": "bronzes/10.webp",
+      "description": "Caballero de Lobo de gran poder ofensivo que usa tácticas ninja para preparar técnicas desde el deck.",
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Wolf Yoshiomi ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Ninja Trickery",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, busca una carta de técnica en tu deck y agrégala a tu mano.",
+          "_pending": "El motor actual no soporta buscar por tipo en deck ni mover carta del deck a mano desde habilidad declarativa. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "kitalpha_equuleus",
+      "name": "Equuleus Kitalpha",
+      "rarity": "rare",
+      "cost": 4,
+      "generate": 3,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/14.webp",
+      "description": "Caballero de Equuleus con estilo defensivo que obliga al rival a enfocarse en su portador.",
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Consume 3 CP; el siguiente BA de Equuleus Kitalpha ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cloth Curse",
+          "type": "pasiva",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Kitalpha.",
+          "_pending": "El motor actual no soporta redirección/forzado global de target para ataques enemigos. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "celeris_equuleus",
+      "name": "Equuleus Celeris",
+      "rarity": "rare",
+      "cost": 4,
+      "generate": 3,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/15.webp",
+      "description": "Caballero de Equuleus con gran resistencia, capaz de atraer la ofensiva rival hacia su posición.",
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 12,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Consume 3 CP; el siguiente BA de Equuleus Celeris ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cloth Curse",
+          "type": "pasiva",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Celeris.",
+          "_pending": "El motor actual no soporta redirección/forzado global de target para ataques enemigos. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "subaru_equuleus",
+      "name": "Equuleus Subaru",
+      "rarity": "epic",
+      "cost": 5,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "bronzes/19.webp",
+      "_transform_on_status": {
+        "status": "divine_frenzy_form",
+        "name": "Equuleus Subaru (Divine Frenzy)",
+        "image_url": "bronzes/20.webp"
+      },
+      "description": "Caballero de Equuleus que desata una forma divina en situaciones críticas y atrae los ataques enemigos.",
+      "stats": {
+        "attack": 5,
+        "defense": 3,
+        "health": 10,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Divine Frenzy",
+          "type": "activa",
+          "description": "Solo puede activarse con 5 HP o menos y una sola vez. Consume 3 CP, entra en forma Divine Frenzy y aumenta el CE en 5 puntos.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "hp_below",
+                "amount": 5
+              },
+              {
+                "type": "no_status",
+                "status": "divine_frenzy_form"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "divine_frenzy_form",
+                "target": "self"
+              },
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 5
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cloth Curse",
+          "type": "pasiva",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Subaru.",
+          "_pending": "El motor actual no soporta redirección/forzado global de target para ataques enemigos. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "douglas_bear",
+      "name": "Bear Douglas",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "bronzes/21.webp",
+      "description": "Caballero de Oso orientado a reforzar la defensa de sus aliados cercanos.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Consume 3 CP; el siguiente BA de Bear Douglas ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Morale Increase",
+          "type": "pasiva",
+          "description": "Los aliados adyacentes reciben +2 AR.",
+          "_pending": "El motor no soporta adyacencia; temporalmente aplica +2 AR a todos los aliados durante 1 turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "rusk_pyxis",
+      "name": "Pyxis Rusk",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "bronzes/22.webp",
+      "description": "Caballero de Pyxis que coordina a su equipo y prepara refuerzos desde el deck.",
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 1",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Pyxis Rusk ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Training Team",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, puedes agregar Puppis Lacaille o Vela Tsukuyomi a tu mano desde el deck.",
+          "_pending": "El motor actual no soporta buscar cartas específicas en el deck ni moverlas a la mano desde habilidades declarativas. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
     {
       "code": "ryuho_dragon",
       "name": "Ryuho de Dragón",
@@ -242,7 +1427,12 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -253,20 +1443,39 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "eden_andromeda",
       "name": "Eden de Andrómeda",
@@ -293,7 +1502,12 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -304,19 +1518,36 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "subaru_sagittarius",
       "name": "Subaru de Sagitario",
@@ -344,8 +1575,18 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1 },
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 1
+              },
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -356,20 +1597,39 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "aria_cosmo",
       "name": "Aria",
@@ -398,13 +1658,24 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 2 }
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 2
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "sonia_pavo_real",
       "name": "Sonia de Pavo Real",
@@ -432,7 +1703,11 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "unicorn_horn", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "unicorn_horn",
+                "target": "self"
+              }
             ]
           }
         },
@@ -443,25 +1718,43 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
             ],
             "actions": [
               {
                 "type": "coin_flip_then",
                 "on_heads": [
-                  { "type": "apply_status", "status": "burn", "target": "target", "value": 1, "duration": 2 }
+                  {
+                    "type": "apply_status",
+                    "status": "burn",
+                    "target": "target",
+                    "value": 1,
+                    "duration": 2
+                  }
                 ],
                 "on_fail": []
               }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "miguel_angel",
       "name": "Miguel de Ángel",
@@ -488,7 +1781,12 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         },
@@ -499,20 +1797,39 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 3 }
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 3 },
-              { "type": "no_status", "status": "ignore_armor" }
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ignore_armor"
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "integra_shield",
       "name": "Integra de Escudo",
@@ -539,13 +1856,24 @@
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
-              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1 }
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 1
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     },
-
     {
       "code": "geki_bear_omega",
       "name": "Geki de Oso (Omega)",
@@ -573,18 +1901,35 @@
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
-              { "type": "cosmos", "amount": 2 }
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
             ],
             "conditions": [
-              { "type": "cosmos_min", "amount": 2 }
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
             ],
             "actions": [
-              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2
+              }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
     }
-
   ]
 }

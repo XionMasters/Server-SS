@@ -1,0 +1,136 @@
+{
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Omega",
+  "type": "knight",
+  "rank": "Silver Saint",
+  "cards": [
+    {
+      "code": "lacaille_puppis",
+      "name": "Puppis Lacaille",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 3,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "silvers/2.webp",
+      "description": "Caballero de Plata de Omega que coordina el entrenamiento del equipo y mantiene presión táctica en combate.",
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 2",
+          "type": "activa",
+          "description": "Descarta una carta; el siguiente BA ignora el Modo Defensa del oponente.",
+          "_pending": "El motor actual no distingue 'ignorar Block Mode' de 'ignorar toda la AR'. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "discard",
+                "target": "self_hand",
+                "amount": 1
+              }
+            ],
+            "conditions": [
+              {
+                "type": "hand_not_empty"
+              }
+            ],
+            "actions": []
+          }
+        },
+        {
+          "name": "Training Team",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, puedes agregar Pyxis Rusk o Vela Tsukuyomi a tu mano desde el deck.",
+          "_pending": "El motor actual no soporta buscar cartas específicas en el deck ni moverlas a la mano desde habilidades declarativas. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    },
+    {
+      "code": "tsubaki_vela",
+      "name": "Vela Tsubaki",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "image_url": "silvers/3.webp",
+      "description": "Caballero de Plata de Omega que lidera el entrenamiento del equipo y refuerza su Cosmo temporalmente.",
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Match 3",
+          "type": "activa",
+          "description": "Paga 6 CP; este caballero gana +4 CE hasta tu próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 6
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 6
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 4,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Training Team",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, puedes agregar Pyxis Rusk o Puppis Lacaille a tu mano desde el deck.",
+          "_pending": "El motor actual no soporta buscar cartas específicas en el deck ni moverlas a la mano desde habilidades declarativas. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "omega",
+      "artist": null
+    }
+  ]
+}

@@ -59,6 +59,11 @@ interface CardEntry {
   element?: string;
   image_url?: string;
   description?: string;
+  max_copies?: number;
+  unique?: boolean;
+  playable_zones?: string[];
+  collection_id?: string | null;
+  artist?: string | null;
   stats?: CardStats;
   abilities?: AbilityDef[];
   // Allow unknown extra fields (silently skipped)
@@ -114,11 +119,13 @@ async function upsertCard(
       `INSERT INTO cards (
          id, code, name, type, rarity, cost, generate,
          description, image_url, faction, element,
+         max_copies, "unique", playable_zones, collection_id, artist,
          created_at, updated_at
        )
        VALUES (
          uuid_generate_v4(), :code, :name, :type, :rarity, :cost, :generate,
          :description, :image_url, :faction, :element,
+         :max_copies, :unique, :playable_zones, :collection_id, :artist,
          NOW(), NOW()
        )
        ON CONFLICT (code) DO UPDATE SET
@@ -131,6 +138,11 @@ async function upsertCard(
          image_url   = EXCLUDED.image_url,
          faction     = EXCLUDED.faction,
          element     = EXCLUDED.element,
+         max_copies  = EXCLUDED.max_copies,
+         "unique"   = EXCLUDED."unique",
+         playable_zones = EXCLUDED.playable_zones,
+         collection_id  = EXCLUDED.collection_id,
+         artist         = EXCLUDED.artist,
          updated_at  = NOW()
        RETURNING id`,
       {
@@ -145,6 +157,11 @@ async function upsertCard(
           image_url:   card.image_url ?? null,
           faction:     card.faction ?? null,
           element:     card.element ?? null,
+          max_copies:  card.max_copies ?? 3,
+          unique:      card.unique ?? false,
+          playable_zones: card.playable_zones ?? ['battlefield'],
+          collection_id:  card.collection_id ?? null,
+          artist:         card.artist ?? null,
         },
         type: QueryTypes.SELECT,
         transaction: t,

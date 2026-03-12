@@ -10,7 +10,6 @@
       "faction": "Athena",
       "element": "light",
       "image": "occasions/athena_blessing.webp",
-
       "abilities": [
         {
           "name": "Divine Protection",
@@ -26,7 +25,14 @@
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

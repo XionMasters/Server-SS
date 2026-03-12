@@ -1,43 +1,195 @@
 {
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
   "saga": "Santuario",
   "type": "knight",
-  "rank": "Gold",
+  "rank": "Gold Saint",
   "cards": [
     {
-      "code": "aiolia_leo",
-      "name": "Aiolia de Leo",
-      "rarity": "legendary",
-      "cost": 6,
+      "saga": "Santuario",
+      "type": "knight",
+      "rank": "Gold",
+      "cards": [
+        {
+          "code": "aiolia_leo",
+          "name": "Aiolia de Leo",
+          "rarity": "gold",
+          "cost": 8,
+          "generate": 0,
+          "faction": "Athena",
+          "element": "light",
+          "image_url": "golds/21.webp",
+          "description": "Caballero de Oro de Leo, conocido por su velocidad y poderosos ataques basados en rayos de luz.",
+          "stats": {
+            "attack": 10,
+            "defense": 7,
+            "health": 12,
+            "cosmos": 10,
+            "can_defend": true,
+            "defense_reduction": 0.5
+          },
+          "abilities": [
+            {
+              "name": "Slayer Fist",
+              "type": "active",
+              "description": "Paga 3 DIP; el proximo BA de Aiolia de Leo ignora AR del enemigo.",
+              "effects": {
+                "trigger": "ACTIVE",
+                "actions": [
+                  {
+                    "type": "apply_status",
+                    "status": "ignore_ar",
+                    "target": "self",
+                    "value": 1,
+                    "duration": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Lightspeed",
+              "type": "passive",
+              "description": "Los BA del usuario ignoran evasion del enemigo.",
+              "effects": {
+                "trigger": "PASSIVE",
+                "actions": [
+                  {
+                    "type": "ignore_evasion",
+                    "target": "self"
+                  }
+                ]
+              }
+            }
+          ],
+          "max_copies": 1,
+          "unique": true,
+          "playable_zones": [
+            "battlefield"
+          ],
+          "collection_id": "santuario",
+          "artist": null
+        }
+      ]
+    },
+    {
+      "code": "mu_aries",
+      "name": "Mu de Aries",
+      "rarity": "gold",
+      "cost": 7,
       "generate": 0,
       "faction": "Athena",
       "element": "light",
-      "image": "knights/aiolia_leo.webp",
-
+      "image_url": "golds/17.webp",
+      "description": "Caballero de Oro de Aries, conocido por su habilidad para reparar armaduras y su técnica de telequinesis.",
       "stats": {
         "attack": 7,
-        "defense": 5,
+        "defense": 8,
         "health": 12,
-        "cosmos": 10,
+        "cosmos": 14,
         "can_defend": true,
-        "defense_reduction": 0.6
+        "defense_reduction": 0.5
       },
-
       "abilities": [
         {
-          "name": "Lightning Plasma",
+          "name": "Star Dust",
           "type": "active",
+          "description": "Selecciona un aliado y restaura sus puntos de AR originales. Ese aliado también gana un incremento permanente de AR +1.",
           "effects": {
             "trigger": "ACTIVE",
             "actions": [
               {
-                "type": "damage",
-                "amount": 4,
-                "target": "enemy"
+                "type": "restore_ar",
+                "target": "ally"
+              },
+              {
+                "type": "modify_stat",
+                "stat": "ar",
+                "target": "ally",
+                "value": 1,
+                "duration": "permanent"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Muvian Aura",
+          "type": "passive",
+          "description": "El usuario y sus aliados son inmunes a condiciones negativas.",
+          "effects": {
+            "trigger": "PASSIVE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "aldebaran_taurus",
+      "name": "Aldebaran de Tauro",
+      "rarity": "gold",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "golds/6.webp",
+      "description": "Caballero de Oro de Tauro, conocido por su fuerza bruta y su técnica de ataque 'Great Horn'.",
+      "stats": {
+        "attack": 8,
+        "defense": 6,
+        "health": 12,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Cosmic Wrap",
+          "type": "active",
+          "description": "El proximo BA del usuario causa PAR al soldado oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "paralyzed",
+                "target": "enemy",
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Posture",
+          "type": "passive",
+          "description": "Pasar a modo defensa no consume el turno del usuario.",
+          "effects": {
+            "trigger": "PASSIVE",
+            "actions": [
+              {
+                "type": "modify_stat",
+                "stat": "defending",
+                "target": "self",
+                "value": 1,
+                "duration": "permanent"
               }
             ]
           }
         }
-      ]
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

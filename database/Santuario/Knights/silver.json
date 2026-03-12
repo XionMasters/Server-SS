@@ -1,0 +1,69 @@
+{
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Santuario",
+  "type": "knight",
+  "rank": "Silver Saint",
+  "cards": [
+    {
+      "code": "marin_aquila",
+      "name": "Aquila Marin",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 3,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "silvers/1.webp",
+      "description": "Caballera de Plata, maestra de Seiya y combatiente veloz del Santuario.",
+      "stats": {
+        "attack": 4,
+        "defense": 3,
+        "health": 7,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Eagle Wings",
+          "type": "activa",
+          "description": "Destruye la carta assistant activa del rival.",
+          "_pending": "El motor actual no soporta destruir cartas helper/assistant desde habilidades declarativas. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": []
+          }
+        },
+        {
+          "name": "Tutoring",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, roba una carta.",
+          "_pending": "El motor actual no soporta robar cartas desde habilidades declarativas. Placeholder hasta Fase 2.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    }
+  ]
+}
