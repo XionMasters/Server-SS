@@ -1309,14 +1309,13 @@
           "name": "Morale Increase",
           "type": "pasiva",
           "description": "Los aliados adyacentes reciben +2 AR.",
-          "_pending": "El motor no soporta adyacencia; temporalmente aplica +2 AR a todos los aliados durante 1 turno.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
               {
                 "type": "apply_status",
                 "status": "ar_boost",
-                "target": "all_allies",
+                "target": "adjacent_allies",
                 "value": 2,
                 "duration": 1
               }

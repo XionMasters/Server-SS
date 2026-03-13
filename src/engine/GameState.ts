@@ -23,11 +23,18 @@ export interface Player {
   deck_count: number;
   graveyard_count: number;
   costos_count: number; // "Cositos" - pie de página
+  /**
+   * Cartas fuera del campo (yomotsu, mazo, etc.) con habilidades pasivas reactivas.
+   * Solo se incluyen las que tienen al menos un trigger distinto de CARD_PLAYED/ACTIVE.
+   * Permiten que Ikki reaccione desde el yomotsu, Shun desde el mazo, etc.
+   */
+  passive_watchers: CardInGameState[];
 }
 
 // Re-exportar desde StatusEffects.ts para compatibilidad con importaciones existentes
 export { StatusEffectType, StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects, tickStatusEffects, setModeEffect } from './StatusEffects';
 import { StatusEffect } from './StatusEffects';
+import type { RawAbility } from './abilities/AbilityDefinition';
 
 // ─────────────────────────────────────────────────────
 // CARTA EN PARTIDA
@@ -49,6 +56,18 @@ export interface CardInGameState {
 
   /** Efectos de estado activos. Source of truth para mode y boosts. */
   status_effects: StatusEffect[];
+
+  /**
+   * Código estable de la carta base (ej: 'ikki_phoenix', 'shun_andromeda').
+   * Permite condiciones que matchean cartas específicas sin importar la instancia.
+   */
+  card_code: string;
+
+  /**
+   * Habilidades de la carta pre-parseadas, listas para PassiveTriggerEngine.
+   * Vacío si la carta no tiene habilidades o no se cargaron las relaciones.
+   */
+  raw_abilities: RawAbility[];
 
   // Stats de combate — base + boosts, calculados al mapear desde BD
   ce: number;   // Combat Effectiveness (base + ce_boost activos)
@@ -117,6 +136,7 @@ export function createEmptyGameState(matchId: string): GameState {
       deck_count: 40,
       graveyard_count: 0,
       costos_count: 0,
+      passive_watchers: [],
     },
     player2: {
       id: 'player2',
@@ -131,6 +151,7 @@ export function createEmptyGameState(matchId: string): GameState {
       deck_count: 40,
       graveyard_count: 0,
       costos_count: 0,
+      passive_watchers: [],
     },
     scenario: null,
     winner_id: null,

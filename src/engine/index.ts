@@ -11,3 +11,14 @@ export { TurnRulesEngine } from './TurnRulesEngine';
 export { CardRulesEngine } from './CardRulesEngine';
 export { AttackRulesEngine } from './AttackRulesEngine';
 export { KnightRulesEngine } from './KnightRulesEngine';
+
+// ─── Event bus & context ──────────────────────────────────────────────────────
+export { GameEventBus } from './events/GameEventBus';
+export { EngineContext, createEngineContext } from './EngineContext';
+
+// ─── Motor actions (una sola puerta de entrada por operación) ─────────────────
+export { applyDamage } from './actions/DamageAction';
+export { killKnight }  from './actions/KillAction';
+export { heal }        from './actions/HealAction';
+export { drawCardState } from './actions/DrawCardAction';
+export { summonKnight, type SummonFromZone } from './actions/SummonAction';

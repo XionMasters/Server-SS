@@ -12,6 +12,7 @@ import { MatchRepository } from '../repositories/MatchRepository';
 import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
 import { GameState } from '../../engine/GameState';
 import CardInPlay from '../../models/CardInPlay';
+import type { GameEvent } from '../../engine/events/GameEvents';
 
 export class AttackManager {
   /**
@@ -28,6 +29,7 @@ export class AttackManager {
     newState: GameState | null;
     damage: number;
     evaded: boolean;
+    events: GameEvent[];
     error?: string;
     isRetry?: boolean;
   }> {
@@ -41,6 +43,7 @@ export class AttackManager {
           newState: cached.cached_result,
           damage: (cached as any).damage || 0,
           evaded: (cached as any).evaded || false,
+          events: [],
           isRetry: true,
         };
       }
@@ -97,7 +100,7 @@ export class AttackManager {
             transaction
           );
 
-        return { newState: execution.newState, damage: execution.damage, evaded: execution.evaded };
+        return { newState: execution.newState, damage: execution.damage, evaded: execution.evaded, events: execution.events };
         }
       );
 
@@ -106,6 +109,7 @@ export class AttackManager {
         newState: result.newState,
         damage: result.damage,
         evaded: result.evaded,
+        events: result.events,
       };
     } catch (error) {
       console.error('[AttackManager] Error en attack:', error);
@@ -114,6 +118,7 @@ export class AttackManager {
         newState: null,
         damage: 0,
         evaded: false,
+        events: [],
         error: error instanceof Error ? error.message : 'Error desconocido',
       };
     }

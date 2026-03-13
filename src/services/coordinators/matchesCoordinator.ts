@@ -29,6 +29,22 @@ import { MatchCoordinator } from './matchCoordinator';
 import { ActionResolver } from '../game/ActionResolver';
 
 export class MatchesCoordinator {
+  /**
+   * Filtra los engine_events del motor (GameEvent[]) para un jugador específico.
+   *
+   * Reglas de visibilidad:
+   *   ALLY_DREW_CARD     → solo el jugador que robó (playerNumber === forPlayer) — incluye cardId
+   *   OPPONENT_DREW_CARD → solo el rival del que robó (playerNumber !== forPlayer) — sin cardId
+   *   resto              → ambos jugadores lo ven
+   */
+  private _filterEngineEventsForPlayer(events: any[], forPlayerNumber: number): any[] {
+    return events.filter(evt => {
+      if (evt.type === 'ALLY_DREW_CARD')     return evt.playerNumber === forPlayerNumber;
+      if (evt.type === 'OPPONENT_DREW_CARD') return evt.playerNumber !== forPlayerNumber;
+      return true;
+    });
+  }
+
   private normalizeEvents(result: any, userId: string) {
     if (!result?.events || !Array.isArray(result.events)) {
       return result;
@@ -121,6 +137,7 @@ export class MatchesCoordinator {
     const player1Id = matchData.player1?.id || matchData.player1_id;
     const player2Id = matchData.player2?.id || matchData.player2_id;
     const isTestMatch = player1Id && player1Id === player2Id;
+    const engineEvents: any[] = actionResult?.events ?? [];
 
     console.log(`[MatchesCoordinator] 📡 Recipients → P1: ${player1Id} | P2: ${player2Id} | test: ${isTestMatch}`);
 
@@ -132,7 +149,8 @@ export class MatchesCoordinator {
         ...matchData,
         last_action: lastAction ?? null,
         perspective_player: activePlayer,
-        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer)
+        cards_in_play: applyHandVisibility(matchData.cards_in_play || [], activePlayer),
+        engine_events: this._filterEngineEventsForPlayer(engineEvents, activePlayer),
       };
 
       return {
@@ -152,7 +170,8 @@ export class MatchesCoordinator {
       ...matchData,
       last_action: lastAction ?? null,
       perspective_player: playerNumber,
-      cards_in_play: applyHandVisibility(matchData.cards_in_play || [], playerNumber)
+      cards_in_play: applyHandVisibility(matchData.cards_in_play || [], playerNumber),
+      engine_events: this._filterEngineEventsForPlayer(engineEvents, playerNumber),
     });
 
     return {

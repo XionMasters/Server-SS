@@ -150,11 +150,10 @@ export class TurnRulesEngine {
       });
     });
 
-    // 6️⃣ Robar carta: decrementar deck_count en el estado puro
-    // La carta real se mueve en CardInPlay (BD) dentro de TurnManager
-    if (nextPlayerObj.deck_count > 0) {
-      nextPlayerObj.deck_count -= 1;
-    }
+    // 6️⃣ Robar carta: el decremento de deck_count y los eventos ALLY_DREW_CARD /
+    //    OPPONENT_DREW_CARD los maneja TurnManager vía drawCardState().
+    //    TurnRulesEngine no decrementaba físicamente la carta — solo el contador.
+    //    Ese paso se movió a DrawCardAction para centralizar la lógica y los eventos.
 
     // Actualizar timestamp
     newState.updated_at = Date.now();

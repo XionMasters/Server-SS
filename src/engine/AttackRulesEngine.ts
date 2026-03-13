@@ -22,6 +22,10 @@ import { CombatContext } from './combat/CombatTypes';
 import { SeededRNG } from './combat/RNG';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
 import { StatusEffect, StatusEffectType, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
+import { createEngineContext } from './EngineContext';
+import { applyDamage } from './actions/DamageAction';
+import { createEvent } from './events/GameEvents';
+import type { GameEvent } from './events/GameEvents';
 
 export class AttackRulesEngine {
   /**
@@ -62,116 +66,129 @@ export class AttackRulesEngine {
   /**
    * Ejecuta un ataque.
    * Si defenderCardId es null → daño directo al jugador (CE del atacante, sin AR).
+   *
+   * Retorna events[] para que el service layer los incluya en el broadcast al cliente.
    */
   static attack(
   state: GameState,
   playerNumber: 1 | 2,
   attackerCardId: string,
   defenderCardId: string | null
-) {
-  const newState = structuredClone(state);
-  const rng = new SeededRNG(newState.rng_seed);
+): {
+  newState: GameState;
+  damage: number;
+  evaded: boolean;
+  events: GameEvent[];
+} {
+  // Crear contexto: clona el estado y crea un bus local para esta operación
+  const engineCtx = createEngineContext(state);
+  const rng = new SeededRNG(engineCtx.state.rng_seed);
 
-  const attackerPlayer = playerNumber === 1 ? newState.player1 : newState.player2;
-  const defenderPlayer = playerNumber === 1 ? newState.player2 : newState.player1;
+  const attackerPlayer = playerNumber === 1 ? engineCtx.state.player1 : engineCtx.state.player2;
+  const defenderPlayer = playerNumber === 1 ? engineCtx.state.player2 : engineCtx.state.player1;
 
   const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
 
-  // Detectar habilidades activas ANTES de resolución (en estado no-clonado de attacker)
+  // Detectar habilidades activas del atacante ANTES de resolver el combate
   const hadIgnoreArmor = (attacker.status_effects ?? []).some(e => e.type === 'ignore_armor');
   const hasUnicornHorn = (attacker.status_effects ?? []).some(e => e.type === 'unicorn_horn');
   const hasHerdEffect  = (attacker.status_effects ?? []).some(e => e.type === 'herd_effect');
 
-  let damageToCard = 0;
+  let damageToCard   = 0;
   let damageToPlayer = 0;
-  let evaded = false;
+  let evaded         = false;
 
   if (!defenderCardId) {
-    damageToPlayer = 2; // regla fija
+    // Ataque directo al jugador: daño fijo, sin carta defensora
+    damageToPlayer = 2;
   } else {
     const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
 
-    // Determinación Interior: si el defensor tiene last_stand_active, es inmune a todo daño
+    // Determinación Interior: inmunidad total si ya tiene last_stand_active
     const hasLastStandActive = (defender.status_effects ?? []).some(e => e.type === 'last_stand_active');
+    // Determinación Interior: sobrevive letal la primera vez con last_stand
+    const hasLastStand = (defender.status_effects ?? []).some(e => e.type === 'last_stand');
 
-    const ctx: CombatContext = {
-      state: newState,
+    const combatCtx: CombatContext = {
+      state: engineCtx.state,
       attacker,
       defender,
-      defenderPlayer
+      defenderPlayer,
     };
 
     const resolver =
-      CombatModeResolvers[defender.mode ?? "normal"] ??
+      CombatModeResolvers[defender.mode ?? 'normal'] ??
       CombatModeResolvers.normal;
 
-    const result = resolver(ctx, rng);
+    const result = resolver(combatCtx, rng);
 
     damageToCard = result.damageToCard;
-    evaded = result.evaded;
+    evaded       = result.evaded;
 
     if (!evaded && !hasLastStandActive) {
-      defender.current_health -= damageToCard;
+      const wouldDie = defender.current_health - damageToCard <= 0;
 
-      if (defender.current_health <= 0) {
-        const hasLastStand = (defender.status_effects ?? []).some(e => e.type === 'last_stand');
+      if (wouldDie && hasLastStand) {
+        // ── Determinación Interior ──────────────────────────────────────────
+        // El caballero absorbe el golpe letal pero sobrevive con 1 HP.
+        // Gana inmunidad total (last_stand_active) por 1 turno.
+        // Emite DAMAGE_DEALT pero NO letal ni muerte.
+        defender.current_health = 1;
+        defender.status_effects = [
+          ...(defender.status_effects ?? []).filter(e => e.type !== 'last_stand'),
+          { type: 'last_stand_active' as StatusEffectType, remaining_turns: 1 },
+        ];
+        engineCtx.bus.emit(
+          createEvent({
+            type: 'DAMAGE_DEALT',
+            playerNumber: defender.player_number,
+            sourceCardId: attackerCardId,
+            targetCardId: defenderCardId,
+            origin: 'player',
+            payload: { amount: damageToCard, instanceId: defenderCardId },
+          }),
+        );
+        // No hay DIP por last_stand
+      } else {
+        // ── Camino normal ───────────────────────────────────────────────────
+        // applyDamage emite DAMAGE_DEALT → DAMAGE_LETHAL → killKnight si HP <= 0
+        applyDamage(engineCtx, defenderCardId, damageToCard, attackerCardId);
 
-        if (hasLastStand) {
-          // Determinación Interior: sobrevive con 1 HP e inmunidad total durante 1 turno
-          defender.current_health = 1;
-          defender.status_effects = [
-            ...(defender.status_effects ?? []).filter(e => e.type !== 'last_stand'),
-            { type: 'last_stand_active' as StatusEffectType, remaining_turns: 1 },
-          ];
-          // No va al yomotsu, no causa DIP
-        } else {
-          defenderPlayer.field_knights =
-            defenderPlayer.field_knights.filter(
-              c => c.instance_id !== defenderCardId
-            );
-
-          defender.zone = "yomotsu";
-          defenderPlayer.graveyard_count += 1;
-
-          damageToPlayer = 1; // regla fija
+        // Si la carta murió (no está en campo), genera 1 DIP al jugador
+        const defenderStillAlive = this._findCardInField(defenderPlayer, defenderCardId);
+        if (!defenderStillAlive) {
+          damageToPlayer = 1;
         }
       }
     }
   }
 
-  // Cuerno de Unicornio: +1 DIP al jugador rival solo si el ataque conectó (no esquivado)
-  if (hasUnicornHorn && !evaded) {
-    damageToPlayer += 1;
-  }
+  // Cuerno de Unicornio: +1 DIP extra si el ataque conectó
+  if (hasUnicornHorn && !evaded) damageToPlayer += 1;
+  // Efecto Manada: +1 DIP extra si ya se está causando DIP
+  if (hasHerdEffect && damageToPlayer > 0) damageToPlayer += 1;
 
-  // Efecto Manada: +1 DIP extra si el AB ya está causando DIP (el origen no importa)
-  if (hasHerdEffect && damageToPlayer > 0) {
-    damageToPlayer += 1;
-  }
-
-  defenderPlayer.life = Math.max(
-    0,
-    defenderPlayer.life - damageToPlayer
-  );
+  defenderPlayer.life = Math.max(0, defenderPlayer.life - damageToPlayer);
 
   // Consumir ignore_armor (efecto de un solo uso por ataque)
   if (hadIgnoreArmor) {
     attacker.status_effects = (attacker.status_effects ?? []).filter(
-      e => e.type !== 'ignore_armor'
+      e => e.type !== 'ignore_armor',
     );
   }
 
-  attacker.is_exhausted = true;
+  attacker.is_exhausted      = true;
   attacker.attacked_this_turn = true;
 
-  newState.rng_seed = rng.getSeed();
+  engineCtx.state.rng_seed = rng.getSeed();
 
-  resolveWinCondition(newState);
+  resolveWinCondition(engineCtx.state);
 
   return {
-    newState,
-    damage: damageToCard,
-    evaded
+    newState: engineCtx.state,
+    damage:   damageToCard,
+    evaded,
+    events:   [...engineCtx.bus.events],
   };
 }
   /**

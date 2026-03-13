@@ -46,12 +46,17 @@ import { sequelize } from '../../config/database';
 import Match from '../../models/Match';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
+import CardAbility from '../../models/CardAbility';
 import { TurnRulesEngine } from '../../engine/TurnRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../repositories/MatchRepository';
 import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry';
 import { GameState } from '../../engine/GameState';
 import { CardDrawService } from './CardDrawService';
+import { createEngineContext } from '../../engine/EngineContext';
+import { drawCardState } from '../../engine/actions/DrawCardAction';
+import { createEvent } from '../../engine/events/GameEvents';
+import type { GameEvent } from '../../engine/events/GameEvents';
 
 export class TurnManager {
   /**
@@ -69,6 +74,7 @@ export class TurnManager {
   ): Promise<{
     success: boolean;
     newState: GameState | null;
+    events: GameEvent[];
     error?: string;
     isRetry?: boolean;
   }> {
@@ -82,6 +88,7 @@ export class TurnManager {
         return {
           success: true,
           newState: cached.cached_result,
+          events: [],
           isRetry: true,
         };
       }
@@ -101,7 +108,11 @@ export class TurnManager {
               {
                 model: CardInPlay,
                 as: 'cards_in_play',
-                include: [{ model: Card, as: 'card' }]
+                include: [{
+                  model: Card,
+                  as: 'card',
+                  include: [{ model: CardAbility, as: 'card_abilities' }]
+                }]
               }
             ]
           });
@@ -132,9 +143,38 @@ export class TurnManager {
           // ====================================================================
           await MatchRepository.applyState(match, execution.newState, transaction);
 
-          // PASO 6b: ROBAR CARTA para el siguiente jugador
+          // PASO 6b: ROBAR CARTA para el siguiente jugador (operación de BD)
           const nextPlayer = playerNumber === 1 ? 2 : 1;
-          await CardDrawService.drawCard(match.id, nextPlayer, transaction);
+          const drawnCard = await CardDrawService.drawCard(match.id, nextPlayer, transaction);
+
+          // PASO 6c: MOTOR PURO — contexto compartido para todos los eventos de este turno
+          const ctx = createEngineContext(execution.newState);
+
+          // TURN_END: fin del turno del jugador actual
+          // (antes del robo, para pasivas que reaccionan «al terminar tu turno»)
+          ctx.bus.emit(createEvent({
+            type: 'TURN_END',
+            playerNumber,
+            matchId: match.id,
+            origin: 'system',
+            payload: { turn: execution.newState.current_turn },
+          }));
+
+          // TURN_START: inicio del turno del siguiente jugador
+          // (después del TURN_END, para que «al iniciar tu turno» sea correcto)
+          ctx.bus.emit(createEvent({
+            type: 'TURN_START',
+            playerNumber: nextPlayer,
+            matchId: match.id,
+            origin: 'system',
+            payload: { turn: execution.newState.current_turn },
+          }));
+
+          // Robo de carta: decrementa deck_count y emite ALLY_DREW_CARD + OPPONENT_DREW_CARD
+          drawCardState(ctx, nextPlayer, drawnCard?.id);
+
+          // Persistir el estado final (con deck_count decrementado y passivas aplicadas)
+          await MatchRepository.applyState(match, ctx.state, transaction);
 
           // ====================================================================
           // PASO 7: REGISTRAR COMO PROCESADA (idempotencia)
@@ -143,24 +183,26 @@ export class TurnManager {
             actionId,
             match.id,
             playerNumber,
-            execution.newState,
+            ctx.state,
             'turn_end',  // actionType
             transaction
           );
 
-          return execution.newState;
+          return { finalState: ctx.state, events: [...ctx.bus.events] };
         }
       );
 
       return {
         success: true,
-        newState: result,
+        newState: result.finalState,
+        events:   result.events,
       };
     } catch (error) {
       console.error('[TurnManager] Error en endTurn:', error);
       return {
         success: false,
         newState: null,
+        events: [],
         error: error instanceof Error ? error.message : 'Error desconocido',
       };
     }

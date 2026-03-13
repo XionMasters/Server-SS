@@ -9,7 +9,16 @@
  *   'target'      → la carta elegida por el cliente (event.targetCardId)
  *   'all_allies'  → todos los caballeros propios en campo
  *   'all_enemies' → todos los caballeros rivales en campo
- *
+ *   'adjacent_allies' → caballeros propios adyacentes al que activa la habilidad (por ejemplo, para habilidades de soporte)
+ *   'adjacent_enemies' → caballeros rivales adyacentes al que activa la habilidad (por ejemplo, para habilidades de ataque en área)
+ *   'target_and_adjacent_enemies' → la carta objetivo y sus adyacentes rivales (por ejemplo, para habilidades de ataque en área dirigidas)
+ *   'opponent_helper' → el ayudante del oponente (para habilidades que interactúan con el ayudante, si es que jugo uno en el slot correspondiente)
+ *   'opponent_technique' → la técnica del oponente (para habilidades que interactúan con técnicas del oponente)
+ *   'random_enemy' → un caballero rival aleatorio en campo (para habilidades que afectan enemigos pero no requieren un objetivo específico)
+ *   'random_ally' → un caballero aliado aleatorio en campo (para habilidades de soporte que no requieren un objetivo específico)
+ *   'other_allies' → todos los caballeros propios excepto el que activa la habilidad (para habilidades de soporte que no deben aplicarse a sí mismas)
+*   'lowest_health_enemy' → el caballero rival con menos HP en campo (para habilidades que priorizan objetivos debilitados)
+  *
  * Para añadir un nuevo target:
  *   TargetResolver.register('nombre', fn);
  */
@@ -22,6 +31,8 @@ export interface TargetContext {
   playerNumber: 1 | 2;
   sourceCardId: string;
   event: GameEvent;
+  /** Fuente de aleatoriedad (heredada de ActionContext). */
+  rng: () => number;
 }
 
 type TargetFn = (ctx: TargetContext) => CardInGameState[];
@@ -47,6 +58,83 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
 
   all_enemies: ({ state, playerNumber }) =>
     (playerNumber === 1 ? state.player2 : state.player1).field_knights,
+
+  adjacent_allies: ({ state, playerNumber, sourceCardId }) => {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    const idx = player.field_knights.findIndex(c => c.instance_id === sourceCardId);
+    if (idx === -1) return [];
+    return [player.field_knights[idx - 1], player.field_knights[idx + 1]].filter(Boolean);
+  },
+
+  adjacent_enemies: ({ state, playerNumber, event }) => {
+  if (!event.targetCardId) return [];
+
+  const opponent = playerNumber === 1 ? state.player2 : state.player1;
+  const idx = opponent.field_knights.findIndex(c => c.instance_id === event.targetCardId);
+
+  if (idx === -1) return [];
+
+  return [
+    opponent.field_knights[idx - 1],
+    opponent.field_knights[idx + 1]
+  ].filter(Boolean);
+},
+
+  opponent_helper: ({ state, playerNumber }) => {
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    return opponent.field_helper ? [opponent.field_helper] : [];
+  },
+
+  opponent_technique: ({ state, playerNumber, event }) => {
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    return opponent.field_techniques.filter(t => t.instance_id === event.targetCardId);    
+  },
+
+  target_and_adjacent_enemies: ({ state, playerNumber, event }) => {
+    if (!event.targetCardId) return [];
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    const idx = opponent.field_knights.findIndex(c => c.instance_id === event.targetCardId);
+    if (idx === -1) return [];
+    return [
+      opponent.field_knights[idx],
+      opponent.field_knights[idx - 1],
+      opponent.field_knights[idx + 1],
+    ].filter(Boolean);
+  },
+
+  random_enemy: ({ state, playerNumber, rng }) => {
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    const enemies = opponent.field_knights;
+    if (enemies.length === 0) return [];
+    const randomIndex = Math.floor(rng() * enemies.length);
+    return [enemies[randomIndex]];
+  },
+
+  random_ally: ({ state, playerNumber, rng }) => {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    const allies = player.field_knights;
+    if (allies.length === 0) return [];
+    const randomIndex = Math.floor(rng() * allies.length);
+    return [allies[randomIndex]];
+  },
+
+  other_allies: ({ state, playerNumber, sourceCardId }) => {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    return player.field_knights.filter(c => c.instance_id !== sourceCardId);
+  },
+
+  lowest_health_enemy: ({ state, playerNumber }) => {
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    const enemies = opponent.field_knights;
+    if (enemies.length === 0) return [];
+    let lowestHpEnemy = enemies[0];
+    for (const enemy of enemies) {
+      if (enemy.current_health < lowestHpEnemy.current_health) {
+        lowestHpEnemy = enemy;
+      }
+    }
+    return [lowestHpEnemy];
+  },
 };
 
 export const TargetResolver = {

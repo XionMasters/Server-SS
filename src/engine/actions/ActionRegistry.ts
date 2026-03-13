@@ -22,7 +22,11 @@ import type { GameState } from '../GameState';
 import type { ActionDefinition, ApplyStatusAction, CoinFlipAction } from '../abilities/AbilityDefinition';
 import type { StatusEffectType } from '../StatusEffects';
 import type { GameEvent } from '../events/GameEvents';
+import type { GameEventBus } from '../events/GameEventBus';
 import { TargetResolver, type TargetContext } from '../targets/TargetResolver';
+import { applyDamage } from './DamageAction';
+import { heal } from './HealAction';
+import { summonKnight } from './SummonAction';
 
 export interface ActionContext {
   playerNumber: 1 | 2;
@@ -30,6 +34,12 @@ export interface ActionContext {
   event: GameEvent;
   /** Fuente de aleatoriedad inyectable (facilita tests). Por defecto: Math.random. */
   rng: () => number;
+  /**
+   * Bus de eventos del contexto de ejecución actual.
+   * Requerido para acciones que emiten eventos (apply_damage, heal, etc.).
+   * Opcional para compatibilidad con callers que aún no tienen bus.
+   */
+  bus?: GameEventBus;
 }
 
 export interface ActionResult {
@@ -58,6 +68,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       playerNumber: ctx.playerNumber,
       sourceCardId: ctx.sourceCardId,
       event: ctx.event,
+      rng: ctx.rng,
     };
     const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
 
@@ -93,6 +104,73 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
         target: card.instance_id,
       });
     }
+  },
+
+  /**
+   * Aplica daño a los targets resueltos.
+   * Requiere ctx.bus para propagar DAMAGE_DEALT / DAMAGE_LETHAL / KNIGHT_DIED.
+   * Estructura: { type: 'apply_damage', target: TargetType, amount: number }
+   */
+  apply_damage: (action: any, ctx, result) => {
+    if (!ctx.bus) {
+      throw new Error('[ActionRegistry] apply_damage requiere un GameEventBus en ctx.bus');
+    }
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    const engineCtx = { state: result.state, bus: ctx.bus };
+    for (const card of targets) {
+      applyDamage(engineCtx, card.instance_id, action.amount ?? 0, ctx.sourceCardId);
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
+   * Cura HP a los targets resueltos.
+   * Requiere ctx.bus para propagar HEAL_RECEIVED.
+   * Estructura: { type: 'heal', target: TargetType, amount: number }
+   */
+  heal: (action: any, ctx, result) => {
+    if (!ctx.bus) {
+      throw new Error('[ActionRegistry] heal requiere un GameEventBus en ctx.bus');
+    }
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    const engineCtx = { state: result.state, bus: ctx.bus };
+    for (const card of targets) {
+      heal(engineCtx, card.instance_id, action.amount ?? 0, ctx.sourceCardId);
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
+   * Convoca un caballero desde yomotsu/mazo/cositos al campo.
+   * La carta debe estar en passive_watchers del estado (puesta ahí por killKnight o el mapper).
+   * Requiere ctx.bus para propagar KNIGHT_SUMMONED.
+   * Estructura: { type: 'summon_from_zone', zone: 'yomotsu'|'deck'|'cositos', position?: number }
+   */
+  summon_from_zone: (action: any, ctx, result) => {
+    if (!ctx.bus) {
+      throw new Error('[ActionRegistry] summon_from_zone requiere un GameEventBus en ctx.bus');
+    }
+    // La carta a convocar es la fuente del evento que disparó esta habilidad.
+    const cardId = ctx.sourceCardId;
+    const fromZone = action.zone ?? 'yomotsu';
+    const position = action.position ?? 0;
+    const engineCtx = { state: result.state, bus: ctx.bus };
+    summonKnight(engineCtx, cardId, position, fromZone);
+    result.affectedIds.push(cardId);
   },
 
   // Coin flip: ejecuta acciones en éxito (cara) o fallo (cruz).

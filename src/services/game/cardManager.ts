@@ -24,6 +24,8 @@ import { GameState } from '../../engine/GameState';
 import { StatusEffect } from '../../engine/StatusEffects';
 import { AbilityEngine } from '../../engine/abilities/AbilityEngine';
 import { ZoneMapper } from '../../utils/ZoneMapper';
+import { createEngineContext } from '../../engine/EngineContext';
+import { GameEventType, createEvent } from '../../engine/events/GameEvents';
 
 // â”€â”€ Card definition cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // card_id â†’ { bdStats, abilities }  (estÃ¡tico durante el proceso)
@@ -202,7 +204,15 @@ export class CardManager {
         // Mueve zona+posicion en BD; stats los persiste applyState step 4.
         await (cardInPlay as any).update({ zone: dbZone, position }, { transaction: tx });
 
-        return { newState };
+        // Emitir CARD_PLAYED (puede disparar pasivas de cartas ya en campo).
+        const ctx = createEngineContext(newState);
+        ctx.bus.emit(createEvent({
+          type: GameEventType.CARD_PLAYED,
+          playerNumber,
+          sourceCardId: cardId,
+          payload: { zone: dbZone, position },
+        }));
+        return { newState: ctx.state, events: [...ctx.bus.events] };
       },
     );
   }

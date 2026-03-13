@@ -25,6 +25,7 @@ import type { GameEvent } from '../events/GameEvents';
 import type { AbilityDefinition, CostDefinition } from './AbilityDefinition';
 import { ConditionRegistry, type ConditionContext } from '../conditions/ConditionRegistry';
 import { ActionRegistry, type ActionContext, type ActionResult } from '../actions/ActionRegistry';
+import type { EngineContext } from '../EngineContext';
 
 export interface AbilityCheck {
     valid: boolean;
@@ -35,6 +36,9 @@ export interface AbilityExecution {
     newState: GameState;
     affectedIds: string[];
     extras?: Record<string, any>;
+    /** Eventos emitidos durante la ejecución. Vacío si se pasó un EngineContext externo
+     *  (los eventos ya están en el bus externo). */
+    events: import('../events/GameEvents').GameEvent[];
 }
 
 /**
@@ -59,6 +63,8 @@ function findSourceCard(player: any, sourceCardId: string): any {
     return (
         player.field_knights.find((c: any) => c.instance_id === sourceCardId) ??
         (player.hand ?? []).find((c: any) => c.instance_id === sourceCardId) ??
+        // Cartas fuera del campo con triggers reactivos (yomotsu, mazo, etc.)
+        (player.passive_watchers ?? []).find((c: any) => c.instance_id === sourceCardId) ??
         null
     );
 }
@@ -143,7 +149,8 @@ function applyCosts(
 
     for (const cost of (def.cost ?? [])) {
         if (cost.type === 'cosmos') {
-            const card = player.field_knights.find(c => c.instance_id === sourceCardId);
+            const card = player.field_knights.find(c => c.instance_id === sourceCardId)
+                      ?? (player.passive_watchers ?? []).find((c: any) => c.instance_id === sourceCardId);
             if (!card) {
                 throw new Error(
                     `[AbilityEngine] Carta fuente "${sourceCardId}" no encontrada al aplicar costo de cosmo`,
@@ -199,20 +206,44 @@ export const AbilityEngine = {
         return _canActivateFromCtx(def, ctx, event);
     },
 
-    /** Ejecuta la habilidad y retorna nuevo estado (operación pura: no muta el estado original). */
+    /** Ejecuta la habilidad y retorna nuevo estado.
+     *
+     * @param def          Definición declarativa de la habilidad.
+     * @param state        Estado actual (se clona si no se pasa engineCtx).
+     * @param playerNumber Jugador que activa.
+     * @param sourceCardId Carta que activa.
+     * @param event        Evento que disparó o contexto de activación.
+     * @param engineCtx    Contexto externo opcional (de PassiveTriggerEngine o acción encadenada).
+     *                     Si se proporciona: se usa su estado directamente (sin clonar) y los
+     *                     eventos van al bus externo. Si no: se crea contexto interno propio.
+     */
     execute(
         def: AbilityDefinition,
         state: GameState,
         playerNumber: 1 | 2,
         sourceCardId: string,
         event: GameEvent,
+        engineCtx?: EngineContext,
     ): AbilityExecution {
-        const newState = structuredClone(state);
+        // Si hay contexto externo, operamos sobre el estado compartido (ya es un clon).
+        // Si no, creamos uno nuevo para esta ejecución.
+        let ctx: EngineContext;
+        let isExternal: boolean;
 
-        const { costExtras } = applyCosts(def, newState, playerNumber, sourceCardId, event);
+        if (engineCtx) {
+            ctx = engineCtx;
+            isExternal = true;
+        } else {
+            // Importación diferida igual que en EngineContext para evitar ciclo
+            const { createEngineContext } = require('../EngineContext') as typeof import('../EngineContext');
+            ctx = createEngineContext(state);
+            isExternal = false;
+        }
+
+        const { costExtras } = applyCosts(def, ctx.state, playerNumber, sourceCardId, event);
 
         const result: ActionResult = {
-            state: newState,
+            state: ctx.state,
             affectedIds: [sourceCardId],
             extras: { ...costExtras },
         };
@@ -221,14 +252,18 @@ export const AbilityEngine = {
             sourceCardId,
             event,
             rng: Math.random,
+            bus: ctx.bus,
         };
         ActionRegistry.executeAll(def.actions, actionCtx, result);
 
-        result.state.updated_at = Date.now();
+        ctx.state.updated_at = Date.now();
         return {
-            newState: result.state,
+            newState: ctx.state,
             affectedIds: [...new Set(result.affectedIds)],
             extras: result.extras,
+            // Si el ctx es externo, los eventos ya están en el bus externo.
+            // Retornamos array vacío para que el caller no los duplique.
+            events: isExternal ? [] : [...ctx.bus.events],
         };
     },
 

@@ -48,12 +48,25 @@
 /**
  * Targets declarativos que resuelven cartas en el campo/mano.
  * 'target' = carta elegida explícitamente por el cliente via targetCardId.
+ * 'self' = la carta que activa la habilidad (sourceCardId).
+ * 'all_allies' / 'all_enemies' = todas las cartas del mismo jugador / oponente.
+ * Para targets más complejos (ej. "todos los aliados con HP < 3"), se pueden crear nuevos tipos
+ * y resolverlos en TargetResolver.resolve() usando el contexto de la acción.
  */
 export type TargetType =
   | 'self'
   | 'target'
   | 'all_allies'
-  | 'all_enemies';
+  | 'all_enemies'
+  | 'adjacent_allies'
+  | 'adjacent_enemies'
+  | 'target_and_adjacent_enemies'
+  | 'opponent_helper'
+  | 'opponent_technique'
+  | 'random_enemy'
+  | 'random_ally'
+  | 'other_allies'
+  | 'lowest_health_enemy';
 
 // ─── Trigger types ────────────────────────────────────────────────────────────
 
@@ -126,7 +139,29 @@ export interface AbilityDefinition {
   actions: ActionDefinition[];
 }
 
+/**
+ * Habilidad con su definición ya parseada, lista para despacho en runtime.
+ * Se almacena en CardInGameState.raw_abilities para que el PassiveTriggerEngine
+ * pueda disparar triggers sin acceder a la BD.
+ */
+export interface RawAbility {
+  /** Slug estable de la habilidad (ej: 'justice_fist'). Null si no fue asignado en BD. */
+  ability_key: string | null;
+  /** Solo las 'pasiva' son procesadas automáticamente por PassiveTriggerEngine. */
+  type: 'activa' | 'pasiva' | 'equipamiento' | 'campo';
+  /** Definición ya decodificada y validada. */
+  effects: AbilityDefinition;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Targets que requieren que el cliente envíe un targetCardId. */
+const CLIENT_TARGET_TYPES = new Set<TargetType>([
+  'target',
+  'adjacent_enemies',
+  'target_and_adjacent_enemies',
+  'opponent_technique',
+]);
 
 /** Determina si la habilidad requiere que el cliente envíe un targetId. */
 export function requiresClientTarget(def: AbilityDefinition): boolean {
@@ -136,7 +171,7 @@ export function requiresClientTarget(def: AbilityDefinition): boolean {
 
 function _actionsNeedTarget(actions: ActionDefinition[]): boolean {
   for (const action of actions) {
-    if ('target' in action && action.target === 'target') return true;
+    if ('target' in action && action.target && CLIENT_TARGET_TYPES.has(action.target)) return true;
     // Recursivo: buscar en ramas de coin_flip_then
     const branches = [
       ...(('heads'    in action && Array.isArray(action.heads))    ? action.heads    : []),

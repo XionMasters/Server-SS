@@ -21,6 +21,7 @@
 import { GameState, Player, CardInGameState, createEmptyGameState } from '../../engine/GameState';
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../engine/StatusEffects';
 import { xmur3 } from '../../engine/combat/RNG';
+import { parseAbilityDef, type RawAbility } from '../../engine/abilities/AbilityDefinition';
 import CardInPlay from '../../models/CardInPlay';
 
 // Asume que existen estos modelos
@@ -120,6 +121,20 @@ export class MatchStateMapper {
         case 'field_knight': targetPlayer.field_knights.push(cardState); break;
         case 'field_support':targetPlayer.field_techniques.push(cardState); break;
         case 'field_helper': targetPlayer.field_helper = cardState; break;
+        case 'yomotsu':
+        case 'deck': {
+          // Solo agregar a passive_watchers si tiene triggers reactivos (no CARD_PLAYED ni ACTIVE)
+          // Esto es lo que permite que Ikki reaccione desde el yomotsu, Shun desde el mazo, etc.
+          const hasReactiveTrigger = cardState.raw_abilities.some(
+            a => a.type === 'pasiva'
+              && a.effects.trigger !== 'CARD_PLAYED'
+              && a.effects.trigger !== 'ACTIVE'
+          );
+          if (hasReactiveTrigger) {
+            targetPlayer.passive_watchers.push(cardState);
+          }
+          break;
+        }
       }
     }
 
@@ -163,6 +178,20 @@ export class MatchStateMapper {
     const base_ce: number = card.current_attack  ?? card.base_ce  ?? 0;
     const base_ar: number = card.current_defense ?? card.base_ar  ?? 0;
 
+    // Parsear habilidades raw para PassiveTriggerEngine
+    const raw_abilities: RawAbility[] = [];
+    const cardAbilities: any[] = card.card?.card_abilities ?? [];
+    for (const ability of cardAbilities) {
+      const def = parseAbilityDef(ability.effects);
+      if (def) {
+        raw_abilities.push({
+          ability_key: ability.ability_key ?? null,
+          type: ability.type,
+          effects: def,
+        });
+      }
+    }
+
     return {
       instance_id: card.id,
       card_id: card.card_id,
@@ -178,6 +207,10 @@ export class MatchStateMapper {
       attacked_this_turn: card.has_attacked_this_turn ?? false,
 
       status_effects: effects,
+
+      // Código estático de la carta base — útil para condiciones que matchean por carta específica
+      card_code: card.card?.code ?? '',
+      raw_abilities,
 
       // Stats con boosts aplicados
       base_ce,

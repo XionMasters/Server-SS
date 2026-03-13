@@ -22,8 +22,10 @@ import { ProcessedActionsRegistry } from '../registries/ProcessedActionsRegistry
 import { GameState } from '../../engine/GameState';
 import CardInPlay from '../../models/CardInPlay';
 import CardAbility from '../../models/CardAbility';
-import { GameEventType, type GameEvent } from '../../engine/events/GameEvents';
+import { GameEventType, type GameEvent, createEvent } from '../../engine/events/GameEvents';
 import { parseAbilityDef } from '../../engine/abilities/AbilityDefinition';
+import { createEngineContext } from '../../engine/EngineContext';
+import { killKnight } from '../../engine/actions/KillAction';
 
 // â”€â”€ Ability cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Las definiciones de habilidades son estÃ¡ticas durante la vida del proceso.
@@ -124,10 +126,18 @@ export class KnightManager {
       async (state) => {
         const v = KnightRulesEngine.validateChargeKnightCosmos(state, playerNumber);
         if (!v.valid) throw new Error(v.error ?? 'ValidaciÃ³n fallida');
-        return KnightRulesEngine.chargeKnightCosmos(state, playerNumber);
+        const execution = KnightRulesEngine.chargeKnightCosmos(state, playerNumber);
+        const ctx = createEngineContext(execution.newState);
+        const player = playerNumber === 1 ? ctx.state.player1 : ctx.state.player2;
+        ctx.bus.emit(createEvent({
+          type: GameEventType.COSMOS_CHARGED,
+          playerNumber,
+          payload: { amount: execution.cosmosGained, totalCosmos: player.cosmos },
+        }));
+        return { newState: ctx.state, cosmosGained: execution.cosmosGained, events: [...ctx.bus.events] };
       },
     );
-    return { cosmosGained: 0, ...result };
+    return { cosmosGained: result.cosmosGained ?? 0, ...result };
   }
 
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -162,8 +172,12 @@ export class KnightManager {
         if (!card) throw new Error('Carta de caballero no encontrada en campo del jugador');
 
         const execution = KnightRulesEngine.sacrificeKnight(state, playerNumber);
-        await card.update({ zone: 'yomotsu', position: 0 }, { transaction: tx });
-        return execution;
+        // killKnight emite KNIGHT_DIED + ALLY_DIED y retira la carta de field_knights.
+        // applyState (paso 5) detectará que la carta ya no está en ningún campo
+        // y la moverá a yomotsu en BD — no necesitamos card.update() explícito.
+        const ctx = createEngineContext(execution.newState);
+        killKnight(ctx, cardInPlayId);
+        return { newState: ctx.state, lifeLost: execution.lifeLost, events: [...ctx.bus.events] };
       },
     );
     return { lifeLost: 1, ...result };
@@ -336,7 +350,7 @@ export class KnightManager {
           );
         }
 
-        return { newState: execution.newState, extras: execution.extras ?? {} };
+        return { newState: execution.newState, extras: execution.extras ?? {}, events: execution.events ?? [] };
       },
     );
   }

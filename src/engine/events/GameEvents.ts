@@ -24,6 +24,11 @@ export const GameEventType = {
   ALLY_DIED:      'ALLY_DIED',      // Alias semántico — aliado del emisor eliminado
   DAMAGE_DEALT:   'DAMAGE_DEALT',   // Daño aplicado a un caballero
   DAMAGE_LETHAL:  'DAMAGE_LETHAL',  // Daño letal (reduce HP a 0)
+  HEAL_RECEIVED:      'HEAL_RECEIVED',      // Curación recibida por un caballero
+  ALLY_DREW_CARD:     'ALLY_DREW_CARD',     // El jugador activo roba una carta del mazo
+  OPPONENT_DREW_CARD: 'OPPONENT_DREW_CARD', // El oponente roba una carta del mazo
+  COSMOS_CHARGED:     'COSMOS_CHARGED',     // Jugador usa "Cargar Cosmo" (+CP)
+  KNIGHT_SUMMONED:    'KNIGHT_SUMMONED',    // Caballero convocado desde yomotsu/mazo/cositos
 } as const;
 
 export type GameEventType = typeof GameEventType[keyof typeof GameEventType];
@@ -38,10 +43,15 @@ export interface EventPayloadMap {
   CARD_PLAYED:   { zone: string; position: number };
   TURN_START:    { turn: number };
   TURN_END:      { turn: number };
-  KNIGHT_DIED:   { instanceId: string; owner: 1 | 2 };
-  ALLY_DIED:     { instanceId: string; owner: 1 | 2 };
+  KNIGHT_DIED:   { instanceId: string; owner: 1 | 2; card_code: string };
+  ALLY_DIED:     { instanceId: string; owner: 1 | 2; card_code: string };
   DAMAGE_DEALT:  { amount: number; instanceId: string; isCrit?: boolean };
-  DAMAGE_LETHAL: { amount: number; instanceId: string };
+  DAMAGE_LETHAL:     { amount: number; instanceId: string };
+  HEAL_RECEIVED:      { amount: number; instanceId: string };
+  ALLY_DREW_CARD:     { cardId: string; remainingDeck: number };
+  OPPONENT_DREW_CARD: { remainingDeck: number }; // Sin cardId: el oponente no revela la carta robada
+  COSMOS_CHARGED:     { amount: number; totalCosmos: number };
+  KNIGHT_SUMMONED:    { instanceId: string; card_code: string; owner: 1 | 2; from_zone: 'yomotsu' | 'deck' | 'cositos'; position: number };
 }
 
 /** Payload tipado para el evento T. Cae a `Record<string, unknown>` si T es la unión completa. */

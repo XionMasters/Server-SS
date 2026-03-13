@@ -35,6 +35,7 @@ function clonePlayer(player: Player): Player {
     hand:             [...player.hand],
     field_knights:    [...player.field_knights],
     field_techniques: [...player.field_techniques],
+    passive_watchers: [...player.passive_watchers],
   };
 }
 
@@ -174,6 +175,7 @@ export class KnightRulesEngine {
    * @returns newState    — estado inmutable actualizado
    *          affectedIds — instance_ids de todas las cartas cuyo estado cambió (el caster siempre incluido)
    *          extras      — datos adicionales para el cliente (coin_flip_result, etc.)
+   *          events      — eventos de motor emitidos durante la ejecución
    */
   static useAbility(
     state: GameState,
@@ -181,12 +183,12 @@ export class KnightRulesEngine {
     cardId: string,
     abilityDef: AbilityDefinition,
     event: GameEvent,
-  ): { newState: GameState; affectedIds: string[]; extras?: Record<string, any> } {
+  ): { newState: GameState; affectedIds: string[]; extras?: Record<string, any>; events: GameEvent[] } {
     const result = AbilityEngine.execute(abilityDef, state, playerNumber, cardId, event);
     // Garantizar que el caster siempre figure en affectedIds aunque la habilidad
     // no lo modifique directamente (ej: coin flip que falla).
     const affectedIds = Array.from(new Set([cardId, ...result.affectedIds]));
-    return { ...result, affectedIds };
+    return { ...result, affectedIds, events: result.events };
   }
 }
 

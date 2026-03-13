@@ -12,6 +12,10 @@
  *   self_in_zone     → la carta fuente está en cierta zona
  *   hp_below         → la carta fuente tiene HP <= N
  *   enemy_has_status → el objetivo (targetCard) o cualquier caballero rival tiene cierto status
+ *   event_card_code  → el card_code de la carta que originó el evento coincide con uno de los
+ *                      valores declarados. Acepta string o array de strings.
+ *                      Ej: { "type": "event_card_code", "code": "ikki_phoenix" }
+ *                      Ej: { "type": "event_card_code", "code": ["ikki_phoenix", "ikki_phoenix_v2", "ikki_leo"] }
  *
  * Para añadir una nueva condición:
  *   ConditionRegistry.register('nombre', fn);
@@ -92,6 +96,24 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
     return (ctx.opponent?.field_knights ?? []).some(k =>
       k.status_effects.some(e => e.type === cond.status),
     );
+  },
+
+  /**
+   * Verdadero si el card_code de la carta que originó el evento está en la lista declarada.
+   * `code` puede ser un string único o un array de strings.
+   *
+   * Ejemplo JSON en la habilidad:
+   *   { "type": "event_card_code", "code": "ikki_phoenix" }
+   *   { "type": "event_card_code", "code": ["ikki_phoenix", "ikki_phoenix_v2", "ikki_leo"] }
+   *
+   * El código viene de ctx.event.payload.card_code, que PassiveTriggerEngine
+   * inyecta en eventos KNIGHT_DIED y ALLY_DIED.
+   */
+  event_card_code: (cond, ctx) => {
+    const eventCode: string | undefined = (ctx.event.payload as any)?.card_code;
+    if (!eventCode) return false;
+    const codes: string[] = Array.isArray(cond.code) ? cond.code : [cond.code];
+    return codes.includes(eventCode);
   },
 };
 
