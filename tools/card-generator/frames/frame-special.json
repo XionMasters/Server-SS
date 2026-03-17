@@ -1,0 +1,68 @@
+{
+  "art_window": {
+    "x": 0, "y": 120, "w": 1024, "h": 900,  
+    "pad_left": 180,
+    "pad_right": 60,
+    "pad_top": 0
+  },
+
+  "name": {
+    "x": 200, "y": 18, "w": 780, "h": 115,
+    "font_size": 52,
+    "align": "center",
+    "color": [30, 20, 10]
+  },
+
+  "rarity_label": {
+    "x": 215, "y": 145,
+    "font_size": 24,
+    "color": [80, 60, 40]
+  },
+
+  "stat_circles": [
+    ["health",  "LP",  120, 353, 85, 80, 32],
+    ["cosmos",  "CP",  120, 507, 85, 80, 32],
+    ["attack",  "CE",  120, 678, 85, 80, 32],
+    ["defense", "AR",  360, 740, 85, 80, 32]
+  ],
+
+  "rank_label": {
+    "x": 200, "y": 863, "w": 780,
+    "font_size": 36,
+    "align": "center",
+    "color": [30, 20, 10]
+  },
+
+  "description": {
+    "x": 55, "y": 910, "w": 930,
+    "font_size": 28,
+    "line_spacing": 6,
+    "color": [30, 20, 10],
+    "max_lines": 4
+  },
+
+  "abilities": {
+    "x": 100, "y": 960,
+    "w": 930,
+    "font_size_name": 30,
+    "font_size_desc": 26,
+    "line_spacing": 5,
+    "name_color": [80, 40, 0],
+    "desc_color": [30, 20, 10],
+    "max_abilities": 3
+  },
+
+  "rarity": {
+    "x": 900, "y": 1480,
+    "font_size": 28,
+    "color": [100, 80, 40]
+  },
+
+  "rarity_icon": {
+    "x": 83, "y": 104, "size": 140
+  },
+
+  "element_icon": {
+    "x": 850, "y": 55, "size": 60
+  }
+}

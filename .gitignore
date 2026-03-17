@@ -18,3 +18,5 @@ dist/
 .env.*.local
 *auth_token*
 *.pem
+# Card generator - imagenes generadas (se regeneran con generate.py)
+tools/card-generator/output/

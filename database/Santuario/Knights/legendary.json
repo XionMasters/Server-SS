@@ -40,6 +40,21 @@
           }
         },
         {
+          "name": "Long dick Meteor",
+          "type": "activa",
+          "description": "Inflije 2 puntos de daño a un caballero oponente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "",
+                "status": "",
+                "target": ""
+              }
+            ]
+          }
+        },
+        {
           "name": "Justice Fist",
           "type": "activa",
           "description": "Descarta una carta de tu mano; el próximo BA de este caballero ignora la AR del defensor.",
@@ -79,7 +94,7 @@
       "artist": null
     },
     {
-      "code": "shiryu_dragon",
+      "code": "shiryu_dragon_v1",
       "name": "Shiryu de Dragón",
       "rarity": "rare",
       "cost": 0,
@@ -94,7 +109,7 @@
         "health": 9,
         "cosmos": 8,
         "can_defend": true,
-        "defense_reduction": 0.3
+        "defense_reduction": 0.5
       },
       "abilities": [
         {
@@ -154,7 +169,7 @@
       "artist": null
     },
     {
-      "code": "hyoga_cygnus",
+      "code": "hyoga_cygnus_v1",
       "name": "Hyoga de Cisne",
       "rarity": "rare",
       "cost": 0,
@@ -235,7 +250,7 @@
       "artist": null
     },
     {
-      "code": "shun_andromeda",
+      "code": "shun_andromeda_v1",
       "name": "Shun de Andrómeda",
       "rarity": "rare",
       "cost": 0,
@@ -310,7 +325,7 @@
       "artist": null
     },
     {
-      "code": "ikki_phoenix",
+      "code": "ikki_phoenix_v1",
       "name": "Ikki de Fénix",
       "rarity": "epic",
       "cost": 0,

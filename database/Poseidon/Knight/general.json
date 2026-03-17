@@ -1,0 +1,84 @@
+{
+    "_schema": 1,
+    "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
+    "saga": "Omega",
+    "type": "knight",
+    "rank": "Bronze Saint",
+    "cards": [
+        {
+            "code": "koga_pegasus",
+            "name": "Koga de Pegaso",
+            "rarity": "epic",
+            "cost": 1,
+            "generate": 2,
+            "faction": "Athena",
+            "element": "light",
+            "image_url": "bronzes/11.webp",
+            "description": "Nuevo caballero de Pegaso, portador de la esperanza de Athena en la era Omega.",
+            "stats": {
+                "attack": 4,
+                "defense": 2,
+                "health": 9,
+                "cosmos": 8,
+                "can_defend": true,
+                "defense_reduction": 0.5
+            },
+            "abilities": [
+                {
+                    "name": "Cosmo Omega",
+                    "type": "pasiva",
+                    "description": "Al entrar en juego, Koga potencia su CE con el poder del Cosmo Omega.",
+                    "effects": {
+                        "trigger": "CARD_PLAYED",
+                        "actions": [
+                            {
+                                "type": "apply_status",
+                                "status": "ce_boost",
+                                "target": "self",
+                                "value": 1
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "Meteor Punch Omega",
+                    "type": "activa",
+                    "description": "Paga 3 CP; el siguiente BA de Koga ignora la AR del defensor.",
+                    "effects": {
+                        "trigger": "ACTIVE",
+                        "cost": [
+                            {
+                                "type": "cosmos",
+                                "amount": 3
+                            }
+                        ],
+                        "conditions": [
+                            {
+                                "type": "cosmos_min",
+                                "amount": 3
+                            },
+                            {
+                                "type": "no_status",
+                                "status": "ignore_armor"
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "apply_status",
+                                "status": "ignore_armor",
+                                "target": "self"
+                            }
+                        ]
+                    }
+                }
+            ],
+            "max_copies": 3,
+            "unique": true,
+            "playable_zones": [
+                "battlefield"
+            ],
+            "collection_id": "omega",
+            "artist": null
+        }
+    ]
+}
