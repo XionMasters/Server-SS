@@ -272,8 +272,8 @@ def compose_card(
     # ── Layout efectivo para este frame ──────────────────────────────────────
     layout = get_layout(str(frame_name))
 
-    # ── Canvas base (fondo blanco) ────────────────────────────────────────────
-    canvas = Image.new("RGBA", (fw, fh), (255, 255, 255, 255))
+    # ── Canvas base transparente para conservar alpha en el output ───────────
+    canvas = Image.new("RGBA", (fw, fh), (0, 0, 0, 0))
 
     # ── Arte ─────────────────────────────────────────────────────────────────
     art_path = find_art(card, art_override)
@@ -301,7 +301,8 @@ def compose_card(
 
     # ── Guardar ──────────────────────────────────────────────────────────────
     out_path = out_dir / f"{code}.webp"
-    canvas.convert("RGB").save(str(out_path), "WEBP", quality=92)
+    # Guardar en RGBA para evitar bordes/blancos de matte en el juego.
+    canvas.save(str(out_path), "WEBP", quality=92)
     print(f"  ✓ {code}.webp  →  {out_path}")
     return out_path
 
