@@ -2,7 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
-import { Match, CardInPlay, Card, User, CardKnight } from '../models/associations';
+import { Match, CardInPlay, Card, User, CardKnight, UserCard, DeckCard } from '../models/associations';
+import CardAbility from '../models/CardAbility';
+import CardTranslation from '../models/CardTranslation';
+import { sequelize } from '../config/database';
 import { ActionResolver } from '../services/game/ActionResolver';
 
 const router = Router();
@@ -27,7 +30,9 @@ function requireAdmin(req: Request, res: Response, next: NextFunction): void {
 router.get('/admin.js', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../views/admin.js'));
 });
-
+router.get('/style.css', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../views/style.css'));
+});
 // Servir la página HTML del dashboard
 router.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, '../views/admin.html'));
@@ -213,6 +218,214 @@ router.get('/matches/:id', requireAdmin, async (req: Request, res: Response) => 
   } catch (err) {
     console.error('[Admin] Error inspecting match:', err);
     res.status(500).json({ error: 'Error al obtener partida' });
+  }
+});
+
+// =============================================
+// Card Manager CRUD API
+// =============================================
+
+// GET /api/admin/cards — list with filters + pagination
+router.get('/cards', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const {
+      type, rarity, element, faction, search,
+      cost_min, cost_max, limit = '50', offset = '0',
+    } = req.query as Record<string, string>;
+
+    const where: any = {};
+    if (type)    where.type    = type;
+    if (rarity)  where.rarity  = rarity;
+    if (element) where.element = element;
+    if (faction) where.faction = { [Op.iLike]: `%${faction}%` };
+    if (search)  where[Op.or]  = [
+      { name: { [Op.iLike]: `%${search}%` } },
+      { code: { [Op.iLike]: `%${search}%` } },
+    ];
+    if (cost_min) where.cost = { ...(where.cost || {}), [Op.gte]: parseInt(cost_min) };
+    if (cost_max) where.cost = { ...(where.cost || {}), [Op.lte]: parseInt(cost_max) };
+
+    const [cards, total] = await Promise.all([
+      Card.findAll({
+        where,
+        include: [{ model: CardKnight, as: 'card_knight', required: false }],
+        limit: Math.min(parseInt(limit), 200),
+        offset: parseInt(offset),
+        order: [['name', 'ASC']],
+      }),
+      Card.count({ where }),
+    ]);
+
+    res.json({ total, cards: cards.map((c: any) => c.toJSON()) });
+  } catch (err) {
+    console.error('[Admin] Error listing cards:', err);
+    res.status(500).json({ error: 'Error al listar cartas' });
+  }
+});
+
+// GET /api/admin/cards/:cardId — full detail: card + knight + abilities + all translations
+router.get('/cards/:cardId', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const card = await Card.findByPk(req.params.cardId, {
+      include: [
+        { model: CardKnight, as: 'card_knight', required: false },
+        { model: CardAbility, as: 'card_abilities', required: false },
+        { model: CardTranslation, as: 'translations', required: false },
+      ],
+    });
+    if (!card) { res.status(404).json({ error: 'Carta no encontrada' }); return; }
+    res.json(card.toJSON());
+  } catch (err) {
+    console.error('[Admin] Error fetching card:', err);
+    res.status(500).json({ error: 'Error al obtener carta' });
+  }
+});
+
+/** Shared save logic for POST and PUT. cardId=null means create. */
+async function saveCardData(cardId: string | null, body: any): Promise<any> {
+  const { translations = {}, stats, abilities, ...cardFields } = body;
+  const esT: any = (translations as any).es || {};
+  const name = esT.name || cardFields.name;
+  const description = esT.description ?? cardFields.description ?? null;
+
+  const t = await sequelize.transaction();
+  try {
+    let card: any;
+    if (cardId) {
+      card = await Card.findByPk(cardId, { transaction: t });
+      if (!card) throw new Error('Carta no encontrada');
+      await card.update({ ...cardFields, name, description }, { transaction: t });
+    } else {
+      if (await Card.findOne({ where: { code: cardFields.code }, transaction: t })) {
+        throw new Error(`Ya existe una carta con code '${cardFields.code}'`);
+      }
+      card = await Card.create({ ...cardFields, name, description }, { transaction: t });
+    }
+    const cid: string = (card as any).id;
+
+    // Knight stats
+    if (stats !== undefined) {
+      const existingK: any = await CardKnight.findOne({ where: { card_id: cid }, transaction: t });
+      if (stats === null) {
+        if (existingK) await existingK.destroy({ transaction: t });
+      } else if (existingK) {
+        await existingK.update(stats, { transaction: t });
+      } else {
+        await CardKnight.create({ ...stats, card_id: cid }, { transaction: t });
+      }
+    }
+
+    // Abilities: full replace
+    if (abilities !== undefined) {
+      await CardAbility.destroy({ where: { card_id: cid }, transaction: t });
+      for (const ab of abilities as any[]) {
+        const { id: _i, card_id: _c, ...abFields } = ab;
+        await CardAbility.create({ ...abFields, card_id: cid }, { transaction: t });
+      }
+    }
+
+    // Translations for EN and PT (ES stays in cards.name)
+    for (const lang of ['en', 'pt'] as const) {
+      const langT: any = (translations as any)[lang];
+      if (!langT?.name) continue;
+
+      const abilityTranslations: Record<string, { name: string; description: string }> = {};
+      if (Array.isArray(langT.abilities) && langT.abilities.length > 0) {
+        const dbAbs: any[] = await CardAbility.findAll({ where: { card_id: cid }, transaction: t }) as any[];
+        const keyToId = new Map(dbAbs.map((a: any) => [a.ability_key, a.id]));
+        for (const abT of langT.abilities) {
+          const abId = keyToId.get(abT.key);
+          if (abId) abilityTranslations[abId] = { name: abT.name || '', description: abT.description || '' };
+        }
+      }
+
+      const existingT: any = await CardTranslation.findOne({ where: { card_id: cid, language: lang }, transaction: t });
+      const payload = { name: langT.name, description: langT.description || null, ability_translations: abilityTranslations };
+      if (existingT) {
+        await existingT.update(payload, { transaction: t });
+      } else {
+        await CardTranslation.create({ ...payload, card_id: cid, language: lang }, { transaction: t });
+      }
+    }
+
+    await t.commit();
+    return Card.findByPk(cid, {
+      include: [
+        { model: CardKnight, as: 'card_knight', required: false },
+        { model: CardAbility, as: 'card_abilities', required: false },
+        { model: CardTranslation, as: 'translations', required: false },
+      ],
+    });
+  } catch (err) {
+    await t.rollback();
+    throw err;
+  }
+}
+
+// POST /api/admin/cards — create
+router.post('/cards', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const result: any = await saveCardData(null, req.body);
+    res.status(201).json(result?.toJSON?.() ?? result);
+  } catch (err: any) {
+    console.error('[Admin] Error creating card:', err);
+    res.status(err.message?.includes('Ya existe') ? 409 : 500).json({ error: err.message || 'Error al crear carta' });
+  }
+});
+
+// PUT /api/admin/cards/:cardId — update
+router.put('/cards/:cardId', requireAdmin, async (req: Request, res: Response) => {
+  try {
+    const result: any = await saveCardData(req.params.cardId, req.body);
+    res.json(result?.toJSON?.() ?? result);
+  } catch (err: any) {
+    console.error('[Admin] Error updating card:', err);
+    res.status(err.message?.includes('no encontrada') ? 404 : 500).json({ error: err.message || 'Error al actualizar carta' });
+  }
+});
+
+// DELETE /api/admin/cards/:cardId — delete card and all related data
+// Sólo se puede eliminar si la carta NO está en uso (user_cards, deck_cards, partidas activas).
+router.delete('/cards/:cardId', requireAdmin, async (req: Request, res: Response) => {
+  const cardId = req.params.cardId;
+  try {
+    const card = await Card.findByPk(cardId);
+    if (!card) { res.status(404).json({ error: 'Carta no encontrada' }); return; }
+
+    // Verificar uso antes de intentar borrar (evita FK violations y explica el motivo)
+    const [ownersCount, decksCount, activeMatchCount] = await Promise.all([
+      UserCard.count({ where: { card_id: cardId } }),
+      DeckCard.count({ where: { card_id: cardId } }),
+      CardInPlay.count({ where: { card_id: cardId } }),
+    ]);
+
+    if (ownersCount > 0 || decksCount > 0 || activeMatchCount > 0) {
+      res.status(409).json({
+        error: 'No se puede eliminar: la carta está en uso',
+        details: {
+          en_inventarios: ownersCount,    // usuarios que la tienen
+          en_mazos: decksCount,           // mazos que la incluyen
+          en_partidas: activeMatchCount,  // instancias en partidas activas
+        },
+      });
+      return;
+    }
+
+    const t = await sequelize.transaction();
+    try {
+      await CardAbility.destroy({ where: { card_id: cardId }, transaction: t });
+      await CardTranslation.destroy({ where: { card_id: cardId }, transaction: t });
+      await CardKnight.destroy({ where: { card_id: cardId }, transaction: t });
+      await card.destroy({ transaction: t });
+      await t.commit();
+      res.json({ success: true });
+    } catch (err: any) {
+      await t.rollback();
+      throw err;
+    }
+  } catch (err: any) {
+    console.error('[Admin] Error deleting card:', err);
+    res.status(500).json({ error: err.message || 'Error al eliminar carta' });
   }
 });
 

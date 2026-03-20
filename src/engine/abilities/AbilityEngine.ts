@@ -20,7 +20,7 @@
  *     → reemplaza el PASSIVE_EFFECT_MAP anterior
  */
 
-import type { GameState } from '../GameState';
+import type { GameState, PendingSelection } from '../GameState';
 import type { GameEvent } from '../events/GameEvents';
 import type { AbilityDefinition, CostDefinition } from './AbilityDefinition';
 import { ConditionRegistry, type ConditionContext } from '../conditions/ConditionRegistry';
@@ -110,12 +110,17 @@ function validateCosts(
             }
         }
         if (cost.type === 'discard') {
-            if (!event.targetCardId) {
-                return { valid: false, error: 'Debes elegir una carta de tu mano para descartar' };
-            }
-            const inHand = (ctx.player.hand ?? []).some((c: any) => c.instance_id === event.targetCardId);
-            if (!inHand) {
-                return { valid: false, error: 'La carta a descartar no está en tu mano' };
+            if (event.targetCardId) {
+                // Camino directo: el cliente ya indicó la carta — verificar que está en mano
+                const inHand = (ctx.player.hand ?? []).some((c: any) => c.instance_id === event.targetCardId);
+                if (!inHand) {
+                    return { valid: false, error: 'La carta a descartar no está en tu mano' };
+                }
+            } else {
+                // Camino interactivo: se pedirá selección — solo verificar que haya cartas en mano
+                if ((ctx.player.hand ?? []).length === 0) {
+                    return { valid: false, error: 'Necesitas al menos una carta en mano para descartar' };
+                }
             }
         }
     }
@@ -158,11 +163,17 @@ function applyCosts(
             }
             (card as any).current_cosmos -= (cost.amount ?? 0);
         }
-        if (cost.type === 'discard' && event.targetCardId) {
-            (player as any).hand = ((player as any).hand ?? []).filter(
-                (c: any) => c.instance_id !== event.targetCardId,
-            );
-            costExtras.discard_card_id = event.targetCardId;
+        if (cost.type === 'discard') {
+            if (event.targetCardId) {
+                // Camino directo: descartar la carta indicada
+                (player as any).hand = ((player as any).hand ?? []).filter(
+                    (c: any) => c.instance_id !== event.targetCardId,
+                );
+                costExtras.discard_card_id = event.targetCardId;
+            } else {
+                // Camino interactivo: señalizar que se necesita selección del jugador
+                costExtras.needs_discard_selection = true;
+            }
         }
     }
     return { costExtras };
@@ -241,6 +252,35 @@ export const AbilityEngine = {
         }
 
         const { costExtras } = applyCosts(def, ctx.state, playerNumber, sourceCardId, event);
+
+        // Costo de descarte interactivo: pausar la cadena y pedir al jugador que elija una carta de su mano.
+        // La habilidad se reanuda vía resolve_selection → on_select ejecuta las acciones originales.
+        if (costExtras.needs_discard_selection) {
+            const selectionId = `sel_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+            const pendingSelection: PendingSelection = {
+                id: selectionId,
+                player_number: playerNumber,
+                zone: 'hand',
+                filter: undefined,
+                destination: 'cositos',
+                on_select: [
+                    // Primero descartar la carta elegida
+                    { type: 'send_to_zone', target: 'selected', destination: 'cositos' } as any,
+                    // Luego ejecutar las acciones originales de la habilidad
+                    ...def.actions,
+                ],
+                source_card_id: sourceCardId,
+                source_player: playerNumber,
+                created_at: Date.now(),
+            };
+            ctx.state.pending_selection = pendingSelection;
+            return {
+                newState: ctx.state,
+                affectedIds: [sourceCardId],
+                extras: { stop_chain: true, selection_required: true, selection_id: selectionId },
+                events: isExternal ? [] : [...ctx.bus.events],
+            };
+        }
 
         const result: ActionResult = {
             state: ctx.state,

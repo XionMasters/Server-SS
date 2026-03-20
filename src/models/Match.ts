@@ -20,6 +20,8 @@ interface MatchAttributes {
   player2_deck_order?: string; // JSON array of card IDs
   player1_deck_index?: number; // Current position in deck
   player2_deck_index?: number; // Current position in deck
+  /** Selección interactiva pendiente (JSONB). null si no hay ninguna. */
+  pending_selection?: any;
   started_at?: Date;
   finished_at?: Date;
   created_at?: Date;
@@ -46,6 +48,7 @@ class Match extends Model<MatchAttributes, MatchCreationAttributes> implements M
   public player2_deck_order?: string;
   public player1_deck_index?: number;
   public player2_deck_index?: number;
+  public pending_selection?: any;
   public started_at?: Date;
   public finished_at?: Date;
   public readonly created_at!: Date;
@@ -156,6 +159,11 @@ Match.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0
+    },
+    pending_selection: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: null
     },
     started_at: {
       type: DataTypes.DATE,

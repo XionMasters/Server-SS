@@ -125,7 +125,7 @@ async function generateCardsWithAI(options: GenerationOptions = { generateAIArt:
         };
 
         // Agregar estadísticas si es caballero
-        if (card.type === 'caballero' && (card as any).card_knight) {
+        if (card.type === 'knight' && (card as any).card_knight) {
           const knight = (card as any).card_knight;
           cardData.attack = knight.attack;
           cardData.defense = knight.defense;

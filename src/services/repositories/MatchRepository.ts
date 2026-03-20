@@ -74,6 +74,9 @@ export class MatchRepository {
             current_attack: card.ce,
             current_defense: card.ar,
             current_cosmos: card.current_cosmos,
+            // Sincronizar zona y posición (maneja transiciones yomotsu → campo / campo → mano)
+            zone: card.zone as any,
+            position: card.position,
           },
           { where: { id: card.instance_id }, transaction }
         );

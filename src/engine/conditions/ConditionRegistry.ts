@@ -19,6 +19,7 @@
  *
  * Para añadir una nueva condición:
  *   ConditionRegistry.register('nombre', fn);
+ *   ⚠️  Actualizar también el catálogo en src/views/admin.html → sección "🔒 Conditions".
  */
 
 import type { ConditionDefinition } from '../abilities/AbilityDefinition';

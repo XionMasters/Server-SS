@@ -13,6 +13,8 @@
 
 // ─── Event type enum ─────────────────────────────────────────────────────────
 
+// 📖 CATÁLOGO: los valores de este objeto están documentados en src/views/admin.html
+//   buscar: "⚡ Triggers" — actualizar el catálogo al agregar un nuevo evento.
 export const GameEventType = {
   ACTIVE:         'ACTIVE',         // Habilidad activada manualmente por el jugador
   CARD_PLAYED:    'CARD_PLAYED',    // Carta jugada desde la mano al campo

@@ -16,6 +16,7 @@
  * Para añadir una nueva acción:
  *   Crea src/engine/actions/MiAccion.ts con la función, luego:
  *   ActionRegistry.register('mi_accion', MiAccionFn);
+ *   ⚠️  Actualizar también el catálogo en src/views/admin.html → sección "🎯 Actions".
  */
 
 import type { GameState } from '../GameState';
@@ -40,6 +41,12 @@ export interface ActionContext {
    * Opcional para compatibilidad con callers que aún no tienen bus.
    */
   bus?: GameEventBus;
+  /**
+   * ID de la carta elegida en una selección interactiva (resolve_selection).
+   * Presente solo cuando se ejecutan acciones `on_select` de un `request_selection`.
+   * Resuelve el target especial 'selected' en TargetResolver.
+   */
+  selectedCardId?: string;
 }
 
 export interface ActionResult {
@@ -69,11 +76,36 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       sourceCardId: ctx.sourceCardId,
       event: ctx.event,
       rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
     };
     const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
 
+    // Mapa: efecto DOT → inmunidad que lo bloquea (y viceversa).
+    const DOT_IMMUNITY: Record<string, string> = {
+      burn:    'burn_immune',
+      poison:  'poison_immune',
+    };
+    const IMMUNITY_CLEARS: Record<string, string> = {
+      burn_immune:   'burn',
+      poison_immune: 'poison',
+    };
+
     for (const card of targets) {
-      const statusEffects: any[] = card.status_effects ?? [];
+      let statusEffects: any[] = card.status_effects ?? [];
+
+      // Si se intenta aplicar un DOT y la carta ya tiene la inmunidad → ignorar.
+      const immunityForDot = DOT_IMMUNITY[action.status];
+      if (immunityForDot && statusEffects.some((s: any) => s.type === immunityForDot)) {
+        continue;
+      }
+
+      // Si se aplica una inmunidad → remover el DOT correspondiente si existe.
+      const dotToClear = IMMUNITY_CLEARS[action.status];
+      if (dotToClear) {
+        statusEffects = statusEffects.filter((s: any) => s.type !== dotToClear);
+        card.status_effects = statusEffects;
+      }
+
       const existing = statusEffects.find(
         (s: any) => s.type === action.status && s.source === ctx.sourceCardId,
       );
@@ -121,6 +153,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       sourceCardId: ctx.sourceCardId,
       event: ctx.event,
       rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
     };
     const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
     const engineCtx = { state: result.state, bus: ctx.bus };
@@ -145,6 +178,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       sourceCardId: ctx.sourceCardId,
       event: ctx.event,
       rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
     };
     const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
     const engineCtx = { state: result.state, bus: ctx.bus };
@@ -189,6 +223,164 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       ActionRegistry.executeAll(failActions, ctx, result);
     }
   },
+
+  /**
+   * Solicita al jugador que elija una carta de una zona (yomotsu, deck, mano, etc.).
+   * Detiene la cadena de acciones (stop_chain) y setea state.pending_selection.
+   * El jugador responde con resolve_selection → el servicio ejecuta on_select.
+   *
+   * Estructura:
+   *   { type: 'request_selection', zone: 'yomotsu'|'deck'|...,
+   *     filter?: { type?, top_n? }, destination: 'hand'|'field'|'cositos',
+   *     on_select: ActionDefinition[] }
+   */
+  request_selection: (action: any, ctx, result) => {
+    const selectionId = `sel_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    result.state.pending_selection = {
+      id: selectionId,
+      player_number: ctx.playerNumber,
+      zone: action.zone,
+      filter: action.filter ?? null,
+      destination: action.destination ?? 'hand',
+      on_select: action.on_select ?? [],
+      source_card_id: ctx.sourceCardId,
+      source_player: ctx.playerNumber,
+      created_at: Date.now(),
+      visible_card_ids: undefined, // El servicio lo rellena para deck search
+    };
+    result.extras.selection_required = true;
+    result.extras.selection_id = selectionId;
+    result.extras.stop_chain = true; // Detener ejecución de acciones siguientes
+  },
+
+  /**
+   * Mueve una carta a la zona destino.
+   * Para graveyard → field/hand: opera sobre engine state.
+   * Para deck → (...): el servicio (SelectionService) maneja la BD directamente.
+   *
+   * target 'selected' = la carta elegida por el jugador (ctx.selectedCardId).
+   * Estructura: { type: 'send_to_zone', target: 'selected', destination: 'hand'|'field'|'cositos' }
+   */
+  send_to_zone: (action: any, ctx, result) => {
+    // Resolver qué carta mover
+    const cardId = action.target === 'selected'
+      ? (ctx.selectedCardId ?? '')
+      : ctx.sourceCardId;
+    if (!cardId) return;
+
+    const state = result.state;
+    let card: any = null;
+    let cardPlayer: any = null;
+
+    // Buscar en graveyard[] y passive_watchers de ambos jugadores
+    for (const player of [state.player1, state.player2]) {
+      if (!Array.isArray(player.graveyard)) player.graveyard = [];
+      const gravIdx = player.graveyard.findIndex((c: any) => c.instance_id === cardId);
+      if (gravIdx !== -1) {
+        card = player.graveyard.splice(gravIdx, 1)[0];
+        // También quitar de passive_watchers si estaba
+        const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+        if (pwIdx !== -1) player.passive_watchers.splice(pwIdx, 1);
+        player.graveyard_count = player.graveyard.length;
+        cardPlayer = player;
+        break;
+      }
+      // Fallback: buscar en passive_watchers (deck search pre-cargado)
+      const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+      if (pwIdx !== -1) {
+        card = player.passive_watchers.splice(pwIdx, 1)[0];
+        cardPlayer = player;
+        break;
+      }
+      // Fallback: buscar en mano
+      const handIdx = player.hand.findIndex((c: any) => c.instance_id === cardId);
+      if (handIdx !== -1) {
+        card = player.hand.splice(handIdx, 1)[0];
+        cardPlayer = player;
+        break;
+      }
+    }
+
+    if (!card || !cardPlayer) return; // Carta no encontrada en engine state — no-op
+
+    const destination: string = action.destination ?? 'hand';
+
+    if (destination === 'hand') {
+      card.zone = 'hand';
+      card.position = cardPlayer.hand.length;
+      cardPlayer.hand.push(card);
+    } else if (destination === 'field') {
+      const occupied = new Set(cardPlayer.field_knights.map((c: any) => c.position));
+      const freeSlot = [0, 1, 2, 3, 4].find(p => !occupied.has(p));
+      if (freeSlot === undefined) return; // Campo lleno — no-op
+      card.zone = 'field_knight';
+      card.position = freeSlot;
+      cardPlayer.field_knights.push(card);
+      // Emitir KNIGHT_SUMMONED si hay bus
+      if (ctx.bus) {
+        const { createEvent } = require('../events/GameEvents');
+        ctx.bus.emit(createEvent({
+          type: 'KNIGHT_SUMMONED',
+          playerNumber: card.player_number,
+          sourceCardId: ctx.sourceCardId,
+          origin: 'system',
+          payload: { instanceId: card.instance_id, card_code: card.card_code,
+                     owner: card.player_number, from_zone: 'yomotsu', position: freeSlot },
+        }));
+      }
+    } else if (destination === 'cositos') {
+      card.zone = 'cositos';
+      cardPlayer.costos_count += 1;
+    }
+
+    result.affectedIds.push(card.instance_id);
+    result.extras.sent_to_zone = { card_id: card.instance_id, destination };
+  },
+
+  /**
+   * Marca el mazo del jugador indicado para mezclado.
+   * El engine solo registra la intención; el servicio ejecuta el shuffle en BD.
+   * Estructura: { type: 'shuffle_deck', player: 'self' | 'opponent' }
+   */
+  shuffle_deck: (action: any, ctx, result) => {
+    const targetPlayerNum = action.player === 'opponent'
+      ? (ctx.playerNumber === 1 ? 2 : 1)
+      : ctx.playerNumber;
+    if (!Array.isArray(result.extras.shuffle_deck_players)) {
+      result.extras.shuffle_deck_players = [];
+    }
+    (result.extras.shuffle_deck_players as number[]).push(targetPlayerNum);
+  },
+
+  /**
+   * Roba cartas del mazo al conjunto de la mano.
+   * El engine decrementa deck_count y emite los eventos.
+   * El servicio (CardDrawService / SelectionService) ejecuta el movimiento real en BD.
+   * Estructura: { type: 'draw_card', amount: N }
+   */
+  draw_card: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 1;
+    const { createEvent: makeEvent } = require('../events/GameEvents');
+
+    for (let i = 0; i < amount; i++) {
+      const player = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
+      if (player.deck_count > 0) {
+        player.deck_count -= 1;
+      }
+      const remaining = player.deck_count;
+      if (ctx.bus) {
+        ctx.bus.emit(makeEvent({ type: 'ALLY_DREW_CARD', playerNumber: ctx.playerNumber,
+          origin: 'system', payload: { cardId: '', remainingDeck: remaining } }));
+        ctx.bus.emit(makeEvent({ type: 'OPPONENT_DREW_CARD', playerNumber: ctx.playerNumber,
+          origin: 'system', payload: { remainingDeck: remaining } }));
+      }
+    }
+    // El servicio interpreta esto para mover cartas en BD
+    result.extras.draw_card_count = (result.extras.draw_card_count ?? 0) + amount;
+    if (!result.extras.draw_card_player) {
+      result.extras.draw_card_player = ctx.playerNumber;
+    }
+  },
 };
 
 export const ActionRegistry = {
@@ -199,7 +391,11 @@ export const ActionRegistry = {
   },
 
   executeAll(actions: ActionDefinition[], ctx: ActionContext, result: ActionResult): void {
-    for (const action of actions) this.execute(action, ctx, result);
+    for (const action of actions) {
+      this.execute(action, ctx, result);
+      // request_selection detiene la cadena — esperar respuesta del jugador
+      if (result.extras.stop_chain) break;
+    }
   },
 
   register(name: string, fn: ActionFn): void {

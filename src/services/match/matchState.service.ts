@@ -53,6 +53,13 @@ export class MatchStateService {
       const player1GraveyardCount = cardsInPlay.filter((c: any) => c.player_number === 1 && c.zone === 'yomotsu').length;
       const player2GraveyardCount = cardsInPlay.filter((c: any) => c.player_number === 2 && c.zone === 'yomotsu').length;
 
+      // El yomotsu es visible para ambos jugadores (regla estándar de juegos de cartas).
+      // Se incluyen las cartas serializadas con full data en el array cards_in_play
+      // (zone='yomotsu'), y adicionalmente se exponen los arrays separados para
+      // facilitar acceso rápido al cliente.
+      const player1GraveyardCards = cardsData.filter((c: any) => c.player_number === 1 && c.zone === 'yomotsu');
+      const player2GraveyardCards = cardsData.filter((c: any) => c.player_number === 2 && c.zone === 'yomotsu');
+
       return {
         success: true,
         data: {
@@ -77,6 +84,11 @@ export class MatchStateService {
           player2_deck_size: player2DeckSize,
           player1_graveyard_count: player1GraveyardCount,
           player2_graveyard_count: player2GraveyardCount,
+          // Arrays completos del yomotsu — ambos jugadores pueden ver ambos
+          player1_graveyard: player1GraveyardCards,
+          player2_graveyard: player2GraveyardCards,
+          // Selección interactiva pendiente (null si no hay ninguna)
+          pending_selection: (match as any).pending_selection ?? null,
           cards_in_play: cardsData
         }
       };

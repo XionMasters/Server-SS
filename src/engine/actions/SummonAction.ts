@@ -46,20 +46,35 @@ export function summonKnight(
 ): void {
   const { state } = ctx;
 
-  // ── Buscar en passive_watchers ──────────────────────────────────────────
+  // ── Buscar la carta según la zona de origen ───────────────────────────
   let card: any = null;
   let cardPlayer: any = null;
 
   for (const player of [state.player1, state.player2]) {
-    const idx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
-    if (idx !== -1) {
-      card = player.passive_watchers.splice(idx, 1)[0];
-      cardPlayer = player;
-      break;
+    // Para yomotsu: buscar en graveyard[] (fuente de verdad)
+    if (fromZone === 'yomotsu') {
+      if (!Array.isArray(player.graveyard)) player.graveyard = [];
+      const gravIdx = player.graveyard.findIndex((c: any) => c.instance_id === cardId);
+      if (gravIdx !== -1) {
+        card = player.graveyard.splice(gravIdx, 1)[0];
+        // También quitar de passive_watchers si estaba ahí (cartas con pasivas reactivas)
+        const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+        if (pwIdx !== -1) player.passive_watchers.splice(pwIdx, 1);
+        cardPlayer = player;
+        break;
+      }
+    } else {
+      // Para deck/cositos: buscar en passive_watchers (pre-cargado por el servicio)
+      const idx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+      if (idx !== -1) {
+        card = player.passive_watchers.splice(idx, 1)[0];
+        cardPlayer = player;
+        break;
+      }
     }
   }
 
-  // Guard: carta no encontrada en passive_watchers — no-op
+  // Guard: carta no encontrada — no-op
   if (!card || !cardPlayer) return;
 
   // ── Resolver posición libre ─────────────────────────────────────────────
@@ -71,8 +86,13 @@ export function summonKnight(
   if (occupiedPositions.has(finalPosition)) {
     const free = [0, 1, 2, 3, 4].find(p => !occupiedPositions.has(p));
     if (free === undefined) {
-      // Campo lleno (5/5) — devolver la carta a passive_watchers y abortar
-      cardPlayer.passive_watchers.push(card);
+      // Campo lleno (5/5) — devolver la carta a su zona y abortar
+      if (fromZone === 'yomotsu') {
+        if (!Array.isArray(cardPlayer.graveyard)) cardPlayer.graveyard = [];
+        cardPlayer.graveyard.push(card);
+      } else {
+        cardPlayer.passive_watchers.push(card);
+      }
       return;
     }
     finalPosition = free;
@@ -85,7 +105,7 @@ export function summonKnight(
 
   // ── Actualizar contadores de zona origen ───────────────────────────────
   if (fromZone === 'yomotsu') {
-    cardPlayer.graveyard_count = Math.max(0, (cardPlayer.graveyard_count ?? 0) - 1);
+    cardPlayer.graveyard_count = Math.max(0, (cardPlayer.graveyard ?? []).length);
   } else if (fromZone === 'cositos') {
     cardPlayer.costos_count = Math.max(0, (cardPlayer.costos_count ?? 0) - 1);
   }

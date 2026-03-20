@@ -34,6 +34,7 @@
  *   1. Agregar el tipo a StatusEffectType con comentario y categoría.
  *   2. Registrarlo en EFFECT_CATEGORY con su categoría.
  *   3. Implementar la lógica en el engine correspondiente según categoría:
+ *   ⚠️  Actualizar también el catálogo en src/views/admin.html → sección "✨ Statuses".
  *      - mode    → CombatResolvers + setModeEffect()
  *      - stat    → computeCeBonus / computeArBonus (hoy) o LayerResolver (Fase 2)
  *      - trigger → AttackRulesEngine (hoy) o EventBus (Fase 3)
@@ -77,9 +78,14 @@ export type StatusEffectType =
   | 'unicorn_horn'      // Pasiva: cada AB que conecta causa +1 DIP al jugador rival
   | 'herd_effect'       // Pasiva: +1 DIP extra cuando el AB ya causa DIP al jugador rival
   | 'burn'             // BRN: causa `value` daño al caballero al inicio de su turno (remaining_turns cuenta regresiva)
+  | 'poison'          // Veneno: causa `value` daño al caballero al inicio de su turno (sin countdown, permanente hasta cura)
   | 'phoenix_rebirth'  // Pasiva Ikki: marker permanente. Trigger KNIGHT_DIED (Fase 3/EventBus): regresa del Yomotsu cuando un aliado muere
   | 'last_stand'        // Pasiva Seiya: marker permanente. Al recibir golpe letal activa last_stand_active
   | 'last_stand_active' // Estado temporal (remaining_turns=1): immune a todo daño durante 1 turno
+  | 'dot_immune'        // Pasiva: inmune a burn y poison (DOTs) — nuná recibe daño por tick DOT
+  // Inmunidades específicas: cada una bloquea exactamente un tipo de efecto DOT
+  | 'burn_immune'       // Pasiva: inmune a burn — bloquea la aplicación del efecto y limpia burn existente
+  | 'poison_immune'     // Pasiva: inmune a poison — bloquea la aplicación del efecto y limpia poison existente
 // TODO (Escenario):      | 'scenario_buff'    // Buff de escenario activo sobre el caballero
 ;
 
@@ -106,9 +112,13 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
   unicorn_horn:    'trigger',
   herd_effect:     'trigger',
   burn:            'trigger',
+  poison:          'trigger',
   phoenix_rebirth: 'trigger',
   last_stand:        'trigger',
   last_stand_active: 'special',
+  dot_immune:        'special', // marker permanente; interpretado en TurnRulesEngine al procesar DOTs
+  burn_immune:       'special', // marker permanente — bloquea apply_status de burn y limpia burn existente
+  poison_immune:     'special', // marker permanente — bloquea apply_status de poison y limpia poison existente
   // TODO (Escenario): scenario_buff: 'stat',
 };
 

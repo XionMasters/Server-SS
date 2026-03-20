@@ -1,0 +1,742 @@
+{
+  "_instructions": "Translate all \"name\" and \"description\" values from ES to EN. Do NOT modify keys, codes, or the \"_source_file\" fields. Keep card names faithful to the Saint Seiya universe when translating. Ability descriptions may reference game mechanics (BA=Basic Attack, CP=Cosmos Points, AR=Armor Rating, DIP=Direct Damage). Keep those abbreviations as-is. Return the complete JSON with the same structure, only replacing the text values.",
+  "_source": "es",
+  "_target": "en",
+  "_generated_at": "2026-03-19T11:46:43.883Z",
+  "_total_cards": 44,
+  "cards": {
+    "koga_pegasus": {
+      "name": "Koga de Pegaso",
+      "description": "Nuevo caballero de Pegaso, portador de la esperanza de Athena en la era Omega.",
+      "abilities": [
+        {
+          "key": "cosmo_omega",
+          "name": "Cosmo Omega",
+          "description": "Al entrar en juego, Koga potencia su CE con el poder del Cosmo Omega."
+        },
+        {
+          "key": "meteor_punch_omega",
+          "name": "Meteor Punch Omega",
+          "description": "Paga 3 CP; el siguiente BA de Koga ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Poseidon/Knight/general.json"
+    },
+    "yuna_eagle": {
+      "name": "Yuna de Águila",
+      "description": "Caballera ágil de Águila, combatiente veloz capaz de esquivar ataques con facilidad.",
+      "abilities": [
+        {
+          "key": "evasion_de_aguila",
+          "name": "Evasión de Aguila",
+          "description": "Al entrar en juego, Yuna adopta Modo Evasión."
+        },
+        {
+          "key": "eagle_dive",
+          "name": "Eagle Dive",
+          "description": "Paga 2 CP; el siguiente BA de Yuna ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "souma_lion": {
+      "name": "Souma de León",
+      "description": "Caballero de León de espíritu ardiente, heredero del fuego de su padre.",
+      "abilities": [
+        {
+          "key": "llama_hereditaria",
+          "name": "Llama Hereditaria",
+          "description": "Al entrar en juego, Souma incrementa su CE con el fuego heredado."
+        },
+        {
+          "key": "leo_explosion",
+          "name": "Leo Explosion",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN al caballero objetivo (1 daño/turno, 2 turnos)."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "haruto_wolf": {
+      "name": "Haruto de Lobo",
+      "description": "Silencioso caballero de Lobo, maestro de ninpo y ataques encubiertos.",
+      "abilities": [
+        {
+          "key": "instinto_del_lobo",
+          "name": "Instinto del Lobo",
+          "description": "Los BA realizados por Haruto causan 1 DIP de Daño Directo adicional al jugador rival."
+        },
+        {
+          "key": "shadow_stitch",
+          "name": "Shadow Stitch",
+          "description": "Paga 3 CP; el siguiente BA de Haruto ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "junkers_wolf": {
+      "name": "Wolf Junkers",
+      "description": "Caballero de Bronce que lidera a sus aliados con impulso de combate y presión ofensiva.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Wolf Junkers ignora la AR del defensor."
+        },
+        {
+          "key": "morale_rise",
+          "name": "Morale Rise",
+          "description": "Al entrar en juego, los aliados reciben +2 CE temporal."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "curtis_hydra": {
+      "name": "Hydra Curtis",
+      "description": "Caballero de Hidra enfocado en apoyo táctico y protección del escuadrón.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Hydra Curtis ignora la AR del defensor."
+        },
+        {
+          "key": "morale_heal",
+          "name": "Morale Heal",
+          "description": "Al entrar en juego, los aliados adyacentes ganan inmunidad a PAR y PSN."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "belriot_lionet": {
+      "name": "Lionet Belriot",
+      "description": "Caballero de Lionet que fortalece la postura defensiva de su escuadrón.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Lionet Belriot ignora la AR del defensor."
+        },
+        {
+          "key": "morale_up",
+          "name": "Morale Up",
+          "description": "Al final del turno propio, los aliados adyacentes entran en Modo Defensa."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "paradise_apus": {
+      "name": "Apus Paradise",
+      "description": "Caballero de Apus que protege a su escuadrón con maniobras evasivas al entrar en combate.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Apus Paradise ignora la AR del defensor."
+        },
+        {
+          "key": "air_effect",
+          "name": "Air Effect",
+          "description": "Cuando entra al campo de batalla, los aliados entran en Modo Evasión."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "guney_delphinus": {
+      "name": "Delphinus Guney",
+      "description": "Caballero de Delphinus orientado a proteger la línea aliada al entrar en combate.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Delphinus Guney ignora la AR del defensor."
+        },
+        {
+          "key": "water_protection",
+          "name": "Water Protection",
+          "description": "Cuando entra al campo de batalla, un aliado entra en Modo Defensa."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "dali_corona_borealis": {
+      "name": "Corona Borealis Dali",
+      "description": "Caballero de Corona Borealis con estilo impredecible y contraataques tácticos.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Corona Borealis Dali ignora la AR del defensor."
+        },
+        {
+          "key": "whirlwind",
+          "name": "Whirlwind",
+          "description": "Cuando recibe BA, lanza una moneda; si sale cara, el atacante vuelve a la mano de su dueño."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "hooke_compass": {
+      "name": "Compass Hooke",
+      "description": "Caballero de Compass que entorpece la ofensiva enemiga con trampas de terreno.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Compass Hooke ignora la AR del defensor."
+        },
+        {
+          "key": "ground_trap",
+          "name": "Ground Trap",
+          "description": "Los caballeros rivales no pueden usar BA el mismo turno en que entran al campo de batalla."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "spear_dorado": {
+      "name": "Dorado Spear",
+      "description": "Caballero de Dorado especializado en fortalecer la defensa del equipo al entrar en batalla.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Dorado Spear ignora la AR del defensor."
+        },
+        {
+          "key": "water_surroundings",
+          "name": "Water Surroundings",
+          "description": "Cuando entra al campo de batalla, los aliados reciben +2 AR durante 2 turnos."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "mirapolos_lynx": {
+      "name": "Lynx Mirapolos",
+      "description": "Caballero de Lynx que arriesga su vida para evitar castigos letales sobre su jugador.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Lynx Mirapolos ignora la AR del defensor."
+        },
+        {
+          "key": "young_death",
+          "name": "Young Death",
+          "description": "Si este caballero es eliminado, su jugador no recibe daño de penalidad DIP."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "yoshiomi_wolf": {
+      "name": "Wolf Yoshiomi",
+      "description": "Caballero de Lobo de gran poder ofensivo que usa tácticas ninja para preparar técnicas desde el deck.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Wolf Yoshiomi ignora la AR del defensor."
+        },
+        {
+          "key": "ninja_trickery",
+          "name": "Ninja Trickery",
+          "description": "Cuando entra al campo de batalla, busca una carta de técnica en tu deck y agrégala a tu mano."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "kitalpha_equuleus": {
+      "name": "Equuleus Kitalpha",
+      "description": "Caballero de Equuleus con estilo defensivo que obliga al rival a enfocarse en su portador.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el siguiente BA de Equuleus Kitalpha ignora la AR del defensor."
+        },
+        {
+          "key": "cloth_curse",
+          "name": "Cloth Curse",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Kitalpha."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "celeris_equuleus": {
+      "name": "Equuleus Celeris",
+      "description": "Caballero de Equuleus con gran resistencia, capaz de atraer la ofensiva rival hacia su posición.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el siguiente BA de Equuleus Celeris ignora la AR del defensor."
+        },
+        {
+          "key": "cloth_curse",
+          "name": "Cloth Curse",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Celeris."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "subaru_equuleus": {
+      "name": "Equuleus Subaru",
+      "description": "Caballero de Equuleus que desata una forma divina en situaciones críticas y atrae los ataques enemigos.",
+      "abilities": [
+        {
+          "key": "divine_frenzy",
+          "name": "Divine Frenzy",
+          "description": "Solo puede activarse con 5 HP o menos y una sola vez. Consume 3 CP, entra en forma Divine Frenzy y aumenta el CE en 5 puntos."
+        },
+        {
+          "key": "cloth_curse",
+          "name": "Cloth Curse",
+          "description": "Los ataques no pasivos de caballeros rivales solo pueden tener como objetivo a Equuleus Subaru."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "douglas_bear": {
+      "name": "Bear Douglas",
+      "description": "Caballero de Oso orientado a reforzar la defensa de sus aliados cercanos.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el siguiente BA de Bear Douglas ignora la AR del defensor."
+        },
+        {
+          "key": "morale_increase",
+          "name": "Morale Increase",
+          "description": "Los aliados adyacentes reciben +2 AR."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "rusk_pyxis": {
+      "name": "Pyxis Rusk",
+      "description": "Caballero de Pyxis que coordina a su equipo y prepara refuerzos desde el deck.",
+      "abilities": [
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA de Pyxis Rusk ignora la AR del defensor."
+        },
+        {
+          "key": "training_team",
+          "name": "Training Team",
+          "description": "Cuando entra al campo de batalla, puedes agregar Puppis Lacaille o Vela Tsukuyomi a tu mano desde el deck."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "ryuho_dragon": {
+      "name": "Ryuho de Dragón",
+      "description": "Hijo de Shiryu, heredero del escudo del Dragón y la templanza de su padre.",
+      "abilities": [
+        {
+          "key": "escudo_del_dragon_omega",
+          "name": "Escudo del Dragón Omega",
+          "description": "Al entrar en juego, el escudo del Dragón refuerza la armadura de Ryuho."
+        },
+        {
+          "key": "rozan_rising_dragon",
+          "name": "Rozan Rising Dragon",
+          "description": "Paga 3 CP; el siguiente BA de Ryuho ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "eden_andromeda": {
+      "name": "Eden de Andrómeda",
+      "description": "Caballero de Andrómeda de carácter frío y calculador, descendiente de una larga estirpe.",
+      "abilities": [
+        {
+          "key": "cadena_omega",
+          "name": "Cadena Omega",
+          "description": "Al entrar en juego, Eden refuerza su armadura con el poder de Andrómeda."
+        },
+        {
+          "key": "nebula_chain",
+          "name": "Nebula Chain",
+          "description": "Paga 3 CP; potencia el ataque de Eden para el siguiente BA."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "subaru_sagittarius": {
+      "name": "Subaru de Sagitario",
+      "description": "Portador de la armadura de Sagitario, el arma más poderosa del Santuario.",
+      "abilities": [
+        {
+          "key": "armadura_sagrada",
+          "name": "Armadura Sagrada",
+          "description": "La armadura de Sagitario potencia tanto el ataque como la defensa de Subaru al entrar en juego."
+        },
+        {
+          "key": "sagittarius_arrow",
+          "name": "Sagittarius Arrow",
+          "description": "Paga 3 CP; el siguiente BA de Subaru ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "aria_cosmo": {
+      "name": "Aria",
+      "description": "La hija de Athena de la era Omega. Su Cosmo sagrado puede sanar y proteger a los aliados.",
+      "abilities": [
+        {
+          "key": "cosmo_divino",
+          "name": "Cosmo Divino",
+          "description": "Al entrar en juego, Aria potencia la AR de todos los aliados."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "sonia_pavo_real": {
+      "name": "Sonia de Pavo Real",
+      "description": "Caballera del dios Marte, rival de Koga. Sus plumas de Pavo Real son armas mortales.",
+      "abilities": [
+        {
+          "key": "plumas_cortantes",
+          "name": "Plumas Cortantes",
+          "description": "Los BA de Sonia causan 1 DIP de Daño Directo adicional al jugador rival."
+        },
+        {
+          "key": "peacock_blizzard",
+          "name": "Peacock Blizzard",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN al objetivo (1 daño/turno, 2 turnos)."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/legendary.json"
+    },
+    "miguel_angel": {
+      "name": "Miguel de Ángel",
+      "description": "Guerrero celestial al servicio de Marte, de poder comparable a un caballero de oro.",
+      "abilities": [
+        {
+          "key": "alas_celestiales",
+          "name": "Alas Celestiales",
+          "description": "Al entrar en juego, Miguel fortalece su armadura con el poder celestial."
+        },
+        {
+          "key": "holy_sword",
+          "name": "Holy Sword",
+          "description": "Paga 3 CP; el siguiente BA de Miguel ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "integra_shield": {
+      "name": "Integra de Escudo",
+      "description": "Caballera de carácter fuerte, defensora de sus compañeros.",
+      "abilities": [
+        {
+          "key": "guardia_de_hierro",
+          "name": "Guardia de Hierro",
+          "description": "Al entrar en juego, Integra fortalece su armadura."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "geki_bear_omega": {
+      "name": "Geki de Oso (Omega)",
+      "description": "Nuevo portador de la armadura de Oso en la era Omega.",
+      "abilities": [
+        {
+          "key": "abrazo_del_oso_omega",
+          "name": "Abrazo del Oso Omega",
+          "description": "Paga 2 CP; potencia el ataque de Geki para el siguiente BA."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/bronze.json"
+    },
+    "lacaille_puppis": {
+      "name": "Puppis Lacaille",
+      "description": "Caballero de Plata de Omega que coordina el entrenamiento del equipo y mantiene presión táctica en combate.",
+      "abilities": [
+        {
+          "key": "match_2",
+          "name": "Match 2",
+          "description": "Descarta una carta; el siguiente BA ignora el Modo Defensa del oponente."
+        },
+        {
+          "key": "training_team",
+          "name": "Training Team",
+          "description": "Cuando entra al campo de batalla, puedes agregar Pyxis Rusk o Vela Tsukuyomi a tu mano desde el deck."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/silver.json"
+    },
+    "tsubaki_vela": {
+      "name": "Vela Tsubaki",
+      "description": "Caballero de Plata de Omega que lidera el entrenamiento del equipo y refuerza su Cosmo temporalmente.",
+      "abilities": [
+        {
+          "key": "match_3",
+          "name": "Match 3",
+          "description": "Paga 6 CP; este caballero gana +4 CE hasta tu próximo turno."
+        },
+        {
+          "key": "training_team",
+          "name": "Training Team",
+          "description": "Cuando entra al campo de batalla, puedes agregar Pyxis Rusk o Puppis Lacaille a tu mano desde el deck."
+        }
+      ],
+      "_source_file": "database/Omega/Knight/silver.json"
+    },
+    "athena_blessing": {
+      "name": "Bendición de Athena",
+      "description": "",
+      "abilities": [
+        {
+          "key": "divine_protection",
+          "name": "Divine Protection",
+          "description": ""
+        }
+      ],
+      "_source_file": "database/Santuario/occasions.json"
+    },
+    "jabu_unicorn": {
+      "name": "Jabu de Unicornio",
+      "description": "Caballero de bronce leal con un cuerno perforador capaz de atravesar cualquier defensa.",
+      "abilities": [
+        {
+          "key": "cuerno_de_unicornio",
+          "name": "Cuerno de Unicornio",
+          "description": "Los BA realizados por el portador causan 1 DIP de Daño Directo adicional al jugador rival."
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA del portador ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "nachi_wolf": {
+      "name": "Nachi de Lobo",
+      "description": "Caballero de bronce ágil e instintivo. Cada golpe directo al rival desencadena el poder de la manada.",
+      "abilities": [
+        {
+          "key": "efecto_manada",
+          "name": "Efecto Manada",
+          "description": "Cuando los BA del portador causan DIP directo al jugador rival, causan 1 DIP extra adicional."
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Paga 3 CP; el siguiente BA del portador ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "geki_bear": {
+      "name": "Geki de Oso",
+      "description": "Caballero de gran fuerza física que domina el combate cuerpo a cuerpo.",
+      "abilities": [
+        {
+          "key": "melee_advantage",
+          "name": "Melee Advantage",
+          "description": "Cuando este caballero realiza BA contra un enemigo, su CE se duplica."
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el próximo BA ignora armadura."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "ban_lion": {
+      "name": "Ban de León Menor",
+      "description": "Caballero ágil con garras afiladas.",
+      "abilities": [
+        {
+          "key": "fast_bomber",
+          "name": "Fast Bomber",
+          "description": "Cuando entra al campo de batalla, recibe +3 Ce de bonus hasta el proximo turno del jugador"
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "ichi_hydra": {
+      "name": "Ichi de Hidra",
+      "description": "Caballero de bronce cuyos ataques pueden envenenar al enemigo.",
+      "abilities": [
+        {
+          "key": "poisoned_claws",
+          "name": "Poisoned Claws",
+          "description": "Los ataques BA aplican condición de veneno."
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "june_chameleon": {
+      "name": "June de Camaleón",
+      "description": "Caballero de bronce con la habilidad de curar a sus aliados al entrar en el campo de batalla.",
+      "abilities": [
+        {
+          "key": "first_aids",
+          "name": "First Aids",
+          "description": "Cuando entra al campo de batalla cura 5 Lp a todos los aliados."
+        },
+        {
+          "key": "match_1",
+          "name": "Match 1",
+          "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/bronze.json"
+    },
+    "mu_aries": {
+      "name": "Mu de Aries",
+      "description": "Caballero de Oro de Aries, conocido por su habilidad para reparar armaduras y su técnica de telequinesis.",
+      "abilities": [
+        {
+          "key": "star_dust",
+          "name": "Star Dust",
+          "description": "Selecciona un aliado y restaura sus puntos de AR originales. Ese aliado también gana un incremento permanente de AR +1."
+        },
+        {
+          "key": "muvian_aura",
+          "name": "Muvian Aura",
+          "description": "El usuario y sus aliados son inmunes a condiciones negativas."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/gold.json"
+    },
+    "aldebaran_taurus": {
+      "name": "Aldebaran de Tauro",
+      "description": "Caballero de Oro de Tauro, conocido por su fuerza bruta y su técnica de ataque 'Great Horn'.",
+      "abilities": [
+        {
+          "key": "cosmic_wrap",
+          "name": "Cosmic Wrap",
+          "description": "El proximo BA del usuario causa PAR al soldado oponente."
+        },
+        {
+          "key": "posture",
+          "name": "Posture",
+          "description": "Pasar a modo defensa no consume el turno del usuario."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/gold.json"
+    },
+    "seiya_pegasus_v1": {
+      "name": "Seiya de Pegaso",
+      "description": "El caballero de bronce más determinado, protector de Athena.",
+      "abilities": [
+        {
+          "key": "inner_determination",
+          "name": "Inner Determination",
+          "description": "Si este caballero recibe un golpe letal, permanece en el campo un turno adicional immune a todo daño."
+        },
+        {
+          "key": "long_dick_meteor",
+          "name": "Long dick Meteor",
+          "description": "Inflije 2 puntos de daño a un caballero oponente."
+        },
+        {
+          "key": "justice_fist",
+          "name": "Justice Fist",
+          "description": "Descarta una carta de tu mano; el próximo BA de este caballero ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/legendary.json"
+    },
+    "shiryu_dragon_v1": {
+      "name": "Shiryu de Dragón",
+      "description": "El caballero más defensivo, maestro del Rozan Shoryu Ha.",
+      "abilities": [
+        {
+          "key": "escudo_del_dragon",
+          "name": "Escudo del Dragón",
+          "description": "El escudo del dragón fortalece la AR de Shiryu desde que entra en juego."
+        },
+        {
+          "key": "rozan_shoryu_ha",
+          "name": "Rozan Shoryu Ha",
+          "description": "Paga 3 CP; el próximo BA de este caballero ignora la AR del defensor."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/legendary.json"
+    },
+    "hyoga_cygnus_v1": {
+      "name": "Hyoga de Cisne",
+      "description": "Maestro del hielo, con ataques que congelan al enemigo.",
+      "abilities": [
+        {
+          "key": "frialdad_absoluta",
+          "name": "Frialdad Absoluta",
+          "description": "El frío extremo endurece la armadura de Hyoga al entrar en juego."
+        },
+        {
+          "key": "polvo_de_diamantes",
+          "name": "Polvo de Diamantes",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, aplica BRN (1 daño/turno, 3 turnos) al caballero objetivo."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/legendary.json"
+    },
+    "shun_andromeda_v1": {
+      "name": "Shun de Andrómeda",
+      "description": "El más gentil de los caballeros, pero letal con sus cadenas.",
+      "abilities": [
+        {
+          "key": "corazon_bondadoso",
+          "name": "Corazón Bondadoso",
+          "description": "Al entrar en juego, Shun fortalece levemente a todos sus aliados en campo."
+        },
+        {
+          "key": "cadena_espiral",
+          "name": "Cadena Espiral",
+          "description": "Paga 3 CP; las cadenas de Andrómeda potencian el próximo ataque de Shun."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/legendary.json"
+    },
+    "ikki_phoenix_v1": {
+      "name": "Ikki de Fénix",
+      "description": "El caballero inmortal del Fénix. Sus llamas arden sin fin y ningún Yomotsu puede retenerlo.",
+      "abilities": [
+        {
+          "key": "return",
+          "name": "Return",
+          "description": "Cuando un caballero aliado muere, Ikki regresa al campo de batalla desde el Yomotsu."
+        },
+        {
+          "key": "phoenix_flames",
+          "name": "Phoenix Flames",
+          "description": "Paga 3 CP; lanza una moneda. Si cara, inflige BRN al caballero objetivo (1 daño/turno, 3 turnos). Si cruz, los CP se pierden igual."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/legendary.json"
+    },
+    "marin_aquila": {
+      "name": "Aquila Marin",
+      "description": "Caballera de Plata, maestra de Seiya y combatiente veloz del Santuario.",
+      "abilities": [
+        {
+          "key": "eagle_wings",
+          "name": "Eagle Wings",
+          "description": "Destruye la carta assistant activa del rival."
+        },
+        {
+          "key": "tutoring",
+          "name": "Tutoring",
+          "description": "Cuando entra al campo de batalla, roba una carta."
+        }
+      ],
+      "_source_file": "database/Santuario/Knights/silver.json"
+    }
+  }
+}

@@ -42,7 +42,7 @@ async function generateImagesFromDatabase() {
         };
 
         // Agregar estadísticas si es caballero
-        if (card.type === 'caballero' && (card as any).CardKnight) {
+        if (card.type === 'knight' && (card as any).CardKnight) {
           const knight = (card as any).CardKnight;
           cardData.attack = knight.attack;
           cardData.defense = knight.defense;

@@ -121,10 +121,26 @@ export class MatchStateMapper {
         case 'field_knight': targetPlayer.field_knights.push(cardState); break;
         case 'field_support':targetPlayer.field_techniques.push(cardState); break;
         case 'field_helper': targetPlayer.field_helper = cardState; break;
-        case 'yomotsu':
+        case 'yomotsu': {
+          // TODOS los caballeros en el yomotsu van al graveyard[] (visible por ambos jugadores)
+          if (!Array.isArray(targetPlayer.graveyard)) targetPlayer.graveyard = [];
+          targetPlayer.graveyard.push(cardState);
+
+          // Adicionalmente: si tiene triggers reactivos, también va a passive_watchers
+          // (permite que Ikki reaccione desde el yomotsu, etc.)
+          const hasReactiveTrigger = cardState.raw_abilities.some(
+            a => a.type === 'pasiva'
+              && a.effects.trigger !== 'CARD_PLAYED'
+              && a.effects.trigger !== 'ACTIVE'
+          );
+          if (hasReactiveTrigger) {
+            targetPlayer.passive_watchers.push(cardState);
+          }
+          break;
+        }
         case 'deck': {
-          // Solo agregar a passive_watchers si tiene triggers reactivos (no CARD_PLAYED ni ACTIVE)
-          // Esto es lo que permite que Ikki reaccione desde el yomotsu, Shun desde el mazo, etc.
+          // Cartas del mazo: NO van al engine state (solo se cuenta deck_count).
+          // Excepción: si tienen triggers reactivos, viajan en passive_watchers.
           const hasReactiveTrigger = cardState.raw_abilities.some(
             a => a.type === 'pasiva'
               && a.effects.trigger !== 'CARD_PLAYED'
@@ -138,12 +154,24 @@ export class MatchStateMapper {
       }
     }
 
+    // Sincronizar graveyard_count desde el array (fuente de verdad)
+    state.player1.graveyard_count = state.player1.graveyard.length;
+    state.player2.graveyard_count = state.player2.graveyard.length;
+
+    // Cargar pending_selection si existe en la BD
+    if ((match as any).pending_selection) {
+      try {
+        const raw = (match as any).pending_selection;
+        state.pending_selection = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      } catch {
+        state.pending_selection = null;
+      }
+    }
+
     return state;
   }
 
   /**
-   * (FUTURO) Convierte GameState → Updates en Match
-   * 
    * No retorna un nuevo Match, sino que especifica
    * qué campos del Match deben ser actualizados.
    * 
@@ -163,6 +191,8 @@ export class MatchStateMapper {
       winner_id: state.winner_id ?? null,
       finished_at: state.phase === 'game_over' ? new Date() : undefined,
       updated_at: new Date(),
+      // Persistir selección pendiente en BD (para sobrevivir entre requests)
+      pending_selection: state.pending_selection ?? null,
     };
   }
 

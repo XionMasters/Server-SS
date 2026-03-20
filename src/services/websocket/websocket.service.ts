@@ -8,6 +8,7 @@ import UserProfile from '../../models/UserProfile';
 import ProfileAvatar from '../../models/ProfileAvatar';
 import { MatchStateService } from '../match/matchState.service';
 import { matchesCoordinator } from '../coordinators/matchesCoordinator';
+import { SelectionService } from '../game/SelectionService';
 import { authenticateSocket } from './websocket-auth.service';
 import { WebSocketPresenceService } from './websocket-presence.service';
 import { WebSocketChatService } from './websocket-chat.service';
@@ -111,6 +112,9 @@ router.registerMany({
       ability_name: data.ability_name,
       action_id: data.action_id
     });
+  },
+  resolve_selection: async (ws, data) => {
+    await handleResolveSelection(ws as AuthenticatedWebSocket, data);
   },
   request_match_state: async (ws, data) => {
     await handleRequestMatchState(ws as AuthenticatedWebSocket, data);
@@ -417,6 +421,46 @@ async function handleCancelSearch(ws: AuthenticatedWebSocket) {
     presenceService.sendToSocket(ws, 'error', {
       code: 'CANCEL_ERROR',
       message: 'Error al cancelar búsqueda'
+    });
+  }
+}
+
+async function handleResolveSelection(ws: AuthenticatedWebSocket, data: any) {
+  try {
+    const userId = ws.userId!;
+    const { match_id, selection_id, chosen_card_id, action_id } = data ?? {};
+
+    if (!match_id || !selection_id || !chosen_card_id || !action_id) {
+      presenceService.sendToSocket(ws, 'error', {
+        code: 'MISSING_FIELDS',
+        message: 'Se requieren match_id, selection_id, chosen_card_id y action_id'
+      });
+      return;
+    }
+
+    const result = await SelectionService.resolveSelection({
+      match_id,
+      user_id: userId,
+      selection_id,
+      chosen_card_id,
+      action_id,
+    });
+
+    if (!result.success) {
+      presenceService.sendToSocket(ws, 'error', {
+        code: result.code || 'SELECTION_ERROR',
+        message: result.error || 'Error resolviendo selección'
+      });
+      return;
+    }
+
+    // Broadcast del estado actualizado a ambos jugadores
+    await broadcastMatchUpdate(match_id);
+  } catch (error: any) {
+    console.error('Error en resolve_selection:', error);
+    presenceService.sendToSocket(ws, 'error', {
+      code: 'SELECTION_ERROR',
+      message: 'Error resolviendo selección'
     });
   }
 }

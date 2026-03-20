@@ -45,7 +45,10 @@ app.use('/api/matches', matchesRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/combat', combatRoutes);
-app.use('/admin', adminRoutes);
+app.use('/admin', (_req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws: wss:;");
+  next();
+}, adminRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check

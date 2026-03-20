@@ -13,7 +13,7 @@ export interface DeckGenerationOptions {
   minCards?: number; // Default: 40
   maxCards?: number; // Default: 50
   targetCards?: number; // Default: 45
-  preferredRarity?: 'common' | 'rare' | 'epic' | 'legendary';
+  preferredRarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
   allowLegendaries?: boolean; // Default: true
   maxLegendaries?: number; // Default: 5
 }
@@ -142,13 +142,13 @@ function generateBalancedDeck(
     console.log(`  Card ${i}: type="${cards[i].type}" (${typeof cards[i].type}), name="${cards[i].name}"`);
   }
 
-  // Separar cartas por tipo (búsqueda bilingüe: inglés y español)
-  const knights = cards.filter(c => c.type === 'caballero' || c.type === 'knight');
-  const techniques = cards.filter(c => c.type === 'tecnica' || c.type === 'technique');
-  const objects = cards.filter(c => c.type === 'objeto' || c.type === 'item');
-  const helpers = cards.filter(c => c.type === 'ayudante' || c.type === 'helper');
-  const occasions = cards.filter(c => c.type === 'ocasion' || c.type === 'event');
-  const stages = cards.filter(c => c.type === 'escenario' || c.type === 'stage');
+  // Separar cartas por tipo
+  const knights = cards.filter(c => c.type === 'knight');
+  const techniques = cards.filter(c => c.type === 'technique');
+  const objects = cards.filter(c => c.type === 'object');
+  const helpers = cards.filter(c => c.type === 'helper');
+  const occasions = cards.filter(c => c.type === 'occasion');
+  const stages = cards.filter(c => c.type === 'stage');
 
   console.log(`[generateBalancedDeck] DEBUG - Filtros:`);
   console.log(`  Knights: ${knights.length}, Techniques: ${techniques.length}, Objects: ${objects.length}`);
@@ -185,13 +185,13 @@ function generateAggressiveDeck(
   let totalCards = 0;
   const legendaryCount = { value: 0 };
 
-  // Filtrar cartas ofensivas (búsqueda bilingüe)
+  // Filtrar cartas ofensivas
   const offensiveCards = cards.filter(c => {
-    if (c.type === 'caballero' || c.type === 'knight') {
+    if (c.type === 'knight') {
       const knight = (c as any).card_knight;
       return knight && knight.attack > knight.defense;
     }
-    if (c.type === 'tecnica' || c.type === 'technique') {
+    if (c.type === 'technique') {
       return c.tags?.includes('ofensiva') || c.cost <= 3;
     }
     return false;
@@ -201,8 +201,8 @@ function generateAggressiveDeck(
   // 70% Caballeros ofensivos
   // 30% Técnicas rápidas
 
-  const knights = offensiveCards.filter(c => c.type === 'caballero' || c.type === 'knight');
-  const techniques = offensiveCards.filter(c => c.type === 'tecnica' || c.type === 'technique');
+  const knights = offensiveCards.filter(c => c.type === 'knight');
+  const techniques = offensiveCards.filter(c => c.type === 'technique');
 
   // Priorizar cartas de bajo costo
   knights.sort((a, b) => a.cost - b.cost);
@@ -227,20 +227,20 @@ function generateDefensiveDeck(
   let totalCards = 0;
   const legendaryCount = { value: 0 };
 
-  // Filtrar cartas defensivas (búsqueda bilingüe)
+  // Filtrar cartas defensivas
   const defensiveCards = cards.filter(c => {
-    if (c.type === 'caballero' || c.type === 'knight') {
+    if (c.type === 'knight') {
       const knight = (c as any).card_knight;
       return knight && knight.defense >= knight.attack;
     }
-    if (c.type === 'tecnica' || c.type === 'technique' || c.type === 'objeto' || c.type === 'item') {
+    if (c.type === 'technique' || c.type === 'object') {
       return c.tags?.includes('defensiva') || c.tags?.includes('curacion');
     }
     return false;
   });
 
-  const knights = defensiveCards.filter(c => c.type === 'caballero' || c.type === 'knight');
-  const support = defensiveCards.filter(c => (c.type === 'tecnica' || c.type === 'technique' || c.type === 'objeto' || c.type === 'item'));
+  const knights = defensiveCards.filter(c => c.type === 'knight');
+  const support = defensiveCards.filter(c => c.type === 'technique' || c.type === 'object');
 
   // Priorizar resistencia
   knights.sort((a, b) => {
@@ -268,9 +268,9 @@ function generateThemedDeck(
   let totalCards = 0;
   const legendaryCount = { value: 0 };
 
-  // Separar por tipo (búsqueda bilingüe)
-  const knights = cards.filter(c => c.type === 'caballero' || c.type === 'knight');
-  const support = cards.filter(c => c.type !== 'caballero' && c.type !== 'knight');
+  // Separar por tipo
+  const knights = cards.filter(c => c.type === 'knight');
+  const support = cards.filter(c => c.type !== 'knight');
 
   // 65% caballeros, 35% soporte
   totalCards += addCardsToSelection(selected, knights, Math.floor(targetCards * 0.65), maxLegendaries, legendaryCount, userCardQuantityMap);

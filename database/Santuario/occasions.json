@@ -33,6 +33,88 @@
       ],
       "collection_id": "santuario",
       "artist": null
+    },
+    {
+      "code": "resurrection_call",
+      "name": "Llamada de la Resurrección",
+      "rarity": "epic",
+      "cost": 3,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Elige un Caballero del Yomotsu y llévalo al campo de batalla.",
+      "abilities": [
+        {
+          "name": "Resurrection Call",
+          "type": "instant",
+          "ability_key": "resurrection_call",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "yomotsu_not_empty" }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "yomotsu",
+                "filter": { "type": "knight" },
+                "destination": "field",
+                "on_select": [
+                  { "type": "send_to_zone", "target": "selected", "destination": "field" }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "cosmic_offering",
+      "name": "Ofrenda Cósmica",
+      "rarity": "rare",
+      "cost": 1,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Descarta una carta de tu mano. Roba 2 cartas del mazo.",
+      "abilities": [
+        {
+          "name": "Cosmic Offering",
+          "type": "instant",
+          "ability_key": "cosmic_offering",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "hand_not_empty" }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "hand",
+                "filter": {},
+                "destination": "cositos",
+                "on_select": [
+                  { "type": "send_to_zone", "target": "selected", "destination": "cositos" },
+                  { "type": "draw_card", "amount": 2 }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }
+

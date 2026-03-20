@@ -53,12 +53,16 @@ export function killKnight(
   // Guard: carta no encontrada (ya muerta o no era knight)
   if (!card || !cardPlayer) return;
 
-  // 2. Actualizar contadores de zona
+  // 2. Actualizar zona y registrar en el yomotsu
   card.zone = 'yomotsu';
-  cardPlayer.graveyard_count += 1;
+  // graveyard[] es la fuente de verdad; graveyard_count se mantiene por compatibilidad
+  if (!Array.isArray(cardPlayer.graveyard)) cardPlayer.graveyard = [];
+  cardPlayer.graveyard.push(card);
+  cardPlayer.graveyard_count = cardPlayer.graveyard.length;
 
   // 3. Mover a passive_watchers si tiene triggers reactivos
   //    Así la carta puede responder a su propia muerte (p.ej. Ikki).
+  //    Nota: también está en graveyard[] para visibilidad y selección interactiva.
   const hasReactivePassives = (card.raw_abilities ?? []).some(
     (a: any) =>
       a.type === 'pasiva' &&

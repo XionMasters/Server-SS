@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
       power_level_max,
       tags,
       search,
-      lang = 'es',
+      lang = 'en',
       include_stats = 'false',
       include_abilities = 'false',
       limit = '100',
@@ -77,12 +77,16 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Incluir traducciones si no es español
-    if (lang !== 'es') {
+    // Incluir traducciones: siempre traemos el idioma pedido + EN como fallback
+    const langsToFetch = lang === 'es'
+      ? []
+      : [...new Set([lang as string, 'en'])];
+
+    if (langsToFetch.length > 0) {
       include.push({
         model: CardTranslation,
         as: 'translations',
-        where: { language: lang },
+        where: { language: { [Op.in]: langsToFetch } },
         required: false
       });
     }
@@ -98,28 +102,33 @@ router.get('/', async (req, res) => {
     // Mapear traducciones si existen
     const cardsWithTranslation = cards.map(card => {
       const cardJson = card.toJSON() as any;
-      
+
       if (lang !== 'es' && cardJson.translations && cardJson.translations.length > 0) {
-        const translation = cardJson.translations[0];
-        cardJson.name = translation.name || cardJson.name;
-        cardJson.description = translation.description || cardJson.description;
-        
-        // Traducir habilidades si existen
-        if (cardJson.card_abilities && translation.ability_translations) {
-          cardJson.card_abilities = cardJson.card_abilities.map((ability: any) => {
-            const abilityTrans = translation.ability_translations[ability.id];
-            if (abilityTrans) {
-              return {
-                ...ability,
-                name: abilityTrans.name || ability.name,
-                description: abilityTrans.description || ability.description
-              };
-            }
-            return ability;
-          });
+        // Fallback chain: idioma pedido → EN → texto base (ES en cards.name)
+        const translation =
+          cardJson.translations.find((t: any) => t.language === lang) ??
+          cardJson.translations.find((t: any) => t.language === 'en');
+
+        if (translation) {
+          cardJson.name        = translation.name        || cardJson.name;
+          cardJson.description = translation.description || cardJson.description;
+
+          if (cardJson.card_abilities && translation.ability_translations) {
+            cardJson.card_abilities = cardJson.card_abilities.map((ability: any) => {
+              const abilityTrans = translation.ability_translations[ability.id];
+              if (abilityTrans) {
+                return {
+                  ...ability,
+                  name:        abilityTrans.name        || ability.name,
+                  description: abilityTrans.description || ability.description
+                };
+              }
+              return ability;
+            });
+          }
         }
       }
-      
+
       delete cardJson.translations;
       return cardJson;
     });
@@ -137,7 +146,7 @@ router.get('/', async (req, res) => {
 // Obtener carta por ID con detalles completos (pública)
 router.get('/:id', async (req, res) => {
   try {
-    const { lang = 'es' } = req.query;
+    const { lang = 'en' } = req.query;
 
     const include: any[] = [
       {
@@ -152,18 +161,22 @@ router.get('/:id', async (req, res) => {
       }
     ];
 
-    // Incluir traducciones si no es español
-    if (lang !== 'es') {
+    // Siempre traemos idioma pedido + EN como fallback
+    const langsToFetch = lang === 'es'
+      ? []
+      : [...new Set([lang as string, 'en'])];
+
+    if (langsToFetch.length > 0) {
       include.push({
         model: CardTranslation,
         as: 'translations',
-        where: { language: lang },
+        where: { language: { [Op.in]: langsToFetch } },
         required: false
       });
     }
 
     const card = await Card.findByPk(req.params.id, { include });
-    
+
     if (!card) {
       res.status(404).json({ error: 'Carta no encontrada' });
       return;
@@ -171,25 +184,29 @@ router.get('/:id', async (req, res) => {
 
     const cardJson = card.toJSON() as any;
 
-    // Aplicar traducción si existe
+    // Aplicar traducción con fallback: idioma pedido → EN → texto base (ES)
     if (lang !== 'es' && cardJson.translations && cardJson.translations.length > 0) {
-      const translation = cardJson.translations[0];
-      cardJson.name = translation.name || cardJson.name;
-      cardJson.description = translation.description || cardJson.description;
-      
-      // Traducir habilidades
-      if (cardJson.card_abilities && translation.ability_translations) {
-        cardJson.card_abilities = cardJson.card_abilities.map((ability: any) => {
-          const abilityTrans = translation.ability_translations[ability.id];
-          if (abilityTrans) {
-            return {
-              ...ability,
-              name: abilityTrans.name || ability.name,
-              description: abilityTrans.description || ability.description
-            };
-          }
-          return ability;
-        });
+      const translation =
+        cardJson.translations.find((t: any) => t.language === lang) ??
+        cardJson.translations.find((t: any) => t.language === 'en');
+
+      if (translation) {
+        cardJson.name        = translation.name        || cardJson.name;
+        cardJson.description = translation.description || cardJson.description;
+
+        if (cardJson.card_abilities && translation.ability_translations) {
+          cardJson.card_abilities = cardJson.card_abilities.map((ability: any) => {
+            const abilityTrans = translation.ability_translations[ability.id];
+            if (abilityTrans) {
+              return {
+                ...ability,
+                name:        abilityTrans.name        || ability.name,
+                description: abilityTrans.description || ability.description
+              };
+            }
+            return ability;
+          });
+        }
       }
     }
 

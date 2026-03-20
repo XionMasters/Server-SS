@@ -6,8 +6,8 @@ class Card extends Model {
   public id!: string;
   public code!: string;
   public name!: string;
-  public type!: 'knight' | 'technique' | 'item' | 'stage' | 'helper' | 'event' | 'caballero' | 'técnica' | 'objeto' | 'escenario' | 'ayudante' | 'ocasión' | 'tecnica' | 'ocasion';
-  public rarity!: 'common' | 'rare' | 'epic' | 'legendary' | 'divine';
+  public type!: 'knight' | 'technique' | 'object' | 'stage' | 'helper' | 'occasion';
+  public rarity!: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'divine';
   public cost!: number;
   public generate!: number;
   public description!: string | null;
@@ -45,7 +45,8 @@ Card.init(
       allowNull: false,
     },
     type: {
-      type: DataTypes.ENUM('knight', 'technique', 'item', 'stage', 'helper', 'event', 'caballero', 'técnica', 'objeto', 'escenario', 'ayudante', 'ocasión', 'tecnica', 'ocasion'),
+      type: DataTypes.ENUM('knight', 'technique', 'object', 'stage', 'helper', 'occasion'),
+      // Note: DB enum still has legacy Spanish values for historical data; all active cards use English.
       allowNull: false,
     },
     rarity: {

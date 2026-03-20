@@ -208,8 +208,12 @@ export class CardRulesEngine {
     for (const zone of [player.hand, player.field_knights, player.field_techniques]) {
       const index = zone.findIndex(c => c.instance_id === cardId);
       if (index >= 0) {
-        zone.splice(index, 1);
-        player.graveyard_count += 1;
+        const [removed] = zone.splice(index, 1);
+        // Mover al yomotsu (graveyard[] es la fuente de verdad)
+        removed.zone = 'yomotsu';
+        if (!Array.isArray(player.graveyard)) player.graveyard = [];
+        player.graveyard.push(removed);
+        player.graveyard_count = player.graveyard.length;
         break;
       }
     }

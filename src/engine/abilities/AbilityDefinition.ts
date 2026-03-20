@@ -66,7 +66,13 @@ export type TargetType =
   | 'random_enemy'
   | 'random_ally'
   | 'other_allies'
-  | 'lowest_health_enemy';
+  | 'lowest_health_enemy'
+  /**
+   * La carta elegida por el jugador en una selección interactiva pendiente.
+   * Solo se usa dentro de las acciones `on_select` de un `request_selection`.
+   * El motor lo resuelve usando ctx.selectedCardId.
+   */
+  | 'selected';
 
 // ─── Trigger types ────────────────────────────────────────────────────────────
 
@@ -104,12 +110,77 @@ export interface CoinFlipAction {
 }
 
 /**
+ * Solicita al jugador que elija una carta de una zona.
+ *
+ * El motor setea `state.pending_selection` y DETIENE la cadena de acciones.
+ * Cuando el jugador responde con `resolve_selection`, el motor ejecuta `on_select`
+ * con la carta elegida disponible como target `'selected'`.
+ *
+ * Para deck search: el servicio enriquece `visible_card_ids` antes de enviar al cliente.
+ *
+ * Ejemplo (revivir desde yomotsu al campo):
+ *   { "type": "request_selection", "zone": "yomotsu", "filter": { "type": "knight" },
+ *     "destination": "field",
+ *     "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "field" }] }
+ *
+ * Ejemplo (deck search: buscar técnica, enviar a mano):
+ *   { "type": "request_selection", "zone": "deck", "filter": { "type": "technique" },
+ *     "destination": "hand",
+ *     "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" },
+ *                  { "type": "shuffle_deck", "player": "self" }] }
+ *
+ * Ejemplo (ver top 5 del mazo y elegir):
+ *   { "type": "request_selection", "zone": "deck", "filter": { "top_n": 5 },
+ *     "destination": "hand",
+ *     "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" },
+ *                  { "type": "shuffle_deck", "player": "self" }] }
+ */
+export interface RequestSelectionAction {
+  type: 'request_selection';
+  /** Zona de donde el jugador elige. */
+  zone: import('../GameState').ZoneSelectSource;
+  /** Filtros opcionales para qué cartas son seleccionables. */
+  filter?: import('../GameState').SelectionFilter;
+  /** Destino de la carta elegida (hint visual para el cliente). */
+  destination: import('../GameState').ZoneDestination;
+  /** Acciones a ejecutar cuando el jugador elija. Usar target 'selected'. */
+  on_select: ActionDefinition[];
+}
+
+/**
+ * Mueve una carta al destino indicado.
+ * target 'selected' = la carta que el jugador eligió en el paso anterior.
+ *
+ * Para graveyard → field/hand: el motor lo maneja en engine state.
+ * Para deck → field/hand: el servicio lo maneja via DB (deck no está en engine state).
+ */
+export interface SendToZoneAction {
+  type: 'send_to_zone';
+  target: TargetType;  // normalmente 'selected'
+  destination: import('../GameState').ZoneDestination;
+}
+
+/**
+ * Marca el mazo del jugador indicado para ser mezclado.
+ * El efecto real (reordenar posiciones en BD) lo ejecuta el servicio,
+ * no el engine puro. El engine solo registra la intención en extras.shuffle_deck.
+ */
+export interface ShuffleDeckAction {
+  type: 'shuffle_deck';
+  /** 'self' = jugador que activó, 'opponent' = rival. */
+  player: 'self' | 'opponent';
+}
+
+/**
  * Union tipada de todas las acciones del motor.
  * Para agregar una nueva acción: añadir su interface arriba e incluirla aquí.
  */
 export type ActionDefinition =
   | ApplyStatusAction
-  | CoinFlipAction;
+  | CoinFlipAction
+  | RequestSelectionAction
+  | SendToZoneAction
+  | ShuffleDeckAction;
 
 // ─── Condition & Cost ─────────────────────────────────────────────────────────
 

@@ -21,6 +21,7 @@
   *
  * Para añadir un nuevo target:
  *   TargetResolver.register('nombre', fn);
+ *   ⚠️  Actualizar también el catálogo en src/views/admin.html → sección "🏹 Targets".
  */
 
 import type { GameState, CardInGameState } from '../GameState';
@@ -33,6 +34,12 @@ export interface TargetContext {
   event: GameEvent;
   /** Fuente de aleatoriedad (heredada de ActionContext). */
   rng: () => number;
+  /**
+   * ID de la carta elegida por el jugador en una selección interactiva.
+   * Presente solo cuando se ejecutan las acciones `on_select` de un `request_selection`.
+   * Resuelve el target especial `'selected'`.
+   */
+  selectedCardId?: string;
 }
 
 type TargetFn = (ctx: TargetContext) => CardInGameState[];
@@ -134,6 +141,27 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
       }
     }
     return [lowestHpEnemy];
+  },
+
+  /**
+   * La carta elegida en una selección interactiva (resolve_selection).
+   * ctx.selectedCardId debe estar seteado por ActionContext al ejecutar on_select.
+   * Busca en graveyard, hand, field_knights y passive_watchers de ambos jugadores.
+   */
+  selected: ({ state, selectedCardId }) => {
+    if (!selectedCardId) return [];
+    for (const player of [state.player1, state.player2]) {
+      const zones = [
+        ...(player.graveyard ?? []),
+        ...player.hand,
+        ...player.field_knights,
+        ...player.field_techniques,
+        ...player.passive_watchers,
+      ];
+      const card = zones.find(c => c.instance_id === selectedCardId);
+      if (card) return [card];
+    }
+    return [];
   },
 };
 

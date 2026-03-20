@@ -69,8 +69,8 @@ async function importCompleteCards(fileName: string = 'cards-complete.json') {
         console.log('  🔄 Carta existente, actualizando...');
         
         card.name = cardData.card_name;
-        card.type = cardData.type;
-        card.rarity = cardData.rarity;
+        card.type = cardData.type as any;
+        card.rarity = cardData.rarity as any;
         card.element = cardData.element || null;
         card.faction = cardData.faction || null;
         card.cost = cardData.cost;
@@ -85,8 +85,8 @@ async function importCompleteCards(fileName: string = 'cards-complete.json') {
         
         card = await Card.create({
           name: cardData.card_name,
-          type: cardData.type,
-          rarity: cardData.rarity,
+          type: cardData.type as any,
+          rarity: cardData.rarity as any,
           element: cardData.element || null,
           faction: cardData.faction || null,
           cost: cardData.cost,

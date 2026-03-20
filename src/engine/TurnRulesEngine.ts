@@ -126,10 +126,23 @@ export class TurnRulesEngine {
     ];
 
     for (const card of allNextPlayerCards) {
-      // Aplicar daño de BRN (burn) ANTES del tick para que el turno en que se cuentea 0 aún haga daño
-      const burnEffect = (card.status_effects ?? []).find(e => e.type === 'burn');
-      if (burnEffect?.value) {
-        card.current_health = Math.max(0, (card.current_health ?? 0) - burnEffect.value);
+      // Aplicar daño de DOTs (burn, poison) ANTES del tick.
+      // Cada inmunidad es explícita: burn_immune bloquea solo burn, poison_immune bloquea solo poison.
+      const effects = card.status_effects ?? [];
+      const hasBurnImmune   = effects.some(e => e.type === 'burn_immune'   || e.type === 'dot_immune');
+      const hasPoisonImmune = effects.some(e => e.type === 'poison_immune' || e.type === 'dot_immune');
+
+      if (!hasBurnImmune) {
+        const burnEffect = effects.find(e => e.type === 'burn');
+        if (burnEffect?.value) {
+          card.current_health = Math.max(0, (card.current_health ?? 0) - burnEffect.value);
+        }
+      }
+      if (!hasPoisonImmune) {
+        const poisonEffect = effects.find(e => e.type === 'poison');
+        if (poisonEffect?.value) {
+          card.current_health = Math.max(0, (card.current_health ?? 0) - poisonEffect.value);
+        }
       }
 
       card.status_effects = tickStatusEffects(card.status_effects ?? []);

@@ -4,508 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Caballeros Cósmicos</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        h1 {
-            color: #667eea;
-            font-size: 28px;
-        }
-
-        .status {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        .status-dot.disconnected {
-            background: #ef4444;
-            animation: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 20px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: bold;
-            color: #667eea;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .user-list, .match-list {
-            list-style: none;
-        }
-
-        .user-item, .match-item {
-            padding: 12px;
-            margin: 8px 0;
-            background: #f3f4f6;
-            border-radius: 6px;
-            border-left: 4px solid #667eea;
-        }
-
-        .user-info-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .user-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-disconnect, .btn-block {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .btn-disconnect:hover {
-            background: #fef3c7;
-        }
-
-        .btn-block:hover {
-            background: #fee2e2;
-        }
-
-        .user-item.searching {
-            border-left-color: #f59e0b;
-            background: #fef3c7;
-        }
-
-        .match-item {
-            border-left-color: #10b981;
-        }
-
-        .match-item.waiting {
-            border-left-color: #f59e0b;
-            background: #fef3c7;
-        }
-
-        .user-name {
-            font-weight: bold;
-            color: #1f2937;
-        }
-
-        .user-id {
-            font-size: 12px;
-            color: #6b7280;
-            font-family: monospace;
-        }
-
-        .match-info {
-            font-size: 14px;
-            color: #4b5563;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 8px;
-        }
-
-        .badge.searching {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge.waiting {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge.active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
-            font-style: italic;
-        }
-
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            text-align: center;
-            min-width: 350px;
-        }
-
-        .login-box h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #e5e7eb;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .login-box input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .login-box button {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
-        .login-box button:hover {
-            background: #5568d3;
-        }
-
-        .error-message {
-            color: #ef4444;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .timestamp {
-            font-size: 11px;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .login-subtitle {
-            margin-bottom: 20px;
-            color: #6b7280;
-        }
-
-        .match-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* ===== MATCH INSPECTOR ===== */
-        .match-item {
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .match-item:hover {
-            background: #e0e7ff;
-        }
-        .match-item.selected {
-            border-left-color: #7c3aed;
-            background: #ede9fe;
-        }
-        .inspector-panel {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        .inspector-panel h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 20px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .inspector-meta {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 18px;
-            flex-wrap: wrap;
-        }
-        .inspector-meta-item {
-            text-align: center;
-        }
-        .inspector-meta-item .label {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #9ca3af;
-            font-weight: bold;
-        }
-        .inspector-meta-item .value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #374151;
-        }
-        .inspector-meta-item .value.cosmos { color: #2563eb; }
-        .inspector-meta-item .value.life   { color: #dc2626; }
-        .inspector-meta-item .value.turn   { color: #7c3aed; }
-        .players-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 18px;
-        }
-        .player-box {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 14px;
-        }
-        .player-box.active-player {
-            border-color: #7c3aed;
-            background: #faf5ff;
-        }
-        .player-box h3 {
-            font-size: 15px;
-            color: #374151;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .player-box h3 .turn-badge {
-            background: #7c3aed;
-            color: white;
-            font-size: 11px;
-            padding: 2px 7px;
-            border-radius: 10px;
-        }
-        .player-stats {
-            display: flex;
-            gap: 18px;
-            margin-bottom: 12px;
-        }
-        .stat-chip {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .stat-chip .num { font-size: 22px; font-weight: bold; }
-        .stat-chip .lbl { font-size: 10px; color: #9ca3af; text-transform: uppercase; }
-        .stat-chip.life  .num { color: #dc2626; }
-        .stat-chip.cosmos .num { color: #2563eb; }
-        .stat-chip.deck   .num { color: #059669; }
-        .zones-section h4 {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #6b7280;
-            margin: 10px 0 6px;
-            font-weight: bold;
-        }
-        .zone-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            min-height: 28px;
-        }
-        .card-chip {
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 5px;
-            padding: 4px 8px;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            max-width: 180px;
-        }
-        .card-chip .cname {
-            font-weight: bold;
-            color: #111827;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 11px;
-        }
-        .card-chip .cmeta {
-            font-size: 10px;
-            color: #6b7280;
-        }
-        .card-chip.rarity-rare       { border-left: 3px solid #3b82f6; }
-        .card-chip.rarity-epic       { border-left: 3px solid #8b5cf6; }
-        .card-chip.rarity-legendary  { border-left: 3px solid #f59e0b; }
-        .card-chip.rarity-divine     { border-left: 3px solid #ec4899; }
-        .card-chip.mode-defense      { background: #dbeafe; }
-        .card-chip.mode-evasion      { background: #d1fae5; }
-        .card-chip.exhausted         { opacity: 0.6; border-top: 2px solid #9ca3af; }
-        .knight-status-row {
-            display: flex;
-            gap: 4px;
-            margin-top: 5px;
-        }
-        .acted-badge {
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 7px;
-            border-radius: 4px;
-        }
-        .acted-badge.acted { background: #fee2e2; color: #b91c1c; }
-        .acted-badge.free  { background: #d1fae5; color: #065f46; }
-        .mode-badge {
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 7px;
-            border-radius: 4px;
-            background: #e0e7ff;
-            color: #3730a3;
-        }
-        .effects-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            margin-top: 3px;
-        }
-        .effect-tag {
-            font-size: 10px;
-            font-weight: 600;
-            padding: 1px 6px;
-            border-radius: 3px;
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #fde68a;
-            font-family: monospace;
-        }
-        .valid-actions-box {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 3px;
-            margin-top: 4px;
-            padding-top: 4px;
-            border-top: 1px solid #e5e7eb;
-        }
-        .valid-actions-box.va-inactive {
-            font-size: 10px;
-            color: #d1d5db;
-            font-style: italic;
-        }
-        .va-item {
-            font-size: 10px;
-            padding: 1px 5px;
-            border-radius: 3px;
-            white-space: nowrap;
-        }
-        .va-yes { background: #d1fae5; color: #065f46; }
-        .va-no  { background: #f3f4f6; color: #9ca3af; text-decoration: line-through; }
-        .zone-empty {
-            font-size: 11px;
-            color: #d1d5db;
-            font-style: italic;
-            padding: 3px 0;
-        }
-        .btn-refresh {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 13px;
-        }
-        .btn-refresh:hover { background: #5568d3; }
-        .inspector-placeholder {
-            text-align: center;
-            padding: 40px;
-            color: #9ca3af;
-            font-style: italic;
-        }
-    </style>
+    <link rel="stylesheet" href="/admin/style.css">
 </head>
 <body>
     <!-- Login Overlay -->
@@ -534,7 +33,13 @@
             </div>
         </header>
 
-        <div class="grid">
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="dashboard" onclick="switchTab('dashboard')">🎮 Dashboard</button>
+            <button class="tab-btn" data-tab="cards" onclick="switchTab('cards')">🃏 Card Manager</button>
+        </nav>
+
+        <div id="tab-dashboard">
+        <div class="grid" id="dashboard-grid">
             <!-- Usuarios Conectados -->
             <div class="card">
                 <h2>👥 Usuarios Conectados</h2>
@@ -558,7 +63,7 @@
         </div>
 
         <!-- Match Inspector -->
-        <div class="inspector-panel">
+        <div class="inspector-panel" id="dashboard-inspector">
             <h2>
                 🔍 Match Inspector
                 <button class="btn-refresh" id="refreshInspector" style="display:none">↻ Actualizar</button>
@@ -567,8 +72,315 @@
                 <div class="inspector-placeholder">← Hacé click en una partida para inspeccionar su estado</div>
             </div>
         </div>
+        </div><!-- /#tab-dashboard -->
+
+        <!-- Card Manager Section -->
+        <div id="tab-cards" class="hidden">
+            <div class="cards-header">
+                <h2>🃏 Card Manager</h2>
+                <button onclick="openNewCard()" class="btn-primary">+ Nueva Carta</button>
+            </div>
+            <div class="filters-bar">
+                <input type="text" id="filter-search" placeholder="Buscar nombre o código...">
+                <select id="filter-type">
+                    <option value="">Todos los tipos</option>
+                    <option value="knight">knight</option>
+                    <option value="technique">technique</option>
+                    <option value="object">object</option>
+                    <option value="stage">stage</option>
+                    <option value="helper">helper</option>
+                    <option value="occasion">occasion</option>
+                </select>
+                <select id="filter-rarity">
+                    <option value="">Todas las rarezas</option>
+                    <option value="common">common</option>
+                    <option value="uncommon">uncommon</option>
+                    <option value="rare">rare</option>
+                    <option value="epic">epic</option>
+                    <option value="legendary">legendary</option>
+                    <option value="divine">divine</option>
+                </select>
+                <select id="filter-element">
+                    <option value="">Todos los elementos</option>
+                    <option value="steel">steel</option>
+                    <option value="fire">fire</option>
+                    <option value="water">water</option>
+                    <option value="earth">earth</option>
+                    <option value="wind">wind</option>
+                    <option value="light">light</option>
+                    <option value="dark">dark</option>
+                </select>
+                <input type="number" id="filter-cost-min" placeholder="Costo min" min="0" max="10">
+                <input type="number" id="filter-cost-max" placeholder="Costo max" min="0" max="10">
+                <button onclick="loadCards(0)" class="btn-primary">Buscar</button>
+                <button onclick="resetFilters()" class="btn-ghost">Limpiar</button>
+            </div>
+            <div id="cards-table-wrap">
+                <div class="empty-state">Hacé click en Buscar para cargar las cartas</div>
+            </div>
+            <div id="cards-pagination" class="pagination-bar" style="display:none"></div>
+        </div>
+
+    </div><!-- /#dashboard container -->
+
+    <!-- Card Editor Modal -->
+    <div id="cm-modal" class="cm-modal hidden">
+        <div class="cm-modal-inner">
+            <div class="cm-modal-header">
+                <h2 id="cm-modal-title">Nueva Carta</h2>
+                <button onclick="closeCardEditor()" class="cm-close">✕</button>
+            </div>
+            <div class="cm-modal-body">
+                <!-- Left: form -->
+                <div class="cm-form">
+                    <div class="form-tabs">
+                        <button class="form-tab active" data-formtab="base" onclick="switchFormTab('base')">Base</button>
+                        <button class="form-tab" data-formtab="texts" onclick="switchFormTab('texts')">Textos</button>
+                        <button class="form-tab" data-formtab="stats" onclick="switchFormTab('stats')">Stats</button>
+                        <button class="form-tab" data-formtab="abilities" onclick="switchFormTab('abilities')">Habilidades</button>
+                    </div>
+
+                    <!-- Tab: Base -->
+                    <div id="formtab-base" class="formtab-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Code *</label>
+                                <input type="text" id="f-code" placeholder="seiya_pegasus">
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo *</label>
+                                <select id="f-type" onchange="onTypeChange()">
+                                    <option value="knight">knight</option>
+                                    <option value="technique">technique</option>
+                                    <option value="object">object</option>
+                                    <option value="stage">stage</option>
+                                    <option value="helper">helper</option>
+                                    <option value="occasion">occasion</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Rareza *</label>
+                                <select id="f-rarity">
+                                    <option value="common">common</option>
+                                    <option value="uncommon">uncommon</option>
+                                    <option value="rare">rare</option>
+                                    <option value="epic">epic</option>
+                                    <option value="legendary">legendary</option>
+                                    <option value="divine">divine</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group sm"><label>Costo</label><input type="number" id="f-cost" value="0" min="0" max="10"></div>
+                            <div class="form-group sm"><label>Genera</label><input type="number" id="f-generate" value="0" min="0" max="10"></div>
+                            <div class="form-group sm"><label>Max copias</label><input type="number" id="f-max-copies" value="3" min="1" max="4"></div>
+                            <div class="form-group sm"><label>Única</label><input type="checkbox" id="f-unique"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Facción</label>
+                                <input type="text" id="f-faction" placeholder="Athena">
+                            </div>
+                            <div class="form-group">
+                                <label>Elemento</label>
+                                <select id="f-element">
+                                    <option value="">—</option>
+                                    <option value="steel">steel</option>
+                                    <option value="fire">fire</option>
+                                    <option value="water">water</option>
+                                    <option value="earth">earth</option>
+                                    <option value="wind">wind</option>
+                                    <option value="light">light</option>
+                                    <option value="dark">dark</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Colección ID</label>
+                                <input type="text" id="f-collection" placeholder="santuario">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Image URL</label>
+                            <input type="text" id="f-image-url" placeholder="bronzes/1.webp">
+                        </div>
+                    </div>
+
+                    <!-- Tab: Textos -->
+                    <div id="formtab-texts" class="formtab-content hidden">
+                        <div class="lang-tabs" id="card-lang-tabs">
+                            <button class="lang-tab active" data-lang="es" onclick="switchCardLang('es')">ES</button>
+                            <button class="lang-tab" data-lang="en" onclick="switchCardLang('en')">EN</button>
+                            <button class="lang-tab" data-lang="pt" onclick="switchCardLang('pt')">PT</button>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="f-name-es" placeholder="Seiya de Pegaso" class="card-lang-field" data-lang="es">
+                            <input type="text" id="f-name-en" placeholder="Pegasus Seiya" class="card-lang-field hidden" data-lang="en">
+                            <input type="text" id="f-name-pt" placeholder="Seiya de Pégaso" class="card-lang-field hidden" data-lang="pt">
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="f-desc-es" rows="3" placeholder="Descripción en español..." class="card-lang-field" data-lang="es"></textarea>
+                            <textarea id="f-desc-en" rows="3" placeholder="Description in English..." class="card-lang-field hidden" data-lang="en"></textarea>
+                            <textarea id="f-desc-pt" rows="3" placeholder="Descrição em português..." class="card-lang-field hidden" data-lang="pt"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Stats (knight only) -->
+                    <div id="formtab-stats" class="formtab-content hidden">
+                        <p id="stats-note" class="form-note" style="display:none">Solo disponible para cartas de tipo knight.</p>
+                        <div id="stats-fields">
+                            <div class="form-row">
+                                <div class="form-group sm"><label>ATK (CE)</label><input type="number" id="f-attack" value="0" min="0"></div>
+                                <div class="form-group sm"><label>DEF (AR)</label><input type="number" id="f-defense" value="0" min="0"></div>
+                                <div class="form-group sm"><label>HP</label><input type="number" id="f-health" value="6" min="1"></div>
+                                <div class="form-group sm"><label>Cosmos (CE)</label><input type="number" id="f-cosmos" value="6" min="1"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group sm"><label>Puede defender</label><input type="checkbox" id="f-can-defend" checked></div>
+                                <div class="form-group sm"><label>Reducción def.</label><input type="number" id="f-defense-reduction" value="0.5" min="0" max="1" step="0.1"></div>
+                                <div class="form-group">
+                                    <label>Rank</label>
+                                    <select id="f-rank">
+                                        <option value="">—</option>
+                                        <option value="Bronze Saint">Bronze Saint</option>
+                                        <option value="Silver Saint">Silver Saint</option>
+                                        <option value="Gold Saint">Gold Saint</option>
+                                        <option value="God Warrior">God Warrior</option>
+                                        <option value="Specter">Specter</option>
+                                        <option value="God">God</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Habilidades -->
+                    <div id="formtab-abilities" class="formtab-content hidden">
+                        <div id="abilities-list"></div>
+                        <button onclick="addAbility()" class="btn-ghost" style="margin-top:8px">+ Agregar habilidad</button>
+                    </div>
+                </div>
+
+                <!-- Right: Catalog -->
+                <div class="cm-catalog">
+                    <div class="catalog-title">📖 Catálogo del Motor</div>
+                    <details class="catalog-section" open>
+                        <summary>⚡ Triggers</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>ACTIVE</code><span>Hab. activada manualmente</span></div>
+                            <div class="catalog-item"><code>CARD_PLAYED</code><span>Carta jugada al campo</span></div>
+                            <div class="catalog-item"><code>TURN_START</code><span>Inicio del turno</span></div>
+                            <div class="catalog-item"><code>TURN_END</code><span>Fin del turno</span></div>
+                            <div class="catalog-item"><code>KNIGHT_DIED</code><span>Caballero eliminado (cualquiera)</span></div>
+                            <div class="catalog-item"><code>ALLY_DIED</code><span>Aliado del portador eliminado</span></div>
+                            <div class="catalog-item"><code>DAMAGE_DEALT</code><span>Daño aplicado</span></div>
+                            <div class="catalog-item"><code>DAMAGE_LETHAL</code><span>Daño letal (HP → 0)</span></div>
+                            <div class="catalog-item"><code>HEAL_RECEIVED</code><span>Curación recibida</span></div>
+                            <div class="catalog-item"><code>ALLY_DREW_CARD</code><span>Jugador activo roba carta</span></div>
+                            <div class="catalog-item"><code>OPPONENT_DREW_CARD</code><span>Oponente roba carta</span></div>
+                            <div class="catalog-item"><code>COSMOS_CHARGED</code><span>Jugador usa Cargar Cosmo</span></div>
+                            <div class="catalog-item"><code>KNIGHT_SUMMONED</code><span>Caballero convocado</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>🎯 Actions</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>apply_status</code><span>Aplica status a targets</span></div>
+                            <div class="catalog-item"><code>heal</code><span>Cura HP a targets</span></div>
+                            <div class="catalog-item"><code>damage</code><span>Aplica daño a targets</span></div>
+                            <div class="catalog-item"><code>draw_card</code><span>Roba carta del mazo</span></div>
+                            <div class="catalog-item"><code>kill</code><span>Elimina un caballero</span></div>
+                            <div class="catalog-item"><code>summon</code><span>Convoca un caballero</span></div>
+                            <div class="catalog-item"><code>coin_flip_then</code><span>Moneda → on_heads[] / on_tails[]</span></div>
+                            <div class="catalog-item"><code>modify_attack</code><span>Modifica CE del target</span></div>
+                            <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone, filter{type?,top_n?}, destination, on_select[]</span></div>
+                            <div class="catalog-item"><code>send_to_zone</code><span>Mueve carta a zona. Parámetros: target (normalmente 'selected'), destination: 'hand'|'field'|'cositos'</span></div>
+                            <div class="catalog-item"><code>shuffle_deck</code><span>Mezcla el mazo. Parámetros: player: 'self'|'opponent'</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>✨ Statuses</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>defense</code><span>Modo defensa: dmg=⌈CE/2⌉-AR</span></div>
+                            <div class="catalog-item"><code>evasion</code><span>Modo evasión: 50% evitar BA</span></div>
+                            <div class="catalog-item"><code>prayer</code><span>Oración Divina (reservado)</span></div>
+                            <div class="catalog-item"><code>ce_boost</code><span>CE +value (acumulable)</span></div>
+                            <div class="catalog-item"><code>ar_boost</code><span>AR +value (acumulable)</span></div>
+                            <div class="catalog-item"><code>hp_boost</code><span>HP máx +value</span></div>
+                            <div class="catalog-item"><code>ignore_armor</code><span>Próximo BA ignora AR</span></div>
+                            <div class="catalog-item"><code>unicorn_horn</code><span>Pasiva: BA →+1 DIP al rival</span></div>
+                            <div class="catalog-item"><code>herd_effect</code><span>Pasiva: +1 DIP extra si ya daña</span></div>
+                            <div class="catalog-item"><code>burn</code><span>BRN: daño/turno con countdown</span></div>
+                            <div class="catalog-item"><code>poison</code><span>Veneno: daño/turno permanente</span></div>
+                            <div class="catalog-item"><code>burn_immune</code><span>Pasiva: inmune al tick de burn</span></div>
+                            <div class="catalog-item"><code>poison_immune</code><span>Pasiva: inmune al tick de poison</span></div>
+                            <div class="catalog-item"><code>phoenix_rebirth</code><span>Ikki: regresa al morir aliado</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>🏹 Targets</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>self</code><span>El caballero activador</span></div>
+                            <div class="catalog-item"><code>target</code><span>Elegido por el cliente (targetCardId)</span></div>
+                            <div class="catalog-item"><code>selected</code><span>Carta elegida en una selección interactiva (resolve_selection). Solo válido en on_select[]</span></div>
+                            <div class="catalog-item"><code>all_allies</code><span>Todos los aliados en campo</span></div>
+                            <div class="catalog-item"><code>all_enemies</code><span>Todos los enemigos en campo</span></div>
+                            <div class="catalog-item"><code>adjacent_allies</code><span>Aliados adyacentes</span></div>
+                            <div class="catalog-item"><code>adjacent_enemies</code><span>Enemigos adyacentes</span></div>
+                            <div class="catalog-item"><code>target_and_adjacent_enemies</code><span>Target + adyacentes rivales</span></div>
+                            <div class="catalog-item"><code>opponent_helper</code><span>Helper del oponente</span></div>
+                            <div class="catalog-item"><code>opponent_technique</code><span>Técnica del oponente</span></div>
+                            <div class="catalog-item"><code>random_enemy</code><span>Enemigo aleatorio</span></div>
+                            <div class="catalog-item"><code>random_ally</code><span>Aliado aleatorio</span></div>
+                            <div class="catalog-item"><code>other_allies</code><span>Todos los aliados excepto self</span></div>
+                            <div class="catalog-item"><code>lowest_health_enemy</code><span>Enemigo con menos HP</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>🔒 Conditions</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>has_status</code><span>status:"name" — portador tiene</span></div>
+                            <div class="catalog-item"><code>no_status</code><span>status:"name" — portador NO tiene</span></div>
+                            <div class="catalog-item"><code>cosmos_min</code><span>amount:N — jugador tiene ≥N CP</span></div>
+                            <div class="catalog-item"><code>hand_not_empty</code><span>Jugador tiene cartas en mano</span></div>
+                            <div class="catalog-item"><code>field_not_empty</code><span>Jugador tiene caballeros en campo</span></div>
+                            <div class="catalog-item"><code>self_in_zone</code><span>zone:"name" — portador en zona</span></div>
+                            <div class="catalog-item"><code>hp_below</code><span>amount:N — HP portador ≤N</span></div>
+                            <div class="catalog-item"><code>enemy_has_status</code><span>status:"name" — target tiene</span></div>
+                            <div class="catalog-item"><code>event_card_code</code><span>code:"code" — código del evento</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>📐 Ejemplo effects JSON</summary>
+                        <pre class="catalog-example">{
+  "trigger": "ACTIVE",
+  "cost": [{"type":"cosmos","amount":3}],
+  "conditions": [
+    {"type":"cosmos_min","amount":3},
+    {"type":"no_status","status":"ignore_armor"}
+  ],
+  "actions": [
+    {
+      "type": "apply_status",
+      "status": "ignore_armor",
+      "target": "self"
+    }
+  ]
+}</pre>
+                    </details>
+                </div>
+            </div>
+            <div class="cm-modal-footer">
+                <button id="cm-delete-btn" onclick="deleteCurrentCard()" class="btn-danger hidden">🗑 Eliminar carta</button>
+                <div style="flex:1"></div>
+                <button onclick="closeCardEditor()" class="btn-ghost">Cancelar</button>
+                <button onclick="saveCard()" class="btn-primary">💾 Guardar</button>
+            </div>
+        </div>
     </div>
 
     <script src="/admin/admin.js"></script>
 </body>
+</html>
 </html>

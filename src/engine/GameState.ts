@@ -10,6 +10,59 @@
  * ✅ Inmutable - Las mutaciones retornan nuevo estado
  */
 
+// ─── Zona origen para selecciones interactivas ─────────────────────────────
+export type ZoneSelectSource = 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique';
+
+// ─── Zona destino para envío de cartas ──────────────────────────────────────
+export type ZoneDestination = 'hand' | 'field' | 'cositos';
+
+export interface SelectionFilter {
+  /** Filtrar por tipo de carta (knight, technique, object, etc.). */
+  type?: string;
+  /** Solo mostrar las primeras N cartas del mazo (top N para deck search). */
+  top_n?: number;
+}
+
+/**
+ * Estado de selección interactiva pendiente.
+ * Se almacena en GameState.pending_selection y en Match.pending_selection (JSONB).
+ *
+ * Flujo:
+ *   1. Habilidad ejecuta `request_selection` → se crea este objeto.
+ *   2. Estado se persiste. Ambos jugadores reciben el estado con pending_selection.
+ *   3. El jugador indicado envía `resolve_selection` con el instance_id elegido.
+ *   4. El motor ejecuta `on_select` con selectedCardId = chosen_card_id.
+ *   5. pending_selection se limpia.
+ */
+export interface PendingSelection {
+  /** ID único para correlacionar la respuesta del cliente. */
+  id: string;
+  /** Jugador que debe seleccionar. */
+  player_number: 1 | 2;
+  /** Zona de donde provienen las opciones. */
+  zone: ZoneSelectSource;
+  /** Filtros para limitar qué cartas puede elegir el jugador. */
+  filter?: SelectionFilter;
+  /** Destino de la carta elegida. */
+  destination: ZoneDestination;
+  /**
+   * Acciones a ejecutar una vez que el jugador elige.
+   * Usan el target especial `'selected'` para referirse a la carta elegida.
+   */
+  on_select: any[];
+  /** Instancia de la carta que generó esta selección. */
+  source_card_id: string;
+  /** Jugador que jugó la carta que generó la selección. */
+  source_player: 1 | 2;
+  /** Timestamp de creación. */
+  created_at: number;
+  /**
+   * IDs de instancias visibles para el jugador (relleno por el servicio para deck search).
+   * Si es undefined, el cliente muestra la zona completa sin filtro.
+   */
+  visible_card_ids?: string[];
+}
+
 export interface Player {
   id: string;
   number: 1 | 2;
@@ -21,12 +74,18 @@ export interface Player {
   field_helper: CardInGameState | null;
   field_occasion: CardInGameState | null;
   deck_count: number;
-  graveyard_count: number;
-  costos_count: number; // "Cositos" - pie de página
   /**
-   * Cartas fuera del campo (yomotsu, mazo, etc.) con habilidades pasivas reactivas.
-   * Solo se incluyen las que tienen al menos un trigger distinto de CARD_PLAYED/ACTIVE.
-   * Permiten que Ikki reaccione desde el yomotsu, Shun desde el mazo, etc.
+   * Lista completa de caballeros en el Yomotsu.
+   * Ambos jugadores pueden verla (regla estándar de juegos de cartas).
+   * graveyard_count = graveyard.length (derivado, mantenido por compatibilidad).
+   */
+  graveyard: CardInGameState[];
+  graveyard_count: number; // deprecated: derivar de graveyard.length
+  costos_count: number; // "Cositos" - pile de eliminados permanentes
+  /**
+   * Cartas fuera del campo con habilidades pasivas reactivas.
+   * Solo las que tienen un trigger distinto de CARD_PLAYED/ACTIVE.
+   * Subset de graveyard (yomotsu) + deck cards con pasivas.
    */
   passive_watchers: CardInGameState[];
 }
@@ -90,24 +149,31 @@ export interface GameScenario {
 export interface GameState {
   // Identificadores
   match_id: string;
-  
+
   // Turno y fase
   current_turn: number; // 1, 2, 3, ...
   current_player: 1 | 2; // Quién juega ahora
   phase: 'player1_turn' | 'player2_turn' | 'game_over';
-  
+
   // Jugadores
   player1: Player;
   player2: Player;
-  
+
   // Tablero compartido
   scenario: GameScenario | null;
-  
+
   // Ganador (null si partida en curso)
   winner_id: string | null;
 
   // Semilla del RNG determinista (avanza con cada acción aleatoria)
   rng_seed: number;
+
+  /**
+   * Selección interactiva pendiente. null si no hay ninguna.
+   * Cuando está seteada, el motor detiene la cadena de acciones y espera
+   * que el jugador indicado envíe `resolve_selection`.
+   */
+  pending_selection: PendingSelection | null;
 
   // Metadata
   created_at: number; // timestamp
@@ -134,6 +200,7 @@ export function createEmptyGameState(matchId: string): GameState {
       field_helper: null,
       field_occasion: null,
       deck_count: 40,
+      graveyard: [],
       graveyard_count: 0,
       costos_count: 0,
       passive_watchers: [],
@@ -149,6 +216,7 @@ export function createEmptyGameState(matchId: string): GameState {
       field_helper: null,
       field_occasion: null,
       deck_count: 40,
+      graveyard: [],
       graveyard_count: 0,
       costos_count: 0,
       passive_watchers: [],
@@ -156,6 +224,7 @@ export function createEmptyGameState(matchId: string): GameState {
     scenario: null,
     winner_id: null,
     rng_seed: 0,
+    pending_selection: null,
     created_at: Date.now(),
     updated_at: Date.now(),
   };
