@@ -65,6 +65,10 @@ export function applyDamage(
 
   const actualDamage = Math.max(0, amount);
   card.current_health -= actualDamage;
+  const maxHealth = card.max_health ?? null;
+  const healthPct = (typeof maxHealth === 'number' && maxHealth > 0)
+    ? (card.current_health / maxHealth) * 100
+    : undefined;
 
   // DAMAGE_DEALT siempre, independientemente de si es letal
   ctx.bus.emit(
@@ -74,7 +78,13 @@ export function applyDamage(
       sourceCardId,
       targetCardId,
       origin: 'system',
-      payload: { amount: actualDamage, instanceId: targetCardId },
+      payload: {
+        amount: actualDamage,
+        instanceId: targetCardId,
+        target_current_health: card.current_health,
+        ...(typeof maxHealth === 'number' ? { target_max_health: maxHealth } : {}),
+        ...(typeof healthPct === 'number' ? { target_health_pct: healthPct } : {}),
+      },
     }),
   );
 
@@ -89,6 +99,6 @@ export function applyDamage(
         payload: { amount: actualDamage, instanceId: targetCardId },
       }),
     );
-    killKnight(ctx, targetCardId, sourceCardId);
+    killKnight(ctx, targetCardId, sourceCardId, 'damage');
   }
 }

@@ -12,7 +12,7 @@ const generatePacks = async () => {
         description: 'Contiene 5 cartas con énfasis en cartas comunes y raras. Perfecto para comenzar tu colección.',
         price: 100,
         cards_per_pack: 5,
-        guaranteed_rarity: 'rara',
+        guaranteed_rarity: 'rare',
         is_active: true,
         image_url: null
       },
@@ -21,7 +21,7 @@ const generatePacks = async () => {
         description: 'Contiene 7 cartas con mayor probabilidad de cartas épicas. ¡Una inversión inteligente!',
         price: 200,
         cards_per_pack: 7,
-        guaranteed_rarity: 'epica',
+        guaranteed_rarity: 'epic',
         is_active: true,
         image_url: null
       },
@@ -30,7 +30,7 @@ const generatePacks = async () => {
         description: 'El sobre premium con 10 cartas y garantía de al menos 1 carta legendaria. ¡Para verdaderos coleccionistas!',
         price: 400,
         cards_per_pack: 10,
-        guaranteed_rarity: 'legendaria',
+        guaranteed_rarity: 'legendary',
         is_active: true,
         image_url: null
       },
@@ -48,7 +48,7 @@ const generatePacks = async () => {
         description: 'El pack definitivo con 15 cartas, garantizando al menos 1 legendaria y 2 épicas. ¡Solo para los más valientes!',
         price: 750,
         cards_per_pack: 15,
-        guaranteed_rarity: 'legendaria',
+        guaranteed_rarity: 'legendary',
         is_active: true,
         image_url: null
       }

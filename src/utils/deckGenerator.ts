@@ -5,15 +5,21 @@ import DeckCard from '../models/DeckCard';
 import Card from '../models/Card';
 import CardKnight from '../models/CardKnight';
 import { Op } from 'sequelize';
+import sequelize from '../config/database';
+import {
+  clampDeckTargetCards,
+  DEFAULT_DECK_CONSTRUCTION_RULES,
+  getCardDeckCopyLimit,
+} from '../config/deck-rules.config';
 
 export interface DeckGenerationOptions {
   strategy: 'balanced' | 'aggressive' | 'defensive' | 'element' | 'faction' | 'random';
   element?: string; // Para estrategia 'element'
   faction?: string; // Para estrategia 'faction'
   minCards?: number; // Default: 40
-  maxCards?: number; // Default: 50
+  maxCards?: number; // Default: 60
   targetCards?: number; // Default: 45
-  preferredRarity?: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+  preferredRarity?: 'common' | 'rare' | 'epic' | 'legendary' | 'divine';
   allowLegendaries?: boolean; // Default: true
   maxLegendaries?: number; // Default: 5
 }
@@ -45,12 +51,13 @@ export async function generateDeck(
     strategy,
     element,
     faction,
-    minCards = 40,
-    maxCards = 50,
-    targetCards = 45,
+    minCards = DEFAULT_DECK_CONSTRUCTION_RULES.minCards,
+    maxCards = DEFAULT_DECK_CONSTRUCTION_RULES.maxCards,
+    targetCards = DEFAULT_DECK_CONSTRUCTION_RULES.defaultTargetCards,
     allowLegendaries = true,
-    maxLegendaries = 5
+    maxLegendaries = DEFAULT_DECK_CONSTRUCTION_RULES.defaultMaxLegendaries
   } = options;
+  const boundedTargetCards = clampDeckTargetCards(targetCards);
 
   // Obtener todas las cartas disponibles del usuario
   const userCardIds = userCardData.map(uc => uc.card_id);
@@ -77,30 +84,30 @@ export async function generateDeck(
     throw new Error('No hay cartas disponibles con los criterios seleccionados');
   }
 
-  console.log(`[DeckGenerator] Estrategia: ${strategy}, Cartas disponibles: ${availableCards.length} únicas, ${Array.from(userCardQuantityMap.values()).reduce((a, b) => a + b, 0)} totales`);
+  console.log(`[DeckGenerator] Estrategia: ${strategy}, Cartas disponibles: ${availableCards.length} únicas, ${Array.from(userCardQuantityMap.values()).reduce((a, b) => a + b, 0)} totales, objetivo: ${boundedTargetCards} (rango ${minCards}-${maxCards})`);
 
   // Generar deck según estrategia
   let selectedCards: Map<string, number>;
 
   switch (strategy) {
     case 'balanced':
-      selectedCards = generateBalancedDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateBalancedDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
       break;
     case 'aggressive':
-      selectedCards = generateAggressiveDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateAggressiveDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
       break;
     case 'defensive':
-      selectedCards = generateDefensiveDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateDefensiveDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
       break;
     case 'element':
     case 'faction':
-      selectedCards = generateThemedDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateThemedDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
       break;
     case 'random':
-      selectedCards = generateRandomDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateRandomDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
       break;
     default:
-      selectedCards = generateBalancedDeck(availableCards, targetCards, maxLegendaries, userCardQuantityMap);
+      selectedCards = generateBalancedDeck(availableCards, boundedTargetCards, maxLegendaries, userCardQuantityMap);
   }
 
   console.log(`[DeckGenerator] Cartas seleccionadas: ${selectedCards.size}`);
@@ -354,7 +361,7 @@ function addCardsToSelection(
     
     // Solo aplicar límites de rareza si NO estamos en modo flexible
     if (!needsFlexibility) {
-      maxQuantity = Math.min(maxQuantity, card.max_copies || 3);
+      maxQuantity = Math.min(maxQuantity, getCardDeckCopyLimit(card.max_copies));
       if (card.unique) maxQuantity = Math.min(1, userHasQuantity);
       
       // Ajustar por rareza
@@ -372,7 +379,7 @@ function addCardsToSelection(
       // Necesitamos más copias por carta para alcanzar el objetivo
       const copiasPromedioPorCarta = Math.ceil(espacioRestante / cardsRestantes);
       // Permitir más copias si el usuario las tiene disponibles
-      quantity = Math.min(userHasQuantity, copiasPromedioPorCarta);
+      quantity = Math.min(userHasQuantity, getCardDeckCopyLimit(card.max_copies), copiasPromedioPorCarta);
       console.log(`[addCardsToSelection] Modo flexible: usando ${quantity} copias (usuario tiene ${userHasQuantity}, espacio: ${espacioRestante}, cartas: ${cardsRestantes})`);
     }
 
@@ -456,27 +463,30 @@ export async function generateAndSaveDeck(
 
   // Eliminar cartas existentes del deck
   console.log(`[generateAndSaveDeck] Eliminando cartas existentes del deck...`);
-  const deleteResult = await DeckCard.destroy({
-    where: { deck_id: deckId }
-  });
-  console.log(`[generateAndSaveDeck] Cartas eliminadas: ${deleteResult}`);
+  await sequelize.transaction(async (transaction) => {
+    const deleteResult = await DeckCard.destroy({
+      where: { deck_id: deckId },
+      transaction,
+    });
+    console.log(`[generateAndSaveDeck] Cartas eliminadas: ${deleteResult}`);
 
-  // Insertar nuevas cartas
-  const deckCards = generatedDeck.cards.map(card => ({
-    deck_id: deckId,
-    card_id: card.card_id,
-    quantity: card.quantity
-  }));
-  
-  console.log(`[generateAndSaveDeck] Preparadas para insertar: ${deckCards.length} registros`);
-  console.log(`[generateAndSaveDeck] Primeras 3: ${JSON.stringify(deckCards.slice(0, 3))}`);
+    const deckCards = generatedDeck.cards.map(card => ({
+      deck_id: deckId,
+      card_id: card.card_id,
+      quantity: card.quantity
+    }));
+    
+    console.log(`[generateAndSaveDeck] Preparadas para insertar: ${deckCards.length} registros`);
+    console.log(`[generateAndSaveDeck] Primeras 3: ${JSON.stringify(deckCards.slice(0, 3))}`);
 
-  if (deckCards.length > 0) {
-    const bulkResult = await DeckCard.bulkCreate(deckCards);
-    console.log(`[generateAndSaveDeck] Cartas insertadas exitosamente: ${bulkResult.length}`);
-  } else {
+    if (deckCards.length > 0) {
+      const bulkResult = await DeckCard.bulkCreate(deckCards, { transaction });
+      console.log(`[generateAndSaveDeck] Cartas insertadas exitosamente: ${bulkResult.length}`);
+      return;
+    }
+
     console.warn(`[generateAndSaveDeck] ⚠️ NO HAY CARTAS PARA INSERTAR`);
-  }
+  });
 
   console.log(`[generateAndSaveDeck] FIN - Retornando generatedDeck\n`);
   return generatedDeck;

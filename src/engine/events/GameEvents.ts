@@ -18,10 +18,9 @@
 export const GameEventType = {
   ACTIVE:         'ACTIVE',         // Habilidad activada manualmente por el jugador
   CARD_PLAYED:    'CARD_PLAYED',    // Carta jugada desde la mano al campo
+  ATTACK_CONNECTED: 'ATTACK_CONNECTED', // Un ataque conecta (no evadido). Distinto de DAMAGE_DEALT: describe el resultado del ataque completo
   TURN_START:     'TURN_START',     // Inicio del turno
   TURN_END:       'TURN_END',       // Fin del turno
-  // KNIGHT_DIED y ALLY_DIED comparten estructura; usa payload.owner para distinguir.
-  // ALLY_DIED se puede derivar: owner === playerNumber → aliado, de lo contrario → enemigo.
   KNIGHT_DIED:    'KNIGHT_DIED',    // Caballero eliminado (cualquier jugador)
   ALLY_DIED:      'ALLY_DIED',      // Alias semántico — aliado del emisor eliminado
   DAMAGE_DEALT:   'DAMAGE_DEALT',   // Daño aplicado a un caballero
@@ -31,6 +30,7 @@ export const GameEventType = {
   OPPONENT_DREW_CARD: 'OPPONENT_DREW_CARD', // El oponente roba una carta del mazo
   COSMOS_CHARGED:     'COSMOS_CHARGED',     // Jugador usa "Cargar Cosmo" (+CP)
   KNIGHT_SUMMONED:    'KNIGHT_SUMMONED',    // Caballero convocado desde yomotsu/mazo/cositos
+  SELECTION_RESOLVED: 'SELECTION_RESOLVED', // Jugador resolvió una selección interactiva (request_selection)
 } as const;
 
 export type GameEventType = typeof GameEventType[keyof typeof GameEventType];
@@ -43,17 +43,46 @@ export type GameEventType = typeof GameEventType[keyof typeof GameEventType];
 export interface EventPayloadMap {
   ACTIVE:        { cost?: number };
   CARD_PLAYED:   { zone: string; position: number };
+  ATTACK_CONNECTED: {
+    attack_type: 'BA' | 'TA';
+    damage_to_card: number;
+    damage_to_player: number;
+    defender_card_id?: string;
+  };
   TURN_START:    { turn: number };
   TURN_END:      { turn: number };
-  KNIGHT_DIED:   { instanceId: string; owner: 1 | 2; card_code: string };
-  ALLY_DIED:     { instanceId: string; owner: 1 | 2; card_code: string };
-  DAMAGE_DEALT:  { amount: number; instanceId: string; isCrit?: boolean };
+  KNIGHT_DIED:   {
+    instanceId: string;
+    owner: 1 | 2;
+    card_code: string;
+    death_reason?: 'damage' | 'effect' | 'sacrifice';
+  };
+  ALLY_DIED:     {
+    instanceId: string;
+    owner: 1 | 2;
+    card_code: string;
+    death_reason?: 'damage' | 'effect' | 'sacrifice';
+  };
+  DAMAGE_DEALT:  {
+    amount: number;
+    instanceId: string;
+    isCrit?: boolean;
+    target_current_health?: number;
+    target_max_health?: number;
+    target_health_pct?: number;
+  };
   DAMAGE_LETHAL:     { amount: number; instanceId: string };
   HEAL_RECEIVED:      { amount: number; instanceId: string };
   ALLY_DREW_CARD:     { cardId: string; remainingDeck: number };
   OPPONENT_DREW_CARD: { remainingDeck: number }; // Sin cardId: el oponente no revela la carta robada
   COSMOS_CHARGED:     { amount: number; totalCosmos: number };
   KNIGHT_SUMMONED:    { instanceId: string; card_code: string; owner: 1 | 2; from_zone: 'yomotsu' | 'deck' | 'cositos'; position: number };
+  SELECTION_RESOLVED: {
+    selection_id: string;
+    chosen_card_id: string;
+    source_card_id: string;
+    zone: string;  // zona desde la que se eligió
+  };
 }
 
 /** Payload tipado para el evento T. Cae a `Record<string, unknown>` si T es la unión completa. */

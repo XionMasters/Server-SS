@@ -38,11 +38,13 @@ export class AttackManager {
       const cached = await ProcessedActionsRegistry.find(actionId);
       if (cached) {
         console.log(`[AttackManager] Acción ${actionId} ya procesada (retry)`);
+        const cachedResult = (cached as any).cached_result ?? {};
+        const cachedState = cachedResult.newState ?? cachedResult;
         return {
           success: true,
-          newState: cached.cached_result,
-          damage: (cached as any).damage || 0,
-          evaded: (cached as any).evaded || false,
+          newState: cachedState,
+          damage: cachedResult.damage ?? (cached as any).damage ?? 0,
+          evaded: cachedResult.evaded ?? (cached as any).evaded ?? false,
           events: [],
           isRetry: true,
         };
@@ -90,7 +92,11 @@ export class AttackManager {
           await MatchRepository.applyState(match, execution.newState, transaction);
 
           // 7️⃣ REGISTRAR (con damage en result)
-          const cacheData = { ...execution.newState, damage: execution.damage };
+          const cacheData = {
+            newState: execution.newState,
+            damage: execution.damage,
+            evaded: execution.evaded,
+          };
           await ProcessedActionsRegistry.register(
             actionId,
             match.id,
@@ -177,6 +183,10 @@ export class AttackManager {
             cardId,
             mode
           );
+
+          if (execution.error) {
+            throw new Error(execution.error);
+          }
 
           // 5️⃣ PERSISTIR
           await MatchRepository.applyState(match, execution.newState, transaction);

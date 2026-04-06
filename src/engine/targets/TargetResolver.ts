@@ -47,7 +47,16 @@ type TargetFn = (ctx: TargetContext) => CardInGameState[];
 const TARGET_REGISTRY: Record<string, TargetFn> = {
   self: ({ state, playerNumber, sourceCardId }) => {
     const player = playerNumber === 1 ? state.player1 : state.player2;
-    const card = player.field_knights.find(c => c.instance_id === sourceCardId);
+    const zones = [
+      ...(player.field_knights ?? []),
+      ...(player.field_techniques ?? []),
+      ...(player.field_helper ? [player.field_helper] : []),
+      ...(player.field_occasion ? [player.field_occasion] : []),
+      ...(player.hand ?? []),
+      ...(player.graveyard ?? []),
+      ...(player.passive_watchers ?? []),
+    ];
+    const card = zones.find(c => c.instance_id === sourceCardId);
     return card ? [card] : [];
   },
 

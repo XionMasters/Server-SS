@@ -13,6 +13,8 @@
     "generate:images:no-ai": "ts-node src/scripts/generateCardsWithAI.ts --no-ai",
     "generate:deck-backs": "ts-node src/scripts/generateDeckBackImages.ts",
     "seed:deck-backs": "ts-node src/scripts/seedDeckBacks-v2.ts",
+    "migrate:status-sources": "ts-node scripts/migrateStatusEffectSources.ts",
+    "migrate:status-sources:dry": "ts-node scripts/migrateStatusEffectSources.ts --dry-run",
     "generate:all": "npm run generate:cards && npm run generate:packs && npm run generate:images"
   },
   "keywords": [],

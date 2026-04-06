@@ -21,13 +21,47 @@ import { CombatModeResolvers } from './combat/CombatResolvers';
 import { CombatContext } from './combat/CombatTypes';
 import { SeededRNG } from './combat/RNG';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
-import { StatusEffect, StatusEffectType, MODE_EFFECT_TYPES, deriveModeFromEffects, setModeEffect } from './StatusEffects';
+import {
+  StatusEffect,
+  StatusEffectType,
+  consumeBasicAttackEffects,
+  deriveModeFromEffects,
+  getBasicAttackCeMultiplier,
+  isModeEffectType,
+  setModeEffect,
+} from './StatusEffects';
 import { createEngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
 import { createEvent } from './events/GameEvents';
 import type { GameEvent } from './events/GameEvents';
 
 export class AttackRulesEngine {
+  private static _validateTurnAndPhase(
+    state: GameState,
+    playerNumber: 1 | 2
+  ): { valid: boolean; error?: string } {
+    if (state.current_player !== playerNumber) {
+      return {
+        valid: false,
+        error: `No es turno del jugador ${playerNumber}. Turno actual: ${state.current_player}`,
+      };
+    }
+
+    if (state.phase === 'game_over') {
+      return { valid: false, error: 'La partida ya terminó' };
+    }
+
+    const expectedPhase = playerNumber === 1 ? 'player1_turn' : 'player2_turn';
+    if (state.phase !== expectedPhase) {
+      return {
+        valid: false,
+        error: `Fase inválida para atacar: ${state.phase}`,
+      };
+    }
+
+    return { valid: true };
+  }
+
   /**
    * Valida que un ataque sea posible.
    * Si defenderCardId es null → ataque directo al jugador (sin bloqueador).
@@ -38,6 +72,11 @@ export class AttackRulesEngine {
     attackerCardId: string,
     defenderCardId: string | null
   ): { valid: boolean; error?: string } {
+    const turnValidation = this._validateTurnAndPhase(state, playerNumber);
+    if (!turnValidation.valid) {
+      return turnValidation;
+    }
+
     const attackerPlayer = playerNumber === 1 ? state.player1 : state.player2;
     const defenderPlayer = playerNumber === 1 ? state.player2 : state.player1;
 
@@ -89,10 +128,12 @@ export class AttackRulesEngine {
 
   const attacker = this._findCardInField(attackerPlayer, attackerCardId)!;
 
-  // Detectar habilidades activas del atacante ANTES de resolver el combate
-  const hadIgnoreArmor = (attacker.status_effects ?? []).some(e => e.type === 'ignore_armor');
-  const hasUnicornHorn = (attacker.status_effects ?? []).some(e => e.type === 'unicorn_horn');
-  const hasHerdEffect  = (attacker.status_effects ?? []).some(e => e.type === 'herd_effect');
+  // Aplicar modificadores declarativos de BA (ej: ce_double)
+  const _origAttackerCe = attacker.ce;
+  const ceMultiplier = getBasicAttackCeMultiplier(attacker.status_effects ?? []);
+  if (ceMultiplier !== 1) {
+    attacker.ce = (attacker.ce ?? 0) * ceMultiplier;
+  }
 
   let damageToCard   = 0;
   let damageToPlayer = 0;
@@ -163,19 +204,32 @@ export class AttackRulesEngine {
     }
   }
 
-  // Cuerno de Unicornio: +1 DIP extra si el ataque conectó
-  if (hasUnicornHorn && !evaded) damageToPlayer += 1;
-  // Efecto Manada: +1 DIP extra si ya se está causando DIP
-  if (hasHerdEffect && damageToPlayer > 0) damageToPlayer += 1;
+  // Evento de ataque conectado: distinto de DAMAGE_DEALT.
+  // DAMAGE_DEALT se emite por carta dañada; ATTACK_CONNECTED describe el resultado del ataque completo.
+  if (!evaded) {
+    engineCtx.bus.emit(
+      createEvent({
+        type: 'ATTACK_CONNECTED',
+        playerNumber,
+        sourceCardId: attackerCardId,
+        ...(defenderCardId ? { targetCardId: defenderCardId } : {}),
+        origin: 'player',
+        payload: {
+          attack_type: 'BA',
+          damage_to_card: damageToCard,
+          damage_to_player: damageToPlayer,
+          ...(defenderCardId ? { defender_card_id: defenderCardId } : {}),
+        },
+      }),
+    );
+  }
 
   defenderPlayer.life = Math.max(0, defenderPlayer.life - damageToPlayer);
 
-  // Consumir ignore_armor (efecto de un solo uso por ataque)
-  if (hadIgnoreArmor) {
-    attacker.status_effects = (attacker.status_effects ?? []).filter(
-      e => e.type !== 'ignore_armor',
-    );
-  }
+  // Consumir efectos one-shot de BA de forma declarativa (ignore_armor, ce_double, etc.)
+  attacker.status_effects = consumeBasicAttackEffects(attacker.status_effects ?? []);
+  // Restaurar CE original para no propagar el cambio temporal al estado persistente
+  attacker.ce = _origAttackerCe;
 
   attacker.is_exhausted      = true;
   attacker.attacked_this_turn = true;
@@ -205,6 +259,11 @@ export class AttackRulesEngine {
     cardId: string,
     mode: 'normal' | 'defense' | 'evasion'
   ): { newState: GameState; error?: string } {
+    const turnValidation = this._validateTurnAndPhase(state, playerNumber);
+    if (!turnValidation.valid) {
+      return { newState: structuredClone(state), error: turnValidation.error };
+    }
+
     const newState = structuredClone(state);
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
@@ -218,7 +277,7 @@ export class AttackRulesEngine {
       card.status_effects = setModeEffect(card.status_effects ?? [], mode, 1);
     } else {
       card.status_effects = (card.status_effects ?? []).filter(
-        e => !MODE_EFFECT_TYPES.includes(e.type)
+        e => !isModeEffectType(e.type)
       );
     }
 

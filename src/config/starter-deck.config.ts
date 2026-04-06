@@ -93,13 +93,14 @@ export const validateStarterDeck = (): { valid: boolean; total: number; message?
     };
   }
 
-  // Validar que ninguna carta tenga más de 3 copias
-  const invalidCards = STARTER_DECK_CARDS.filter(card => card.quantity > 3 || card.quantity < 1);
+  // Validar que todas las cantidades sean positivas.
+  // El límite real por carta se valida con max_copies al persistir el deck.
+  const invalidCards = STARTER_DECK_CARDS.filter(card => card.quantity < 1);
   if (invalidCards.length > 0) {
     return {
       valid: false,
       total,
-      message: 'Todas las cartas deben tener entre 1 y 3 copias.'
+      message: 'Todas las cartas del deck inicial deben tener una cantidad positiva.'
     };
   }
 

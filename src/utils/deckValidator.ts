@@ -1,6 +1,10 @@
 // src/utils/deckValidator.ts
 import Card from '../models/Card';
 import DeckCard from '../models/DeckCard';
+import {
+  DEFAULT_DECK_CONSTRUCTION_RULES,
+  getCardDeckCopyLimit,
+} from '../config/deck-rules.config';
 
 export interface DeckValidationResult {
   valid: boolean;
@@ -16,9 +20,9 @@ export interface DeckValidationRules {
 }
 
 export const DEFAULT_DECK_RULES: DeckValidationRules = {
-  minCards: 40,
-  maxCards: 60,
-  maxCopiesPerCard: 3
+  minCards: DEFAULT_DECK_CONSTRUCTION_RULES.minCards,
+  maxCards: DEFAULT_DECK_CONSTRUCTION_RULES.maxCards,
+  maxCopiesPerCard: DEFAULT_DECK_CONSTRUCTION_RULES.defaultMaxCopiesPerCard
 };
 
 export async function validateDeck(
@@ -57,7 +61,7 @@ export async function validateDeck(
     }
 
     // Validar max_copies
-    const maxAllowed = card.max_copies === 0 ? 1 : card.max_copies;
+    const maxAllowed = getCardDeckCopyLimit(card.max_copies);
     
     if (deckCard.quantity > maxAllowed) {
       errors.push(
@@ -100,7 +104,7 @@ export async function validateDeck(
   }
 
   // Advertir si hay muy pocos caballeros
-  const knightCount = typeCount['caballero'] || 0;
+  const knightCount = typeCount['knight'] || 0;
   if (knightCount < 15) {
     warnings.push(
       `Solo tienes ${knightCount} caballeros. Se recomienda al menos 15 para un mazo balanceado`
@@ -108,7 +112,7 @@ export async function validateDeck(
   }
 
   // Advertir si hay demasiadas cartas legendarias/divinas
-  const legendaryCount = (rarityCount['legendaria'] || 0) + (rarityCount['divina'] || 0);
+  const legendaryCount = (rarityCount['legendary'] || 0) + (rarityCount['divine'] || 0);
   if (legendaryCount > totalCards * 0.3) {
     warnings.push(
       `Tienes ${legendaryCount} cartas legendarias/divinas (${Math.round(legendaryCount/totalCards*100)}%). Considera reducir para mejor consistencia`

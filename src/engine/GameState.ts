@@ -91,7 +91,22 @@ export interface Player {
 }
 
 // Re-exportar desde StatusEffects.ts para compatibilidad con importaciones existentes
-export { StatusEffectType, StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects, tickStatusEffects, setModeEffect } from './StatusEffects';
+export {
+  StatusEffectType,
+  StatusEffect,
+  StatusEffectSource,
+  deriveModeFromEffects,
+  computeCeBonus,
+  computeArBonus,
+  computeHpBonus,
+  parseStatusEffects,
+  tickStatusEffects,
+  setModeEffect,
+  isModeEffectType,
+  hasEffect,
+  removeEffect,
+  addOrRefreshEffect,
+} from './StatusEffects';
 import { StatusEffect } from './StatusEffects';
 import type { RawAbility } from './abilities/AbilityDefinition';
 
@@ -132,6 +147,7 @@ export interface CardInGameState {
   ce: number;   // Combat Effectiveness (base + ce_boost activos)
   ar: number;   // Armor Rating (base + ar_boost activos)
   current_health: number;
+  max_health: number;
   current_cosmos: number; // CP actuales de la carta (se usa para habilidades que cuestan CP)
 
   /** Stats base, sin boosts. Necesarios para recomputar al expirar efectos. */

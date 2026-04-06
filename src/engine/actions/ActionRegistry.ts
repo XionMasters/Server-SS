@@ -19,14 +19,29 @@
  *   ⚠️  Actualizar también el catálogo en src/views/admin.html → sección "🎯 Actions".
  */
 
-import type { GameState } from '../GameState';
-import type { ActionDefinition, ApplyStatusAction, CoinFlipAction } from '../abilities/AbilityDefinition';
-import type { StatusEffectType } from '../StatusEffects';
-import type { GameEvent } from '../events/GameEvents';
+import { resolveWinCondition, type GameState } from '../GameState';
+
+/**
+ * Interacciones declarativas entre efectos de estado.
+ * - blockedBy: si la carta ya tiene alguno de estos efectos, la aplicación se cancela.
+ * - removes:   al aplicar este efecto, remueve los efectos listados de la carta objetivo.
+ *
+ * Para añadir una relación nueva basta con editar este mapa — sin tocar código del engine.
+ */
+const STATUS_INTERACTIONS: Record<string, { blockedBy?: string[]; removes?: string[] }> = {
+  burn:          { blockedBy: ['burn_immune'] },
+  poison:        { blockedBy: ['poison_immune'] },
+  burn_immune:   { removes: ['burn'] },
+  poison_immune: { removes: ['poison'] },
+};
+import type { ActionDefinition, ApplyStatusAction, CoinFlipAction, KillAction } from '../abilities/AbilityDefinition';
+import { addOrRefreshEffect, removeEffect, type StatusEffectType } from '../StatusEffects';
+import { createEvent, type GameEvent } from '../events/GameEvents';
 import type { GameEventBus } from '../events/GameEventBus';
 import { TargetResolver, type TargetContext } from '../targets/TargetResolver';
 import { applyDamage } from './DamageAction';
 import { heal } from './HealAction';
+import { killKnight } from './KillAction';
 import { summonKnight } from './SummonAction';
 
 export interface ActionContext {
@@ -62,6 +77,75 @@ type ActionFn<T extends ActionDefinition = ActionDefinition> = (
   result: ActionResult,
 ) => void;
 
+type CardMoveOrigin = 'graveyard' | 'passive_watchers' | 'hand' | 'field_knight' | 'field_technique' | 'field_helper' | 'field_occasion';
+
+function _detachCardFromKnownZones(
+  state: GameState,
+  cardId: string,
+): { card: any; player: any; from: CardMoveOrigin } | null {
+  for (const player of [state.player1, state.player2]) {
+    if (!Array.isArray(player.graveyard)) player.graveyard = [];
+
+    const graveIdx = player.graveyard.findIndex((c: any) => c.instance_id === cardId);
+    if (graveIdx !== -1) {
+      const card = player.graveyard.splice(graveIdx, 1)[0];
+      const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+      if (pwIdx !== -1) player.passive_watchers.splice(pwIdx, 1);
+      player.graveyard_count = player.graveyard.length;
+      return { card, player, from: 'graveyard' };
+    }
+
+    const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
+    if (pwIdx !== -1) {
+      const card = player.passive_watchers.splice(pwIdx, 1)[0];
+      return { card, player, from: 'passive_watchers' };
+    }
+
+    const handIdx = player.hand.findIndex((c: any) => c.instance_id === cardId);
+    if (handIdx !== -1) {
+      const card = player.hand.splice(handIdx, 1)[0];
+      return { card, player, from: 'hand' };
+    }
+
+    const fkIdx = player.field_knights.findIndex((c: any) => c.instance_id === cardId);
+    if (fkIdx !== -1) {
+      const card = player.field_knights.splice(fkIdx, 1)[0];
+      return { card, player, from: 'field_knight' };
+    }
+
+    const ftIdx = player.field_techniques.findIndex((c: any) => c.instance_id === cardId);
+    if (ftIdx !== -1) {
+      const card = player.field_techniques.splice(ftIdx, 1)[0];
+      return { card, player, from: 'field_technique' };
+    }
+
+    if (player.field_helper?.instance_id === cardId) {
+      const card = player.field_helper;
+      player.field_helper = null;
+      return { card, player, from: 'field_helper' };
+    }
+
+    if (player.field_occasion?.instance_id === cardId) {
+      const card = player.field_occasion;
+      player.field_occasion = null;
+      return { card, player, from: 'field_occasion' };
+    }
+  }
+
+  return null;
+}
+
+function _sendCardToHand(player: any, card: any): void {
+  card.zone = 'hand';
+  card.position = player.hand.length;
+  player.hand.push(card);
+}
+
+function _sendCardToCositos(player: any, card: any): void {
+  card.zone = 'cositos';
+  player.costos_count += 1;
+}
+
 const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   // Aplica un StatusEffect a los targets resueltos.
   // Stacking: si el mismo tipo+source ya existe, refresca duración/valor en lugar de duplicar.
@@ -80,50 +164,50 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     };
     const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
 
-    // Mapa: efecto DOT → inmunidad que lo bloquea (y viceversa).
-    const DOT_IMMUNITY: Record<string, string> = {
-      burn:    'burn_immune',
-      poison:  'poison_immune',
-    };
-    const IMMUNITY_CLEARS: Record<string, string> = {
-      burn_immune:   'burn',
-      poison_immune: 'poison',
-    };
-
     for (const card of targets) {
       let statusEffects: any[] = card.status_effects ?? [];
 
-      // Si se intenta aplicar un DOT y la carta ya tiene la inmunidad → ignorar.
-      const immunityForDot = DOT_IMMUNITY[action.status];
-      if (immunityForDot && statusEffects.some((s: any) => s.type === immunityForDot)) {
+      const interaction = STATUS_INTERACTIONS[action.status];
+
+      // Si la carta ya tiene uno de los efectos bloqueadores → ignorar la aplicación.
+      if (interaction?.blockedBy?.some((blocker) => statusEffects.some((s: any) => s.type === blocker))) {
         continue;
       }
 
-      // Si se aplica una inmunidad → remover el DOT correspondiente si existe.
-      const dotToClear = IMMUNITY_CLEARS[action.status];
-      if (dotToClear) {
-        statusEffects = statusEffects.filter((s: any) => s.type !== dotToClear);
+      // Remover efectos que este status cancela (ej: burn_immune quita burn).
+      if (interaction?.removes) {
+        for (const toRemove of interaction.removes) {
+          statusEffects = removeEffect(statusEffects as any, toRemove as StatusEffectType) as any[];
+        }
         card.status_effects = statusEffects;
       }
 
       const existing = statusEffects.find(
-        (s: any) => s.type === action.status && s.source === ctx.sourceCardId,
+        (s: any) => s.type === action.status && s.source?.card_instance_id === ctx.sourceCardId,
       );
 
       if (existing) {
-        // Refrescar: regenerar duración/valor sin duplicar la entrada
-        if (action.duration !== undefined) existing.remaining_turns = action.duration;
-        if (action.value    !== undefined) existing.value           = action.value;
-      } else {
-        card.status_effects = [
-          ...statusEffects,
-          {
-            type: action.status as StatusEffectType,
-            remaining_turns: action.duration ?? null,
-            ...(action.value !== undefined ? { value: action.value } : {}),
-            source: ctx.sourceCardId,
+        card.status_effects = addOrRefreshEffect(statusEffects as any, {
+          type: action.status as StatusEffectType,
+          remaining_turns: action.duration ?? existing.remaining_turns ?? null,
+          ...(action.value !== undefined ? { value: action.value } : {}),
+          source: {
+            card_instance_id: ctx.sourceCardId,
+            player: ctx.playerNumber,
+            type: 'passive',
           },
-        ];
+        } as any);
+      } else {
+        card.status_effects = addOrRefreshEffect(statusEffects as any, {
+          type: action.status as StatusEffectType,
+          remaining_turns: action.duration ?? null,
+          ...(action.value !== undefined ? { value: action.value } : {}),
+          source: {
+            card_instance_id: ctx.sourceCardId,
+            player: ctx.playerNumber,
+            type: 'passive',
+          },
+        } as any);
       }
 
       // Deduplicar más tarde con Set en AbilityEngine.execute
@@ -164,6 +248,76 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   },
 
   /**
+   * Aplica daño directo a un jugador (no a una carta).
+   * Estructura: { type: 'apply_player_damage', target: 'self'|'opponent', amount: number }
+   */
+  apply_player_damage: (action: any, ctx, result) => {
+    const amount: number = Math.max(0, action.amount ?? 0);
+    const targetPlayerNumber: 1 | 2 = action.target === 'self'
+      ? ctx.playerNumber
+      : (ctx.playerNumber === 1 ? 2 : 1);
+
+    const targetPlayer = targetPlayerNumber === 1 ? result.state.player1 : result.state.player2;
+    targetPlayer.life = Math.max(0, targetPlayer.life - amount);
+
+    resolveWinCondition(result.state);
+
+    if (!Array.isArray(result.extras.player_damage_applied)) {
+      result.extras.player_damage_applied = [];
+    }
+    (result.extras.player_damage_applied as any[]).push({
+      target_player: targetPlayerNumber,
+      amount,
+    });
+  },
+
+  /**
+   * Aplica daño directo al cosmos del jugador (PCP), sin bajar de 0.
+   * Estructura: { type: 'apply_cosmos_damage', target: 'self'|'opponent', amount: number }
+   */
+  apply_cosmos_damage: (action: any, ctx, result) => {
+    const amount: number = Math.max(0, action.amount ?? 0);
+    const targetPlayerNumber: 1 | 2 = action.target === 'self'
+      ? ctx.playerNumber
+      : (ctx.playerNumber === 1 ? 2 : 1);
+
+    const targetPlayer = targetPlayerNumber === 1 ? result.state.player1 : result.state.player2;
+    targetPlayer.cosmos = Math.max(0, targetPlayer.cosmos - amount);
+
+    if (!Array.isArray(result.extras.player_cosmos_damage_applied)) {
+      result.extras.player_cosmos_damage_applied = [];
+    }
+    (result.extras.player_cosmos_damage_applied as any[]).push({
+      target_player: targetPlayerNumber,
+      amount,
+    });
+  },
+
+  /**
+   * Elimina caballeros objetivo (envía a yomotsu y dispara eventos de muerte).
+   * Estructura: { type: 'kill', target?: TargetType }
+   */
+  kill: (action: KillAction, ctx, result) => {
+    if (!ctx.bus) {
+      throw new Error('[ActionRegistry] kill requiere un GameEventBus en ctx.bus');
+    }
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    const engineCtx = { state: result.state, bus: ctx.bus };
+    for (const card of targets) {
+      killKnight(engineCtx, card.instance_id, ctx.sourceCardId, 'effect');
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
    * Cura HP a los targets resueltos.
    * Requiere ctx.bus para propagar HEAL_RECEIVED.
    * Estructura: { type: 'heal', target: TargetType, amount: number }
@@ -198,13 +352,27 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     if (!ctx.bus) {
       throw new Error('[ActionRegistry] summon_from_zone requiere un GameEventBus en ctx.bus');
     }
-    // La carta a convocar es la fuente del evento que disparó esta habilidad.
-    const cardId = ctx.sourceCardId;
-    const fromZone = action.zone ?? 'yomotsu';
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
     const position = action.position ?? 0;
     const engineCtx = { state: result.state, bus: ctx.bus };
-    summonKnight(engineCtx, cardId, position, fromZone);
-    result.affectedIds.push(cardId);
+    for (const card of targets) {
+      const inferredFromZone = card.zone === 'deck'
+        ? 'deck'
+        : card.zone === 'cositos'
+          ? 'cositos'
+          : 'yomotsu';
+      const fromZone = action.zone ?? inferredFromZone;
+      summonKnight(engineCtx, card.instance_id, position, fromZone);
+      result.affectedIds.push(card.instance_id);
+    }
   },
 
   // Coin flip: ejecuta acciones en éxito (cara) o fallo (cruz).
@@ -235,7 +403,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
    *     on_select: ActionDefinition[] }
    */
   request_selection: (action: any, ctx, result) => {
-    const selectionId = `sel_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const selectionId = `sel_${Date.now()}_${ctx.rng().toString(36).slice(2, 7)}`;
     result.state.pending_selection = {
       id: selectionId,
       player_number: ctx.playerNumber,
@@ -262,79 +430,47 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
    * Estructura: { type: 'send_to_zone', target: 'selected', destination: 'hand'|'field'|'cositos' }
    */
   send_to_zone: (action: any, ctx, result) => {
-    // Resolver qué carta mover
-    const cardId = action.target === 'selected'
-      ? (ctx.selectedCardId ?? '')
-      : ctx.sourceCardId;
-    if (!cardId) return;
-
-    const state = result.state;
-    let card: any = null;
-    let cardPlayer: any = null;
-
-    // Buscar en graveyard[] y passive_watchers de ambos jugadores
-    for (const player of [state.player1, state.player2]) {
-      if (!Array.isArray(player.graveyard)) player.graveyard = [];
-      const gravIdx = player.graveyard.findIndex((c: any) => c.instance_id === cardId);
-      if (gravIdx !== -1) {
-        card = player.graveyard.splice(gravIdx, 1)[0];
-        // También quitar de passive_watchers si estaba
-        const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
-        if (pwIdx !== -1) player.passive_watchers.splice(pwIdx, 1);
-        player.graveyard_count = player.graveyard.length;
-        cardPlayer = player;
-        break;
-      }
-      // Fallback: buscar en passive_watchers (deck search pre-cargado)
-      const pwIdx = player.passive_watchers.findIndex((c: any) => c.instance_id === cardId);
-      if (pwIdx !== -1) {
-        card = player.passive_watchers.splice(pwIdx, 1)[0];
-        cardPlayer = player;
-        break;
-      }
-      // Fallback: buscar en mano
-      const handIdx = player.hand.findIndex((c: any) => c.instance_id === cardId);
-      if (handIdx !== -1) {
-        card = player.hand.splice(handIdx, 1)[0];
-        cardPlayer = player;
-        break;
-      }
-    }
-
-    if (!card || !cardPlayer) return; // Carta no encontrada en engine state — no-op
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'selected', targetCtx);
+    if (targets.length === 0) return;
 
     const destination: string = action.destination ?? 'hand';
+    if (!Array.isArray(result.extras.sent_to_zone)) result.extras.sent_to_zone = [];
 
-    if (destination === 'hand') {
-      card.zone = 'hand';
-      card.position = cardPlayer.hand.length;
-      cardPlayer.hand.push(card);
-    } else if (destination === 'field') {
-      const occupied = new Set(cardPlayer.field_knights.map((c: any) => c.position));
-      const freeSlot = [0, 1, 2, 3, 4].find(p => !occupied.has(p));
-      if (freeSlot === undefined) return; // Campo lleno — no-op
-      card.zone = 'field_knight';
-      card.position = freeSlot;
-      cardPlayer.field_knights.push(card);
-      // Emitir KNIGHT_SUMMONED si hay bus
-      if (ctx.bus) {
-        const { createEvent } = require('../events/GameEvents');
-        ctx.bus.emit(createEvent({
-          type: 'KNIGHT_SUMMONED',
-          playerNumber: card.player_number,
-          sourceCardId: ctx.sourceCardId,
-          origin: 'system',
-          payload: { instanceId: card.instance_id, card_code: card.card_code,
-                     owner: card.player_number, from_zone: 'yomotsu', position: freeSlot },
-        }));
+    for (const target of targets) {
+      const cardId = target.instance_id;
+
+      if (destination === 'field') {
+        if (!ctx.bus) {
+          throw new Error('[ActionRegistry] send_to_zone a field requiere un GameEventBus en ctx.bus');
+        }
+        const inferredFromZone = target.zone === 'deck'
+          ? 'deck'
+          : target.zone === 'cositos'
+            ? 'cositos'
+            : 'yomotsu';
+        const engineCtx = { state: result.state, bus: ctx.bus };
+        summonKnight(engineCtx, cardId, action.position ?? 0, inferredFromZone);
+      } else {
+        const detached = _detachCardFromKnownZones(result.state, cardId);
+        if (!detached) continue;
+        if (destination === 'hand') {
+          _sendCardToHand(detached.player, detached.card);
+        } else if (destination === 'cositos') {
+          _sendCardToCositos(detached.player, detached.card);
+        }
       }
-    } else if (destination === 'cositos') {
-      card.zone = 'cositos';
-      cardPlayer.costos_count += 1;
-    }
 
-    result.affectedIds.push(card.instance_id);
-    result.extras.sent_to_zone = { card_id: card.instance_id, destination };
+      result.affectedIds.push(cardId);
+      (result.extras.sent_to_zone as any[]).push({ card_id: cardId, destination });
+    }
   },
 
   /**
@@ -360,7 +496,6 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
    */
   draw_card: (action: any, ctx, result) => {
     const amount: number = action.amount ?? 1;
-    const { createEvent: makeEvent } = require('../events/GameEvents');
 
     for (let i = 0; i < amount; i++) {
       const player = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
@@ -369,9 +504,9 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       }
       const remaining = player.deck_count;
       if (ctx.bus) {
-        ctx.bus.emit(makeEvent({ type: 'ALLY_DREW_CARD', playerNumber: ctx.playerNumber,
+        ctx.bus.emit(createEvent({ type: 'ALLY_DREW_CARD', playerNumber: ctx.playerNumber,
           origin: 'system', payload: { cardId: '', remainingDeck: remaining } }));
-        ctx.bus.emit(makeEvent({ type: 'OPPONENT_DREW_CARD', playerNumber: ctx.playerNumber,
+        ctx.bus.emit(createEvent({ type: 'OPPONENT_DREW_CARD', playerNumber: ctx.playerNumber,
           origin: 'system', payload: { remainingDeck: remaining } }));
       }
     }

@@ -8,13 +8,13 @@
 -- =============================================================
 -- PACKS
 -- =============================================================
-INSERT INTO packs (name, description, price, cards_per_pack, guaranteed_rarity, is_active)
+INSERT INTO packs (name, description, price, cards_per_pack, guaranteed_rarity, is_active, image_url)
 VALUES
-  ('Sobre Básico',       'Un sobre económico con 3 cartas aleatorias. Ideal para probar suerte sin gastar mucho.',                                                   50,  3,  NULL,          TRUE),
-  ('Sobre de Bronce',    'Contiene 5 cartas con énfasis en cartas comunes y raras. Perfecto para comenzar tu colección.',                                             100, 5,  'rara',        TRUE),
-  ('Sobre de Plata',     'Contiene 7 cartas con mayor probabilidad de cartas épicas. ¡Una inversión inteligente!',                                                   200, 7,  'epica',       TRUE),
-  ('Sobre de Oro',       'El sobre premium con 10 cartas y garantía de al menos 1 carta legendaria. ¡Para verdaderos coleccionistas!',                               400, 10, 'legendaria',  TRUE),
-  ('Mega Pack',          'El pack definitivo con 15 cartas, garantizando al menos 1 legendaria y 2 épicas. ¡Solo para los más valientes!',                           750, 15, 'legendaria',  TRUE);
+  ('Sobre Básico',       'Un sobre económico con 3 cartas aleatorias. Ideal para probar suerte sin gastar mucho.',                                                   50,  3,  NULL,          TRUE, '/assets/examples/seiya.png'),
+  ('Sobre de Bronce',    'Contiene 5 cartas con énfasis en cartas comunes y raras. Perfecto para comenzar tu colección.',                                             100, 5,  'rare',       TRUE, '/assets/examples/seiya.png'),
+  ('Sobre de Plata',     'Contiene 7 cartas con mayor probabilidad de cartas épicas. ¡Una inversión inteligente!',                                                   200, 7,  'epic',       TRUE, '/assets/examples/seiya.png'),
+  ('Sobre de Oro',       'El sobre premium con 10 cartas y garantía de al menos 1 carta legendaria. ¡Para verdaderos coleccionistas!',                               400, 10, 'legendary',  TRUE, '/assets/examples/seiya.png'),
+  ('Mega Pack',          'El pack definitivo con 15 cartas, garantizando al menos 1 legendaria y 2 épicas. ¡Solo para los más valientes!',                           750, 15, 'legendary',  TRUE, '/assets/examples/seiya.png');
 
 -- =============================================================
 -- PROFILE AVATARS

@@ -15,6 +15,7 @@
  */
 
 import { sequelize } from '../../config/database';
+import { QueryTypes } from 'sequelize';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
 import CardKnight from '../../models/CardKnight';
@@ -114,19 +115,25 @@ export class SelectionService {
 
         // 7. Ejecutar on_select con selectedCardId
         const bus = new GameEventBus();
-        const fakeEvent = createEvent({
-          type: 'CARD_PLAYED',
+        const rng = SelectionService._createSeededRng(action_id);
+        const selectionEvent = createEvent({
+          type: 'SELECTION_RESOLVED',
           playerNumber,
           sourceCardId: pending.source_card_id,
           origin: 'player',
-          payload: { zone: 'yomotsu', position: 0 },
+          payload: {
+            selection_id,
+            chosen_card_id,
+            source_card_id: pending.source_card_id,
+            zone: pending.zone,
+          },
         });
 
         const actionCtx: ActionContext = {
           playerNumber,
           sourceCardId: pending.source_card_id,
-          event: fakeEvent,
-          rng: Math.random.bind(Math),
+          event: selectionEvent,
+          rng,
           bus,
           selectedCardId: chosen_card_id,
         };
@@ -142,7 +149,7 @@ export class SelectionService {
         // 8. Shuffle deck si fue marcado por shuffle_deck action
         if (Array.isArray(actionResult.extras.shuffle_deck_players)) {
           for (const pNum of actionResult.extras.shuffle_deck_players as number[]) {
-            await this._shuffleDeck(match_id, pNum, tx);
+            await this._shuffleDeck(match_id, pNum, tx, rng);
           }
         }
 
@@ -161,14 +168,16 @@ export class SelectionService {
         // 10. Persistir nuevo estado
         await MatchRepository.applyState(match, actionResult.state, tx);
 
-        // 11. Si la carta elegida era del mazo, actualizar su zona en BD
-        // 11. Sincronizar zona en BD para cartas movidas desde deck o hand
-        const sentCard = actionResult.extras.sent_to_zone;
-        if (sentCard && (pending.zone === 'deck' || pending.zone === 'hand')) {
+        // 11. Sincronizar zona en BD para cartas movidas por on_select
+        // Necesario para cartas de deck/hand que no fueron cargadas en GameState completo.
+        const sentCards: any[] = Array.isArray(actionResult.extras.sent_to_zone)
+          ? actionResult.extras.sent_to_zone
+          : (actionResult.extras.sent_to_zone ? [actionResult.extras.sent_to_zone] : []);
+        for (const sentCard of sentCards) {
           const dbZone = sentCard.destination === 'field' ? 'field_knight' : sentCard.destination;
           await CardInPlay.update(
             { zone: dbZone },
-            { where: { id: chosen_card_id, match_id }, transaction: tx }
+            { where: { id: sentCard.card_id, match_id }, transaction: tx }
           );
         }
 
@@ -231,6 +240,14 @@ export class SelectionService {
     chosenCardId: string,
     tx: any,
   ): Promise<void> {
+    // Validación universal: si hay opciones visibles restringidas, la carta debe estar en la lista.
+    // Aplica a cualquier zona (deck con top_n, mano con filtro, yomotsu filtrado, etc.)
+    if (pending.visible_card_ids && pending.visible_card_ids.length > 0) {
+      if (!pending.visible_card_ids.includes(chosenCardId)) {
+        throw new Error('La carta elegida no está entre las opciones disponibles');
+      }
+    }
+
     if (pending.zone === 'yomotsu') {
       const player = pending.player_number === 1 ? state.player1 : state.player2;
       const inGraveyard = (player.graveyard ?? []).some(c => c.instance_id === chosenCardId);
@@ -251,13 +268,6 @@ export class SelectionService {
         transaction: tx,
       });
       if (!card) throw new Error('La carta elegida no está en tu mazo');
-
-      // Si hay visible_card_ids (top_n o tipo filtrado): validar que esté en la lista
-      if (pending.visible_card_ids && pending.visible_card_ids.length > 0) {
-        if (!pending.visible_card_ids.includes(chosenCardId)) {
-          throw new Error('La carta elegida no está entre las opciones disponibles');
-        }
-      }
     } else if (pending.zone === 'hand') {
       // Descarte desde mano: verificar que la carta esté en la mano del jugador
       const player = pending.player_number === 1 ? state.player1 : state.player2;
@@ -274,29 +284,70 @@ export class SelectionService {
     }
   }
 
-  private static async _shuffleDeck(matchId: string, playerNumber: number, tx: any): Promise<void> {
+  private static async _shuffleDeck(
+    matchId: string,
+    playerNumber: number,
+    tx: any,
+    rng: () => number,
+  ): Promise<void> {
     const deckCards = await CardInPlay.findAll({
       where: { match_id: matchId, player_number: playerNumber, zone: 'deck' },
+      attributes: ['id'],
       transaction: tx,
     });
-
     if (deckCards.length === 0) return;
 
-    // Fisher-Yates shuffle sobre los índices de posición
+    // Fisher-Yates shuffle determinístico usando el RNG inyectado
     const positions = deckCards.map((_, i) => i);
     for (let i = positions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      const j = Math.floor(rng() * (i + 1));
       [positions[i], positions[j]] = [positions[j], positions[i]];
     }
 
-    for (let i = 0; i < deckCards.length; i++) {
-      await (deckCards[i] as any).update(
-        { position: positions[i] },
-        { transaction: tx }
-      );
-    }
+    // Batch update: una sola query en vez de N queries
+    const bindings: any[] = [matchId, playerNumber,
+      ...deckCards.flatMap((card: any, i: number) => [card.id, positions[i]]),
+    ];
+    const valueRows = deckCards.map((_: any, i: number) => {
+      const idIdx  = 3 + i * 2;
+      const posIdx = 4 + i * 2;
+      return `($${idIdx}::uuid, $${posIdx}::int)`;
+    });
+
+    await sequelize.query(
+      `UPDATE cards_in_play AS c
+       SET position = v.pos
+       FROM (VALUES ${valueRows.join(', ')}) AS v(card_id, pos)
+       WHERE c.id = v.card_id
+         AND c.match_id = $1::uuid
+         AND c.player_number = $2::int
+         AND c.zone = 'deck'`,
+      { bind: bindings, type: QueryTypes.BULKUPDATE, transaction: tx },
+    );
 
     console.log(`🔀 [SelectionService] Mazo del jugador ${playerNumber} mezclado (${deckCards.length} cartas)`);
+  }
+
+  /**
+   * Crea un RNG determinístico seeded con un string (hash FNV-1a → mulberry32).
+   * Usar en lugar de Math.random para garantizar reproducibilidad en tests y replay.
+   */
+  private static _createSeededRng(seed: string): () => number {
+    // FNV-1a 32-bit hash
+    let h = 0x811c9dc5;
+    for (let i = 0; i < seed.length; i++) {
+      h ^= seed.charCodeAt(i);
+      h = Math.imul(h, 0x01000193) | 0;
+    }
+    // mulberry32 PRNG
+    let s = h;
+    return function (): number {
+      s |= 0;
+      s = s + 0x6d2b79f5 | 0;
+      let t = Math.imul(s ^ (s >>> 15), 1 | s);
+      t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 0x100000000;
+    };
   }
 
   private static _mapCardToState(card: any): any {
@@ -334,6 +385,7 @@ export class SelectionService {
       ce: base_ce + computeCeBonus(effects),
       ar: base_ar + computeArBonus(effects),
       current_health: card.current_health ?? 0,
+      max_health: knight?.health ?? card.current_health ?? 0,
       current_cosmos: card.current_cosmos ?? 0,
     };
   }

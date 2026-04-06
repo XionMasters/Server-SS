@@ -248,6 +248,7 @@ export class MatchStateMapper {
       ce:   base_ce + computeCeBonus(effects),
       ar:   base_ar + computeArBonus(effects),
       current_health: card.current_health ?? 0,
+      max_health: card.card?.card_knight?.health ?? card.current_health ?? 0,
       current_cosmos: card.current_cosmos ?? 0,
     };
   }

@@ -93,6 +93,8 @@ function buildConditionContext(
         player: {
             hand: (player as any).hand ?? [],
             field_knights: player.field_knights,
+            life: (player as any).life,
+            cosmos: (player as any).cosmos,
         },
         event,
     };
@@ -109,6 +111,18 @@ function validateCosts(
                 return { valid: false, error: `CP insuficiente. Requiere ${cost.amount} CP del caballero` };
             }
         }
+            if (cost.type === 'life') {
+                const required = cost.amount ?? 0;
+                if ((ctx.player as any).life < required) {
+                    return { valid: false, error: `PLP insuficiente. Requiere ${required} de vida del jugador` };
+                }
+            }
+            if (cost.type === 'player_cosmos') {
+                const required = cost.amount ?? 0;
+                if ((ctx.player as any).cosmos < required) {
+                    return { valid: false, error: `PCP insuficiente. Requiere ${required} de cosmos del jugador` };
+                }
+            }
         if (cost.type === 'discard') {
             if (event.targetCardId) {
                 // Camino directo: el cliente ya indicó la carta — verificar que está en mano
@@ -175,6 +189,14 @@ function applyCosts(
                 costExtras.needs_discard_selection = true;
             }
         }
+            if (cost.type === 'life') {
+                const amount = Math.max(0, cost.amount ?? 0);
+                player.life = Math.max(0, player.life - amount);
+            }
+            if (cost.type === 'player_cosmos') {
+                const amount = Math.max(0, cost.amount ?? 0);
+                player.cosmos = Math.max(0, player.cosmos - amount);
+            }
     }
     return { costExtras };
 }

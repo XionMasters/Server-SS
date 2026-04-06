@@ -47,7 +47,7 @@ Pack.init(
       }
     },
     guaranteed_rarity: {
-      type: DataTypes.ENUM('comun', 'rara', 'epica', 'legendaria'),
+      type: DataTypes.ENUM('common', 'rare', 'epic', 'legendary'),
       allowNull: true,
     },
     is_active: {

@@ -176,7 +176,7 @@ export class KnightManager {
         // applyState (paso 5) detectará que la carta ya no está en ningún campo
         // y la moverá a yomotsu en BD — no necesitamos card.update() explícito.
         const ctx = createEngineContext(execution.newState);
-        killKnight(ctx, cardInPlayId);
+        killKnight(ctx, cardInPlayId, undefined, 'sacrifice');
         return { newState: ctx.state, lifeLost: execution.lifeLost, events: [...ctx.bus.events] };
       },
     );

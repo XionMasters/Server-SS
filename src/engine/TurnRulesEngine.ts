@@ -18,8 +18,60 @@
  */
 
 import { GameState } from './GameState';
-import { deriveModeFromEffects, computeCeBonus, computeArBonus, tickStatusEffects } from './StatusEffects';
+import { deriveModeFromEffects, computeCeBonus, computeArBonus, computeHpBonus, tickStatusEffects } from './StatusEffects';
 import { BASE_MATCH_RULES } from '../game/rules/base.rules';
+import { createEngineContext, type EngineContext } from './EngineContext';
+import { applyDamage } from './actions/DamageAction';
+
+function _recomputeDerivedStatsWithHpClamp(card: any, effectsBeforeTick: any[]): void {
+  const prevHpBonus = computeHpBonus(effectsBeforeTick ?? []);
+  const baseMaxHp = Math.max(0, (card.max_health ?? card.current_health ?? 0) - prevHpBonus);
+  const nextHpBonus = computeHpBonus(card.status_effects ?? []);
+  card.max_health = baseMaxHp + nextHpBonus;
+  card.current_health = Math.min(card.current_health ?? 0, card.max_health);
+
+  card.mode = deriveModeFromEffects(card.status_effects);
+  card.ce   = card.base_ce + computeCeBonus(card.status_effects);
+  card.ar   = card.base_ar + computeArBonus(card.status_effects);
+}
+
+function _findCardInOwnedField(player: any, cardId: string): any | null {
+  return (
+    player.field_knights.find((c: any) => c.instance_id === cardId) ??
+    player.field_techniques.find((c: any) => c.instance_id === cardId) ??
+    (player.field_helper?.instance_id === cardId ? player.field_helper : null) ??
+    (player.field_occasion?.instance_id === cardId ? player.field_occasion : null)
+  );
+}
+
+function _applyDotDamageIfPresent(ctx: EngineContext, card: any, effects: any[]): void {
+  // DOT (burn/poison) solo aplica a caballeros en campo.
+  if (card.zone !== 'field_knight') return;
+
+  const hasBurnImmune   = effects.some(e => e.type === 'burn_immune'   || e.type === 'dot_immune');
+  const hasPoisonImmune = effects.some(e => e.type === 'poison_immune' || e.type === 'dot_immune');
+
+  if (!hasBurnImmune) {
+    const burnEffect = effects.find(e => e.type === 'burn');
+    if (typeof burnEffect?.value === 'number' && burnEffect.value > 0) {
+      applyDamage(ctx, card.instance_id, burnEffect.value);
+    }
+  }
+
+  // Si murió por burn, ya no existe en field_knights y no debe recibir poison.
+  const stillAliveAfterBurn = _findCardInOwnedField(
+    card.player_number === 1 ? ctx.state.player1 : ctx.state.player2,
+    card.instance_id,
+  );
+  if (!stillAliveAfterBurn) return;
+
+  if (!hasPoisonImmune) {
+    const poisonEffect = effects.find(e => e.type === 'poison');
+    if (typeof poisonEffect?.value === 'number' && poisonEffect.value > 0) {
+      applyDamage(ctx, card.instance_id, poisonEffect.value);
+    }
+  }
+}
 
 export class TurnRulesEngine {
   /**
@@ -114,47 +166,48 @@ export class TurnRulesEngine {
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
     nextPlayerObj.cosmos += cosmosIncrease;
 
+    // Contexto para enrutamiento unificado de daño (DOTs pasan por DamageAction).
+    const dotCtx = createEngineContext(newState);
+    const nextPlayerObjInCtx = dotCtx.state[nextPlayer === 1 ? 'player1' : 'player2'];
+
     // 5️⃣ Procesar status_effects del siguiente jugador:
     //    - Decrementar remaining_turns de cada efecto
     //    - Eliminar efectos expirados (remaining_turns <= 0)
     //    - Recomputar mode, ce y ar desde los efectos restantes
-    const allNextPlayerCards = [
-      ...nextPlayerObj.field_knights,
-      ...nextPlayerObj.field_techniques,
-      ...(nextPlayerObj.field_helper ? [nextPlayerObj.field_helper] : []),
-      ...(nextPlayerObj.field_occasion ? [nextPlayerObj.field_occasion] : []),
+    const allNextPlayerCardIds = [
+      ...nextPlayerObjInCtx.field_knights.map((c: any) => c.instance_id),
+      ...nextPlayerObjInCtx.field_techniques.map((c: any) => c.instance_id),
+      ...(nextPlayerObjInCtx.field_helper ? [nextPlayerObjInCtx.field_helper.instance_id] : []),
+      ...(nextPlayerObjInCtx.field_occasion ? [nextPlayerObjInCtx.field_occasion.instance_id] : []),
     ];
 
-    for (const card of allNextPlayerCards) {
-      // Aplicar daño de DOTs (burn, poison) ANTES del tick.
-      // Cada inmunidad es explícita: burn_immune bloquea solo burn, poison_immune bloquea solo poison.
+    for (const cardId of allNextPlayerCardIds) {
+      const card = _findCardInOwnedField(nextPlayerObjInCtx, cardId);
+      if (!card) continue;
+
       const effects = card.status_effects ?? [];
-      const hasBurnImmune   = effects.some(e => e.type === 'burn_immune'   || e.type === 'dot_immune');
-      const hasPoisonImmune = effects.some(e => e.type === 'poison_immune' || e.type === 'dot_immune');
+      _applyDotDamageIfPresent(dotCtx, card, effects);
 
-      if (!hasBurnImmune) {
-        const burnEffect = effects.find(e => e.type === 'burn');
-        if (burnEffect?.value) {
-          card.current_health = Math.max(0, (card.current_health ?? 0) - burnEffect.value);
-        }
-      }
-      if (!hasPoisonImmune) {
-        const poisonEffect = effects.find(e => e.type === 'poison');
-        if (poisonEffect?.value) {
-          card.current_health = Math.max(0, (card.current_health ?? 0) - poisonEffect.value);
-        }
-      }
+      const cardAfterDot = _findCardInOwnedField(nextPlayerObjInCtx, cardId);
+      if (!cardAfterDot) continue;
 
-      card.status_effects = tickStatusEffects(card.status_effects ?? []);
-      card.mode = deriveModeFromEffects(card.status_effects);
-      card.ce   = card.base_ce + computeCeBonus(card.status_effects);
-      card.ar   = card.base_ar + computeArBonus(card.status_effects);
+      const effectsBeforeTick = [...(cardAfterDot.status_effects ?? [])];
+      cardAfterDot.status_effects = tickStatusEffects(cardAfterDot.status_effects ?? []);
+      _recomputeDerivedStatsWithHpClamp(cardAfterDot, effectsBeforeTick);
+    }
+
+    // También tickear passive_watchers (cartas en yomotsu/mazo con pasivas reactivas)
+    // para soportar cooldowns "una vez por turno" fuera del campo.
+    for (const watcher of nextPlayerObjInCtx.passive_watchers ?? []) {
+      const effectsBeforeTick = [...(watcher.status_effects ?? [])];
+      watcher.status_effects = tickStatusEffects(watcher.status_effects ?? []);
+      _recomputeDerivedStatsWithHpClamp(watcher, effectsBeforeTick);
     }
 
     // Resetear flags de exhaust del siguiente jugador (puede volver a atacar)
     const fieldsToReset = [
-      nextPlayerObj.field_knights,
-      nextPlayerObj.field_techniques,
+      nextPlayerObjInCtx.field_knights,
+      nextPlayerObjInCtx.field_techniques,
     ];
     fieldsToReset.forEach(field => {
       field?.forEach(card => {
@@ -169,9 +222,9 @@ export class TurnRulesEngine {
     //    Ese paso se movió a DrawCardAction para centralizar la lógica y los eventos.
 
     // Actualizar timestamp
-    newState.updated_at = Date.now();
+    dotCtx.state.updated_at = Date.now();
 
-    return { newState };
+    return { newState: dotCtx.state };
   }
 
   /**

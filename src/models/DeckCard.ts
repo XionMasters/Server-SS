@@ -44,7 +44,6 @@ DeckCard.init(
       defaultValue: 1,
       validate: {
         min: 1,
-        max: 3, // Máximo 3 copias de una carta
       },
     },
   },

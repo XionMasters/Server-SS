@@ -16,6 +16,11 @@
  *                      valores declarados. Acepta string o array de strings.
  *                      Ej: { "type": "event_card_code", "code": "ikki_phoenix" }
  *                      Ej: { "type": "event_card_code", "code": ["ikki_phoenix", "ikki_phoenix_v2", "ikki_leo"] }
+ *   attack_type_is   → valida payload.attack_type del evento (ej: BA | TA)
+ *   event_source_is_self → true si event.sourceCardId === sourceCard.instance_id
+ *   event_player_damage_min → valida payload.damage_to_player >= amount
+ *   event_target_health_pct_below → valida payload.target_health_pct < percent
+ *   event_death_reason_not → verdadero si payload.death_reason !== value
  *
  * Para añadir una nueva condición:
  *   ConditionRegistry.register('nombre', fn);
@@ -32,7 +37,7 @@ export interface StatusEffectRef {
   type: string;
   remaining_turns?: number | null;
   value?: number;
-  source?: string;
+  source?: string | { card_instance_id: string; player?: 1 | 2; type?: string };
 }
 
 /** Referencia ligera a una carta dentro del contexto de condición. */
@@ -49,6 +54,8 @@ export interface CardRef {
 export interface PlayerRef {
   hand: CardRef[];
   field_knights: CardRef[];
+  life?: number;
+  cosmos?: number;
 }
 
 /** Contexto con la información mínima para evaluar condiciones.
@@ -115,6 +122,38 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
     if (!eventCode) return false;
     const codes: string[] = Array.isArray(cond.code) ? cond.code : [cond.code];
     return codes.includes(eventCode);
+  },
+
+  /** Valida tipo de ataque expuesto por el evento (ej: ATTACK_CONNECTED). */
+  attack_type_is: (cond, ctx) => {
+    const attackType: string | undefined = (ctx.event.payload as any)?.attack_type;
+    return !!attackType && attackType === cond.value;
+  },
+
+  /** Verdadero si la carta que originó el evento es la misma que porta esta habilidad. */
+  event_source_is_self: (_cond, ctx) => {
+    if (!ctx.sourceCard.instance_id) return false;
+    return ctx.event.sourceCardId === ctx.sourceCard.instance_id;
+  },
+
+  /** Verdadero si el evento reporta daño al jugador >= amount. */
+  event_player_damage_min: (cond, ctx) => {
+    const directDamage: number = Number((ctx.event.payload as any)?.damage_to_player ?? 0);
+    return directDamage >= Number(cond.amount ?? 0);
+  },
+
+  /** Verdadero si el objetivo del evento quedó por debajo de X% de vida. */
+  event_target_health_pct_below: (cond, ctx) => {
+    const targetPct = Number((ctx.event.payload as any)?.target_health_pct);
+    const threshold = Number(cond.percent ?? cond.value ?? 0);
+    if (!Number.isFinite(targetPct) || !Number.isFinite(threshold)) return false;
+    return targetPct < threshold;
+  },
+
+  /** Excluye una causa de muerte del evento (ej: 'sacrifice'). */
+  event_death_reason_not: (cond, ctx) => {
+    const reason: string | undefined = (ctx.event.payload as any)?.death_reason;
+    return reason !== cond.value;
   },
 };
 

@@ -46,6 +46,15 @@ export const connectDatabase = async (): Promise<void> => {
           `);
           console.log('✅ Columna current_deck_back_id agregada');
         }
+
+        if (!columns['deck_cover_card_id']) {
+          console.log('🔧 Agregando columna deck_cover_card_id a tabla decks...');
+          await sequelize.query(`
+            ALTER TABLE decks
+            ADD COLUMN deck_cover_card_id UUID REFERENCES cards(id) ON DELETE SET NULL
+          `);
+          console.log('✅ Columna deck_cover_card_id agregada');
+        }
       } catch (colError: any) {
         if (!colError.message.includes('already exists')) {
           console.warn('⚠️  No se pudo agregar columna:', colError.message);

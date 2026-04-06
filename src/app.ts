@@ -18,7 +18,6 @@ import matchesRoutes from './routes/matches.routes';
 import adminRoutes from './routes/admin.routes';
 import profileRoutes from './routes/profile.routes';
 import chatRoutes from './routes/chat.routes';
-import combatRoutes from './routes/combat.routes';
 
 dotenv.config();
 
@@ -44,7 +43,6 @@ app.use('/api/decks', decksRoutes);
 app.use('/api/matches', matchesRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/combat', combatRoutes);
 app.use('/admin', (_req, res, next) => {
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws: wss:;");
   next();

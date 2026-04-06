@@ -121,6 +121,9 @@ UserDeckBackUnlock.belongsTo(DeckBack, { foreignKey: 'deck_back_id', as: 'deck_b
 Deck.belongsTo(DeckBack, { foreignKey: 'current_deck_back_id', as: 'deck_back' });
 DeckBack.hasMany(Deck, { foreignKey: 'current_deck_back_id', as: 'decks' });
 
+// Configurar portada del deck (carta como thumbnail)
+Deck.belongsTo(Card, { foreignKey: 'deck_cover_card_id', as: 'cover_card' });
+
 // Configurar relaciones de UserProfile
 User.hasOne(UserProfile, { foreignKey: 'user_id', as: 'profile' });
 UserProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });

@@ -409,6 +409,13 @@ export const updateDeckBack = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    // Verificar que el dorso existe y está activo
+    const deckBack = await DeckBack.findOne({ where: { id: deck_back_id, is_active: true } });
+    if (!deckBack) {
+      res.status(404).json({ error: 'Dorso no encontrado o inactivo' });
+      return;
+    }
+
     // Verificar que el usuario tiene ese dorso desbloqueado
     const unlock = await UserDeckBackUnlock.findOne({
       where: { user_id: user.id, deck_back_id }

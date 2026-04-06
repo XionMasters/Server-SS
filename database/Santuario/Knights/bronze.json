@@ -29,12 +29,21 @@
           "type": "pasiva",
           "description": "Los BA realizados por el portador causan 1 DIP de Daño Directo adicional al jugador rival.",
           "effects": {
-            "trigger": "CARD_PLAYED",
+            "trigger": "ATTACK_CONNECTED",
+            "conditions": [
+              {
+                "type": "attack_type_is",
+                "value": "BA"
+              },
+              {
+                "type": "event_source_is_self"
+              }
+            ],
             "actions": [
               {
-                "type": "apply_status",
-                "status": "unicorn_horn",
-                "target": "self"
+                "type": "apply_player_damage",
+                "target": "opponent",
+                "amount": 1
               }
             ]
           }
@@ -103,12 +112,25 @@
           "type": "pasiva",
           "description": "Cuando los BA del portador causan DIP directo al jugador rival, causan 1 DIP extra adicional.",
           "effects": {
-            "trigger": "CARD_PLAYED",
+            "trigger": "ATTACK_CONNECTED",
+            "conditions": [
+              {
+                "type": "attack_type_is",
+                "value": "BA"
+              },
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "event_player_damage_min",
+                "amount": 1
+              }
+            ],
             "actions": [
               {
-                "type": "apply_status",
-                "status": "herd_effect",
-                "target": "self"
+                "type": "apply_player_damage",
+                "target": "opponent",
+                "amount": 1
               }
             ]
           }

@@ -270,11 +270,12 @@
                         <div class="catalog-items">
                             <div class="catalog-item"><code>ACTIVE</code><span>Hab. activada manualmente</span></div>
                             <div class="catalog-item"><code>CARD_PLAYED</code><span>Carta jugada al campo</span></div>
+                            <div class="catalog-item"><code>ATTACK_CONNECTED</code><span>Ataque conectado (no evadido). Distinto de DAMAGE_DEALT</span></div>
                             <div class="catalog-item"><code>TURN_START</code><span>Inicio del turno</span></div>
                             <div class="catalog-item"><code>TURN_END</code><span>Fin del turno</span></div>
                             <div class="catalog-item"><code>KNIGHT_DIED</code><span>Caballero eliminado (cualquiera)</span></div>
                             <div class="catalog-item"><code>ALLY_DIED</code><span>Aliado del portador eliminado</span></div>
-                            <div class="catalog-item"><code>DAMAGE_DEALT</code><span>Daño aplicado</span></div>
+                            <div class="catalog-item"><code>DAMAGE_DEALT</code><span>Daño aplicado a una carta</span></div>
                             <div class="catalog-item"><code>DAMAGE_LETHAL</code><span>Daño letal (HP → 0)</span></div>
                             <div class="catalog-item"><code>HEAL_RECEIVED</code><span>Curación recibida</span></div>
                             <div class="catalog-item"><code>ALLY_DREW_CARD</code><span>Jugador activo roba carta</span></div>
@@ -288,12 +289,13 @@
                         <div class="catalog-items">
                             <div class="catalog-item"><code>apply_status</code><span>Aplica status a targets</span></div>
                             <div class="catalog-item"><code>heal</code><span>Cura HP a targets</span></div>
-                            <div class="catalog-item"><code>damage</code><span>Aplica daño a targets</span></div>
+                            <div class="catalog-item"><code>apply_damage</code><span>Aplica daño a cartas. Parámetros: target, amount</span></div>
+                            <div class="catalog-item"><code>apply_player_damage</code><span>Daño directo a jugador. Parámetros: target ('self'|'opponent'), amount</span></div>
+                            <div class="catalog-item"><code>apply_cosmos_damage</code><span>Daño directo al cosmos del jugador. Parámetros: target ('self'|'opponent'), amount</span></div>
+                            <div class="catalog-item"><code>kill</code><span>Elimina caballero objetivo (yomotsu). Parámetros: target (default: 'target')</span></div>
                             <div class="catalog-item"><code>draw_card</code><span>Roba carta del mazo</span></div>
-                            <div class="catalog-item"><code>kill</code><span>Elimina un caballero</span></div>
-                            <div class="catalog-item"><code>summon</code><span>Convoca un caballero</span></div>
+                            <div class="catalog-item"><code>summon_from_zone</code><span>Convoca un caballero. Parámetros: target('self'|'target'|'selected'), zone?('yomotsu'|'deck'|'cositos'), position?</span></div>
                             <div class="catalog-item"><code>coin_flip_then</code><span>Moneda → on_heads[] / on_tails[]</span></div>
-                            <div class="catalog-item"><code>modify_attack</code><span>Modifica CE del target</span></div>
                             <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone, filter{type?,top_n?}, destination, on_select[]</span></div>
                             <div class="catalog-item"><code>send_to_zone</code><span>Mueve carta a zona. Parámetros: target (normalmente 'selected'), destination: 'hand'|'field'|'cositos'</span></div>
                             <div class="catalog-item"><code>shuffle_deck</code><span>Mezcla el mazo. Parámetros: player: 'self'|'opponent'</span></div>
@@ -309,13 +311,12 @@
                             <div class="catalog-item"><code>ar_boost</code><span>AR +value (acumulable)</span></div>
                             <div class="catalog-item"><code>hp_boost</code><span>HP máx +value</span></div>
                             <div class="catalog-item"><code>ignore_armor</code><span>Próximo BA ignora AR</span></div>
-                            <div class="catalog-item"><code>unicorn_horn</code><span>Pasiva: BA →+1 DIP al rival</span></div>
-                            <div class="catalog-item"><code>herd_effect</code><span>Pasiva: +1 DIP extra si ya daña</span></div>
+                            <div class="catalog-item"><code>ce_double</code><span>Próximo BA duplica CE</span></div>
                             <div class="catalog-item"><code>burn</code><span>BRN: daño/turno con countdown</span></div>
                             <div class="catalog-item"><code>poison</code><span>Veneno: daño/turno permanente</span></div>
                             <div class="catalog-item"><code>burn_immune</code><span>Pasiva: inmune al tick de burn</span></div>
                             <div class="catalog-item"><code>poison_immune</code><span>Pasiva: inmune al tick de poison</span></div>
-                            <div class="catalog-item"><code>phoenix_rebirth</code><span>Ikki: regresa al morir aliado</span></div>
+                            <div class="catalog-item"><code>phoenix_rebirth_cooldown</code><span>Lock técnico: resurrección 1 vez por turno</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">
@@ -349,6 +350,20 @@
                             <div class="catalog-item"><code>hp_below</code><span>amount:N — HP portador ≤N</span></div>
                             <div class="catalog-item"><code>enemy_has_status</code><span>status:"name" — target tiene</span></div>
                             <div class="catalog-item"><code>event_card_code</code><span>code:"code" — código del evento</span></div>
+                            <div class="catalog-item"><code>attack_type_is</code><span>value:'BA'|'TA' — tipo de ataque en el evento</span></div>
+                            <div class="catalog-item"><code>event_source_is_self</code><span>Sin parámetros — event.sourceCardId == portador</span></div>
+                            <div class="catalog-item"><code>event_player_damage_min</code><span>amount:N — payload.damage_to_player ≥ N</span></div>
+                            <div class="catalog-item"><code>event_target_health_pct_below</code><span>percent:N — payload.target_health_pct &lt; N</span></div>
+                            <div class="catalog-item"><code>event_death_reason_not</code><span>value:'sacrifice'|'damage'|'effect' — excluye causa de muerte</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>💰 Costs</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>cosmos</code><span>CP del caballero que activa (amount)</span></div>
+                            <div class="catalog-item"><code>player_cosmos</code><span>PCP del jugador que activa (amount)</span></div>
+                            <div class="catalog-item"><code>life</code><span>PLP del jugador que activa (amount)</span></div>
+                            <div class="catalog-item"><code>discard</code><span>Descartar desde mano propia</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">

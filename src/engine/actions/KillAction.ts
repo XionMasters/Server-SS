@@ -14,8 +14,8 @@
  *
  * Llamado desde:
  *   - DamageAction.applyDamage() cuando HP cae a 0.
- *   - KnightRulesEngine.sacrificeKnight() (futuro: directamente aquí).
- *   - Efectos de CardsManager que eliminan cartas sin pasar por combate.
+ *   - KnightManager.sacrificeKnight() vía killKnight(..., 'sacrifice').
+ *   - ActionRegistry.kill (habilidades declarativas que eliminan cartas).
  *
  * 100% puro: sin await, sin BD.
  */
@@ -32,6 +32,7 @@ export function killKnight(
   ctx: EngineContext,
   cardId: string,
   sourceCardId?: string,
+  deathReason: 'damage' | 'effect' | 'sacrifice' = 'effect',
 ): void {
   const { state } = ctx;
 
@@ -84,7 +85,12 @@ export function killKnight(
       sourceCardId,
       targetCardId: cardId,
       origin: 'system',
-      payload: { instanceId: cardId, owner: card.player_number, card_code: card.card_code },
+      payload: {
+        instanceId: cardId,
+        owner: card.player_number,
+        card_code: card.card_code,
+        death_reason: deathReason,
+      },
     }),
   );
 
@@ -96,7 +102,12 @@ export function killKnight(
       sourceCardId,
       targetCardId: cardId,
       origin: 'system',
-      payload: { instanceId: cardId, owner: card.player_number, card_code: card.card_code },
+      payload: {
+        instanceId: cardId,
+        owner: card.player_number,
+        card_code: card.card_code,
+        death_reason: deathReason,
+      },
     }),
   );
 }

@@ -9,11 +9,12 @@ interface DeckAttributes {
   description?: string;
   is_active: boolean;
   current_deck_back_id?: string | null;
+  deck_cover_card_id?: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
 
-interface DeckCreationAttributes extends Optional<DeckAttributes, 'id' | 'description' | 'is_active' | 'current_deck_back_id' | 'created_at' | 'updated_at'> {}
+interface DeckCreationAttributes extends Optional<DeckAttributes, 'id' | 'description' | 'is_active' | 'current_deck_back_id' | 'deck_cover_card_id' | 'created_at' | 'updated_at'> {}
 
 class Deck extends Model<DeckAttributes, DeckCreationAttributes> implements DeckAttributes {
   public id!: string;
@@ -22,6 +23,7 @@ class Deck extends Model<DeckAttributes, DeckCreationAttributes> implements Deck
   public description?: string;
   public is_active!: boolean;
   public current_deck_back_id?: string | null;
+  public deck_cover_card_id?: string | null;
   public readonly created_at!: Date;
   public readonly updated_at!: Date;
 }
@@ -59,6 +61,15 @@ Deck.init(
       allowNull: true,
       references: {
         model: 'deck_backs',
+        key: 'id',
+      },
+      onDelete: 'SET NULL',
+    },
+    deck_cover_card_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: {
+        model: 'cards',
         key: 'id',
       },
       onDelete: 'SET NULL',

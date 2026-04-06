@@ -10,13 +10,59 @@ import CardAbility from '../models/CardAbility';
 import UserCard from '../models/UserCard';
 import transactionService from '../services/transactionService';
 
+const DEFAULT_PACK_IMAGE_URL = '/assets/examples/seiya.png';
+
 // Configuración de probabilidades por rareza
 const RARITY_WEIGHTS = {
-  'comun': 60,     // 60%
-  'rara': 25,      // 25%
-  'epica': 12,     // 12%
-  'legendaria': 3  // 3%
+  'common': 60,     // 60%
+  'rare': 25,       // 25%
+  'epic': 12,       // 12%
+  'legendary': 3    // 3%
 };
+
+function normalizePackRarity(rarity?: string | null): string | null {
+  if (!rarity) {
+    return null;
+  }
+
+  const rarityMap: Record<string, string> = {
+    comun: 'common',
+    rara: 'rare',
+    epica: 'epic',
+    legendaria: 'legendary',
+  };
+
+  return rarityMap[rarity] || rarity;
+}
+
+function normalizePackImageUrl(imageUrl?: string | null): string {
+  if (!imageUrl || imageUrl.trim() === '') {
+    return DEFAULT_PACK_IMAGE_URL;
+  }
+
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://') || imageUrl.startsWith('/assets/')) {
+    return imageUrl;
+  }
+
+  return `/assets/${imageUrl.replace(/^\/+/, '')}`;
+}
+
+function serializePack(pack: any) {
+  const data = typeof pack?.toJSON === 'function' ? pack.toJSON() : pack;
+  return {
+    ...data,
+    image_url: normalizePackImageUrl(data?.image_url),
+    guaranteed_rarity: normalizePackRarity(data?.guaranteed_rarity),
+  };
+}
+
+function serializeUserPack(userPack: any) {
+  const data = typeof userPack?.toJSON === 'function' ? userPack.toJSON() : userPack;
+  return {
+    ...data,
+    Pack: data?.Pack ? serializePack(data.Pack) : data?.Pack,
+  };
+}
 
 // Obtener todos los packs disponibles
 export const getAvailablePacks = async (req: Request, res: Response): Promise<void> => {
@@ -28,7 +74,7 @@ export const getAvailablePacks = async (req: Request, res: Response): Promise<vo
 
     res.json({
       success: true,
-      data: packs
+      data: packs.map((pack) => serializePack(pack))
     });
 
   } catch (error) {
@@ -56,7 +102,7 @@ export const getUserPacks = async (req: Request, res: Response): Promise<void> =
 
     res.json({
       success: true,
-      data: userPacks,
+      data: userPacks.map((userPack) => serializeUserPack(userPack)),
       total: userPacks.length
     });
 
@@ -167,9 +213,11 @@ export const buyPack = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: `Compraste ${quantity} ${pack.name}(s) por ${totalCost} monedas`,
       data: {
+        pack: serializePack(pack),
         pack_name: pack.name,
         quantity_bought: quantity,
         total_cost: totalCost,
+        currency: user.currency,
         remaining_currency: user.currency,
         user_pack_id: userPack.id  // ✅ Devolver el ID del UserPack
       }
@@ -187,7 +235,7 @@ export const buyPack = async (req: Request, res: Response): Promise<void> => {
 
 // Función para generar carta aleatoria basada en probabilidades
 const generateRandomCard = async (guaranteedRarity?: string): Promise<any> => {
-  let targetRarity = guaranteedRarity;
+  let targetRarity = normalizePackRarity(guaranteedRarity);
   
   if (!targetRarity) {
     // Generar rareza aleatoria basada en pesos
@@ -223,7 +271,7 @@ const generateRandomCard = async (guaranteedRarity?: string): Promise<any> => {
   if (cards.length === 0) {
     // Fallback a común si no hay cartas de la rareza
     const fallbackCards = await Card.findAll({
-      where: { rarity: 'comun' },
+      where: { rarity: 'common' },
       include: [
         {
           model: CardKnight,
@@ -288,7 +336,7 @@ export const openPack = async (req: Request, res: Response): Promise<void> => {
 
     const pack = (userPack as any).Pack;
     const cardsToGenerate = pack.cards_per_pack;
-    const guaranteedRarity = pack.guaranteed_rarity;
+    const guaranteedRarity = normalizePackRarity(pack.guaranteed_rarity);
     
     // Generar cartas
     const generatedCards = [];
@@ -361,6 +409,8 @@ export const openPack = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: `¡Abriste un ${pack.name}!`,
       data: {
+        user_pack_id: user_pack_id || userPack.id,
+        pack: serializePack(pack),
         pack_name: pack.name,
         cards: generatedCards.map(card => {
           const cardData: any = {

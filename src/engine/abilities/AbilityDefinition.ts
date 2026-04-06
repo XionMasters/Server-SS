@@ -171,6 +171,34 @@ export interface ShuffleDeckAction {
   player: 'self' | 'opponent';
 }
 
+/** Aplica daño directo al PLP del jugador objetivo. */
+export interface ApplyPlayerDamageAction {
+  type: 'apply_player_damage';
+  target: 'self' | 'opponent';
+  amount: number;
+}
+
+/** Aplica daño directo al PCP del jugador objetivo. */
+export interface ApplyCosmosDamageAction {
+  type: 'apply_cosmos_damage';
+  target: 'self' | 'opponent';
+  amount: number;
+}
+
+/** Convoca un caballero desde yomotsu/deck/cositos al campo. */
+export interface SummonFromZoneAction {
+  type: 'summon_from_zone';
+  zone?: 'yomotsu' | 'deck' | 'cositos';
+  position?: number;
+  target?: TargetType;
+}
+
+/** Elimina (envía a yomotsu) la carta objetivo. */
+export interface KillAction {
+  type: 'kill';
+  target?: TargetType;
+}
+
 /**
  * Union tipada de todas las acciones del motor.
  * Para agregar una nueva acción: añadir su interface arriba e incluirla aquí.
@@ -180,7 +208,11 @@ export type ActionDefinition =
   | CoinFlipAction
   | RequestSelectionAction
   | SendToZoneAction
-  | ShuffleDeckAction;
+  | ShuffleDeckAction
+  | ApplyPlayerDamageAction
+  | ApplyCosmosDamageAction
+  | SummonFromZoneAction
+  | KillAction;
 
 // ─── Condition & Cost ─────────────────────────────────────────────────────────
 
@@ -190,9 +222,10 @@ export interface ConditionDefinition {
 }
 
 export interface CostDefinition {
-  type: 'cosmos' | 'discard' | 'life';
+  type: 'cosmos' | 'discard' | 'life' | 'player_cosmos';
   /** Para 'cosmos': cantidad de CP requerida en la carta que activa. */
   amount?: number;
+  /** Para 'life' y 'player_cosmos': cantidad a pagar por el jugador que activa. */
   /** Para 'discard': zona de origen. 'self_hand' = mano del jugador. */
   target?: 'self_hand';
 }
@@ -242,7 +275,9 @@ export function requiresClientTarget(def: AbilityDefinition): boolean {
 
 function _actionsNeedTarget(actions: ActionDefinition[]): boolean {
   for (const action of actions) {
-    if ('target' in action && action.target && CLIENT_TARGET_TYPES.has(action.target)) return true;
+    if ('target' in action && typeof action.target === 'string') {
+      if (CLIENT_TARGET_TYPES.has(action.target as TargetType)) return true;
+    }
     // Recursivo: buscar en ramas de coin_flip_then
     const branches = [
       ...(('heads'    in action && Array.isArray(action.heads))    ? action.heads    : []),

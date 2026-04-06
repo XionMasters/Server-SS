@@ -69,7 +69,7 @@ CREATE TYPE card_transaction_reason_enum AS ENUM (
     'ADMIN_REMOVAL', 'TOURNAMENT_ANTE'
 );
 
-CREATE TYPE pack_guaranteed_rarity_enum AS ENUM ('comun', 'rara', 'epica', 'legendaria');
+CREATE TYPE pack_guaranteed_rarity_enum AS ENUM ('common', 'rare', 'epic', 'legendary');
 
 CREATE TYPE profile_avatar_unlock_type_enum AS ENUM (
     'default', 'card_unlock', 'achievement', 'special'
@@ -250,6 +250,7 @@ CREATE TABLE decks (
     description          TEXT,
     is_active            BOOLEAN      NOT NULL DEFAULT FALSE,
     current_deck_back_id UUID         REFERENCES deck_backs(id) ON DELETE SET NULL,
+    deck_cover_card_id   UUID         REFERENCES cards(id) ON DELETE SET NULL,
     created_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at           TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );

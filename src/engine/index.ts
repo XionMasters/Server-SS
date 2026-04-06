@@ -6,7 +6,22 @@
  */
 
 export { GameState, Player, CardInGameState, GameScenario, createEmptyGameState, validateGameState, resolveWinCondition } from './GameState';
-export { StatusEffectType, StatusEffect, MODE_EFFECT_TYPES, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects, tickStatusEffects, setModeEffect } from './StatusEffects';
+export {
+	StatusEffectType,
+	StatusEffect,
+	StatusEffectSource,
+	deriveModeFromEffects,
+	computeCeBonus,
+	computeArBonus,
+	computeHpBonus,
+	parseStatusEffects,
+	tickStatusEffects,
+	setModeEffect,
+	isModeEffectType,
+	hasEffect,
+	removeEffect,
+	addOrRefreshEffect,
+} from './StatusEffects';
 export { TurnRulesEngine } from './TurnRulesEngine';
 export { CardRulesEngine } from './CardRulesEngine';
 export { AttackRulesEngine } from './AttackRulesEngine';
