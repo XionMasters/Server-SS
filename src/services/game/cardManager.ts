@@ -1,13 +1,13 @@
 ﻿/**
  * CardManager.ts
  *
- * OrquestaciÃ³n transaccional para operaciones de cartas.
+ * Orquestacion transaccional para operaciones de cartas.
  *
- * PatrÃ³n unificado (runAction):
- *   idempotencia â†’ reload+lock â†’ mapear â†’ executor â†’ persist â†’ register
+ * Patron unificado (runAction):
+ *   idempotencia -> reload+lock -> mapear -> executor -> persist -> register
  *
  * Toda regla de juego vive en CardRulesEngine.
- * Toda traducciÃ³n de zona vive en ZoneMapper.
+ * Toda traduccion de zona vive en ZoneMapper.
  * Las definiciones de habilidades se cachean en cardDefCache.
  */
 
@@ -27,8 +27,8 @@ import { ZoneMapper } from '../../utils/ZoneMapper';
 import { createEngineContext } from '../../engine/EngineContext';
 import { GameEventType, createEvent } from '../../engine/events/GameEvents';
 
-// â”€â”€ Card definition cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// card_id â†’ { bdStats, abilities }  (estÃ¡tico durante el proceso)
+// Card definition cache
+// card_id -> { bdStats, abilities } (estatico durante el proceso)
 interface CardDef {
   bdStats: CardBdStats;
   abilities: any[];
@@ -46,7 +46,7 @@ async function getCardDef(cardId: string, tx: any): Promise<CardDef> {
     }),
     CardAbility.findAll({ where: { card_id: cardId }, transaction: tx }),
   ]);
-  if (!card) throw new Error(`DefiniciÃ³n de carta no encontrada: ${cardId}`);
+  if (!card) throw new Error(`Definicion de carta no encontrada: ${cardId}`);
 
   const knight: any = (card as any).card_knight;
   const bdStats: CardBdStats = {
@@ -65,9 +65,9 @@ async function getCardDef(cardId: string, tx: any): Promise<CardDef> {
 }
 
 export class CardManager {
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ==========================================================================
   // GENERIC TRANSACTION RUNNER  (same pattern as KnightManager)
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ==========================================================================
 
   private static async runAction<T extends { newState: GameState }>(
     match: any,
@@ -121,8 +121,8 @@ export class CardManager {
    * Juega una carta desde mano al campo.
    *
    * Flujo:
-   *  1. Carga definiciÃ³n de carta (cache)
-   *  2. Valida con CardRulesEngine (cosmos, zona, posiciÃ³n â€” dentro del lock)
+  *  1. Carga definicion de carta (cache)
+  *  2. Valida con CardRulesEngine (cosmos, zona, posicion, dentro del lock)
    *  3. Aplica cosmos delta en GameState
    *  4. Mueve CardInPlay a la zona destino en BD
    *  5. Inicializa stats de caballero si aplica
@@ -154,25 +154,55 @@ export class CardManager {
 
         const dbZone = ZoneMapper.toDatabase(targetZone);
 
-        // â”€â”€ Cargar definiciÃ³n (cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Cargar definicion (cache)
         const { bdStats, abilities } = await getCardDef((cardInPlay as any).card_id, tx);
 
-        // â”€â”€ Leer conteo de zona con lock (evita race condition) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // ── Leer conteo de zona con lock (evita race condition) ────────────
+        // Para field_scenario: no filtramos por player_number (el escenario es compartido).
+        const scenarioZone = dbZone === 'field_scenario';
+        const zoneQuery = scenarioZone
+          ? { match_id: match.id, zone: dbZone }
+          : { match_id: match.id, player_number: playerNumber, zone: dbZone };
+
         const zoneCards = await CardInPlay.findAll({
-          where: { match_id: match.id, player_number: playerNumber, zone: dbZone },
+          where: zoneQuery,
           lock: tx.LOCK.UPDATE,
           transaction: tx,
-          attributes: ['id', 'position'],
+          attributes: ['id', 'card_id', 'position'],
         });
-        const zoneCurrentCount = zoneCards.length;
-        const positionOccupied = zoneCards.some((c: any) => c.position === position);
+
+        // ── Reemplazo de escenario ──────────────────────────────────────────
+        // Si ya existe un escenario, verificar si puede ser reemplazado.
+        // Si puede, moverlo al yomotsu antes de validar la nueva jugada.
+        let effectiveCount = zoneCards.length;
+        let effectivePositionOccupied = zoneCards.some((c: any) => c.position === position);
+
+        if (scenarioZone && zoneCards.length > 0) {
+          const existing = zoneCards[0] as any;
+          const existingDef = await getCardDef(existing.card_id, tx);
+          const cannotReplace = existingDef.abilities.some(
+            (a: any) =>
+              a.effects?.cannot_be_replaced === true ||
+              a.effects?.indestructible === true,
+          );
+          if (cannotReplace) {
+            throw new Error('El escenario activo no puede ser reemplazado');
+          }
+          // Mover escenario anterior al yomotsu
+          await existing.update({ zone: 'yomotsu' }, { transaction: tx });
+          effectiveCount = 0;
+          effectivePositionOccupied = false;
+        }
+
+        const zoneCurrentCount = effectiveCount;
+        const positionOccupied = effectivePositionOccupied;
 
         // â”€â”€ Validar (motor puro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const v = CardRulesEngine.validatePlayCard(
           state, playerNumber, cardId, dbZone, position,
           bdStats.cost, zoneCurrentCount, positionOccupied,
         );
-        if (!v.valid) throw new Error(v.error ?? 'ValidaciÃ³n fallida');
+        if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
 
         // â”€â”€ Calcular nuevo estado de cosmos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const { newState } = CardRulesEngine.executePlayCard(

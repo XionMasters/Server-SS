@@ -23,7 +23,13 @@ import CardInPlay from '../../models/CardInPlay';
 import { Op } from 'sequelize';
 
 /** Zonas de campo activas (las que se comparan contra el GameState) */
-const ACTIVE_FIELD_ZONES = ['field_knight', 'field_support', 'field_helper'] as const;
+const ACTIVE_FIELD_ZONES = [
+  'field_knight',
+  'field_support',
+  'field_helper',
+  'field_occasion',
+  'field_scenario',
+] as const;
 
 export class MatchRepository {
   /**
@@ -59,8 +65,13 @@ export class MatchRepository {
       ];
       if (newState.player1.field_helper) allCards.push(newState.player1.field_helper);
       if (newState.player2.field_helper) allCards.push(newState.player2.field_helper);
+      if (newState.player1.field_occasion) allCards.push(newState.player1.field_occasion);
+      if (newState.player2.field_occasion) allCards.push(newState.player2.field_occasion);
 
-      for (const card of allCards) {
+      // Evita updates duplicados cuando una carta aparece referenciada por más de una vista.
+      const uniqueCards = Array.from(new Map(allCards.map(c => [c.instance_id, c])).values());
+
+      for (const card of uniqueCards) {
         await CardInPlay.update(
           {
             has_attacked_this_turn: card.attacked_this_turn,
@@ -84,9 +95,10 @@ export class MatchRepository {
 
       // 5️⃣ Mover al yomotsu las cartas que ya no están en ningún campo del GameState
       //    (murieron en combate esta acción)
-      const liveInstanceIds = new Set(
-        allCards.map(c => c.instance_id)
-      );
+      const liveInstanceIds = new Set(uniqueCards.map(c => c.instance_id));
+      if (newState.scenario?.instance_id) {
+        liveInstanceIds.add(newState.scenario.instance_id);
+      }
 
       const moved = await CardInPlay.update(
         { zone: 'yomotsu' },

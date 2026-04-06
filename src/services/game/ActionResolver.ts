@@ -318,7 +318,7 @@ export class ActionResolver {
       }
 
       case 'technique': {
-        const occupied = this._occupiedPositions(cardsInPlay, playerNumber, 'field_technique');
+        const occupied = this._occupiedSupportPositions(cardsInPlay, playerNumber);
         return [0, 1, 2, 3, 4].filter(i => !occupied.has(i));
       }
 
@@ -342,13 +342,14 @@ export class ActionResolver {
         // Objetos/equipamiento: comparten los 5 slots de la fila de técnicas.
         // Son permanentes; se asocian al caballero en el mismo slot (misma posición).
         // Si el caballero muere, el objeto pasa al yomotsu (TODO: implementar en KnightManager).
-        const occupied = this._occupiedPositions(cardsInPlay, playerNumber, 'field_technique');
+        const occupied = this._occupiedSupportPositions(cardsInPlay, playerNumber);
         return [0, 1, 2, 3, 4].filter(i => !occupied.has(i));
       }
 
       case 'stage': {
-        const hasScenario = cardsInPlay.some(c => c.zone === 'field_scenario');
-        return hasScenario ? [] : [0];
+        // El escenario siempre puede jugarse: si hay uno activo, se reemplaza.
+        // La restricción "no puede ser reemplazado" se valida en el servidor (CardManager).
+        return [0];
       }
 
       default:
@@ -366,6 +367,26 @@ export class ActionResolver {
     return new Set(
       cardsInPlay
         .filter(c => c.player_number === playerNumber && c.zone === zone)
+        .map(c => c.position)
+    );
+  }
+
+  /**
+   * Compatibilidad de zonas de soporte:
+   * - Cliente/serializado: field_technique
+   * - BD interna/admin: field_support
+   */
+  private static _occupiedSupportPositions(
+    cardsInPlay: any[],
+    playerNumber: number
+  ): Set<number> {
+    return new Set(
+      cardsInPlay
+        .filter(
+          c =>
+            c.player_number === playerNumber
+            && (c.zone === 'field_technique' || c.zone === 'field_support')
+        )
         .map(c => c.position)
     );
   }

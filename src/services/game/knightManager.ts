@@ -1,17 +1,17 @@
 ﻿/**
  * KnightManager.ts
  *
- * OrquestaciÃ³n transaccional para las acciones de caballero.
- * Mismo patrÃ³n que TurnManager / AttackManager.
+ * Orquestacion transaccional para las acciones de caballero.
+ * Mismo patron que TurnManager / AttackManager.
  *
  * Acciones:
- * - chargeKnightCosmos  â†’ +cosmos_per_charge CP al jugador (puro GameState)
- * - sacrificeKnight     â†’ -1 vida + mover carta a yomotsu
- * - moveKnight          â†’ mover carta a nueva posiciÃ³n (solo BD, sin GameState)
- * - useAbility          â†’ ejecuta habilidad activa de caballero
+ * - chargeKnightCosmos  -> +cosmos_per_charge CP al jugador (puro GameState)
+ * - sacrificeKnight     -> -1 vida + mover carta a yomotsu
+ * - moveKnight          -> mover carta a nueva posicion (solo BD, sin GameState)
+ * - useAbility          -> ejecuta habilidad activa de caballero
  *
- * PatrÃ³n transaccional unificado (runAction):
- *   idempotencia â†’ reload+lock â†’ mapear â†’ executor â†’ persist â†’ register
+ * Patron transaccional unificado (runAction):
+ *   idempotencia -> reload+lock -> mapear -> executor -> persist -> register
  */
 
 import { sequelize } from '../../config/database';
@@ -27,8 +27,8 @@ import { parseAbilityDef } from '../../engine/abilities/AbilityDefinition';
 import { createEngineContext } from '../../engine/EngineContext';
 import { killKnight } from '../../engine/actions/KillAction';
 
-// â”€â”€ Ability cache â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Las definiciones de habilidades son estÃ¡ticas durante la vida del proceso.
+// Ability cache
+// Las definiciones de habilidades son estaticas durante la vida del proceso.
 // Cacheamos por card_id para evitar N+1 queries a card_abilities.
 // El cache se descarta en reinicio (suficiente para un servidor de juego).
 const abilityCache = new Map<string, any[]>();
@@ -41,21 +41,21 @@ async function getAbilities(cardId: string, tx: any): Promise<any[]> {
 }
 
 export class KnightManager {
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ==========================================================================
   // GENERIC TRANSACTION RUNNER
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ==========================================================================
 
   /**
-   * PatrÃ³n de transacciÃ³n unificado que elimina ~200 lÃ­neas de boilerplate.
+  * Patron de transaccion unificado que elimina ~200 lineas de boilerplate.
    *
    * Responsabilidades del helper:
    *   1. Idempotencia â€” devuelve resultado previo si actionId ya fue procesado
-   *   2. TransacciÃ³n con lock de fila en el match
+  *   2. Transaccion con lock de fila en el match
    *   3. Mapeo match â†’ GameState puro
    *   4. Persiste newState y registra el actionId
    *   5. Captura errores y devuelve { success: false }
    *
-   * El executor recibe (state, tx) y lanza Error para abortar la transacciÃ³n.
+  * El executor recibe (state, tx) y lanza Error para abortar la transaccion.
    */
   private static async runAction<T extends { newState: GameState }>(
     match: any,
@@ -65,14 +65,14 @@ export class KnightManager {
     executor: (state: GameState, tx: any) => Promise<T>,
   ): Promise<any> {
     try {
-      // 0ï¸âƒ£ IDEMPOTENCIA
+      // 0) IDEMPOTENCIA
       const cached = await ProcessedActionsRegistry.find(actionId);
       if (cached) {
         console.log(`[KnightManager] ${actionName} ${actionId} ya procesada (retry)`);
         return { success: true, newState: cached.cached_result, isRetry: true };
       }
 
-      // 1ï¸âƒ£ TRANSACCIÃ“N CON LOCK
+      // 1) TRANSACCION CON LOCK
       const result = await sequelize.transaction(async (tx) => {
         await match.reload({ lock: tx.LOCK.UPDATE, transaction: tx });
         // Cargar cartas en juego con lock para que MatchStateMapper pueble
@@ -125,7 +125,7 @@ export class KnightManager {
       match, playerNumber, actionId, 'charge_cosmos',
       async (state) => {
         const v = KnightRulesEngine.validateChargeKnightCosmos(state, playerNumber);
-        if (!v.valid) throw new Error(v.error ?? 'ValidaciÃ³n fallida');
+        if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
         const execution = KnightRulesEngine.chargeKnightCosmos(state, playerNumber);
         const ctx = createEngineContext(execution.newState);
         const player = playerNumber === 1 ? ctx.state.player1 : ctx.state.player2;
@@ -163,7 +163,7 @@ export class KnightManager {
       match, playerNumber, actionId, 'sacrifice_knight',
       async (state, tx) => {
         const v = KnightRulesEngine.validateSacrificeKnight(state, playerNumber);
-        if (!v.valid) throw new Error(v.error ?? 'ValidaciÃ³n fallida');
+        if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
 
         const card = await CardInPlay.findOne({
           where: { id: cardInPlayId, match_id: match.id, player_number: playerNumber, zone: 'field_knight' },
@@ -188,8 +188,8 @@ export class KnightManager {
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   /**
-   * Mover Caballero: cambia la posiciÃ³n de un caballero en el campo (0â€“4).
-   * No hay cambio en GameState puro (posiciones no se trackean ahÃ­).
+  * Mover Caballero: cambia la posicion de un caballero en el campo (0-4).
+  * Debe reflejarse en GameState para que applyState no revierta la posicion.
    */
   static async moveKnight(
     match: any,
@@ -209,9 +209,9 @@ export class KnightManager {
       match, playerNumber, actionId, 'move_knight',
       async (state, tx) => {
         const v = KnightRulesEngine.validateTurn(state, playerNumber);
-        if (!v.valid) throw new Error(v.error ?? 'ValidaciÃ³n fallida');
+        if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
         if (targetPosition < 0 || targetPosition > 4)
-          throw new Error('PosiciÃ³n de destino invÃ¡lida (0â€“4)');
+          throw new Error('Posicion de destino invalida (0-4)');
 
         const card = await CardInPlay.findOne({
           where: { id: cardInPlayId, match_id: match.id, player_number: playerNumber, zone: 'field_knight' },
@@ -223,12 +223,17 @@ export class KnightManager {
           where: { match_id: match.id, player_number: playerNumber, zone: 'field_knight', position: targetPosition },
           transaction: tx,
         });
-        if (occupied) throw new Error('La posiciÃ³n destino ya estÃ¡ ocupada');
+        if (occupied && occupied.id !== cardInPlayId) throw new Error('La posicion destino ya esta ocupada');
 
         const oldPosition = card.position as number;
-        await card.update({ position: targetPosition }, { transaction: tx });
 
-        // moveKnight no modifica GameState puro; devuelve el estado actual sin cambios
+        const player = playerNumber === 1 ? state.player1 : state.player2;
+        const stateCard = player.field_knights.find((k: any) => k.instance_id === cardInPlayId);
+        if (!stateCard) throw new Error('Carta de caballero no encontrada en GameState');
+
+        stateCard.position = targetPosition;
+        state.updated_at = Date.now();
+
         return { newState: state, oldPosition, newPosition: targetPosition };
       },
     );
@@ -274,7 +279,7 @@ export class KnightManager {
         const casterRecord = cardMap.get(cardInPlayId);
         if (!casterRecord) throw new Error('Carta lanzadora no encontrada en la partida');
 
-        // â”€â”€ Cargar definiciÃ³n de habilidad (con cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Cargar definicion de habilidad (con cache)
         const abilityRecords = await getAbilities(casterRecord.card_id, tx);
 
         // Preferir ability_key si estÃ¡ disponible; fallback a normalizaciÃ³n de nombre
@@ -286,7 +291,7 @@ export class KnightManager {
 
         const abilityDef = parseAbilityDef(abilityRecord.effects);
         if (!abilityDef)
-          throw new Error(`DefiniciÃ³n invÃ¡lida para la habilidad "${abilityName}"`);
+          throw new Error(`Definicion invalida para la habilidad "${abilityName}"`);
 
         // â”€â”€ Validar objetivo si se provee â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if (targetId) {
@@ -307,7 +312,7 @@ export class KnightManager {
         const validation = KnightRulesEngine.validateUseAbility(
           state, playerNumber, cardInPlayId, abilityDef, gameEvent,
         );
-        if (!validation.valid) throw new Error(validation.error ?? 'ValidaciÃ³n fallida');
+        if (!validation.valid) throw new Error(validation.error ?? 'Validacion fallida');
 
         const execution = KnightRulesEngine.useAbility(
           state, playerNumber, cardInPlayId, abilityDef, gameEvent,

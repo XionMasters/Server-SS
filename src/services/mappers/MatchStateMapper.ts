@@ -121,6 +121,19 @@ export class MatchStateMapper {
         case 'field_knight': targetPlayer.field_knights.push(cardState); break;
         case 'field_support':targetPlayer.field_techniques.push(cardState); break;
         case 'field_helper': targetPlayer.field_helper = cardState; break;
+        case 'field_occasion':
+          targetPlayer.field_occasion = cardState;
+          break;
+        case 'field_scenario':
+          // Escenario global compartido. Si llegan multiples por inconsistencia,
+          // el ultimo procesado prevalece para mantener la partida jugable.
+          state.scenario = {
+            instance_id: cardState.instance_id,
+            card_id: cardState.card_id,
+            card_name: card.card?.name ?? '',
+            effect: '',
+          };
+          break;
         case 'yomotsu': {
           // TODOS los caballeros en el yomotsu van al graveyard[] (visible por ambos jugadores)
           if (!Array.isArray(targetPlayer.graveyard)) targetPlayer.graveyard = [];

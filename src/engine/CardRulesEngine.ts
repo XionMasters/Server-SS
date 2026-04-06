@@ -149,9 +149,18 @@ export class CardRulesEngine {
         if (!card.ar)             { card.ar = bdStats.defense ?? 0; card.base_ar = bdStats.defense ?? 0; }
         if (!card.current_cosmos) card.current_cosmos = bdStats.cosmos ?? 0;
       }
-      if      (dbZone === 'field_knight')  player.field_knights.push(card);
-      else if (dbZone === 'field_support') player.field_techniques.push(card);
-      else if (dbZone === 'field_helper')  player.field_helper = card;
+      if      (dbZone === 'field_knight')   player.field_knights.push(card);
+      else if (dbZone === 'field_support')  player.field_techniques.push(card);
+      else if (dbZone === 'field_helper')   player.field_helper = card;
+      else if (dbZone === 'field_occasion') player.field_occasion = card;
+      else if (dbZone === 'field_scenario') {
+        newState.scenario = {
+          instance_id: card.instance_id,
+          card_id: card.card_id,
+          card_name: '',
+          effect: '',
+        };
+      }
     }
 
     newState.updated_at = Date.now();
