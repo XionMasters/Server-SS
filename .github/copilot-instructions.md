@@ -31,6 +31,7 @@ src/
 │   ├── auth/
 │   ├── decks/
 │   ├── collection/
+│   ├── chat/
 │   ├── matches/
 │   ├── packs/
 │   └── profile/

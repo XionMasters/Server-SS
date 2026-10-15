@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 import {
   getProfile,
   getAvailableAvatars,

@@ -1,7 +1,7 @@
 // src/routes/decks.routes.ts
 import { Router } from 'express';
 import * as decksController from '../controllers/decks.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 
 const router = Router();
 

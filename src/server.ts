@@ -2,12 +2,15 @@
 import { createServer } from 'http';
 import app from './app';
 import { connectDatabase } from './config/database';
-import { initializeWebSocketServer } from './services/websocket/websocket.service';
+import { initializeWebSocketServer } from './infrastructure/websocket/server';
+import { validateSecurityConfiguration } from './infrastructure/auth/token.service';
 
 const PORT = process.env.PORT || 3000;
 
 const startServer = async () => {
   try {
+    validateSecurityConfiguration();
+
     // Conectar a la base de datos
     await connectDatabase();
     

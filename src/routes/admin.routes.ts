@@ -1,12 +1,16 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import path from 'path';
-import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { Match, CardInPlay, Card, User, CardKnight, UserCard, DeckCard } from '../models/associations';
 import CardAbility from '../models/CardAbility';
 import CardTranslation from '../models/CardTranslation';
 import { sequelize } from '../config/database';
 import { ActionResolver } from '../services/game/ActionResolver';
+import {
+  createAdminAccessToken,
+  getAdminPassword,
+  verifyAdminAccessToken,
+} from '../infrastructure/auth/token.service';
 
 const router = Router();
 
@@ -18,7 +22,7 @@ function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null;
   if (!token) { res.status(401).json({ error: 'Token requerido' }); return; }
   try {
-    const payload: any = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const payload = verifyAdminAccessToken(token);
     if (payload.role !== 'admin') { res.status(403).json({ error: 'Acceso denegado' }); return; }
     next();
   } catch {
@@ -42,18 +46,14 @@ router.get('/', (req: Request, res: Response) => {
 router.post('/auth', (req: Request, res: Response) => {
   try {
     const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminPassword = getAdminPassword();
 
     if (password !== adminPassword) {
       return res.status(401).json({ error: 'Contraseña incorrecta' });
     }
 
     // Generar token JWT para admin
-    const token = jwt.sign(
-      { role: 'admin' },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '24h' }
-    );
+    const token = createAdminAccessToken();
 
     res.json({ token, message: 'Autenticación exitosa' });
   } catch (error) {

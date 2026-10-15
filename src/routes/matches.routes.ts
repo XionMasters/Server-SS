@@ -1,7 +1,7 @@
 // src/routes/matches.routes.ts
 import { Router } from 'express';
 import * as matchesController from '../controllers/matches.controller';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 
 const router = Router();
 const DEPRECATION_SUNSET = 'Wed, 31 Dec 2026 23:59:59 GMT';

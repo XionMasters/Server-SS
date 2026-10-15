@@ -3,7 +3,7 @@
  * GameService - Orquestador central de lógica de juego
  * 
  * DEPRECADO: Este servicio contiene endpoints REST legados.
- * Use WebSocket handlers en websocket.service.ts en su lugar.
+ * Use WebSocket handlers en infrastructure/websocket/server.ts en su lugar.
  */
 
 import Match from '../models/Match';

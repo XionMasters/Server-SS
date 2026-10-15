@@ -1,16 +1,21 @@
-// src/middleware/auth.middleware.ts
+// src/interfaces/http/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
+import User from '../../../models/User';
+import { getActiveUserSession } from '../../../infrastructure/auth/session.service';
+import { verifyUserAccessToken } from '../../../infrastructure/auth/token.service';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_muy_segura';
-
-export interface AuthRequest extends Request {
-  user?: any;
+export interface AuthenticatedRequest extends Request {
+  user?: User;
+  auth?: {
+    userId: string;
+    username: string;
+    sessionId: string;
+  };
 }
 
 export const authenticateToken = async (
-  req: AuthRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -23,7 +28,16 @@ export const authenticateToken = async (
       return;
     }
 
-    const decoded: any = jwt.verify(token, JWT_SECRET);
+    const decoded = verifyUserAccessToken(token);
+    const session = await getActiveUserSession(decoded.userId, decoded.sessionId, token);
+
+    if (!session) {
+      res.status(401).json({
+        error: 'Sesión inválida o cerrada',
+        code: 'SESSION_INVALIDATED'
+      });
+      return;
+    }
     
     // Buscar usuario en la base de datos
     const user = await User.findByPk(decoded.userId, {
@@ -36,6 +50,11 @@ export const authenticateToken = async (
     }
 
     req.user = user;
+    req.auth = {
+      userId: decoded.userId,
+      username: decoded.username,
+      sessionId: decoded.sessionId,
+    };
     next();
   } catch (error: any) {
     console.error('Error en autenticación:', error);

@@ -76,7 +76,7 @@ src/
 En `src/services/` hay grupos que no deberían permanecer juntos
 indefinidamente:
 
-- `services/websocket/`: adaptadores y handlers de WebSocket.
+- `services/websocket/`: módulo migrado a `infrastructure/websocket/`.
 - `services/repositories/`: persistencia.
 - `services/game/`: managers y coordinación de juego.
 - `services/match/`: casos de uso de partidas.
@@ -96,6 +96,7 @@ src/
 │   ├── auth/
 │   ├── decks/
 │   ├── collection/
+│   ├── chat/
 │   ├── matches/
 │   ├── packs/
 │   └── profile/
@@ -177,13 +178,49 @@ Reglas:
 | `src/app.ts` | `src/interfaces/http/` | `[ ]` | La composición de Express queda separada del dominio |
 | `src/server.ts` | `src/server.ts` | `[ ]` | Solo compone infraestructura y arranca el proceso |
 
+### Migración piloto: chat HTTP
+
+- `[x]` Mover `chat.routes.ts` a `src/interfaces/http/routes/`.
+- `[x]` Mover `chat.controller.ts` a `src/interfaces/http/controllers/`.
+- `[x]` Actualizar el montaje de `/api/chat` sin cambiar rutas, métodos ni
+  middleware de autenticación.
+- `[x]` Extraer los casos de uso de consulta, eliminación y envío a
+  `src/app/chat/`.
+- `[x]` Mover el acceso a `ChatMessage` a un repositorio de infraestructura.
+- `[x]` Migrar el modelo Sequelize `ChatMessage` a
+  `src/infrastructure/database/models/`.
+- `[x]` Separar el handler WebSocket de chat y reutilizar el caso de uso de
+  envío.
+- `[x]` Reubicar `WebSocketPresenceService`, autenticación, router, panel
+  admin y servidor WebSocket en `src/infrastructure/websocket/`.
+- `[-]` Extraer los handlers de partidas aún contenidos en el servidor
+  WebSocket hacia casos de uso y handlers especializados.
+
+### Migración piloto: autenticación y sesiones
+
+- `[x]` Mover controller, routes y middleware HTTP de auth a
+  `src/interfaces/http/`.
+- `[x]` Centralizar firma y verificación de JWT para usuario y admin.
+- `[x]` Eliminar secretos JWT/admin por defecto y validar configuración al
+  iniciar el servidor.
+- `[x]` Añadir `sessionId` al JWT y validar la sesión activa en cada request
+  HTTP y conexión WebSocket.
+- `[x]` Eliminar tokens de los parámetros de URL del WebSocket.
+- `[x]` Mover `UserSession` a `infrastructure/database/models`.
+- `[ ]` Extraer los casos de uso de registro, login, logout, perfil y email a
+  `src/app/auth/`.
+- `[ ]` Añadir rate limiting a auth y economía.
+- `[ ]` Montar la verificación de email en las operaciones que lo requieran.
+
 ## Fases de trabajo
 
 ### Fase 0 — Recuperar contexto y establecer una línea base
 
 - `[ ]` Confirmar scripts de desarrollo, build y test.
-- `[ ]` Ejecutar `npm run build` y registrar errores existentes.
-- `[ ]` Ejecutar `npm test` y registrar el estado actual.
+- `[x]` Ejecutar `npm run build` y registrar el error existente en F12:
+  `columns` indefinido en `src/config/database.ts`.
+- `[!]` Ejecutar `npm test`: Jest no está disponible en `node_modules`; requiere
+  instalar las dependencias antes de validar la suite.
 - `[ ]` Identificar variables de entorno necesarias sin guardar secretos.
 - `[ ]` Identificar endpoints HTTP y eventos WebSocket públicos.
 - `[ ]` Confirmar qué tablas y scripts de base de datos son necesarios para
@@ -278,6 +315,11 @@ Una pieza se considera migrada únicamente cuando:
 | Fecha | Área | Cambio | Validación | Responsable |
 | --- | --- | --- | --- | --- |
 | 2026-10-13 | Documentación | Creación del roadmap y mapa inicial | Revisión de estructura actual | Equipo |
+| 2026-10-14 | Base de datos | Corregida referencia `columns` → `deckColumns` en migración defensiva | Pendiente de ejecutar build | Equipo |
+| 2026-10-15 | Chat HTTP | Routes y controller trasladados a `interfaces/http` sin cambiar el contrato público | `npm run build` correcto | Equipo |
+| 2026-10-15 | Chat vertical slice | Casos de uso, repositorio Sequelize, modelo y handler WebSocket migrados; se preservó la respuesta HTTP existente | `npm run build` correcto | Equipo |
+| 2026-10-15 | Infraestructura WebSocket | Servidor, presencia, autenticación, router y panel admin trasladados fuera de `services` | `npm run build` correcto | Equipo |
+| 2026-10-15 | Auth y sesiones | HTTP auth movido a interfaces; JWT, sesiones HTTP/WS, admin y CORS endurecidos | `npm run build` correcto; integración pendiente de dependencias/entorno | Equipo |
 
 ---
 

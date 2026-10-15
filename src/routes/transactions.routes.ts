@@ -1,6 +1,6 @@
 // src/routes/transactions.routes.ts
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 import transactionService from '../services/transactionService';
 
 const router = Router();

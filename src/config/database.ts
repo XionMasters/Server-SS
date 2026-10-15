@@ -97,7 +97,7 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Columna rank agregada.');
         }
 
-        if (!columns['deck_cover_card_id']) {
+        if (!deckColumns['deck_cover_card_id']) {
           console.log('🔧 Agregando columna deck_cover_card_id a tabla decks...');
           await sequelize.query(`
             ALTER TABLE decks

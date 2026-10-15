@@ -1,6 +1,6 @@
 // src/routes/userCards.routes.ts
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 import {
   getUserCards,
   getUserCardStats
