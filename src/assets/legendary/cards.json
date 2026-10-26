@@ -3,54 +3,2971 @@
   "cards": [
     {
       "names": {
-        "es": "Athena Saori",
-        "en": "Athena Saori",
-        "pt": "Atena Saori"
+        "es": "BY OrionEden",
+        "en": "BY OrionEden",
+        "pt": "BY OrionEden"
       },
       "image_url": "/assets/legendary/1.webp",
       "descriptions": {
-        "es": "Diosa de la Sabiduría y la Guerra Justa. Protectora de la humanidad.",
-        "en": "Goddess of Wisdom and Just War. Protector of humanity.",
-        "pt": "Deusa da Sabedoria e da Guerra Justa. Protetora da humanidade."
+        "es": "BY OrionEden a 43; p> N ~~ Ng)! DHT",
+        "en": "BY OrionEden a 43; p> N ~~ Ng)! DHT",
+        "pt": "BY OrionEden a 43; p> N ~~ Ng)! DHT"
       },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
       "knight_stats": {
-        "attack": 10,
-        "defense": 12,
-        "health": 25,
-        "cosmos": 20
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
       },
       "abilities": [
         {
           "names": {
-            "es": "Bendición Divina",
-            "en": "Divine Blessing",
-            "pt": "Bênção Divina"
+            "es": "Purple Fulgore",
+            "en": "Purple Fulgore",
+            "pt": "Purple Fulgore"
           },
           "type": "activa",
-          "cosmos_cost": 5,
+          "cosmos_cost": 0,
           "descriptions": {
-            "es": "Restaura 5 LP a todos los aliados y elimina condiciones negativas.",
-            "en": "Restore 5 LP to all allies and remove negative conditions.",
-            "pt": "Restaura 5 LP a todos os aliados e remove condições negativas."
+            "es": "Pay 4 Cp; all opponent",
+            "en": "Pay 4 Cp; all opponent",
+            "pt": "Pay 4 Cp; all opponent"
           },
-          "conditions": {
-            "trigger": "on_activate"
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "Lonely thunder",
+            "en": "Lonely thunder",
+            "pt": "Lonely thunder"
           },
-          "effects": [
-            {
-              "type": "heal",
-              "value": 5,
-              "target": "all_allies"
-            },
-            {
-              "type": "remove_status",
-              "status_type": "negative",
-              "target": "all_allies"
-            }
-          ]
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Vhen user produces",
+            "en": "Vhen user produces",
+            "pt": "Vhen user produces"
+          },
+          "conditions": {},
+          "effects": []
         }
       ],
-      "tags": ["goddess", "athena", "divine", "support"]
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KV OrionEden",
+        "en": "KV OrionEden",
+        "pt": "KV OrionEden"
+      },
+      "image_url": "/assets/legendary/2.webp",
+      "descriptions": {
+        "es": "KV OrionéEden W Z ), ~~ ( 2 @) Bronze saint)",
+        "en": "KV OrionéEden W Z ), ~~ ( 2 @) Bronze saint)",
+        "pt": "KV OrionéEden W Z ), ~~ ( 2 @) Bronze saint)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "52 Purple Discharge",
+            "en": "52 Purple Discharge",
+            "pt": "52 Purple Discharge"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "oy 4 (p; Decrease (8)",
+            "en": "oy 4 (p; Decrease (8)",
+            "pt": "oy 4 (p; Decrease (8)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "a OrionEden",
+        "en": "a OrionEden",
+        "pt": "a OrionEden"
+      },
+      "image_url": "/assets/legendary/3.webp",
+      "descriptions": {
+        "es": "a. Orion.Eden N i 5 e I 5 y I IES 8 Ne ge By i 7% shail",
+        "en": "a. Orion.Eden N i 5 e I 5 y I IES 8 Ne ge By i 7% shail",
+        "pt": "a. Orion.Eden N i 5 e I 5 y I IES 8 Ne ge By i 7% shail"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 4,
+      "knight_stats": {
+        "attack": 12,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "V2 Omega Cloth",
+            "en": "V2 Omega Cloth",
+            "pt": "V2 Omega Cloth"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": ":for every tum, hat user + qm",
+            "en": ":for every tum, hat user + qm",
+            "pt": ":for every tum, hat user + qm"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "omega"
+      ]
+    },
+    {
+      "names": {
+        "es": "Sal Th",
+        "en": "Sal Th",
+        "pt": "Sal Th"
+      },
+      "image_url": "/assets/legendary/4.webp",
+      "descriptions": {
+        "es": "KV wWolfaruio N Sal Th mg, J a a l — ZV ©) “Bronze Saint... 54 53 Secret Style: Pay 1 DIP; send the first (@B)",
+        "en": "KV wWolfaruio N Sal Th mg, J a a l — ZV ©) “Bronze Saint... 54 53 Secret Style: Pay 1 DIP; send the first (@B)",
+        "pt": "KV wWolfaruio N Sal Th mg, J a a l — ZV ©) “Bronze Saint... 54 53 Secret Style: Pay 1 DIP; send the first (@B)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "53 Secret Style",
+            "en": "53 Secret Style",
+            "pt": "53 Secret Style"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Pay 1 DIP; send the first (@B)",
+            "en": "Pay 1 DIP; send the first (@B)",
+            "pt": "Pay 1 DIP; send the first (@B)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": ")3 SNinja Mastery",
+            "en": ")3 SNinja Mastery",
+            "pt": ")3 SNinja Mastery"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "When the user enters in",
+            "en": "When the user enters in",
+            "pt": "When the user enters in"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 Vil dy",
+        "en": "7 Vil dy",
+        "pt": "7 Vil dy"
+      },
+      "image_url": "/assets/legendary/5.webp",
+      "descriptions": {
+        "es": "CV Wolf Haruto 7\" Vil dy BR. 2 y Sa B . y, \"i J ; y gf =",
+        "en": "CV Wolf Haruto 7\" Vil dy BR. 2 y Sa B . y, \"i J ; y gf =",
+        "pt": "CV Wolf Haruto 7\" Vil dy BR. 2 y Sa B . y, \"i J ; y gf ="
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "V4 Ninjitsu",
+            "en": "V4 Ninjitsu",
+            "pt": "V4 Ninjitsu"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discord a technique from your bod",
+            "en": "Discord a technique from your bod",
+            "pt": "Discord a technique from your bod"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "AYE hand",
+            "en": "AYE hand",
+            "pt": "AYE hand"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "your next BA will target all the aL”",
+            "en": "your next BA will target all the aL”",
+            "pt": "your next BA will target all the aL”"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "aa UL",
+        "en": "aa UL",
+        "pt": "aa UL"
+      },
+      "image_url": "/assets/legendary/6.webp",
+      "descriptions": {
+        "es": "< Wolf Haruto USAR V7) Jo “aa UL 15 NN ge WV Nd =<",
+        "en": "< Wolf Haruto USAR V7) Jo “aa UL 15 NN ge WV Nd =<",
+        "pt": "< Wolf Haruto USAR V7) Jo “aa UL 15 NN ge WV Nd =<"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 0,
+        "defense": 4,
+        "health": 15,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "52 Sound Waves",
+            "en": "52 Sound Waves",
+            "pt": "52 Sound Waves"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard a Tedhmique from 3p",
+            "en": "Discard a Tedhmique from 3p",
+            "pt": "Discard a Tedhmique from 3p"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "=\" opponent’ssoldiefs ip)‘Block Mode’",
+            "en": "=\" opponent’ssoldiefs ip)‘Block Mode’",
+            "pt": "=\" opponent’ssoldiefs ip)‘Block Mode’"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": ":-",
+            "en": ":-",
+            "pt": ":-"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "VY Cygnusdlyoga",
+        "en": "VY Cygnusdlyoga",
+        "pt": "VY Cygnusdlyoga"
+      },
+      "image_url": "/assets/legendary/7.webp",
+      "descriptions": {
+        "es": "VY Cygnusdlyoga ; WwW 7 ®) ALS $7 Pra -",
+        "en": "VY Cygnusdlyoga ; WwW 7 ®) ALS $7 Pra -",
+        "pt": "VY Cygnusdlyoga ; WwW 7 ®) ALS $7 Pra -"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 4,
+      "knight_stats": {
+        "attack": 11,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "63 Frost Aura",
+            "en": "63 Frost Aura",
+            "pt": "63 Frost Aura"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "11hen user receives a BA; flip ool",
+            "en": "11hen user receives a BA; flip ool",
+            "pt": "11hen user receives a BA; flip ool"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "nl P",
+        "en": "nl P",
+        "pt": "nl P"
+      },
+      "image_url": "/assets/legendary/8.webp",
+      "descriptions": {
+        "es": "C7 Aquarius - cosa WU © nl P % 2S N& ~ EN oO 2-2 (@) ier ion 1 &)",
+        "en": "C7 Aquarius - cosa WU © nl P % 2S N& ~ EN oO 2-2 (@) ier ion 1 &)",
+        "pt": "C7 Aquarius - cosa WU © nl P % 2S N& ~ EN oO 2-2 (@) ier ion 1 &)"
+      },
+      "rarity": "common",
+      "cost": 4,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 7
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY Cygnusddyoga",
+        "en": "CY Cygnusddyoga",
+        "pt": "CY Cygnusddyoga"
+      },
+      "image_url": "/assets/legendary/9.webp",
+      "descriptions": {
+        "es": "CY Cygnusddyoga f NC NYA a Ed 1 330 aS hil R=)",
+        "en": "CY Cygnusddyoga f NC NYA a Ed 1 330 aS hil R=)",
+        "pt": "CY Cygnusddyoga f NC NYA a Ed 1 330 aS hil R=)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "(A Point",
+            "en": "(A Point",
+            "pt": "(A Point"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Pay 1 DIP; Gll the FRZ £9",
+            "en": "Pay 1 DIP; Gll the FRZ £9",
+            "pt": "Pay 1 DIP; Gll the FRZ £9"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "RSV a 5 oga",
+        "en": "RSV a 5 oga",
+        "pt": "RSV a 5 oga"
+      },
+      "image_url": "/assets/legendary/10.webp",
+      "descriptions": {
+        "es": "RSV a 5. oga iz IER 7 » Cine ™ s EN 450",
+        "en": "RSV a 5. oga iz IER 7 » Cine ™ s EN 450",
+        "pt": "RSV a 5. oga iz IER 7 » Cine ™ s EN 450"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 5,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY cygnusdlyoga",
+        "en": "CY cygnusdlyoga",
+        "pt": "CY cygnusdlyoga"
+      },
+      "image_url": "/assets/legendary/11.webp",
+      "descriptions": {
+        "es": "CY cygnusdlyoga [ NV i 72 AN 7 5 Sa OAT ‘GPU 1",
+        "en": "CY cygnusdlyoga [ NV i 72 AN 7 5 Sa OAT ‘GPU 1",
+        "pt": "CY cygnusdlyoga [ NV i 72 AN 7 5 Sa OAT ‘GPU 1"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EN Blizzard",
+            "en": "EN Blizzard",
+            "pt": "EN Blizzard"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "1 , if peed od)",
+            "en": "1 , if peed od)",
+            "pt": "1 , if peed od)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "BR) citi or onc pore oir",
+            "en": "BR) citi or onc pore oir",
+            "pt": "BR) citi or onc pore oir"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Sa",
+            "en": "Sa",
+            "pt": "Sa"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Cygnusddyoga",
+        "en": "Cygnusddyoga",
+        "pt": "Cygnusddyoga"
+      },
+      "image_url": "/assets/legendary/12.webp",
+      "descriptions": {
+        "es": "? Cygnusddyoga Ny 5 7 3 y NS (7 I WINS~7",
+        "en": "? Cygnusddyoga Ny 5 7 3 y NS (7 I WINS~7",
+        "pt": "? Cygnusddyoga Ny 5 7 3 y NS (7 I WINS~7"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EB Absolute Zero",
+            "en": "EB Absolute Zero",
+            "pt": "EB Absolute Zero"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Py 2 DIPPcause [RZ @°B)",
+            "en": "Py 2 DIPPcause [RZ @°B)",
+            "pt": "Py 2 DIPPcause [RZ @°B)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 Phoenix Ikki",
+        "en": "7 Phoenix Ikki",
+        "pt": "7 Phoenix Ikki"
+      },
+      "image_url": "/assets/legendary/13.webp",
+      "descriptions": {
+        "es": "(7 Phoenix Ikki NLWNE Rank ( ~~’ Q 5)",
+        "en": "(7 Phoenix Ikki NLWNE Rank ( ~~’ Q 5)",
+        "pt": "(7 Phoenix Ikki NLWNE Rank ( ~~’ Q 5)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "7) wx Flames",
+            "en": "7) wx Flames",
+            "pt": "7) wx Flames"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Fay 3 Cp; flipa coin, if @",
+            "en": "Fay 3 Cp; flipa coin, if @",
+            "pt": "Fay 3 Cp; flipa coin, if @"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "J) JRecurm",
+            "en": "J) JRecurm",
+            "pt": "J) JRecurm"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Thisskit only works ihe the ser",
+            "en": "Thisskit only works ihe the ser",
+            "pt": "Thisskit only works ihe the ser"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "wil Leodkki",
+        "en": "wil Leodkki",
+        "pt": "wil Leodkki"
+      },
+      "image_url": "/assets/legendary/14.webp",
+      "descriptions": {
+        "es": "wil Leodkki (PRY Al 4 ry Y & fz is Vo eg iol) (@ NATTA ®)",
+        "en": "wil Leodkki (PRY Al 4 ry Y & fz is Vo eg iol) (@ NATTA ®)",
+        "pt": "wil Leodkki (PRY Al 4 ry Y & fz is Vo eg iol) (@ NATTA ®)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 4,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CV Phoenix Ikki",
+        "en": "CV Phoenix Ikki",
+        "pt": "CV Phoenix Ikki"
+      },
+      "image_url": "/assets/legendary/15.webp",
+      "descriptions": {
+        "es": "CV Phoenix Ikki Fi Nl ) ] eby ’ i wa) I S52) ( 4",
+        "en": "CV Phoenix Ikki Fi Nl ) ] eby ’ i wa) I S52) ( 4",
+        "pt": "CV Phoenix Ikki Fi Nl ) ] eby ’ i wa) I S52) ( 4"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 2,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EP Piercig Feather",
+            "en": "EP Piercig Feather",
+            "pt": "EP Piercig Feather"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discrda crc your (@)",
+            "en": "Discrda crc your (@)",
+            "pt": "Discrda crc your (@)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY Phoenix Ikki",
+        "en": "CY Phoenix Ikki",
+        "pt": "CY Phoenix Ikki"
+      },
+      "image_url": "/assets/legendary/16.webp",
+      "descriptions": {
+        "es": "CY Phoenix Ikki PR 2 vo Red = £5 @ F.7C Gold Saint (5)",
+        "en": "CY Phoenix Ikki PR 2 vo Red = £5 @ F.7C Gold Saint (5)",
+        "pt": "CY Phoenix Ikki PR 2 vo Red = £5 @ F.7C Gold Saint (5)"
+      },
+      "rarity": "legendary",
+      "cost": 6,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 10,
+        "defense": 8,
+        "health": 10,
+        "cosmos": 11
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "gold"
+      ]
+    },
+    {
+      "names": {
+        "es": "SV Phoenix Ikki",
+        "en": "SV Phoenix Ikki",
+        "pt": "SV Phoenix Ikki"
+      },
+      "image_url": "/assets/legendary/17.webp",
+      "descriptions": {
+        "es": "SV Phoenix Ikki H ) 2 BF 1% 4 J WF A J 7) P Z",
+        "en": "SV Phoenix Ikki H ) 2 BF 1% 4 J WF A J 7) P Z",
+        "pt": "SV Phoenix Ikki H ) 2 BF 1% 4 J WF A J 7) P Z"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "52) Phoenix Wings",
+            "en": "52) Phoenix Wings",
+            "pt": "52) Phoenix Wings"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard a card to: Ce)",
+            "en": "Discard a card to: Ce)",
+            "pt": "Discard a card to: Ce)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Phoenix Ikki",
+        "en": "Phoenix Ikki",
+        "pt": "Phoenix Ikki"
+      },
+      "image_url": "/assets/legendary/18.webp",
+      "descriptions": {
+        "es": "© Phoenix Ikki IN 2) a ve, 5 [ LN 7g. Ay >) 5",
+        "en": "© Phoenix Ikki IN 2) a ve, 5 [ LN 7g. Ay >) 5",
+        "pt": "© Phoenix Ikki IN 2) a ve, 5 [ LN 7g. Ay >) 5"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 1,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "2 Fury Flames",
+            "en": "2 Fury Flames",
+            "pt": "2 Fury Flames"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Reck.ce your DIP to 1 point; (5)",
+            "en": "Reck.ce your DIP to 1 point; (5)",
+            "pt": "Reck.ce your DIP to 1 point; (5)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "LO) God Cth",
+            "en": "LO) God Cth",
+            "pt": "LO) God Cth"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For every 2 ims that wer",
+            "en": "For every 2 ims that wer",
+            "pt": "For every 2 ims that wer"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "divine"
+      ]
+    },
+    {
+      "names": {
+        "es": "SV RegasusKoga",
+        "en": "SV RegasusKoga",
+        "pt": "SV RegasusKoga"
+      },
+      "image_url": "/assets/legendary/19.webp",
+      "descriptions": {
+        "es": "SV RegasusKoga ORS ~ 7 . A y +",
+        "en": "SV RegasusKoga ORS ~ 7 . A y +",
+        "pt": "SV RegasusKoga ORS ~ 7 . A y +"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "52) Dark Form",
+            "en": "52) Dark Form",
+            "pt": "52) Dark Form"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Pay 10 Cp ; The user 8%",
+            "en": "Pay 10 Cp ; The user 8%",
+            "pt": "Pay 10 Cp ; The user 8%"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CV pegasus Koga N",
+        "en": "CV pegasus Koga N",
+        "pt": "CV pegasus Koga N"
+      },
+      "image_url": "/assets/legendary/20.webp",
+      "descriptions": {
+        "es": "CV pegasus Koga N ‘oit i , L 3 : 4 Bi ils li",
+        "en": "CV pegasus Koga N ‘oit i , L 3 : 4 Bi ils li",
+        "pt": "CV pegasus Koga N ‘oit i , L 3 : 4 Bi ils li"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Ability 1",
+            "en": "Ability 1",
+            "pt": "Ability 1"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "4",
+            "en": "4",
+            "pt": "4"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "{Unconditional Friendship",
+            "en": "{Unconditional Friendship",
+            "pt": "{Unconditional Friendship"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For every.",
+            "en": "For every.",
+            "pt": "For every."
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Y pe asus Koga",
+        "en": "Y pe asus Koga",
+        "pt": "Y pe asus Koga"
+      },
+      "image_url": "/assets/legendary/21.webp",
+      "descriptions": {
+        "es": "Y pe asus Koga oY 4 NN   ASTD",
+        "en": "Y pe asus Koga oY 4 NN   ASTD",
+        "pt": "Y pe asus Koga oY 4 NN   ASTD"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EB) Sasittarius Cloth",
+            "en": "EB) Sasittarius Cloth",
+            "pt": "EB) Sasittarius Cloth"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "User can only use this (@RR",
+            "en": "User can only use this (@RR",
+            "pt": "User can only use this (@RR"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "Unconditional Friendship",
+            "en": "Unconditional Friendship",
+            "pt": "Unconditional Friendship"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Far every allieg",
+            "en": "Far every allieg",
+            "pt": "Far every allieg"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "97 s 7",
+        "en": "97 s 7",
+        "pt": "97 s 7"
+      },
+      "image_url": "/assets/legendary/22.webp",
+      "descriptions": {
+        "es": "KY sagittarius Koga {97 :s 7 — = ye i @) = Codsaint )",
+        "en": "KY sagittarius Koga {97 :s 7 — = ye i @) = Codsaint )",
+        "pt": "KY sagittarius Koga {97 :s 7 — = ye i @) = Codsaint )"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "{97",
+            "en": "{97",
+            "pt": "{97"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "s 7",
+            "en": "s 7",
+            "pt": "s 7"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "y Pegasus Koga",
+        "en": "y Pegasus Koga",
+        "pt": "y Pegasus Koga"
+      },
+      "image_url": "/assets/legendary/23.webp",
+      "descriptions": {
+        "es": "y Pegasus Koga SN Pie. So a 9 > vz RR NZ Iv ical AM Y Ya, 45, I",
+        "en": "y Pegasus Koga SN Pie. So a 9 > vz RR NZ Iv ical AM Y Ya, 45, I",
+        "pt": "y Pegasus Koga SN Pie. So a 9 > vz RR NZ Iv ical AM Y Ya, 45, I"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 9,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "omega"
+      ]
+    },
+    {
+      "names": {
+        "es": "DiagonRyuho",
+        "en": "DiagonRyuho",
+        "pt": "DiagonRyuho"
+      },
+      "image_url": "/assets/legendary/24.webp",
+      "descriptions": {
+        "es": ">” Diagon.Ryuho a pe ILC » Wad",
+        "en": ">” Diagon.Ryuho a pe ILC » Wad",
+        "pt": ">” Diagon.Ryuho a pe ILC » Wad"
+      },
+      "rarity": "common",
+      "cost": 3,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 3,
+        "cosmos": 5
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "59) Water Shield",
+            "en": "59) Water Shield",
+            "pt": "59) Water Shield"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Pay.2 Cp in order to; be)",
+            "en": "Pay.2 Cp in order to; be)",
+            "pt": "Pay.2 Cp in order to; be)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "03) Cosmo Knowtecge",
+            "en": "03) Cosmo Knowtecge",
+            "pt": "03) Cosmo Knowtecge"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Teciiqes sed (©)",
+            "en": "Teciiqes sed (©)",
+            "pt": "Teciiqes sed (©)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "XY DragonRyuho",
+        "en": "XY DragonRyuho",
+        "pt": "XY DragonRyuho"
+      },
+      "image_url": "/assets/legendary/25.webp",
+      "descriptions": {
+        "es": "XY\" Dragon.Ryuho S787 NY s wv = hh © 7 7",
+        "en": "XY\" Dragon.Ryuho S787 NY s wv = hh © 7 7",
+        "pt": "XY\" Dragon.Ryuho S787 NY s wv = hh © 7 7"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "DragonRyuho",
+        "en": "DragonRyuho",
+        "pt": "DragonRyuho"
+      },
+      "image_url": "/assets/legendary/26.webp",
+      "descriptions": {
+        "es": "©” Dragon.Ryuho SIN p- Ao y Tox) (Ss qo» LN IR A) $5,400]",
+        "en": "©” Dragon.Ryuho SIN p- Ao y Tox) (Ss qo» LN IR A) $5,400]",
+        "pt": "©” Dragon.Ryuho SIN p- Ao y Tox) (Ss qo» LN IR A) $5,400]"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 4,
+      "knight_stats": {
+        "attack": 12,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "omega"
+      ]
+    },
+    {
+      "names": {
+        "es": "Ophiuchus Shaina 4",
+        "en": "Ophiuchus Shaina 4",
+        "pt": "Ophiuchus Shaina 4"
+      },
+      "image_url": "/assets/legendary/27.webp",
+      "descriptions": {
+        "es": "[&> “Ophiuchus Shaina “4 PAPER 4 (Si -~ x 2 ( WW, = » C -",
+        "en": "[&> “Ophiuchus Shaina “4 PAPER 4 (Si -~ x 2 ( WW, = » C -",
+        "pt": "[&> “Ophiuchus Shaina “4 PAPER 4 (Si -~ x 2 ( WW, = » C -"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EP) Electrical Chain",
+            "en": "EP) Electrical Chain",
+            "pt": "EP) Electrical Chain"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "When Ler prodicesa (5)",
+            "en": "When Ler prodicesa (5)",
+            "pt": "When Ler prodicesa (5)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "Od) Advanced Tutoring",
+            "en": "Od) Advanced Tutoring",
+            "pt": "Od) Advanced Tutoring"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Each time you Call =)",
+            "en": "Each time you Call =)",
+            "pt": "Each time you Call =)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "4 Ophiuchus Shaina 4",
+        "en": "4 Ophiuchus Shaina 4",
+        "pt": "4 Ophiuchus Shaina 4"
+      },
+      "image_url": "/assets/legendary/28.webp",
+      "descriptions": {
+        "es": "“4 Ophiuchus Shaina “4 ) AS K&S al ®)7 y 7A 7 4",
+        "en": "“4 Ophiuchus Shaina “4 ) AS K&S al ®)7 y 7A 7 4",
+        "pt": "“4 Ophiuchus Shaina “4 ) AS K&S al ®)7 y 7A 7 4"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 7,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "5Y sagitiaiivs Selya",
+        "en": "5Y sagitiaiivs Selya",
+        "pt": "5Y sagitiaiivs Selya"
+      },
+      "image_url": "/assets/legendary/29.webp",
+      "descriptions": {
+        "es": "5Y sagitiaiivs Selya ENE Wes? it l Ta il @) Godsant GO (6) mrp &l",
+        "en": "5Y sagitiaiivs Selya ENE Wes? it l Ta il @) Godsant GO (6) mrp &l",
+        "pt": "5Y sagitiaiivs Selya ENE Wes? it l Ta il @) Godsant GO (6) mrp &l"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "5Y Pegasus Seiya",
+        "en": "5Y Pegasus Seiya",
+        "pt": "5Y Pegasus Seiya"
+      },
+      "image_url": "/assets/legendary/30.webp",
+      "descriptions": {
+        "es": "5Y Pegasus Seiya \" I ha 75 == I To, ) N PY . = Wr bi",
+        "en": "5Y Pegasus Seiya \" I ha 75 == I To, ) N PY . = Wr bi",
+        "pt": "5Y Pegasus Seiya \" I ha 75 == I To, ) N PY . = Wr bi"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 6,
+      "knight_stats": {
+        "attack": 75,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EB Victory Fist",
+            "en": "EB Victory Fist",
+            "pt": "EB Victory Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Reduce your DIPto 1; user's @'9)",
+            "en": "Reduce your DIPto 1; user's @'9)",
+            "pt": "Reduce your DIPto 1; user's @'9)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "} God Cloth",
+            "en": "} God Cloth",
+            "pt": "} God Cloth"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For every 2 tums that ser mi",
+            "en": "For every 2 tums that ser mi",
+            "pt": "For every 2 tums that ser mi"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "OV Pegasus Seiya",
+        "en": "OV Pegasus Seiya",
+        "pt": "OV Pegasus Seiya"
+      },
+      "image_url": "/assets/legendary/31.webp",
+      "descriptions": {
+        "es": "OV Pegasus Seiya of - 4 Sasi] Suh) w- AS 4 I Vi} 75] A",
+        "en": "OV Pegasus Seiya of - 4 Sasi] Suh) w- AS 4 I Vi} 75] A",
+        "pt": "OV Pegasus Seiya of - 4 Sasi] Suh) w- AS 4 I Vi} 75] A"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 4,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EON Verity Fist",
+            "en": "EON Verity Fist",
+            "pt": "EON Verity Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard cord; user's next BA (0",
+            "en": "Discard cord; user's next BA (0",
+            "pt": "Discard cord; user's next BA (0"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "oF) Rte) =",
+            "en": "oF) Rte) =",
+            "pt": "oF) Rte) ="
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "oF) Rte) =:",
+            "en": "oF) Rte) =:",
+            "pt": "oF) Rte) =:"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY pegasus Seiya",
+        "en": "CY pegasus Seiya",
+        "pt": "CY pegasus Seiya"
+      },
+      "image_url": "/assets/legendary/32.webp",
+      "descriptions": {
+        "es": "CY pegasus Seiya SAnUZ  ( a “4 or @) 7 Codsant 3)",
+        "en": "CY pegasus Seiya SAnUZ  ( a “4 or @) 7 Codsant 3)",
+        "pt": "CY pegasus Seiya SAnUZ  ( a “4 or @) 7 Codsant 3)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY pegasus Seiya",
+        "en": "CY pegasus Seiya",
+        "pt": "CY pegasus Seiya"
+      },
+      "image_url": "/assets/legendary/33.webp",
+      "descriptions": {
+        "es": "(CY pegasus Seiya va Z ey I FB hh ED",
+        "en": "(CY pegasus Seiya va Z ey I FB hh ED",
+        "pt": "(CY pegasus Seiya va Z ey I FB hh ED"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 1,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "42), Freedom Fist",
+            "en": "42), Freedom Fist",
+            "pt": "42), Freedom Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discord 1 card; user's next (8)",
+            "en": "Discord 1 card; user's next (8)",
+            "pt": "Discord 1 card; user's next (8)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CV Pegasus Seiya",
+        "en": "CV Pegasus Seiya",
+        "pt": "CV Pegasus Seiya"
+      },
+      "image_url": "/assets/legendary/34.webp",
+      "descriptions": {
+        "es": "CV Pegasus Seiya ef NE av Bl pe =) Shi Y © 1",
+        "en": "CV Pegasus Seiya ef NE av Bl pe =) Shi Y © 1",
+        "pt": "CV Pegasus Seiya ef NE av Bl pe =) Shi Y © 1"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "WW 52) Justice Fist",
+            "en": "WW 52) Justice Fist",
+            "pt": "WW 52) Justice Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard a card, user's next ed) !",
+            "en": "Discard a card, user's next ed) !",
+            "pt": "Discard a card, user's next ed) !"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KY DragonShinyw",
+        "en": "KY DragonShinyw",
+        "pt": "KY DragonShinyw"
+      },
+      "image_url": "/assets/legendary/35.webp",
+      "descriptions": {
+        "es": "K>Y Dragon.Shinyw I *® y W @ 1 pe LPs NN YN h ) =\" WY N",
+        "en": "K>Y Dragon.Shinyw I *® y W @ 1 pe LPs NN YN h ) =\" WY N",
+        "pt": "K>Y Dragon.Shinyw I *® y W @ 1 pe LPs NN YN h ) =\" WY N"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Piercing Fist",
+            "en": "Piercing Fist",
+            "pt": "Piercing Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Der 1 point 3)",
+            "en": "Der 1 point 3)",
+            "pt": "Der 1 point 3)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "34) Dragon Shield",
+            "en": "34) Dragon Shield",
+            "pt": "34) Dragon Shield"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "hen Ger enters “Block qm",
+            "en": "hen Ger enters “Block qm",
+            "pt": "hen Ger enters “Block qm"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "4 ibraShiryu",
+        "en": "4 ibraShiryu",
+        "pt": "4 ibraShiryu"
+      },
+      "image_url": "/assets/legendary/36.webp",
+      "descriptions": {
+        "es": "“4 ibra.Shiryu { Neri i y SN [572 98, Vo Yen @ GET io)",
+        "en": "“4 ibra.Shiryu { Neri i y SN [572 98, Vo Yen @ GET io)",
+        "pt": "“4 ibra.Shiryu { Neri i y SN [572 98, Vo Yen @ GET io)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Y DragonShiyu",
+        "en": "Y DragonShiyu",
+        "pt": "Y DragonShiyu"
+      },
+      "image_url": "/assets/legendary/37.webp",
+      "descriptions": {
+        "es": "$Y Dragon.Shiyu i No = = a 2 Fie? '§ :",
+        "en": "$Y Dragon.Shiyu i No = = a 2 Fie? '§ :",
+        "pt": "$Y Dragon.Shiyu i No = = a 2 Fie? '§ :"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 2,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Ability 1",
+            "en": "Ability 1",
+            "pt": "Ability 1"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": ":",
+            "en": ":",
+            "pt": ":"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 Dragon shiryy",
+        "en": "7 Dragon shiryy",
+        "pt": "7 Dragon shiryy"
+      },
+      "image_url": "/assets/legendary/38.webp",
+      "descriptions": {
+        "es": "(7 Dragon. shiryy SO Sa A Ne Mn. ANN EE sr",
+        "en": "(7 Dragon. shiryy SO Sa A Ne Mn. ANN EE sr",
+        "pt": "(7 Dragon. shiryy SO Sa A Ne Mn. ANN EE sr"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 1,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "(0) Dragon Shield",
+            "en": "(0) Dragon Shield",
+            "pt": "(0) Dragon Shield"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "VYhen User enters “Block",
+            "en": "VYhen User enters “Block",
+            "pt": "VYhen User enters “Block"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "CY Dragon Shiryy 1",
+        "en": "CY Dragon Shiryy 1",
+        "pt": "CY Dragon Shiryy 1"
+      },
+      "image_url": "/assets/legendary/39.webp",
+      "descriptions": {
+        "es": "CY Dragon. Shiryy 1 ny > Kl L(y) A I N A d L COs 2 US",
+        "en": "CY Dragon. Shiryy 1 ny > Kl L(y) A I N A d L COs 2 US",
+        "pt": "CY Dragon. Shiryy 1 ny > Kl L(y) A I N A d L COs 2 US"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "EZ Dragon Shiryu",
+        "en": "EZ Dragon Shiryu",
+        "pt": "EZ Dragon Shiryu"
+      },
+      "image_url": "/assets/legendary/40.webp",
+      "descriptions": {
+        "es": "EZ Dragon. Shiryu f M7 “el f i Z2 o 8 Via \"",
+        "en": "EZ Dragon. Shiryu f M7 “el f i Z2 o 8 Via \"",
+        "pt": "EZ Dragon. Shiryu f M7 “el f i Z2 o 8 Via \""
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Y Dragon Shiny",
+        "en": "Y Dragon Shiny",
+        "pt": "Y Dragon Shiny"
+      },
+      "image_url": "/assets/legendary/41.webp",
+      "descriptions": {
+        "es": "[$Y Dragon. Shiny f NJ a 1 Lr ¢ B » IN & A dA",
+        "en": "[$Y Dragon. Shiny f NJ a 1 Lr ¢ B » IN & A dA",
+        "pt": "[$Y Dragon. Shiny f NJ a 1 Lr ¢ B » IN & A dA"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 1,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "£8) Divine Shield",
+            "en": "£8) Divine Shield",
+            "pt": "£8) Divine Shield"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard a card; Ce)",
+            "en": "Discard a card; Ce)",
+            "pt": "Discard a card; Ce)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "&) God Cloth",
+            "en": "&) God Cloth",
+            "pt": "&) God Cloth"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For very Zturms that user mt",
+            "en": "For very Zturms that user mt",
+            "pt": "For very Zturms that user mt"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "divine"
+      ]
+    },
+    {
+      "names": {
+        "es": "CV Andromeda Shun",
+        "en": "CV Andromeda Shun",
+        "pt": "CV Andromeda Shun"
+      },
+      "image_url": "/assets/legendary/42.webp",
+      "descriptions": {
+        "es": "CV Andromeda Shun 7 , f 0D (WW ail 3 a . h 28 Bis; j—2a°",
+        "en": "CV Andromeda Shun 7 , f 0D (WW ail 3 a . h 28 Bis; j—2a°",
+        "pt": "CV Andromeda Shun 7 , f 0D (WW ail 3 a . h 28 Bis; j—2a°"
+      },
+      "rarity": "common",
+      "cost": 2,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 3,
+        "cosmos": 2
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "WE Wrappine Chin",
+            "en": "WE Wrappine Chin",
+            "pt": "WE Wrappine Chin"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Poy 2 Co; An opponent. (3)",
+            "en": "Poy 2 Co; An opponent. (3)",
+            "pt": "Poy 2 Co; An opponent. (3)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "5) INebuar Trap",
+            "en": "5) INebuar Trap",
+            "pt": "5) INebuar Trap"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Every opponent soldier:",
+            "en": "Every opponent soldier:",
+            "pt": "Every opponent soldier:"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Rv",
+        "en": "Rv",
+        "pt": "Rv"
+      },
+      "image_url": "/assets/legendary/43.webp",
+      "descriptions": {
+        "es": "Rv = & Take» SEA I » &! by Bal (ORS PENI Tema",
+        "en": "Rv = & Take» SEA I » &! by Bal (ORS PENI Tema",
+        "pt": "Rv = & Take» SEA I » &! by Bal (ORS PENI Tema"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 Andiomeda x",
+        "en": "7 Andiomeda x",
+        "pt": "7 Andiomeda x"
+      },
+      "image_url": "/assets/legendary/44.webp",
+      "descriptions": {
+        "es": "7 Andiomeda x NF v = BD — == ~.u72 f Bronze saint @p Fore sant 6)",
+        "en": "7 Andiomeda x NF v = BD — == ~.u72 f Bronze saint @p Fore sant 6)",
+        "pt": "7 Andiomeda x NF v = BD — == ~.u72 f Bronze saint @p Fore sant 6)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 2,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "WE) cine Crain",
+            "en": "WE) cine Crain",
+            "pt": "WE) cine Crain"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Poy Case)",
+            "en": "Poy Case)",
+            "pt": "Poy Case)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "A NFicden Cosh",
+            "en": "A NFicden Cosh",
+            "pt": "A NFicden Cosh"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "fen User ds es han",
+            "en": "fen User ds es han",
+            "pt": "fen User ds es han"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KY Andromeda Shun 4",
+        "en": "KY Andromeda Shun 4",
+        "pt": "KY Andromeda Shun 4"
+      },
+      "image_url": "/assets/legendary/45.webp",
+      "descriptions": {
+        "es": "KY Andromeda Shun 4 wel (NE f . Al 7 & A ONG] Ze &)",
+        "en": "KY Andromeda Shun 4 wel (NE f . Al 7 & A ONG] Ze &)",
+        "pt": "KY Andromeda Shun 4 wel (NE f . Al 7 & A ONG] Ze &)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 7,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "SY Vigo",
+        "en": "SY Vigo",
+        "pt": "SY Vigo"
+      },
+      "image_url": "/assets/legendary/46.webp",
+      "descriptions": {
+        "es": "SY Vigo. NENG RNG © OD Ad 0, . A RQ coisa 6)",
+        "en": "SY Vigo. NENG RNG © OD Ad 0, . A RQ coisa 6)",
+        "pt": "SY Vigo. NENG RNG © OD Ad 0, . A RQ coisa 6)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 6,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "OV Andromeda Shun",
+        "en": "OV Andromeda Shun",
+        "pt": "OV Andromeda Shun"
+      },
+      "image_url": "/assets/legendary/47.webp",
+      "descriptions": {
+        "es": "OV Andromeda Shun J A NE ‘& v4 7B ] “a < {U Fr LX",
+        "en": "OV Andromeda Shun J A NE ‘& v4 7B ] “a < {U Fr LX",
+        "pt": "OV Andromeda Shun J A NE ‘& v4 7B ] “a < {U Fr LX"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 98,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "98) Divine Blood",
+            "en": "98) Divine Blood",
+            "pt": "98) Divine Blood"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "f ser he les tan 5 Lp ard",
+            "en": "f ser he les tan 5 Lp ard",
+            "pt": "f ser he les tan 5 Lp ard"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "5 Andromeda Shun",
+        "en": "5 Andromeda Shun",
+        "pt": "5 Andromeda Shun"
+      },
+      "image_url": "/assets/legendary/48.webp",
+      "descriptions": {
+        "es": "[5 Andromeda Shun 4 = hare 2 ( Sk y —",
+        "en": "[5 Andromeda Shun 4 = hare 2 ( Sk y —",
+        "pt": "[5 Andromeda Shun 4 = hare 2 ( Sk y —"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 2,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EON Nebular Steam",
+            "en": "EON Nebular Steam",
+            "pt": "EON Nebular Steam"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Pay 7 Cp; Cause PAR \"ed",
+            "en": "Pay 7 Cp; Cause PAR \"ed",
+            "pt": "Pay 7 Cp; Cause PAR \"ed"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "divine"
+      ]
+    },
+    {
+      "names": {
+        "es": "Virgo shy",
+        "en": "Virgo shy",
+        "pt": "Virgo shy"
+      },
+      "image_url": "/assets/legendary/49.webp",
+      "descriptions": {
+        "es": "Virgo shy NC Wi@N [NS x #! == CA LD ®) E'S Gold Saint\" 5) fis on the batt] eres (62) (",
+        "en": "Virgo shy NC Wi@N [NS x #! == CA LD ®) E'S Gold Saint\" 5) fis on the batt] eres (62) (",
+        "pt": "Virgo shy NC Wi@N [NS x #! == CA LD ®) E'S Gold Saint\" 5) fis on the batt] eres (62) ("
+      },
+      "rarity": "legendary",
+      "cost": 6,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 10,
+        "defense": 8,
+        "health": 10,
+        "cosmos": 11
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "gold"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 LionetsSoma",
+        "en": "7 LionetsSoma",
+        "pt": "7 LionetsSoma"
+      },
+      "image_url": "/assets/legendary/50.webp",
+      "descriptions": {
+        "es": "[7 LionetsSoma Ly % ¢ >  @ (1 1",
+        "en": "[7 LionetsSoma Ly % ¢ >  @ (1 1",
+        "pt": "[7 LionetsSoma Ly % ¢ >  @ (1 1"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EBNInner Fire",
+            "en": "EBNInner Fire",
+            "pt": "EBNInner Fire"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard a card and flip a coin; (8)",
+            "en": "Discard a card and flip a coin; (8)",
+            "pt": "Discard a card and flip a coin; (8)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "ESV lionetsSoma N",
+        "en": "ESV lionetsSoma N",
+        "pt": "ESV lionetsSoma N"
+      },
+      "image_url": "/assets/legendary/51.webp",
+      "descriptions": {
+        "es": "ESV lionetsSoma N Q ey S j AN 4 £4 % ~»",
+        "en": "ESV lionetsSoma N Q ey S j AN 4 £4 % ~»",
+        "pt": "ESV lionetsSoma N Q ey S j AN 4 £4 % ~»"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Backdraft",
+            "en": "Backdraft",
+            "pt": "Backdraft"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Fay 2 Cp; your opponent must (5)",
+            "en": "Fay 2 Cp; your opponent must (5)",
+            "pt": "Fay 2 Cp; your opponent must (5)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "i 53) [Flashout",
+            "en": "i 53) [Flashout",
+            "pt": "i 53) [Flashout"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Vhepluser produces a BALE",
+            "en": "Vhepluser produces a BALE",
+            "pt": "Vhepluser produces a BALE"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "LionefSoma",
+        "en": "LionefSoma",
+        "pt": "LionefSoma"
+      },
+      "image_url": "/assets/legendary/52.webp",
+      "descriptions": {
+        "es": "©¥ LionefSoma - ~ } Nae) 1 = 4 4 i. v9 — il @)] \"Omega saint (OI",
+        "en": "©¥ LionefSoma - ~ } Nae) 1 = 4 4 i. v9 — il @)] \"Omega saint (OI",
+        "pt": "©¥ LionefSoma - ~ } Nae) 1 = 4 4 i. v9 — il @)] \"Omega saint (OI"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 4,
+      "knight_stats": {
+        "attack": 12,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "omega"
+      ]
+    },
+    {
+      "names": {
+        "es": "KV PegasusJenma",
+        "en": "KV PegasusJenma",
+        "pt": "KV PegasusJenma"
+      },
+      "image_url": "/assets/legendary/53.webp",
+      "descriptions": {
+        "es": "KV Pegasus.Jenma ; [7 b -t) Z f - 7 i =~ =",
+        "en": "KV Pegasus.Jenma ; [7 b -t) Z f - 7 i =~ =",
+        "pt": "KV Pegasus.Jenma ; [7 b -t) Z f - 7 i =~ ="
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "2) Flowery Bracelet",
+            "en": "2) Flowery Bracelet",
+            "pt": "2) Flowery Bracelet"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discarda card, if ser (5)",
+            "en": "Discarda card, if ser (5)",
+            "pt": "Discarda card, if ser (5)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "Divine Inheritance",
+            "en": "Divine Inheritance",
+            "pt": "Divine Inheritance"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "for opponent",
+            "en": "for opponent",
+            "pt": "for opponent"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KV pegasusJenma",
+        "en": "KV pegasusJenma",
+        "pt": "KV pegasusJenma"
+      },
+      "image_url": "/assets/legendary/54.webp",
+      "descriptions": {
+        "es": "KV pegasus.Jenma Ts: We RB Fe a, Ye ] N Af",
+        "en": "KV pegasus.Jenma Ts: We RB Fe a, Ye ] N Af",
+        "pt": "KV pegasus.Jenma Ts: We RB Fe a, Ye ] N Af"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 6,
+      "knight_stats": {
+        "attack": 57,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "Ts",
+            "en": "Ts",
+            "pt": "Ts"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "We",
+            "en": "We",
+            "pt": "We"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "W452), Demmi-God",
+            "en": "W452), Demmi-God",
+            "pt": "W452), Demmi-God"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard and condern 2 cards; (§ BR",
+            "en": "Discard and condern 2 cards; (§ BR",
+            "pt": "Discard and condern 2 cards; (§ BR"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "7 PegasusTenma",
+        "en": "7 PegasusTenma",
+        "pt": "7 PegasusTenma"
+      },
+      "image_url": "/assets/legendary/55.webp",
+      "descriptions": {
+        "es": "$7 PegasusTenma 7 - JA ¢. 0 J A f -~ p -",
+        "en": "$7 PegasusTenma 7 - JA ¢. 0 J A f -~ p -",
+        "pt": "$7 PegasusTenma 7 - JA ¢. 0 J A f -~ p -"
+      },
+      "rarity": "common",
+      "cost": 2,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 7,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 0
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "59%) Rebellion Fist",
+            "en": "59%) Rebellion Fist",
+            "pt": "59%) Rebellion Fist"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Discard 2 ards, user's 83",
+            "en": "Discard 2 ards, user's 83",
+            "pt": "Discard 2 ards, user's 83"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "38) God Cloth",
+            "en": "38) God Cloth",
+            "pt": "38) God Cloth"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For every 2 ts that user (ES)",
+            "en": "For every 2 ts that user (ES)",
+            "pt": "For every 2 ts that user (ES)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KY Unicom Yato",
+        "en": "KY Unicom Yato",
+        "pt": "KY Unicom Yato"
+      },
+      "image_url": "/assets/legendary/56.webp",
+      "descriptions": {
+        "es": "KY Unicom Yato 5 4 k [= 4 OF @) ‘EBronze Saint.‘ (50) B Innate Fellowship: Send this card to your (°F) Paro cir fam 82",
+        "en": "KY Unicom Yato 5 4 k [= 4 OF @) ‘EBronze Saint.‘ (50) B Innate Fellowship: Send this card to your (°F) Paro cir fam 82",
+        "pt": "KY Unicom Yato 5 4 k [= 4 OF @) ‘EBronze Saint.‘ (50) B Innate Fellowship: Send this card to your (°F) Paro cir fam 82"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "B Innate Fellowship",
+            "en": "B Innate Fellowship",
+            "pt": "B Innate Fellowship"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Send this card to your (°F)",
+            "en": "Send this card to your (°F)",
+            "pt": "Send this card to your (°F)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "5) Magical Horn",
+            "en": "5) Magical Horn",
+            "pt": "5) Magical Horn"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "EA prockiced by user i",
+            "en": "EA prockiced by user i",
+            "pt": "EA prockiced by user i"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "KY Unicom Yato",
+        "en": "KY Unicom Yato",
+        "pt": "KY Unicom Yato"
+      },
+      "image_url": "/assets/legendary/57.webp",
+      "descriptions": {
+        "es": "KY Unicom Yato ly (ow ANZ J A AN",
+        "en": "KY Unicom Yato ly (ow ANZ J A AN",
+        "pt": "KY Unicom Yato ly (ow ANZ J A AN"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "J Innate Friendship",
+            "en": "J Innate Friendship",
+            "pt": "J Innate Friendship"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Heal an ally soldier @'B)",
+            "en": "Heal an ally soldier @'B)",
+            "pt": "Heal an ally soldier @'B)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "VY AguilaYung N",
+        "en": "VY AguilaYung N",
+        "pt": "VY AguilaYung N"
+      },
+      "image_url": "/assets/legendary/58.webp",
+      "descriptions": {
+        "es": "VY AguilaYung N A 4 h Vz 7 A (IRD",
+        "en": "VY AguilaYung N A 4 h Vz 7 A (IRD",
+        "pt": "VY AguilaYung N A 4 h Vz 7 A (IRD"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 4,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EAVAquila's Wind",
+            "en": "EAVAquila's Wind",
+            "pt": "EAVAquila's Wind"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Dispose 2 cards; Yo 63)",
+            "en": "Dispose 2 cards; Yo 63)",
+            "pt": "Dispose 2 cards; Yo 63)"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "P Swift",
+            "en": "P Swift",
+            "pt": "P Swift"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Afterd BAuser enters “Fuade",
+            "en": "Afterd BAuser enters “Fuade",
+            "pt": "Afterd BAuser enters “Fuade"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "EY AquilaYuna",
+        "en": "EY AquilaYuna",
+        "pt": "EY AquilaYuna"
+      },
+      "image_url": "/assets/legendary/59.webp",
+      "descriptions": {
+        "es": "EY AquilaYuna 7 Wg RT i Z2) Y",
+        "en": "EY AquilaYuna 7 Wg RT i Z2) Y",
+        "pt": "EY AquilaYuna 7 Wg RT i Z2) Y"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 7,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EN Aduila's Wind",
+            "en": "EN Aduila's Wind",
+            "pt": "EN Aduila's Wind"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Dipose 2 cards; You can (PF)",
+            "en": "Dipose 2 cards; You can (PF)",
+            "pt": "Dipose 2 cards; You can (PF)"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "AquilaYuna",
+        "en": "AquilaYuna",
+        "pt": "AquilaYuna"
+      },
+      "image_url": "/assets/legendary/60.webp",
+      "descriptions": {
+        "es": "© Aquila.Yuna = J NLA “ AR i a0 A JIRA )",
+        "en": "© Aquila.Yuna = J NLA “ AR i a0 A JIRA )",
+        "pt": "© Aquila.Yuna = J NLA “ AR i a0 A JIRA )"
+      },
+      "rarity": "divine",
+      "cost": 6,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 0,
+        "defense": 10,
+        "health": 11,
+        "cosmos": 12
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "EB) Perfect Wings",
+            "en": "EB) Perfect Wings",
+            "pt": "EB) Perfect Wings"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "Next ters. 6B",
+            "en": "Next ters. 6B",
+            "pt": "Next ters. 6B"
+          },
+          "conditions": {},
+          "effects": []
+        },
+        {
+          "names": {
+            "es": "P Omeea Cloth",
+            "en": "P Omeea Cloth",
+            "pt": "P Omeea Cloth"
+          },
+          "type": "pasiva",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "For every tur that user] 2m",
+            "en": "For every tur that user] 2m",
+            "pt": "For every tur that user] 2m"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "omega"
+      ]
+    },
+    {
+      "names": {
+        "es": "REV A q Ug i oga",
+        "en": "REV A q Ug i oga",
+        "pt": "REV A q Ug i oga"
+      },
+      "image_url": "/assets/legendary/61.webp",
+      "descriptions": {
+        "es": "REV A q Ug i ; oga [a $v 2 [Li GS Re Fy -— <8 NY 2) 2 QL. Cassar GO)",
+        "en": "REV A q Ug i ; oga [a $v 2 [Li GS Re Fy -— <8 NY 2) 2 QL. Cassar GO)",
+        "pt": "REV A q Ug i ; oga [a $v 2 [Li GS Re Fy -— <8 NY 2) 2 QL. Cassar GO)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "ORCC",
+        "en": "ORCC",
+        "pt": "ORCC"
+      },
+      "image_url": "/assets/legendary/62.webp",
+      "descriptions": {
+        "es": "©” Aquarius Hyoga 1 2 ORCC toFR: o Q LO)",
+        "en": "©” Aquarius Hyoga 1 2 ORCC toFR: o Q LO)",
+        "pt": "©” Aquarius Hyoga 1 2 ORCC toFR: o Q LO)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 1,
+      "knight_stats": {
+        "attack": 1,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "toFR",
+            "en": "toFR",
+            "pt": "toFR"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "o",
+            "en": "o",
+            "pt": "o"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "ZV Leo i i",
+        "en": "ZV Leo i i",
+        "pt": "ZV Leo i i"
+      },
+      "image_url": "/assets/legendary/63.webp",
+      "descriptions": {
+        "es": "ZV Leo i i ( AR) Xiph dag , f Hl — - pv @)] Gold saint TS)",
+        "en": "ZV Leo i i ( AR) Xiph dag , f Hl — - pv @)] Gold saint TS)",
+        "pt": "ZV Leo i i ( AR) Xiph dag , f Hl — - pv @)] Gold saint TS)"
+      },
+      "rarity": "legendary",
+      "cost": 6,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 10,
+        "defense": 8,
+        "health": 10,
+        "cosmos": 11
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "gold"
+      ]
+    },
+    {
+      "names": {
+        "es": "Leodkki",
+        "en": "Leodkki",
+        "pt": "Leodkki"
+      },
+      "image_url": "/assets/legendary/64.webp",
+      "descriptions": {
+        "es": "¥ Leodkki (RY) eo DHE = a 9 yi or 24 a ~ if",
+        "en": "¥ Leodkki (RY) eo DHE = a 9 yi or 24 a ~ if",
+        "pt": "¥ Leodkki (RY) eo DHE = a 9 yi or 24 a ~ if"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "i 14",
+        "en": "i 14",
+        "pt": "i 14"
+      },
+      "image_url": "/assets/legendary/65.webp",
+      "descriptions": {
+        "es": "OY sagittarius Seiya Wl i) 14 o - (J d8 Nees? Zi f a X@)] codsant CO)",
+        "en": "OY sagittarius Seiya Wl i) 14 o - (J d8 Nees? Zi f a X@)] codsant CO)",
+        "pt": "OY sagittarius Seiya Wl i) 14 o - (J d8 Nees? Zi f a X@)] codsant CO)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "f ZY J",
+        "en": "f ZY J",
+        "pt": "f ZY J"
+      },
+      "image_url": "/assets/legendary/66.webp",
+      "descriptions": {
+        "es": "5 sqgittari eiya f ZY J (RETR)",
+        "en": "5 sqgittari eiya f ZY J (RETR)",
+        "pt": "5 sqgittari eiya f ZY J (RETR)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "Rv ibraShiryu",
+        "en": "Rv ibraShiryu",
+        "pt": "Rv ibraShiryu"
+      },
+      "image_url": "/assets/legendary/67.webp",
+      "descriptions": {
+        "es": "Rv ibra.Shiryu =v pt A a) Ni: @ Ea 7 &)",
+        "en": "Rv ibra.Shiryu =v pt A a) Ni: @ Ea 7 &)",
+        "pt": "Rv ibra.Shiryu =v pt A a) Ni: @ Ea 7 &)"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 2,
+      "knight_stats": {
+        "attack": 7,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [
+        {
+          "names": {
+            "es": "A a) Ni",
+            "en": "A a) Ni",
+            "pt": "A a) Ni"
+          },
+          "type": "activa",
+          "cosmos_cost": 0,
+          "descriptions": {
+            "es": "A a) Ni:",
+            "en": "A a) Ni:",
+            "pt": "A a) Ni:"
+          },
+          "conditions": {},
+          "effects": []
+        }
+      ],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
+    },
+    {
+      "names": {
+        "es": "4 ibraShiryu",
+        "en": "4 ibraShiryu",
+        "pt": "4 ibraShiryu"
+      },
+      "image_url": "/assets/legendary/68.webp",
+      "descriptions": {
+        "es": "“4 ibra.Shiryu Nor] IN oF Ed 8 REAR @) a ale o",
+        "en": "“4 ibra.Shiryu Nor] IN oF Ed 8 REAR @) a ale o",
+        "pt": "“4 ibra.Shiryu Nor] IN oF Ed 8 REAR @) a ale o"
+      },
+      "rarity": "common",
+      "cost": 5,
+      "generate": 3,
+      "knight_stats": {
+        "attack": 8,
+        "defense": 4,
+        "health": 9,
+        "cosmos": 10
+      },
+      "abilities": [],
+      "tags": [
+        "legendary",
+        "bronze"
+      ]
     }
   ]
 }

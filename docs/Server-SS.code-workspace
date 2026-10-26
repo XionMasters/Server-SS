@@ -1,9 +1,11 @@
 {
     "folders": [
         {
+            "name": "Server-SS",
             "path": ".."
         },
         {
+            "name": "ccg",
             "path": "../../../Nacho/Projects/ccg"
         }
     ]

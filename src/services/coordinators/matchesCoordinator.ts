@@ -250,6 +250,42 @@ export class MatchesCoordinator {
         });
       }
 
+      case 'TECHNIQUE_ATTACK': {
+        if (!actionId) {
+          return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
+        }
+
+        const knightCardId = action.knightCardId || action.knight_card_id || action.knight_id;
+        const techniqueCardId = action.techniqueCardId || action.technique_card_id || action.technique_id;
+        const defenderCardId = (action.defenderCardId || action.defender_card_id || action.defender_id) || null;
+
+        if (!knightCardId) {
+          return { success: false, code: 'KNIGHT_ID_REQUIRED', error: 'knight_id es requerido' };
+        }
+        if (!techniqueCardId) {
+          return { success: false, code: 'TECHNIQUE_ID_REQUIRED', error: 'technique_id es requerido' };
+        }
+
+        const result = await MatchCoordinator.useTechnique(
+          matchId,
+          userId,
+          knightCardId,
+          techniqueCardId,
+          defenderCardId,
+          actionId,
+        );
+
+        const taResult = result as any;
+        return this._buildMatchUpdateResult(result, matchId, userId, {
+          type: 'technique_attack',
+          knight_id: knightCardId,
+          technique_id: techniqueCardId,
+          defender_id: defenderCardId,
+          total_damage: taResult.totalDamage ?? 0,
+          hit_count: taResult.hitCount ?? 0,
+        });
+      }
+
       case 'CHANGE_DEFENSIVE_MODE': {
         if (!actionId) {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };

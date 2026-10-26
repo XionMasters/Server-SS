@@ -1,0 +1,153 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'technique'. Se juegan en field_technique. El campo 'technique_stats' declara los par\u00e1metros del TA (Technique Attack) que el motor usar\u00e1 cuando est\u00e9 implementado.",
+  "saga": "Santuario",
+  "type": "technique",
+  "cards": [
+    {
+      "code": "pegasus_meteor_fist",
+      "name": "Meteoros de Pegaso",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "techniques/pegasus_meteor_fist.webp",
+      "description": "Compatible con caballeros [pegasus]. TA: Gasta 4 CP del caballero. Golpea 3 veces con CE 2 por golpe.",
+      "tags": ["pegasus", "technique"],
+      "technique_stats": {
+        "hit_count": 3,
+        "hit_ce": 2,
+        "ta_cost": 4,
+        "compatible_tags": ["pegasus"]
+      },
+      "abilities": [
+        {
+          "name": "Meteoros de Pegaso",
+          "type": "campo",
+          "ability_key": "pegasus_meteor_fist_ta",
+          "description": "TA habilitado para caballeros [pegasus]. Costo: 4 CP del caballero. Efecto: 3 golpes de CE 2 al defensor.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "sagittarius_arrow",
+      "name": "Sagittarius Arrow",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "techniques/sagittarius_arrow.webp",
+      "description": "Compatible con caballeros [sagittarius]. TA: Gasta 8 CP del caballero. Causa 10 LP de daño directo a un soldado rival (ignora AR y Modo Defensa).",
+      "tags": ["sagittarius", "technique"],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 10,
+        "ta_cost": 8,
+        "compatible_tags": ["sagittarius"],
+        "ignore_ar": true
+      },
+      "abilities": [
+        {
+          "name": "Sagittarius Arrow",
+          "type": "campo",
+          "ability_key": "sagittarius_arrow_ta",
+          "description": "TA habilitado para caballeros [sagittarius]. Costo: 8 CP. Efecto: 10 LP de daño directo al objetivo (ignora AR y Modo Defensa).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "stardust_revolution",
+      "name": "Stardust Revolution",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "techniques/stardust_revolution.webp",
+      "description": "Compatible con caballeros [dragon]. TA: Gasta 3 CP del caballero. Golpea con CE 4. El objetivo recibe BRN (2 DIP/turno) por 3 turnos.",
+      "tags": ["dragon", "technique"],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 3,
+        "compatible_tags": ["dragon"],
+        "ta_effects": [
+          { "type": "burn", "value": 2, "turns": 3 }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Stardust Revolution",
+          "type": "campo",
+          "ability_key": "stardust_revolution_ta",
+          "description": "TA habilitado para caballeros [dragon]. Costo: 3 CP. Efecto: 1 golpe CE 4. BRN en el objetivo por 3 turnos (2 DIP/turno).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "seki_shiki_meikai_ha",
+      "name": "Seki Shiki Meikai Ha",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Hades",
+      "element": "dark",
+      "image_url": "techniques/seki_shiki_meikai_ha.webp",
+      "description": "Compatible con caballeros [cancer]. TA: Gasta 3 CP del caballero. Busca en tu mazo la carta de escenario 'Yomotsu Hill' y actívala. Si ya está activa, causa X LP de daño directo al jugador rival (siendo X el número de soldados en tu sección Yomotsu).",
+      "tags": ["cancer", "technique", "yomotsu"],
+      "technique_stats": {
+        "hit_count": 0,
+        "hit_ce": 0,
+        "ta_cost": 3,
+        "compatible_tags": ["cancer"]
+      },
+      "abilities": [
+        {
+          "name": "Seki Shiki Meikai Ha",
+          "type": "campo",
+          "ability_key": "seki_shiki_meikai_ha_ta",
+          "description": "TA habilitado para caballeros [cancer]. Costo: 3 CP. Busca 'Yomotsu Hill' en el mazo y actívalo. Si ya está activo: daño directo al jugador rival igual al número de soldados en tu sección Yomotsu.",
+          "_pending": "Requiere: search_deck_for_stage_code + activate_stage_to_field_occasion + conditional_count_yomotsu_soldiers + direct_player_damage. Pendiente Fase 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "santuario",
+      "artist": null
+    }
+  ]
+}

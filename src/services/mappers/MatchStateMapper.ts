@@ -128,8 +128,7 @@ export class MatchStateMapper {
           // Escenario global compartido. Si llegan multiples por inconsistencia,
           // el ultimo procesado prevalece para mantener la partida jugable.
           state.scenario = {
-            instance_id: cardState.instance_id,
-            card_id: cardState.card_id,
+            ...cardState,
             card_name: card.card?.name ?? '',
             effect: '',
           };
@@ -253,6 +252,8 @@ export class MatchStateMapper {
 
       // Código estático de la carta base — útil para condiciones que matchean por carta específica
       card_code: card.card?.code ?? '',
+      // Tags propagados desde Card.tags — permiten condiciones/filtros por grupo de personaje
+      tags: (card.card as any)?.tags ?? [],
       raw_abilities,
 
       // Stats con boosts aplicados

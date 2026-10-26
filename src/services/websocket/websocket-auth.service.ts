@@ -53,6 +53,13 @@ export async function authenticateSocket(
     };
   }
 
+  if (adminToken) {
+    throw new WebSocketAuthError(
+      'INVALID_ADMIN_TOKEN',
+      'Token de admin inválido o expirado'
+    );
+  }
+
   // 2️⃣ Validar token usuario
   if (!token) {
     throw new WebSocketAuthError(

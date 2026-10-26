@@ -97,6 +97,38 @@ export type StatusEffectType =
   | 'burn_immune'       // Pasiva: inmune a burn — bloquea la aplicación del efecto y limpia burn existente
   | 'poison_immune'     // Pasiva: inmune a poison — bloquea la aplicación del efecto y limpia poison existente
   | 'phoenix_rebirth_cooldown' // Lock técnico: evita que la resurrección se dispare más de una vez por turno
+/** category: trigger ──────────────────────────────────────────────────────── */
+  | 'frozen'              // FRZ: el portador no puede atacar/activar durante su turno
+  | 'paralyzed'           // PAR: igual que FRZ; se aplica por electric_charge
+/** category: special (one-shot BA modifiers) ──────────────────────────────── */
+  | 'ignore_block_mode'   // Próximo BA ignora Modo Defensa del defensor (se consume al atacar)
+  | 'ignore_evade_mode'   // Próximo BA ignora Modo Evasión del defensor (se consume al atacar)
+/** category: special (permanent markers) ──────────────────────────────────── */
+  | 'dragon_shield'       // Inmune a Técnicas de Nivel 1 mientras esté en Modo Defensa
+  | 'electric_charge'     // Próximo BA del portador aplica PAR al objetivo (se consume al atacar)
+  | 'life_floor_1'        // LP del jugador no puede bajar de 1 mientras la carta esté en campo
+  | 'dragon_rage'         // Próximo BA del portador también daña soldados adyacentes al objetivo (se consume al atacar)
+/** category: special (one-shot TA modifiers — se consumen al usar Technique Attack) ─────── */
+  | 'ta_apply_status'         // aplica estado(s) al objetivo; config en params.status_type/status_types
+  | 'ta_modify_target_ce'     // modifica CE/base_ce del objetivo por `value` (negativo = reduce)
+  | 'ta_modify_target_ar'     // modifica AR/base_ar del objetivo por `value` (negativo = reduce)
+  | 'ta_extra_damage'         // daño extra al jugador defensor por `value`
+  | 'ta_modify_defender_cosmos' // modifica cosmos del jugador defensor por `value` (negativo = drena)
+  | 'ta_combo'                // ejecuta múltiples sub-acciones en params.actions[]
+  | 'ta_causes_par'           // próxima TA del portador aplica paralyzed al objetivo
+  | 'ta_causes_psn'           // próxima TA aplica poison al objetivo
+  | 'ta_causes_par_psn'       // próxima TA aplica paralyzed + poison al objetivo
+  | 'ta_summon_crow_token'    // próxima TA convoca un Token "Cuervo" [Lp=1 Ce=1 Ar=0 Cp=0]
+  | 'ta_drains_target_cosmos' // próxima TA establece el cosmos del objetivo a 0
+  | 'ta_reduce_ar_2'          // próxima TA reduce el AR del objetivo en 2 de forma permanente
+  | 'ta_immune_negative'      // próxima TA luego otorga al portador inmunidad a condiciones negativas
+  | 'ta_reveal_hand'          // próxima TA revela la mano del oponente
+  | 'ta_extra_damage_3'       // próxima TA inflige 3 LP de daño extra al jugador oponente
+  | 'ta_destroy_assistant'    // próxima TA destruye la carta Auxiliar del oponente
+  | 'ta_drain_cosmos_2'       // próxima TA drena 2 CP del cosmos del jugador oponente
+  | 'ta_ignore_block_mode'    // próxima TA ignora el Modo Defensa del objetivo
+/** category: special (estados aplicados como resultado de efectos TA) ───────────────────── */
+  | 'immune_negative'         // Inmune a condiciones negativas (paralyzed, poison, burn, frozen) por remaining_turns
 // TODO (Escenario):      | 'scenario_buff'    // Buff de escenario activo sobre el caballero
 ;
 
@@ -129,6 +161,37 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
   burn_immune:       'special', // marker permanente — bloquea apply_status de burn y limpia burn existente
   poison_immune:     'special', // marker permanente — bloquea apply_status de poison y limpia poison existente
   phoenix_rebirth_cooldown: 'special',
+  // trigger
+  frozen:             'trigger',
+  paralyzed:          'trigger',
+  // special (one-shot BA modifiers)
+  ignore_block_mode:  'special',
+  ignore_evade_mode:  'special',
+  // special (permanent markers)
+  dragon_shield:      'special',
+  electric_charge:    'special',
+  life_floor_1:       'special',
+  dragon_rage:        'special',
+  // TA modifiers (one-shot)
+  ta_apply_status:           'special',
+  ta_modify_target_ce:       'special',
+  ta_modify_target_ar:       'special',
+  ta_extra_damage:           'special',
+  ta_modify_defender_cosmos: 'special',
+  ta_combo:                  'special',
+  ta_causes_par:           'special',
+  ta_causes_psn:           'special',
+  ta_causes_par_psn:       'special',
+  ta_summon_crow_token:    'special',
+  ta_drains_target_cosmos: 'special',
+  ta_reduce_ar_2:          'special',
+  ta_immune_negative:      'special',
+  ta_reveal_hand:          'special',
+  ta_extra_damage_3:       'special',
+  ta_destroy_assistant:    'special',
+  ta_drain_cosmos_2:       'special',
+  ta_ignore_block_mode:    'special',
+  immune_negative:         'special',
   // TODO (Escenario): scenario_buff: 'stat',
 };
 
@@ -146,6 +209,8 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
 export interface StatusEffect {
   type: StatusEffectType;
   value?: number;
+  /** Parámetros opcionales para efectos configurables (ej: ta_apply_status). */
+  params?: Record<string, unknown>;
   remaining_turns: number | null;
   source?: StatusEffectSource;
 }
@@ -247,9 +312,25 @@ interface BasicAttackEffectRule {
 // Reglas declarativas para efectos que modifican BA.
 // consumeOnAttack: true  → se elimina del efecto tras el primer BA (one-shot, como ignore_armor)
 // consumeOnAttack: false → el efecto persiste; cada BA lo aplica mientras esté activo (como ce_double de pasiva)
+interface BasicAttackIgnoreRule {
+  ignoreBlockMode?: boolean;
+  ignoreEvadeMode?: boolean;
+  applyParalyzedOnHit?: boolean;
+}
+
+const BASIC_ATTACK_IGNORE_RULES: Partial<Record<StatusEffectType, BasicAttackIgnoreRule>> = {
+  ignore_block_mode: { ignoreBlockMode:  true },
+  ignore_evade_mode: { ignoreEvadeMode:  true },
+  electric_charge:   { applyParalyzedOnHit: true },
+};
+
 const BASIC_ATTACK_EFFECT_RULES: Partial<Record<StatusEffectType, BasicAttackEffectRule>> = {
-  ignore_armor: { ignoreArmor: true,  consumeOnAttack: true  },
-  ce_double:    { ceMultiplier: 2,    consumeOnAttack: false }
+  ignore_armor:      { ignoreArmor: true,  consumeOnAttack: true  },
+  ce_double:         { ceMultiplier: 2,    consumeOnAttack: false },
+  ignore_block_mode: { consumeOnAttack: true },
+  ignore_evade_mode: { consumeOnAttack: true },
+  electric_charge:   { consumeOnAttack: true },
+  dragon_rage:       { consumeOnAttack: true },
 };
 
 /** Multiplicador total de CE para BA en base a efectos activos. */
@@ -269,9 +350,87 @@ export function attackerIgnoresArmor(effects: StatusEffect[]): boolean {
   return effects.some(e => BASIC_ATTACK_EFFECT_RULES[e.type]?.ignoreArmor === true);
 }
 
+/** True si el atacante puede ignorar Modo Defensa del defensor en su próximo BA. */
+export function attackerIgnoresBlockMode(effects: StatusEffect[]): boolean {
+  return effects.some(e => BASIC_ATTACK_IGNORE_RULES[e.type]?.ignoreBlockMode === true);
+}
+
+/** True si el atacante puede ignorar Modo Evasión del defensor en su próximo BA. */
+export function attackerIgnoresEvadeMode(effects: StatusEffect[]): boolean {
+  return effects.some(e => BASIC_ATTACK_IGNORE_RULES[e.type]?.ignoreEvadeMode === true);
+}
+
+/** True si el atacante aplicará PAR al objetivo con su próximo BA. */
+export function attackerHasElectricCharge(effects: StatusEffect[]): boolean {
+  return effects.some(e => BASIC_ATTACK_IGNORE_RULES[e.type]?.applyParalyzedOnHit === true);
+}
+
+/** True si el atacante tiene Dragon Rage (BA con cleave a adyacentes). */
+export function attackerHasDragonRage(effects: StatusEffect[]): boolean {
+  return effects.some(e => e.type === 'dragon_rage');
+}
+
+/** True si la carta está inmovilizada (frozen o paralyzed) y no puede actuar. */
+export function isImmobilized(effects: StatusEffect[]): boolean {
+  return effects.some(e => e.type === 'frozen' || e.type === 'paralyzed');
+}
+
 /** Consume efectos de BA marcados como one-shot. */
 export function consumeBasicAttackEffects(effects: StatusEffect[]): StatusEffect[] {
   return effects.filter(e => BASIC_ATTACK_EFFECT_RULES[e.type]?.consumeOnAttack !== true);
+}
+
+// ─── Technique Attack (TA) Effect Rules ───────────────────────────────────────
+
+export interface TechniqueAttackEffectRule {
+  consumeOnTA: boolean;
+  /** Si true, el atacante ignora el Modo Defensa del defensor. */
+  ignoreBlockMode?: boolean;
+  /** Efecto de estado que aplica al objetivo al hit. */
+  applyToTarget?: StatusEffectType;
+  /** Pasos adicionales semánticos indicados en el comment del tipo. */
+  semanticKey?: string;
+}
+
+const TECHNIQUE_ATTACK_EFFECT_RULES: Partial<Record<StatusEffectType, TechniqueAttackEffectRule>> = {
+  ta_apply_status:          { consumeOnTA: true, semanticKey: 'apply_status' },
+  ta_modify_target_ce:      { consumeOnTA: true, semanticKey: 'modify_target_ce' },
+  ta_modify_target_ar:      { consumeOnTA: true, semanticKey: 'modify_target_ar' },
+  ta_extra_damage:          { consumeOnTA: true, semanticKey: 'extra_damage' },
+  ta_modify_defender_cosmos:{ consumeOnTA: true, semanticKey: 'modify_defender_cosmos' },
+  ta_combo:                 { consumeOnTA: true, semanticKey: 'combo' },
+  ta_causes_par:           { consumeOnTA: true, applyToTarget: 'paralyzed' },
+  ta_causes_psn:           { consumeOnTA: true, applyToTarget: 'poison' },
+  ta_causes_par_psn:       { consumeOnTA: true, applyToTarget: 'paralyzed' }, // también aplica poison; TechniqueRulesEngine lo maneja
+  ta_summon_crow_token:    { consumeOnTA: true, semanticKey: 'summon_crow_token' },
+  ta_drains_target_cosmos: { consumeOnTA: true, semanticKey: 'drain_target_cosmos' },
+  ta_reduce_ar_2:          { consumeOnTA: true, semanticKey: 'reduce_ar_2' },
+  ta_immune_negative:      { consumeOnTA: true, semanticKey: 'immune_negative' },
+  ta_reveal_hand:          { consumeOnTA: true, semanticKey: 'reveal_hand' },
+  ta_extra_damage_3:       { consumeOnTA: true, semanticKey: 'extra_damage_3' },
+  ta_destroy_assistant:    { consumeOnTA: true, semanticKey: 'destroy_assistant' },
+  ta_drain_cosmos_2:       { consumeOnTA: true, semanticKey: 'drain_cosmos_2' },
+  ta_ignore_block_mode:    { consumeOnTA: true, ignoreBlockMode: true },
+};
+
+/** True si el atacante ignora Modo Defensa del defensor en su próxima TA. */
+export function attackerTaIgnoresBlockMode(effects: StatusEffect[]): boolean {
+  return effects.some(e => TECHNIQUE_ATTACK_EFFECT_RULES[e.type]?.ignoreBlockMode === true);
+}
+
+/** Consume efectos de TA marcados como one-shot. */
+export function consumeTechniqueAttackEffects(effects: StatusEffect[]): StatusEffect[] {
+  return effects.filter(e => TECHNIQUE_ATTACK_EFFECT_RULES[e.type]?.consumeOnTA !== true);
+}
+
+/** Devuelve la lista de efectos TA activos en el atacante (para que el engine los procese). */
+export function getActiveTaModifiers(effects: StatusEffect[]): StatusEffect[] {
+  return effects.filter(e => TECHNIQUE_ATTACK_EFFECT_RULES[e.type] !== undefined);
+}
+
+/** Regla declarativa de un modificador TA para un tipo específico. */
+export function getTechniqueAttackEffectRule(type: StatusEffectType): TechniqueAttackEffectRule | undefined {
+  return TECHNIQUE_ATTACK_EFFECT_RULES[type];
 }
 
 /** True si existe un efecto del tipo indicado. */

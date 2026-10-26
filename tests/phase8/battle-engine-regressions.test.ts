@@ -27,6 +27,7 @@ function createKnight(params: {
     attacked_this_turn: false,
     status_effects: params.effects ?? [],
     card_code: `code-${params.id}`,
+    tags: [],
     raw_abilities: [],
     ce,
     ar,

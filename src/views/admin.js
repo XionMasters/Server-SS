@@ -1,6 +1,68 @@
 let ws = null;
 const API_URL = window.location.origin;
 let currentInspectMatchId = null;
+let reconnectTimer = null;
+let shouldReconnect = true;
+
+function parseJwt(token) {
+    try {
+        const payload = token.split('.')[1];
+        const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+        return JSON.parse(atob(padded));
+    } catch (_) {
+        return null;
+    }
+}
+
+function isTokenExpired(token) {
+    const payload = parseJwt(token);
+    if (!payload || !payload.exp) return true;
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp <= now;
+}
+
+function setAuthenticatedUI(isAuthenticated) {
+    const loginOverlay = document.getElementById('loginOverlay');
+    const dashboard = document.getElementById('dashboard');
+
+    if (isAuthenticated) {
+        loginOverlay.classList.add('hidden');
+        dashboard.classList.remove('hidden');
+    } else {
+        loginOverlay.classList.remove('hidden');
+        dashboard.classList.add('hidden');
+    }
+}
+
+function logoutAdmin(message) {
+    shouldReconnect = false;
+
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+    }
+
+    if (ws) {
+        ws.onclose = null;
+        ws.onerror = null;
+        ws.onmessage = null;
+        try { ws.close(1000, 'logout'); } catch (_) {}
+        ws = null;
+    }
+
+    sessionStorage.removeItem('adminToken');
+    setAuthenticatedUI(false);
+    updateStatus(false);
+
+    const errorDiv = document.getElementById('loginError');
+    if (message) {
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+    } else {
+        errorDiv.classList.add('hidden');
+    }
+}
 
 function fmtDate(val) {
     if (!val) return 'N/D';
@@ -24,8 +86,9 @@ async function login() {
 
         if (response.ok) {
             sessionStorage.setItem('adminToken', data.token);
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
+            shouldReconnect = true;
+            setAuthenticatedUI(true);
+            errorDiv.classList.add('hidden');
             connectWebSocket();
         } else {
             errorDiv.textContent = data.error || 'Contraseña incorrecta';
@@ -40,7 +103,17 @@ async function login() {
 // ==================== WEBSOCKET ====================
 function connectWebSocket() {
     const token = sessionStorage.getItem('adminToken');
-    if (!token) return;
+    if (!token) {
+        setAuthenticatedUI(false);
+        return;
+    }
+
+    if (isTokenExpired(token)) {
+        logoutAdmin('Tu sesión expiró. Ingresá nuevamente.');
+        return;
+    }
+
+    shouldReconnect = true;
 
     const wsUrl = `ws://${window.location.host}/ws?admin_token=${token}`;
     ws = new WebSocket(wsUrl);
@@ -55,17 +128,35 @@ function connectWebSocket() {
     ws.onmessage = (event) => {
         try {
             const message = JSON.parse(event.data);
+
+            if (message.event === 'error') {
+                const code = message?.data?.code;
+                if (code === 'INVALID_ADMIN_TOKEN' || code === 'INVALID_TOKEN' || code === 'NO_TOKEN') {
+                    logoutAdmin('Sesión inválida o expirada. Ingresá nuevamente.');
+                    return;
+                }
+            }
+
             handleMessage(message);
         } catch (error) {
             console.error('Error parsing message:', error);
         }
     };
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
         console.log('❌ WebSocket desconectado');
         updateStatus(false);
+
+        const isAuthClose = event.code === 1008;
+        if (isAuthClose) {
+            logoutAdmin('Sesión inválida o expirada. Ingresá nuevamente.');
+            return;
+        }
+
         // Reconectar después de 3 segundos
-        setTimeout(connectWebSocket, 3000);
+        if (shouldReconnect) {
+            reconnectTimer = setTimeout(connectWebSocket, 3000);
+        }
     };
 
     ws.onerror = (error) => {
@@ -187,9 +278,14 @@ function updateMatchList(matches) {
 window.onload = () => {
     const token = sessionStorage.getItem('adminToken');
     if (token) {
-        document.getElementById('loginOverlay').classList.add('hidden');
-        document.getElementById('dashboard').classList.remove('hidden');
-        connectWebSocket();
+        if (isTokenExpired(token)) {
+            logoutAdmin('Tu sesión expiró. Ingresá nuevamente.');
+        } else {
+            setAuthenticatedUI(true);
+            connectWebSocket();
+        }
+    } else {
+        setAuthenticatedUI(false);
     }
     
     // Agregar event listeners

@@ -35,6 +35,7 @@ function cloneState(state: GameState): GameState {
     ...state,
     player1: clonePlayer(state.player1),
     player2: clonePlayer(state.player2),
+    scenario: state.scenario ? { ...state.scenario } : null,
   };
 }
 
@@ -155,8 +156,9 @@ export class CardRulesEngine {
       else if (dbZone === 'field_occasion') player.field_occasion = card;
       else if (dbZone === 'field_scenario') {
         newState.scenario = {
-          instance_id: card.instance_id,
-          card_id: card.card_id,
+          ...card,
+          zone: dbZone,
+          position,
           card_name: '',
           effect: '',
         };

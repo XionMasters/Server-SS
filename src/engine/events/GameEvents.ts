@@ -31,6 +31,11 @@ export const GameEventType = {
   COSMOS_CHARGED:     'COSMOS_CHARGED',     // Jugador usa "Cargar Cosmo" (+CP)
   KNIGHT_SUMMONED:    'KNIGHT_SUMMONED',    // Caballero convocado desde yomotsu/mazo/cositos
   SELECTION_RESOLVED: 'SELECTION_RESOLVED', // Jugador resolvió una selección interactiva (request_selection)
+  BA_DEALT:       'BA_DEALT',       // Perspectiva del atacante: su BA conecta (no evadido)
+  BA_RECEIVED:    'BA_RECEIVED',    // Perspectiva del defensor: recibe un BA (no evadido)
+  TA_DEALT:       'TA_DEALT',       // Perspectiva del atacante: su TA conecta
+  TA_RECEIVED:    'TA_RECEIVED',    // Perspectiva del defensor: recibe una TA
+  OBJECT_EQUIPPED: 'OBJECT_EQUIPPED', // Carta tipo ocasion/objeto entra al campo
 } as const;
 
 export type GameEventType = typeof GameEventType[keyof typeof GameEventType];
@@ -47,6 +52,8 @@ export interface EventPayloadMap {
     attack_type: 'BA' | 'TA';
     damage_to_card: number;
     damage_to_player: number;
+    technique_card_id?: string;
+    hit_count?: number;
     defender_card_id?: string;
   };
   TURN_START:    { turn: number };
@@ -82,6 +89,40 @@ export interface EventPayloadMap {
     chosen_card_id: string;
     source_card_id: string;
     zone: string;  // zona desde la que se eligió
+  };
+  BA_DEALT: {
+    attack_type: 'BA';
+    damage: number;
+    attacker_card_id: string;
+    defender_card_id?: string;
+  };
+  BA_RECEIVED: {
+    attack_type: 'BA';
+    damage: number;
+    attacker_card_id?: string;
+    defender_card_id: string;
+  };
+  TA_DEALT: {
+    attack_type: 'TA';
+    total_damage: number;
+    hit_count: number;
+    attacker_card_id: string;
+    technique_card_id: string;
+    defender_card_id?: string;
+  };
+  TA_RECEIVED: {
+    attack_type: 'TA';
+    total_damage: number;
+    hit_count: number;
+    attacker_card_id?: string;
+    technique_card_id: string;
+    defender_card_id: string;
+  };
+  OBJECT_EQUIPPED: {
+    card_id: string;
+    card_code: string;
+    owner: 1 | 2;
+    zone: string; // 'field_occasion' | 'field_helper', etc.
   };
 }
 

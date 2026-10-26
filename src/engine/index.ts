@@ -26,6 +26,7 @@ export { TurnRulesEngine } from './TurnRulesEngine';
 export { CardRulesEngine } from './CardRulesEngine';
 export { AttackRulesEngine } from './AttackRulesEngine';
 export { KnightRulesEngine } from './KnightRulesEngine';
+export { TechniqueRulesEngine, type TechniqueStats } from './TechniqueRulesEngine';
 
 // ─── Event bus & context ──────────────────────────────────────────────────────
 export { GameEventBus } from './events/GameEventBus';

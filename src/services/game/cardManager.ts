@@ -113,16 +113,16 @@ export class CardManager {
     }
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
   // PLAY CARD
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
 
   /**
    * Juega una carta desde mano al campo.
    *
    * Flujo:
-  *  1. Carga definicion de carta (cache)
-  *  2. Valida con CardRulesEngine (cosmos, zona, posicion, dentro del lock)
+    *  1. Carga definicion de carta (cache)
+    *  2. Valida con CardRulesEngine (cosmos, zona, posicion, dentro del lock)
    *  3. Aplica cosmos delta en GameState
    *  4. Mueve CardInPlay a la zona destino en BD
    *  5. Inicializa stats de caballero si aplica
@@ -132,7 +132,7 @@ export class CardManager {
     match: any,
     playerNumber: 1 | 2,
     cardId: string,        // instance_id de CardInPlay
-    targetZone: string,    // zona en notaciÃ³n cliente
+    targetZone: string,    // zona en notacion cliente
     position: number,
     actionId: string,
   ): Promise<{
@@ -144,7 +144,7 @@ export class CardManager {
     return this.runAction(
       match, playerNumber, actionId, 'card_play',
       async (state, tx) => {
-        // â”€â”€ Cargar carta con lock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Cargar carta con lock.
         const cardInPlay = await CardInPlay.findOne({
           where: { id: cardId, match_id: match.id, player_number: playerNumber, zone: 'hand' },
           lock: tx.LOCK.UPDATE,
@@ -197,19 +197,19 @@ export class CardManager {
         const zoneCurrentCount = effectiveCount;
         const positionOccupied = effectivePositionOccupied;
 
-        // â”€â”€ Validar (motor puro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Validar con el motor puro.
         const v = CardRulesEngine.validatePlayCard(
           state, playerNumber, cardId, dbZone, position,
           bdStats.cost, zoneCurrentCount, positionOccupied,
         );
         if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
 
-        // â”€â”€ Calcular nuevo estado de cosmos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Calcular nuevo estado de cosmos.
         const { newState } = CardRulesEngine.executePlayCard(
           state, playerNumber, cardId, dbZone, position, bdStats,
         );
 
-        // â”€â”€ Inicializar stats de caballero si aplica â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Inicializar stats de caballero si aplica.
         // Aplicar efectos pasivos de entrada al nodo en newState.
         // applyState persiste status_effects desde GameState a DB (step 4).
         if (bdStats.card_type === 'knight' && abilities.length > 0) {
@@ -247,7 +247,7 @@ export class CardManager {
     );
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
   // DISCARD CARD  (futuro)
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 

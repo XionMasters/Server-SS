@@ -1,0 +1,196 @@
+{
+  "_schema": 1,
+  "_note": "Formas transformadas de Gold Cloth. Estas cartas NO van al mazo (max_copies: 0); solo existen en BD como destino de la acción 'transform'. La carta de objeto/equipamiento correspondiente es la que permite la transformación.",
+  "saga": "Santuario",
+  "type": "knight",
+  "rank": "Gold Saint",
+  "cards": [
+    {
+      "code": "virgo_shun_v1",
+      "name": "Virgo Shun",
+      "rarity": "legendary",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "golds_transformed/virgo_shun_v1.webp",
+      "description": "Shun de Andrómeda encarnando la Armadura de Virgo. Sus cadenas alcanzan la divina geometría del cosmos.",
+      "_note": "Carta transformada. Corresponde a shun_andromeda_v1. No puede añadirse al mazo directamente.",
+      "tags": ["shun", "andromeda", "virgo", "gold_cloth_form", "shun_v1"],
+      "stats": {
+        "attack": 3,
+        "defense": 7,
+        "health": 8,
+        "cosmos": 12,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Barrera de Vapor",
+          "type": "activa",
+          "ability_key": "virgo_shun_steam_barrier",
+          "description": "Paga 5 CP; el portador se vuelve inmune a los ataques BA del rival hasta el próximo turno.",
+          "_pending": "Requiere status 'ba_immune' y verificación en attackManager. Por ahora aplica ar_boost temporal como placeholder.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 5 }],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 5 },
+              { "type": "no_status", "status": "ba_immune" }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 4,
+                "duration": 1,
+                "_note": "Placeholder para 'ba_immune' cuando sea soportado por attackManager"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cosmo Oculto",
+          "type": "pasiva",
+          "ability_key": "virgo_shun_hidden_cosmo",
+          "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
+          "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic basada en AR enemiga máxima. No implementado. Trigger ficticio para no dispararse.",
+          "effects": {
+            "trigger": "NONE"
+          }
+        }
+      ],
+      "max_copies": 0,
+      "unique": true,
+      "playable_zones": [],
+      "collection_id": "santuario",
+      "artist": "Will Tox"
+    },
+    {
+      "code": "virgo_shun_v2",
+      "name": "Virgo Shun",
+      "rarity": "legendary",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "golds_transformed/virgo_shun_v2.webp",
+      "description": "Shun de Andrómeda en su segunda forma con la Armadura de Virgo. Más defensivo, sus cadenas se vuelven barrera inquebrantable.",
+      "_note": "Carta transformada. Corresponde a shun_andromeda_v2. No puede añadirse al mazo directamente.",
+      "tags": ["shun", "andromeda", "virgo", "gold_cloth_form", "shun_v2"],
+      "stats": {
+        "attack": 2,
+        "defense": 8,
+        "health": 8,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Barrera de Vapor",
+          "type": "activa",
+          "ability_key": "virgo_shun_steam_barrier",
+          "description": "Paga 5 CP; el portador se vuelve inmune a los ataques BA del rival hasta el próximo turno.",
+          "_pending": "Requiere status 'ba_immune' y verificación en attackManager. Por ahora aplica ar_boost temporal como placeholder.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 5 }],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 5 },
+              { "type": "no_status", "status": "ba_immune" }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 4,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cosmo Oculto",
+          "type": "pasiva",
+          "ability_key": "virgo_shun_hidden_cosmo",
+          "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
+          "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic. No implementado.",
+          "effects": {
+            "trigger": "NONE"
+          }
+        }
+      ],
+      "max_copies": 0,
+      "unique": true,
+      "playable_zones": [],
+      "collection_id": "santuario",
+      "artist": "Will Tox"
+    },
+    {
+      "code": "virgo_shun_v3",
+      "name": "Virgo Shun",
+      "rarity": "legendary",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "image_url": "golds_transformed/virgo_shun_v3.webp",
+      "description": "Shun de Andrómeda en su forma más poderosa con la Armadura de Virgo. La perfección de Virgo se manifiesta a través de sus cadenas.",
+      "_note": "Carta transformada. Corresponde a shun_andromeda_v3. No puede añadirse al mazo directamente.",
+      "tags": ["shun", "andromeda", "virgo", "gold_cloth_form", "shun_v3"],
+      "stats": {
+        "attack": 6,
+        "defense": 8,
+        "health": 9,
+        "cosmos": 15,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Barrera de Vapor",
+          "type": "activa",
+          "ability_key": "virgo_shun_steam_barrier",
+          "description": "Paga 5 CP; el portador se vuelve inmune a los ataques BA del rival hasta el próximo turno.",
+          "_pending": "Requiere status 'ba_immune' y verificación en attackManager. Por ahora aplica ar_boost temporal como placeholder.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 5 }],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 5 },
+              { "type": "no_status", "status": "ba_immune" }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 4,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cosmo Oculto",
+          "type": "pasiva",
+          "ability_key": "virgo_shun_hidden_cosmo",
+          "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
+          "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic. No implementado.",
+          "effects": {
+            "trigger": "NONE"
+          }
+        }
+      ],
+      "max_copies": 0,
+      "unique": true,
+      "playable_zones": [],
+      "collection_id": "santuario",
+      "artist": "Will Tox"
+    }
+  ]
+}

@@ -113,6 +113,16 @@ router.registerMany({
       action_id: data.action_id
     });
   },
+  use_technique: async (ws, data) => {
+    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
+      type: 'TECHNIQUE_ATTACK',
+      match_id: data.match_id,
+      knight_id: data.knight_id,
+      technique_id: data.technique_id,
+      defender_id: data.defender_id,
+      action_id: data.action_id,
+    });
+  },
   resolve_selection: async (ws, data) => {
     await handleResolveSelection(ws as AuthenticatedWebSocket, data);
   },

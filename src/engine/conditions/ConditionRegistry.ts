@@ -155,6 +155,95 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
     const reason: string | undefined = (ctx.event.payload as any)?.death_reason;
     return reason !== cond.value;
   },
+
+  /**
+   * Verdadero si la vida del jugador activo es <= amount.
+   * Usado para habilidades que se potencian cuando el jugador está en desventaja.
+   *
+   * Ejemplo JSON: { "type": "player_lp_below", "amount": 4 }
+   */
+  player_lp_below: (cond, ctx) =>
+    ((ctx.player as any).life ?? Infinity) <= (cond.amount ?? 0),
+
+  /**
+   * Verdadero si al menos un caballero aliado en campo tiene el card_code indicado.
+   * Usado por cartas objeto/equipamiento que requieren un caballero específico en campo.
+   *
+   * Ejemplo JSON: { "type": "field_has_card_code", "code": "shun_andromeda_v1" }
+   *
+   * Nota: field_knights en PlayerRef son en realidad CardInGameState en runtime,
+   * por lo que se accede a card_code via cast a any.
+   */
+  field_has_card_code: (cond, ctx) => {
+    const code: string | undefined = cond.code as string | undefined;
+    if (!code) return false;
+    return (ctx.player.field_knights as any[]).some(
+      (k: any) => k.card_code === code,
+    );
+  },
+
+  /**
+   * Verdadero si al menos un caballero aliado en campo tiene el tag indicado.
+   * Más genérico que field_has_card_code: cubre versiones múltiples de un mismo personaje.
+   *
+   * Ejemplo JSON: { "type": "field_has_tag", "tag": "shun" }
+   *              { "type": "field_has_tag", "tag": "andromeda" }
+   */
+  field_has_tag: (cond, ctx) => {
+    const tag: string | undefined = (cond as any).tag as string | undefined;
+    if (!tag) return false;
+    return (ctx.player.field_knights as any[]).some(
+      (k: any) => Array.isArray(k.tags) && k.tags.includes(tag),
+    );
+  },
+  /**
+   * Verdadero si la carta en event.targetCardId tiene CE < amount.
+   * Usado en triggers BA_RECEIVED para condiciones sobre el atacante.
+   *
+   * Ejemplo JSON: { "type": "target_ce_below", "amount": 7 }
+   */
+  target_ce_below: (cond, ctx) => {
+    const targetId = ctx.event?.targetCardId;
+    if (!targetId) return false;
+    // Buscar en ambos jugadores (el target puede ser de cualquier bando)
+    const allKnights = [
+      ...(ctx.player.field_knights as any[]),
+      ...(ctx.opponent?.field_knights as any[] ?? []),
+    ];
+    const card = allKnights.find((k: any) => k.instance_id === targetId);
+    return card ? (card.ce ?? 0) < (cond.amount ?? 0) : false;
+  },
+
+  /**
+   * Verdadero si al menos una carta en la MANO del jugador tiene el tag indicado.
+   * Usado para habilidades que requieren descartar un tipo específico de carta.
+   *
+   * Ejemplo JSON: { "type": "hand_has_tag", "tag": "black_saint" }
+   */
+  hand_has_tag: (cond, ctx) => {
+    const tag: string | undefined = (cond as any).tag as string | undefined;
+    if (!tag) return false;
+    return (ctx.player.hand as any[]).some(
+      (c: any) => Array.isArray(c.tags) && c.tags.includes(tag),
+    );
+  },
+
+  /**
+   * Verdadero si al menos un caballero del OPONENTE en campo tiene alguno de los tags indicados.
+   * Acepta `tags` (array) o `tag` (string único).
+   *
+   * Ejemplo JSON: { "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }
+   *              { "type": "opponent_field_has_any_tag", "tag": "bronze" }
+   */
+  opponent_field_has_any_tag: (cond, ctx) => {
+    const tags: string[] = Array.isArray((cond as any).tags)
+      ? (cond as any).tags
+      : ((cond as any).tag ? [(cond as any).tag] : []);
+    if (tags.length === 0) return false;
+    return (ctx.opponent?.field_knights as any[] ?? []).some(
+      (k: any) => Array.isArray(k.tags) && tags.some(tag => k.tags.includes(tag)),
+    );
+  },
 };
 
 export const ConditionRegistry = {

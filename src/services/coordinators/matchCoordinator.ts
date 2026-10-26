@@ -22,6 +22,7 @@ import { TurnManager } from '../game/turnManager';
 import { CardManager } from '../game/cardManager';
 import { AttackManager } from '../game/attackManager';
 import { KnightManager } from '../game/knightManager';
+import { TechniqueManager } from '../game/techniqueManager';
 
 export class MatchCoordinator {
 
@@ -225,6 +226,36 @@ export class MatchCoordinator {
     if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
 
     return await KnightManager.useAbility(match, playerNumber, cardInPlayId, abilityName, actionId, targetId);
+  }
+
+  /**
+   * Ejecuta Technique Attack (TA) usando un caballero + técnica en campo.
+   * DELEGA: TechniqueManager
+   */
+  static async useTechnique(
+    matchId: string,
+    userId: string,
+    knightCardId: string,
+    techniqueCardId: string,
+    defenderCardId: string | null,
+    actionId: string,
+  ) {
+    const match = await Match.findByPk(matchId);
+    if (!match) return { success: false, error: 'Match no encontrado' };
+
+    const playerNumber = this._getPlayerNumber(match, userId);
+    if (!playerNumber) return { success: false, error: 'No eres jugador de este match' };
+
+    if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
+
+    return await TechniqueManager.techniqueAttack(
+      match,
+      playerNumber,
+      knightCardId,
+      techniqueCardId,
+      defenderCardId,
+      actionId,
+    );
   }
 
   /**

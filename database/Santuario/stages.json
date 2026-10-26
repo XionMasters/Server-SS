@@ -1,0 +1,48 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'stage'. Efectos globales que afectan toda la partida mientras est\u00e9n activos.",
+  "saga": "Santuario",
+  "type": "stage",
+  "cards": [
+    {
+      "code": "graude_foundation_coliseum",
+      "name": "Coliseo de la Fundaci\u00f3n Graude",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "stages/graude_foundation_coliseum.webp",
+      "description": "Al final del turno, si el jugador activo declar\u00f3 al menos un ataque, gana +1 PCP para el siguiente turno. Todos los caballeros en Modo Evasi\u00f3n tienen +10% de probabilidad de esquivar BA.",
+      "abilities": [
+        {
+          "name": "Esp\u00edritu de Combate",
+          "type": "campo",
+          "ability_key": "graude_combat_spirit",
+          "description": "Al final del turno, si el jugador activo declar\u00f3 al menos un ataque (BA o TA), gana +1 PCP adicional para el siguiente turno.",
+          "_pending": "Requiere trigger TURN_END + condici\u00f3n 'attack_declared_this_turn' en GameState. Pendiente Fase 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        },
+        {
+          "name": "Regla del Coliseo",
+          "type": "campo",
+          "ability_key": "graude_evasion_boost",
+          "description": "Mientras este escenario est\u00e9 activo, todos los caballeros en Modo Evasi\u00f3n tienen +10% de probabilidad de esquivar BA.",
+          "_pending": "Requiere modificador global de evasi\u00f3n inyectado en AttackRulesEngine desde FieldEffectsEngine. Pendiente Fase 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "santuario",
+      "artist": null
+    }
+  ]
+}

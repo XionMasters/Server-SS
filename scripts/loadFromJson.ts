@@ -49,6 +49,15 @@ interface CardStats {
   defense_reduction?: number;
 }
 
+interface TechniqueStats {
+  hit_count: number;
+  hit_ce: number;
+  ta_cost: number;
+  compatible_tags?: string[];
+  ignore_ar?: boolean;
+  ta_effects?: Array<{ type: string; value?: number; turns?: number }>;
+}
+
 interface CardEntry {
   code: string;
   name: string;
@@ -64,7 +73,9 @@ interface CardEntry {
   playable_zones?: string[];
   collection_id?: string | null;
   artist?: string | null;
+  tags?: string[];
   stats?: CardStats;
+  technique_stats?: TechniqueStats;
   abilities?: AbilityDef[];
   // Allow unknown extra fields (silently skipped)
   [key: string]: unknown;
@@ -119,13 +130,13 @@ async function upsertCard(
       `INSERT INTO cards (
          id, code, name, type, rarity, cost, generate,
          description, image_url, faction, element,
-         max_copies, "unique", playable_zones, collection_id, artist,
+         max_copies, "unique", playable_zones, collection_id, artist, tags,
          created_at, updated_at
        )
        VALUES (
          uuid_generate_v4(), :code, :name, :type, :rarity, :cost, :generate,
          :description, :image_url, :faction, :element,
-         :max_copies, :unique, :playable_zones, :collection_id, :artist,
+         :max_copies, :unique, :playable_zones, :collection_id, :artist, :tags,
          NOW(), NOW()
        )
        ON CONFLICT (code) DO UPDATE SET
@@ -143,6 +154,7 @@ async function upsertCard(
          playable_zones = EXCLUDED.playable_zones,
          collection_id  = EXCLUDED.collection_id,
          artist         = EXCLUDED.artist,
+         tags           = EXCLUDED.tags,
          updated_at  = NOW()
        RETURNING id`,
       {
@@ -162,6 +174,7 @@ async function upsertCard(
           playable_zones: `{${(card.playable_zones ?? ['battlefield']).join(',')}}`,
           collection_id:  card.collection_id ?? '',
           artist:         card.artist ?? '',
+          tags:           card.tags ? `{${card.tags.join(',')}}` : '{}',
         },
         type: QueryTypes.SELECT,
         transaction: t,
@@ -210,7 +223,42 @@ async function upsertCard(
       );
     }
 
-    // 3. Replace card_abilities (delete + insert — abilities don't have stable PKs)
+    // 3. Upsert card_techniques (if technique_stats present)
+    const ts = card.technique_stats;
+    if (ts) {
+      await sequelize.query(
+        `INSERT INTO card_techniques (
+           card_id, hit_count, hit_ce, ta_cost, compatible_tags, ignore_ar, ta_effects
+         )
+         VALUES (
+           :card_id, :hit_count, :hit_ce, :ta_cost, :compatible_tags, :ignore_ar, :ta_effects::jsonb
+         )
+         ON CONFLICT (card_id) DO UPDATE SET
+           hit_count       = EXCLUDED.hit_count,
+           hit_ce          = EXCLUDED.hit_ce,
+           ta_cost         = EXCLUDED.ta_cost,
+           compatible_tags = EXCLUDED.compatible_tags,
+           ignore_ar       = EXCLUDED.ignore_ar,
+           ta_effects      = EXCLUDED.ta_effects`,
+        {
+          replacements: {
+            card_id:         cardId,
+            hit_count:       ts.hit_count ?? 1,
+            hit_ce:          ts.hit_ce ?? 0,
+            ta_cost:         ts.ta_cost ?? 0,
+            compatible_tags: ts.compatible_tags?.length
+              ? `{${(ts.compatible_tags as string[]).join(',')}}`
+              : '{}',
+            ignore_ar:       ts.ignore_ar ?? false,
+            ta_effects:      JSON.stringify(ts.ta_effects ?? []),
+          },
+          type: QueryTypes.INSERT,
+          transaction: t,
+        }
+      );
+    }
+
+    // 4. Replace card_abilities (delete + insert — abilities don't have stable PKs)
     if (card.abilities && card.abilities.length > 0) {
       await sequelize.query(
         `DELETE FROM card_abilities WHERE card_id = :card_id`,
@@ -238,7 +286,7 @@ async function upsertCard(
               name:        ability.name,
               ability_key: abilityKey,
               type:        ability.type,
-              description: ability.description,
+              description: ability.description ?? '',
               conditions:  JSON.stringify(conditionsClean),
               effects:     JSON.stringify(effectsClean),
             },

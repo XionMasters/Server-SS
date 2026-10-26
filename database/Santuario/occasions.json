@@ -9,11 +9,13 @@
       "cost": 2,
       "faction": "Athena",
       "element": "light",
-      "image": "occasions/athena_blessing.webp",
+      "image_url": "occasions/athena_blessing.webp",
+      "description": "Cura 3 LP a todos los caballeros aliados en campo.",
       "abilities": [
         {
           "name": "Divine Protection",
-          "type": "instant",
+          "type": "activa",
+          "description": "Al jugarse, cura 3 LP a todos los caballeros aliados en campo.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
@@ -45,7 +47,8 @@
       "abilities": [
         {
           "name": "Resurrection Call",
-          "type": "instant",
+          "type": "activa",
+          "description": "Elige un Caballero del Yomotsu y llévalo al campo de batalla.",
           "ability_key": "resurrection_call",
           "effects": {
             "trigger": "CARD_PLAYED",
@@ -85,7 +88,8 @@
       "abilities": [
         {
           "name": "Cosmic Offering",
-          "type": "instant",
+          "type": "activa",
+          "description": "Descarta una carta de tu mano. Roba 2 cartas del mazo.",
           "ability_key": "cosmic_offering",
           "effects": {
             "trigger": "CARD_PLAYED",
@@ -103,6 +107,44 @@
                   { "type": "draw_card", "amount": 2 }
                 ]
               }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "blood_price",
+      "name": "Precio de Sangre",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "image_url": "occasions/blood_price.webp",
+      "description": "Paga 1 PLP; causa 1 punto de daño directo al jugador rival.",
+      "abilities": [
+        {
+          "name": "Precio de Sangre",
+          "type": "activa",
+          "ability_key": "blood_price",
+          "description": "Al jugarse, el usuario paga 1 PLP y el rival recibe 1 punto de daño directo a su vida.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" }
+            ],
+            "cost": [
+              { "type": "life", "amount": 1 }
+            ],
+            "actions": [
+              { "type": "apply_player_damage", "target": "opponent", "amount": 1 }
             ]
           }
         }

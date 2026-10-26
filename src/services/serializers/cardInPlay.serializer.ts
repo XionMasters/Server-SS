@@ -1,4 +1,5 @@
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../engine/StatusEffects';
+import { ZoneMapper } from '../../utils/ZoneMapper';
 
 export function serializeCardInPlay(cardInPlay: any) {
   // Cartas en deck: payload mínimo — el cliente solo necesita el conteo, nunca las renderiza
@@ -15,6 +16,7 @@ export function serializeCardInPlay(cardInPlay: any) {
 
   const card = cardInPlay.get('card') as any;
   const knight = card?.card_knight;
+  const technique = card?.card_technique;
 
   // Parsear status_effects desde BD
   const effects: StatusEffect[] = parseStatusEffects(cardInPlay.status_effects);
@@ -35,6 +37,7 @@ export function serializeCardInPlay(cardInPlay: any) {
 
   const cardData: any = {
     id: card?.id,
+    code: card?.code,
     name: card?.name,
     type: card?.type,
     rarity: card?.rarity,
@@ -43,7 +46,8 @@ export function serializeCardInPlay(cardInPlay: any) {
     image_url: card?.image_url,
     description: card?.description,
     faction: card?.faction || '',
-    element: card?.element || ''
+    element: card?.element || '',
+    tags: card?.tags || [],
   };
 
   if (knight) {
@@ -57,8 +61,17 @@ export function serializeCardInPlay(cardInPlay: any) {
     };
   }
 
+  if (technique) {
+    cardData.card_technique = {
+      hit_count: technique.hit_count || 1,
+      hit_ce: technique.hit_ce || 0,
+      ta_cost: technique.ta_cost || 0,
+      compatible_tags: technique.compatible_tags || [],
+    };
+  }
+
   // Traducir zona interna de BD a zona que usa el cliente
-  const clientZone = cardInPlay.zone === 'field_support' ? 'field_technique' : cardInPlay.zone;
+  const clientZone = ZoneMapper.toClient(cardInPlay.zone);
 
   return {
     id: cardInPlay.id,

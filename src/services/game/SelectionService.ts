@@ -162,6 +162,27 @@ export class SelectionService {
           }
         }
 
+        // 8c. Transformaciones: actualizar card_id en BD para cartas que cambiaron de forma.
+        // Los stats (CE, AR, HP, CP) ya están actualizados en actionResult.state y los
+        // persiste applyState (step 10). Solo se necesita actualizar el card_id aquí.
+        if (Array.isArray(actionResult.extras.transforms)) {
+          for (const t of actionResult.extras.transforms as { instance_id: string; into_code: string }[]) {
+            const newCardDef = await Card.findOne({
+              where: { code: t.into_code },
+              attributes: ['id'],
+              transaction: tx,
+            });
+            if (!newCardDef) {
+              console.warn(`[SelectionService] transform: carta destino no encontrada en DB: "${t.into_code}"`);
+              continue;
+            }
+            await CardInPlay.update(
+              { card_id: (newCardDef as any).id },
+              { where: { id: t.instance_id, match_id }, transaction: tx },
+            );
+          }
+        }
+
         // 9. Limpiar pending_selection
         actionResult.state.pending_selection = null;
 
@@ -281,6 +302,18 @@ export class SelectionService {
           throw new Error(`La carta elegida no es de tipo "${pending.filter.type}"`);
         }
       }
+    } else if (pending.zone === 'field') {
+      // Selección de caballero en campo (ej: Armadura de Virgo → Shun)
+      const player = pending.player_number === 1 ? state.player1 : state.player2;
+      const card = player.field_knights.find(c => c.instance_id === chosenCardId);
+      if (!card) throw new Error('La carta elegida no está en tu campo');
+
+      if (pending.filter?.type && card.card_type !== pending.filter.type) {
+        throw new Error(`La carta elegida no es de tipo "${pending.filter.type}"`);
+      }
+      if (pending.filter?.code && (card as any).card_code !== pending.filter.code) {
+        throw new Error('La carta elegida no cumple el requisito de esta habilidad');
+      }
     }
   }
 
@@ -379,6 +412,7 @@ export class SelectionService {
       attacked_this_turn: card.has_attacked_this_turn ?? false,
       status_effects: effects,
       card_code: cardData?.code ?? '',
+      tags: (cardData as any)?.tags ?? [],
       raw_abilities,
       base_ce,
       base_ar,

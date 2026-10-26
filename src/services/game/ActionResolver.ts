@@ -23,6 +23,7 @@ import { AbilityEngine } from '../../engine/abilities/AbilityEngine';
 import { parseAbilityDef, getCosmosCost, requiresClientTarget } from '../../engine/abilities/AbilityDefinition';
 import { type ConditionContext } from '../../engine/conditions/ConditionRegistry';
 import { GameEventType, type GameEvent } from '../../engine/events/GameEvents';
+import { ZoneMapper } from '../../utils/ZoneMapper';
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -100,6 +101,7 @@ export class ActionResolver {
             card,
             opponentKnights,
             emptyKnightSlots,
+            cardsInPlay,
             matchState
           )
         };
@@ -126,6 +128,7 @@ export class ActionResolver {
     knight: any,
     opponentKnights: any[],
     emptySlots: number[],
+    cardsInPlay: any[],
     matchState: any
   ): KnightValidActions {
     const hasActed: boolean = knight.has_attacked_this_turn ?? false;
@@ -150,8 +153,23 @@ export class ActionResolver {
       && this._noScenarioPreventsEvasion(matchState);
     const canDefend   = canActAtAll
       && currentMode !== 'defense'
-      && (knight.card?.card_knight?.can_defend !== false);
+      && (this._getCardPayload(knight)?.card_knight?.can_defend !== false);
     const canSacrifice = !hasActed; // El sacrificio siempre usa la acción del caballero
+
+    const ownTechniques = cardsInPlay.filter(
+      c => c.player_number === knight.player_number && ZoneMapper.isSupportZone(c.zone)
+    );
+    const knightTags: string[] = this._getCardPayload(knight)?.tags ?? [];
+    const compatibleTechniques = ownTechniques.filter(t => {
+      const tStats = this._getCardPayload(t)?.card_technique;
+      if (!tStats) return false;
+      const compatibleTags: string[] = tStats.compatible_tags ?? [];
+      const taCost: number = tStats.ta_cost ?? 0;
+      if ((knight.current_cosmos ?? 0) < taCost) return false;
+      return compatibleTags.some(tag => knightTags.includes(tag));
+    });
+    const canUseTechnique = canActAtAll && compatibleTechniques.length > 0;
+    const techniqueTargets = canUseTechnique ? this._resolveAttackTargets(opponentKnights) : [];
 
     // ── Habilidades activas ─────────────────────────────────────────────
     // Delegado al AbilityRegistry; este método no crece al agregar cartas nuevas.
@@ -170,9 +188,8 @@ export class ActionResolver {
       can_sacrifice: canSacrifice,
       can_use_ability: canUseAbility,
       active_abilities: activeAbilities,
-      // ─── Por implementar ───────────────────────────────────────────────────
-      can_use_technique: false,
-      technique_targets: [],
+      can_use_technique: canUseTechnique,
+      technique_targets: techniqueTargets,
     };
   }
 
@@ -285,13 +302,13 @@ export class ActionResolver {
     matchState: any
   ): HandCardValidActions {
     const cosmos: number = matchState[`player${playerNumber}_cosmos`] ?? 0;
-    const cardCost: number = card.card?.cost ?? 0;
+    const cardCost: number = this._getCardPayload(card)?.cost ?? 0;
 
     if (cosmos < cardCost) {
       return { can_play: false, play_slots: [] };
     }
 
-    const cardType: string = card.card?.type ?? '';
+    const cardType: string = this._getCardPayload(card)?.type ?? '';
     const playSlots = this._getPlaySlots(cardType, playerNumber, cardsInPlay);
 
     return {
@@ -374,7 +391,7 @@ export class ActionResolver {
   /**
    * Compatibilidad de zonas de soporte:
    * - Cliente/serializado: field_technique
-   * - BD interna/admin: field_support
+   * - BD interna: field_support
    */
   private static _occupiedSupportPositions(
     cardsInPlay: any[],
@@ -385,9 +402,13 @@ export class ActionResolver {
         .filter(
           c =>
             c.player_number === playerNumber
-            && (c.zone === 'field_technique' || c.zone === 'field_support')
+            && ZoneMapper.isSupportZone(c.zone)
         )
         .map(c => c.position)
     );
+  }
+
+  private static _getCardPayload(card: any): any {
+    return card?.base_data || card?.card || {};
   }
 }

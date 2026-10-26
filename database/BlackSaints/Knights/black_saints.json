@@ -1,0 +1,674 @@
+{
+  "_schema": 1,
+  "_note": "Black Saints series. Las habilidades 'Dark Effect' aplican modificadores one-shot que se consumen en el próximo Technique Attack (ta_* status). El motor de TA las consumirá cuando esté implementado. La pasiva 'Black Saint' (+3 Ce/Ar vs Bronze/Silver) se aplica al inicio del turno del portador.",
+  "saga": "Black Saint Series",
+  "type": "knight",
+  "rank": "Black Saint",
+  "cards": [
+    {
+      "code": "black_altar_avido",
+      "name": "Black Altar Avido",
+      "rarity": "epic",
+      "cost": 6,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Altar.webp",
+      "description": "La líder de los Black Saints. Sus técnicas oscuras permiten reciclar aliados caídos para mantener una ventaja de cartas implacable.",
+      "tags": ["black_saint", "altar", "avido"],
+      "stats": {
+        "attack": 6,
+        "defense": 4,
+        "health": 10,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Black Alchemy",
+          "type": "activa",
+          "description": "Descarta 1 Black Saint de tu mano; roba 2 cartas.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "discard", "amount": 1 }],
+            "conditions": [{ "type": "hand_has_tag", "tag": "black_saint" }],
+            "actions": [
+              { "type": "draw_card", "amount": 2 }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_andromeda",
+      "name": "Black Andromeda",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Andromeda.webp",
+      "description": "La contraparte oscura de Shun. Sus cadenas corrompidas paralizan y envenenan.",
+      "tags": ["black_saint", "andromeda"],
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario causa las condiciones PAR y PSN al objetivo.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_causes_par_psn", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_aquila",
+      "name": "Black Aquila",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Aquila.webp",
+      "description": "El Aguila Negra. Sus técnicas siempre dejan al enemigo paralizado.",
+      "tags": ["black_saint", "aquila"],
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 8,
+        "cosmos": 9,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario causa la condición PAR al objetivo.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_causes_par", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_crow",
+      "name": "Black Crow",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Crow.webp",
+      "description": "El Cuervo Negro invoca secuaces oscuros para fortalecer su posición.",
+      "tags": ["black_saint", "crow"],
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario convoca un Token 'Cuervo' [Lp=1 Ce=1 Ar=0 Cp=0].",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_summon_crow_token", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_cygnus",
+      "name": "Black Cygnus",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Cygnus.webp",
+      "description": "El Cisne Negro. Sus técnicas drenadas dejan al enemigo sin cosmos para actuar.",
+      "tags": ["black_saint", "cygnus"],
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario reduce el atributo Cp del objetivo a 0.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_drains_target_cosmos", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_dragon",
+      "name": "Black Dragon",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Dragon.webp",
+      "description": "El Dragón Negro. Sus técnicas corroen la armadura del enemigo.",
+      "tags": ["black_saint", "dragon"],
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario reduce el atributo AR del objetivo en 2 de forma permanente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_reduce_ar_2", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_hound_yudo",
+      "name": "Black Hound Yudo",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Hound_Yudo.webp",
+      "description": "El Lebrel Negro Yudo. Sus técnicas oscuras otorgan una momentánea invulnerabilidad a las condiciones negativas.",
+      "tags": ["black_saint", "hound", "yudo"],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario otorga al portador inmunidad a condiciones negativas.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_immune_negative", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_hound",
+      "name": "Black Hound",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Hound.webp",
+      "description": "El Lebrel Negro. Sus técnicas revelan los secretos del oponente.",
+      "tags": ["black_saint", "hound"],
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario revela la mano del oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_reveal_hand", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_lacerta",
+      "name": "Black Lacerta",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Lacerta.webp",
+      "description": "La Lacerta Negra. Sus técnicas amplifican el daño directo.",
+      "tags": ["black_saint", "lacerta"],
+      "stats": {
+        "attack": 3,
+        "defense": 1,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario inflige 3 LP de daño extra al jugador oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_extra_damage_3", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_ophiuchus",
+      "name": "Black Ophiuchus",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Ophiuchus.webp",
+      "description": "El Ophiuchus Negro. Sus técnicas eliminan el apoyo del oponente.",
+      "tags": ["black_saint", "ophiuchus"],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique del usuario destruye la carta Auxiliar del oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_destroy_assistant", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_pegasus",
+      "name": "Black Pegasus",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Pegasus.webp",
+      "description": "El Pegaso Negro. Sus técnicas envenenan lentamente al enemigo.",
+      "tags": ["black_saint", "pegasus"],
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 9,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario causa la condición PSN al soldado oponente objetivo.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_causes_psn", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_phoenix",
+      "name": "Black Phoenix",
+      "rarity": "rare",
+      "cost": 0,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Phoenix.webp",
+      "description": "El Fénix Negro. Sus técnicas drenan el cosmos del rival.",
+      "tags": ["black_saint", "phoenix"],
+      "stats": {
+        "attack": 3,
+        "defense": 1,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario reduce 2 CP del cosmos del jugador oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_drain_cosmos_2", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    },
+    {
+      "code": "black_whale_alegre",
+      "name": "Black Whale Alegre",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Whale_Alegre.webp",
+      "description": "La Ballena Negra Alegre. Sus técnicas atraviesan la defensa más sólida.",
+      "tags": ["black_saint", "whale", "alegre"],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dark Effect",
+          "type": "activa",
+          "description": "El próximo Technique Attack del usuario ignora el Modo Defensa del objetivo.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "actions": [
+              { "type": "apply_status", "status": "ta_ignore_block_mode", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": "Willytox"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import Match from '../../models/Match';
 import Card from '../../models/Card';
 import CardKnight from '../../models/CardKnight';
+import CardTechnique from '../../models/CardTechnique';
 import CardInPlay from '../../models/CardInPlay';
 import User from '../../models/User';
 import { GameStateBuilder } from '../game/GameStateBuilder';
@@ -38,8 +39,11 @@ export class MatchStateService {
           {
             model: Card,
             as: 'card',
-            attributes: ['id', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element'],
-            include: [{ model: CardKnight, as: 'card_knight' }]
+            attributes: ['id', 'code', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element', 'tags'],
+            include: [
+              { model: CardKnight, as: 'card_knight' },
+              { model: CardTechnique, as: 'card_technique' },
+            ]
           }
         ]
       });

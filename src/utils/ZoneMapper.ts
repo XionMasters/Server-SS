@@ -32,6 +32,9 @@ export type DbZone =
   | 'yomotsu'
   | 'cositos';
 
+export const CLIENT_SUPPORT_ZONE: ClientZone = 'field_technique';
+export const DB_SUPPORT_ZONE: DbZone = 'field_support';
+
 /** Límite de cartas por zona (BD). 0 = sin límite. */
 const ZONE_LIMITS: Record<string, number> = {
   field_knight:   5,
@@ -44,12 +47,17 @@ const ZONE_LIMITS: Record<string, number> = {
 export const ZoneMapper = {
   /** Zona del cliente → zona de BD. */
   toDatabase(zone: string): string {
-    return zone === 'field_technique' ? 'field_support' : zone;
+    return zone === CLIENT_SUPPORT_ZONE ? DB_SUPPORT_ZONE : zone;
   },
 
   /** Zona de BD → zona del cliente. */
   toClient(zone: string): string {
-    return zone === 'field_support' ? 'field_technique' : zone;
+    return zone === DB_SUPPORT_ZONE ? CLIENT_SUPPORT_ZONE : zone;
+  },
+
+  /** Devuelve true si la zona pertenece a la fila compartida de soporte/tecnica. */
+  isSupportZone(zone: string): boolean {
+    return zone === CLIENT_SUPPORT_ZONE || zone === DB_SUPPORT_ZONE;
   },
 
   /**

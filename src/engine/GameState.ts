@@ -11,7 +11,7 @@
  */
 
 // ─── Zona origen para selecciones interactivas ─────────────────────────────
-export type ZoneSelectSource = 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique';
+export type ZoneSelectSource = 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique' | 'field';
 
 // ─── Zona destino para envío de cartas ──────────────────────────────────────
 export type ZoneDestination = 'hand' | 'field' | 'cositos';
@@ -21,6 +21,10 @@ export interface SelectionFilter {
   type?: string;
   /** Solo mostrar las primeras N cartas del mazo (top N para deck search). */
   top_n?: number;
+  /** Filtrar por card_code exacto (ej: 'shun_andromeda_v1'). */
+  code?: string;
+  /** Filtrar por tag (ej: 'shun'). Más genérico que code: selecciona cualquier carta con ese tag. */
+  tag?: string;
 }
 
 /**
@@ -138,6 +142,13 @@ export interface CardInGameState {
   card_code: string;
 
   /**
+   * Tags de la carta base (ej: ['shun', 'andromeda', 'bronze']).
+   * Propagados desde Card.tags al momento del mapeo.
+   * Permiten condiciones/filtros que matchean grupos de cartas sin depender de codes exactos.
+   */
+  tags: string[];
+
+  /**
    * Habilidades de la carta pre-parseadas, listas para PassiveTriggerEngine.
    * Vacío si la carta no tiene habilidades o no se cargaron las relaciones.
    */
@@ -155,9 +166,7 @@ export interface CardInGameState {
   base_ar: number;
 }
 
-export interface GameScenario {
-  instance_id: string;
-  card_id: string;
+export interface GameScenario extends CardInGameState {
   card_name: string;
   effect: string;
 }

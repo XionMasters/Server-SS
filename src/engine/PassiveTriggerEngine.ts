@@ -45,6 +45,12 @@ const PERSPECTIVE_FILTER: Partial<Record<GameEventType, 'same' | 'opposite'>> = 
   ALLY_DREW_CARD:     'same',      // "mi aliado robó"       → equipo que robó
   OPPONENT_DREW_CARD: 'opposite',  // "mi oponente robó"     → equipo contrario al que robó
   ALLY_DIED:          'same',      // "mi aliado murió"      → equipo del caballero caído
+  BA_DEALT:           'same',      // "yo di un BA"          → equipo del atacante
+  BA_RECEIVED:        'same',      // "yo recibí un BA"      → equipo del defensor
+  TA_DEALT:           'same',      // "yo di una TA"         → equipo del atacante
+  TA_RECEIVED:        'same',      // "yo recibí una TA"     → equipo del defensor
+  OBJECT_EQUIPPED:    'same',      // "mi equipo jugó una ocasión" → equipo que la jugó
+  TURN_START:         'same',      // "mi turno empieza"     → equipo del jugador activo
   // KNIGHT_DIED sin filtro: cualquier carta puede reaccionar (incluyendo enemigos)
 };
 

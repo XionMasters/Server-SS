@@ -190,6 +190,115 @@
       ],
       "collection_id": "santuario",
       "artist": null
+    },
+    {
+      "code": "aioros_sagittarius",
+      "name": "Aioros de Sagitario",
+      "rarity": "gold",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "golds/22.webp",
+      "description": "Caballero de Oro de Sagitario, protector incorruptible de Athena. Sus flechas doradas atraviesan cualquier defensa.",
+      "tags": ["aioros", "sagittarius", "gold"],
+      "stats": {
+        "attack": 9,
+        "defense": 5,
+        "health": 12,
+        "cosmos": 12,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Flecha Dorada",
+          "type": "pasiva",
+          "description": "Los BA de Aioros ignoran el Modo Evasión del defensor.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_evade_mode",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Plegaria a Athena",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Aioros ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 3 },
+              { "type": "no_status", "status": "ignore_armor" }
+            ],
+            "actions": [
+              { "type": "apply_status", "status": "ignore_armor", "target": "self" }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "deathmask_cancer",
+      "name": "Deathmask de Cancer",
+      "rarity": "gold",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Hades",
+      "element": "dark",
+      "image_url": "golds/23.webp",
+      "description": "Traicionero Caballero de Oro de Cancer. Colecciona las máscaras de sus víctimas y domina el paso al inframundo de Yomotsu.",
+      "tags": ["deathmask", "cancer", "gold", "yomotsu"],
+      "stats": {
+        "attack": 8,
+        "defense": 5,
+        "health": 12,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Máscara de la Muerte",
+          "type": "pasiva",
+          "description": "Cuando un caballero rival muere por cualquier causa, Deathmask gana +1 CE permanente (máx. +5).",
+          "_pending": "Requiere trigger KNIGHT_DIED con condition 'enemy_died'. Pendiente Fase 2.",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "actions": []
+          }
+        },
+        {
+          "name": "Yomotsu Hirasaka",
+          "type": "activa",
+          "description": "Paga 4 CP; envía el caballero defensor directamente al Yomotsu del rival (sin pasar por el campo).",
+          "_pending": "Requiere acción 'send_to_yomotsu' con target seleccionado. Pendiente Fase 2.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "conditions": [
+              { "type": "cosmos_min", "amount": 4 }
+            ],
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

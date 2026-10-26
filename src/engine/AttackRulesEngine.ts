@@ -18,22 +18,24 @@
  */
 
 import { CombatModeResolvers } from './combat/CombatResolvers';
-import { CombatContext } from './combat/CombatTypes';
+import { CombatContext, findCardInPlayerField } from './combat/CombatTypes';
 import { SeededRNG } from './combat/RNG';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
 import {
-  StatusEffect,
   StatusEffectType,
-  consumeBasicAttackEffects,
   deriveModeFromEffects,
   getBasicAttackCeMultiplier,
   isModeEffectType,
   setModeEffect,
+  attackerIgnoresBlockMode,
+  attackerIgnoresEvadeMode,
+  isImmobilized,
 } from './StatusEffects';
 import { createEngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
 import { createEvent } from './events/GameEvents';
 import type { GameEvent } from './events/GameEvents';
+import { applyBasicAttackSideEffects } from './attack/AttackEffectRegistry';
 
 export class AttackRulesEngine {
   private static _validateTurnAndPhase(
@@ -89,6 +91,11 @@ export class AttackRulesEngine {
     // Validar que no esté exhausto
     if (attacker.is_exhausted) {
       return { valid: false, error: 'Carta atacante está exhausto' };
+    }
+
+    // Verificar que el atacante no esté inmovilizado (frozen / paralyzed)
+    if (isImmobilized(attacker.status_effects ?? [])) {
+      return { valid: false, error: 'Carta atacante está inmovilizada y no puede atacar este turno' };
     }
 
     // Si se especifica defensor, validar que exista
@@ -157,8 +164,16 @@ export class AttackRulesEngine {
       defenderPlayer,
     };
 
+    // Modo efectivo del defensor: puede ser anulado por efectos del atacante
+    const attackerEffects = attacker.status_effects ?? [];
+    const defenderRawMode = defender.mode ?? 'normal';
+    const effectiveDefenderMode: string =
+      (defenderRawMode === 'defense' && attackerIgnoresBlockMode(attackerEffects)) ? 'normal' :
+      (defenderRawMode === 'evasion' && attackerIgnoresEvadeMode(attackerEffects)) ? 'normal' :
+      defenderRawMode;
+
     const resolver =
-      CombatModeResolvers[defender.mode ?? 'normal'] ??
+      CombatModeResolvers[effectiveDefenderMode] ??
       CombatModeResolvers.normal;
 
     const result = resolver(combatCtx, rng);
@@ -222,12 +237,57 @@ export class AttackRulesEngine {
         },
       }),
     );
+
+    // BA_DEALT — perspectiva del atacante (dispara pasivas del atacante)
+    engineCtx.bus.emit(
+      createEvent({
+        type: 'BA_DEALT',
+        playerNumber,
+        sourceCardId: attackerCardId,
+        ...(defenderCardId ? { targetCardId: defenderCardId } : {}),
+        origin: 'system',
+        payload: {
+          attack_type: 'BA',
+          damage: damageToCard,
+          attacker_card_id: attackerCardId,
+          ...(defenderCardId ? { defender_card_id: defenderCardId } : {}),
+        },
+      }),
+    );
+
+    // BA_RECEIVED — perspectiva del defensor (dispara pasivas del defensor)
+    if (defenderCardId) {
+      const defenderPlayerNumber: 1 | 2 = playerNumber === 1 ? 2 : 1;
+      engineCtx.bus.emit(
+        createEvent({
+          type: 'BA_RECEIVED',
+          playerNumber: defenderPlayerNumber,
+          sourceCardId: defenderCardId,
+          targetCardId: attackerCardId,
+          origin: 'system',
+          payload: {
+            attack_type: 'BA',
+            damage: damageToCard,
+            attacker_card_id: attackerCardId,
+            defender_card_id: defenderCardId,
+          },
+        }),
+      );
+    }
   }
 
   defenderPlayer.life = Math.max(0, defenderPlayer.life - damageToPlayer);
 
-  // Consumir efectos one-shot de BA de forma declarativa (ignore_armor, ce_double, etc.)
-  attacker.status_effects = consumeBasicAttackEffects(attacker.status_effects ?? []);
+  // Side-effects de BA (registry declarativo): consume one-shot + aplica parálisis/cleave.
+  applyBasicAttackSideEffects({
+    engineCtx,
+    attacker,
+    attackerCardId,
+    defenderCardId,
+    playerNumber,
+    evaded,
+  });
+
   // Restaurar CE original para no propagar el cambio temporal al estado persistente
   attacker.ce = _origAttackerCe;
 
@@ -296,24 +356,9 @@ export class AttackRulesEngine {
   // Helpers privados
   // ══════════════════════════════════════════════════════════════════════════
 
-  /** Busca una carta en todas las zonas de campo del jugador por instance_id. */
+  /** Delegado a la utilidad compartida de CombatTypes. */
   private static _findCardInField(player: Player, cardId: string): CardInGameState | null {
-    const zones: (CardInGameState[] | CardInGameState | null)[] = [
-      player.field_knights,
-      player.field_techniques,
-      player.field_helper,
-      player.field_occasion,
-    ];
-
-    for (const zone of zones) {
-      if (Array.isArray(zone)) {
-        const found = zone.find(c => c.instance_id === cardId);
-        if (found) return found;
-      } else if (zone && zone.instance_id === cardId) {
-        return zone;
-      }
-    }
-    return null;
+    return findCardInPlayerField(player, cardId);
   }
 }
 

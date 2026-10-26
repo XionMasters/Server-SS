@@ -3,6 +3,7 @@ import User from './User';
 import Card from './Card';
 import UserCard from './UserCard';
 import CardKnight from './CardKnight';
+import CardTechnique from './CardTechnique';
 import CardAbility from './CardAbility';
 import CardTranslation from './CardTranslation';
 import Pack from './Pack';
@@ -42,10 +43,12 @@ UserCard.belongsTo(Card, { foreignKey: 'card_id', as: 'card' });
 
 // Configurar relaciones de Card con sus detalles
 Card.hasOne(CardKnight, { foreignKey: 'card_id', as: 'card_knight' });
+Card.hasOne(CardTechnique, { foreignKey: 'card_id', as: 'card_technique' });
 Card.hasMany(CardAbility, { foreignKey: 'card_id', as: 'card_abilities' });
 Card.hasMany(CardTranslation, { foreignKey: 'card_id', as: 'translations' });
 
 CardKnight.belongsTo(Card, { foreignKey: 'card_id', as: 'card' });
+CardTechnique.belongsTo(Card, { foreignKey: 'card_id', as: 'card' });
 CardAbility.belongsTo(Card, { foreignKey: 'card_id', as: 'card' });
 CardTranslation.belongsTo(Card, { foreignKey: 'card_id', as: 'card' });
 

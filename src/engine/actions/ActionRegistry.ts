@@ -35,7 +35,7 @@ const STATUS_INTERACTIONS: Record<string, { blockedBy?: string[]; removes?: stri
   poison_immune: { removes: ['poison'] },
 };
 import type { ActionDefinition, ApplyStatusAction, CoinFlipAction, KillAction } from '../abilities/AbilityDefinition';
-import { addOrRefreshEffect, removeEffect, type StatusEffectType } from '../StatusEffects';
+import { addOrRefreshEffect, removeEffect, computeCeBonus, computeArBonus, type StatusEffectType } from '../StatusEffects';
 import { createEvent, type GameEvent } from '../events/GameEvents';
 import type { GameEventBus } from '../events/GameEventBus';
 import { TargetResolver, type TargetContext } from '../targets/TargetResolver';
@@ -343,6 +343,29 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   },
 
   /**
+   * Restaura CP (Cosmos Points) a los targets resueltos.
+   * Opuesto de apply_cosmos_damage para carta — no tiene tope ya que max_cosmos no está en
+   * GameState; el exceso simplemente queda como reserva hasta que se use.
+   * Estructura: { type: 'restore_cosmos', target: TargetType, amount: number }
+   */
+  restore_cosmos: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 0;
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    for (const card of targets) {
+      (card as any).current_cosmos = ((card as any).current_cosmos ?? 0) + amount;
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
    * Convoca un caballero desde yomotsu/mazo/cositos al campo.
    * La carta debe estar en passive_watchers del estado (puesta ahí por killKnight o el mapper).
    * Requiere ctx.bus para propagar KNIGHT_SUMMONED.
@@ -393,14 +416,17 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   },
 
   /**
-   * Solicita al jugador que elija una carta de una zona (yomotsu, deck, mano, etc.).
+   * Solicita al jugador que elija una carta de una zona (yomotsu, deck, mano, campo, etc.).
    * Detiene la cadena de acciones (stop_chain) y setea state.pending_selection.
    * El jugador responde con resolve_selection → el servicio ejecuta on_select.
    *
    * Estructura:
-   *   { type: 'request_selection', zone: 'yomotsu'|'deck'|...,
-   *     filter?: { type?, top_n? }, destination: 'hand'|'field'|'cositos',
+   *   { type: 'request_selection', zone: 'yomotsu'|'deck'|'field'|...,
+   *     filter?: { type?, top_n?, code? }, destination: 'hand'|'field'|'cositos',
    *     on_select: ActionDefinition[] }
+   *
+   * Para zone === 'field': visible_card_ids se puebla aquí directamente desde el
+   * GameState (los caballeros ya están en memoria), filtrando por filter.type y filter.code.
    */
   request_selection: (action: any, ctx, result) => {
     const selectionId = `sel_${Date.now()}_${ctx.rng().toString(36).slice(2, 7)}`;
@@ -414,8 +440,47 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       source_card_id: ctx.sourceCardId,
       source_player: ctx.playerNumber,
       created_at: Date.now(),
-      visible_card_ids: undefined, // El servicio lo rellena para deck search
+      visible_card_ids: undefined, // El servicio lo rellena para deck search; aquí para field
     };
+
+    // Para selección de campo propio: los caballeros ya están en GameState → poblar visible_card_ids aquí
+    if (action.zone === 'field') {
+      const player = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
+      let candidates: any[] = player.field_knights;
+      if (action.filter?.type) {
+        candidates = candidates.filter((c: any) => c.card_type === action.filter.type);
+      }
+      if (action.filter?.code) {
+        candidates = candidates.filter((c: any) => c.card_code === action.filter.code);
+      }
+      if (action.filter?.tag) {
+        candidates = candidates.filter((c: any) => Array.isArray(c.tags) && c.tags.includes(action.filter.tag));
+      }
+      result.state.pending_selection.visible_card_ids = candidates.map((c: any) => c.instance_id);
+    }
+
+    // Para selección de campo oponente: leer caballeros del jugador contrario
+    if (action.zone === 'field_opponent') {
+      const opponent = ctx.playerNumber === 1 ? result.state.player2 : result.state.player1;
+      let candidates: any[] = opponent.field_knights;
+      if (action.filter?.type) {
+        candidates = candidates.filter((c: any) => c.card_type === action.filter.type);
+      }
+      if (action.filter?.code) {
+        candidates = candidates.filter((c: any) => c.card_code === action.filter.code);
+      }
+      if (action.filter?.tag) {
+        candidates = candidates.filter((c: any) => Array.isArray(c.tags) && c.tags.includes(action.filter.tag));
+      }
+      if (action.filter?.status) {
+        candidates = candidates.filter((c: any) =>
+          Array.isArray(c.status_effects) &&
+          c.status_effects.some((e: any) => e.type === action.filter.status)
+        );
+      }
+      result.state.pending_selection.visible_card_ids = candidates.map((c: any) => c.instance_id);
+    }
+
     result.extras.selection_required = true;
     result.extras.selection_id = selectionId;
     result.extras.stop_chain = true; // Detener ejecución de acciones siguientes
@@ -515,6 +580,191 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     if (!result.extras.draw_card_player) {
       result.extras.draw_card_player = ctx.playerNumber;
     }
+  },
+
+  /**
+   * Transforma una carta en campo en otra forma (ej: Shun → Virgo Shun).
+   * Actualiza todos los stats de combate (CE, AR, HP, CP) en el GameState in-memory.
+   * Limpia status_effects de la forma anterior.
+   * El servicio debe actualizar el card_id en BD leyendo extras.transforms.
+   *
+   * Estructura:
+   *   {
+   *     type: 'transform',
+   *     target: 'selected' | TargetType,
+   *     into: {
+   *       "<source_card_code>": { code: "<target_card_code>", ce: N, ar: N, health: N, cosmos: N },
+   *       ...
+   *     }
+   *   }
+   *
+   * El mapa `into` usa el card_code de la carta fuente para determinar la forma destino,
+   * permitiendo que una sola acción cubra múltiples versiones del mismo personaje.
+   *
+   * Para añadir al catálogo: actualizar src/views/admin.html → sección "🎯 Actions".
+   */
+  transform: (action: any, ctx, result) => {
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'selected', targetCtx);
+    if (targets.length === 0) {
+      console.warn('[ActionRegistry] transform: no se encontró el objetivo de la transformación');
+      return;
+    }
+
+    const into: Record<string, { code: string; ce: number; ar: number; health: number; cosmos: number }> =
+      action.into ?? {};
+
+    for (const card of targets) {
+      const sourceCode: string = (card as any).card_code ?? '';
+      const mapping = into[sourceCode];
+
+      if (!mapping) {
+        console.warn(`[ActionRegistry] transform: no hay definición para card_code "${sourceCode}"`);
+        continue;
+      }
+
+      // Actualizar stats in-memory
+      card.ce       = mapping.ce;
+      card.ar       = mapping.ar;
+      card.base_ce  = mapping.ce;
+      card.base_ar  = mapping.ar;
+      card.current_health = mapping.health;
+      card.max_health     = mapping.health;
+      card.current_cosmos = mapping.cosmos;
+      (card as any).card_code = mapping.code;
+      // Limpiar status effects de la forma anterior
+      card.status_effects = [];
+
+      // Registrar para que el servicio actualice el card_id en BD
+      if (!Array.isArray(result.extras.transforms)) result.extras.transforms = [];
+      (result.extras.transforms as any[]).push({
+        instance_id: card.instance_id,
+        into_code: mapping.code,
+      });
+
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
+   * Aplica ce_boost a self igual a la AR del caballero oponente con mayor armadura.
+   * Si el oponente no tiene caballeros en campo, no hace nada.
+   * Usado por "Hidden Cosmo" de Shun v2.
+   * Estructura: { type: 'ce_boost_from_opponent_max_ar' }
+   */
+  ce_boost_from_opponent_max_ar: (action: any, ctx, result) => {
+    const opponent = ctx.playerNumber === 1 ? result.state.player2 : result.state.player1;
+    if (opponent.field_knights.length === 0) return;
+
+    const maxAr = Math.max(...opponent.field_knights.map((c: any) => c.ar ?? 0));
+    if (maxAr <= 0) return;
+
+    const selfPlayer = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
+    const selfCard = selfPlayer.field_knights.find((c: any) => c.instance_id === ctx.sourceCardId)
+      ?? (selfPlayer.passive_watchers ?? []).find((c: any) => c.instance_id === ctx.sourceCardId);
+    if (!selfCard) return;
+
+    selfCard.status_effects = addOrRefreshEffect(selfCard.status_effects ?? [], {
+      type: 'ce_boost' as StatusEffectType,
+      value: maxAr,
+      remaining_turns: null,
+      source: { card_instance_id: ctx.sourceCardId, player: ctx.playerNumber, type: 'passive' },
+    });
+    selfCard.ce = selfCard.base_ce + computeCeBonus(selfCard.status_effects);
+
+    result.affectedIds.push(selfCard.instance_id);
+  },
+
+  /**
+   * Transfiere el AR actual de la carta a su CE (Eject Armor — Shiryu).
+   * Pone el AR a 0 permanentemente y agrega el mismo valor como ce_boost permanente.
+   * Actualiza los campos base_ar, ar, ce de forma inmediata.
+   * Estructura: { type: 'transfer_ar_to_ce', target: TargetType }
+   */
+  transfer_ar_to_ce: (action: any, ctx, result) => {
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    for (const target of targets) {
+      const arAmount = Math.max(0, target.ar ?? 0);
+      if (arAmount === 0) continue;
+
+      // Poner AR base a 0 permanentemente
+      target.base_ar = 0;
+      target.ar = 0;
+
+      // Limpiar ar_boost positivos existentes (ya incorporados en arAmount)
+      target.status_effects = (target.status_effects ?? []).filter(
+        (e: any) => !(e.type === 'ar_boost' && (e.value ?? 0) > 0)
+      ) as typeof target.status_effects;
+
+      // Agregar ce_boost permanente por el valor transferido
+      target.status_effects = addOrRefreshEffect(target.status_effects ?? [], {
+        type: 'ce_boost' as StatusEffectType,
+        value: arAmount,
+        remaining_turns: null,
+        source: { card_instance_id: `${ctx.sourceCardId}_transfer`, player: ctx.playerNumber, type: 'passive' },
+      });
+
+      // Actualizar CE efectivo inmediatamente
+      target.ce = target.base_ce + computeCeBonus(target.status_effects);
+
+      result.affectedIds.push(target.instance_id);
+    }
+  },
+
+  /**
+   * Reduce permanentemente el AR base de los targets resueltos en 'amount' puntos.
+   * A diferencia de ar_boost (temporal), este cambio modifica base_ar directamente.
+   * Usado por habilidades como "Fissure Point" de Hyoga.
+   * Estructura: { type: 'permanent_ar_reduce', target: TargetType, amount: number }
+   */
+  permanent_ar_reduce: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 0;
+    if (amount <= 0) return;
+    const targetCtx: TargetContext = {
+      state: result.state,
+      playerNumber: ctx.playerNumber,
+      sourceCardId: ctx.sourceCardId,
+      event: ctx.event,
+      rng: ctx.rng,
+      selectedCardId: ctx.selectedCardId,
+    };
+    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    for (const target of targets) {
+      target.base_ar = Math.max(0, (target.base_ar ?? 0) - amount);
+      target.ar      = Math.max(0, target.base_ar + computeArBonus(target.status_effects ?? []));
+      result.affectedIds.push(target.instance_id);
+    }
+  },
+
+  /**
+   * Marca que el oponente debe descartar una carta aleatoria de su mano.
+   * El engine solo registra la intención en extras; el servicio ejecuta el descarte en BD.
+   * Estructura: { type: 'discard_opponent_random', amount: number }
+   */
+  discard_opponent_random: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 1;
+    if (!Array.isArray(result.extras.discard_opponent_random)) {
+      result.extras.discard_opponent_random = [];
+    }
+    (result.extras.discard_opponent_random as any[]).push({
+      player: ctx.playerNumber === 1 ? 2 : 1,
+      amount,
+    });
   },
 };
 

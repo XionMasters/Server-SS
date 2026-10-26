@@ -46,16 +46,16 @@ export class KnightManager {
   // ==========================================================================
 
   /**
-  * Patron de transaccion unificado que elimina ~200 lineas de boilerplate.
+    * Patron de transaccion unificado que elimina ~200 lineas de boilerplate.
    *
    * Responsabilidades del helper:
-   *   1. Idempotencia â€” devuelve resultado previo si actionId ya fue procesado
-  *   2. Transaccion con lock de fila en el match
-   *   3. Mapeo match â†’ GameState puro
+    *   1. Idempotencia: devuelve resultado previo si actionId ya fue procesado
+    *   2. Transaccion con lock de fila en el match
+    *   3. Mapeo match -> GameState puro
    *   4. Persiste newState y registra el actionId
    *   5. Captura errores y devuelve { success: false }
    *
-  * El executor recibe (state, tx) y lanza Error para abortar la transaccion.
+    * El executor recibe (state, tx) y lanza Error para abortar la transaccion.
    */
   private static async runAction<T extends { newState: GameState }>(
     match: any,
@@ -103,12 +103,12 @@ export class KnightManager {
     }
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
   // CHARGE_COSMOS
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
 
   /**
-   * Cargar Cosmo: otorga cosmos_per_charge CP al jugador (segÃºn BASE_MATCH_RULES).
+  * Cargar Cosmo: otorga cosmos_per_charge CP al jugador (segun BASE_MATCH_RULES).
    */
   static async chargeKnightCosmos(
     match: any,
@@ -140,9 +140,9 @@ export class KnightManager {
     return { cosmosGained: result.cosmosGained ?? 0, ...result };
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
   // SACRIFICE_KNIGHT
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
 
   /**
    * Sacrificar Caballero: -1 vida al jugador y mueve la carta al yomotsu.
@@ -173,8 +173,8 @@ export class KnightManager {
 
         const execution = KnightRulesEngine.sacrificeKnight(state, playerNumber);
         // killKnight emite KNIGHT_DIED + ALLY_DIED y retira la carta de field_knights.
-        // applyState (paso 5) detectará que la carta ya no está en ningún campo
-        // y la moverá a yomotsu en BD — no necesitamos card.update() explícito.
+        // applyState (paso 5) detectara que la carta ya no esta en ningun campo
+        // y la movera a yomotsu en BD; no necesitamos card.update() explicito.
         const ctx = createEngineContext(execution.newState);
         killKnight(ctx, cardInPlayId, undefined, 'sacrifice');
         return { newState: ctx.state, lifeLost: execution.lifeLost, events: [...ctx.bus.events] };
@@ -183,13 +183,13 @@ export class KnightManager {
     return { lifeLost: 1, ...result };
   }
 
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
   // MOVE_KNIGHT
-  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+  // ============================================================================
 
   /**
-  * Mover Caballero: cambia la posicion de un caballero en el campo (0-4).
-  * Debe reflejarse en GameState para que applyState no revierta la posicion.
+    * Mover Caballero: cambia la posicion de un caballero en el campo (0-4).
+    * Debe reflejarse en GameState para que applyState no revierta la posicion.
    */
   static async moveKnight(
     match: any,

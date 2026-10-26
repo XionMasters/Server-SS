@@ -1,0 +1,69 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'object' (equipamiento/permanente). Se juegan en field_occasion. Trigger CARD_PLAYED dispara su habilidad al entrar en juego. La condición event_source_is_self garantiza que solo dispara cuando la carta misma es jugada.",
+  "saga": "Santuario",
+  "type": "object",
+  "cards": [
+    {
+      "code": "virgo_cloth",
+      "name": "Armadura de Virgo",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "objects/virgo_cloth.webp",
+      "description": "Paga 2 DIP; un Caballero de Bronce llamado [Shun de Andrómeda] en tu campo hereda la Forma de Armadura Dorada de Virgo con sus atributos completamente restaurados. Esta forma persiste mientras esta carta permanezca en tu campo.",
+      "abilities": [
+        {
+          "name": "Herencia de Virgo",
+          "type": "equipamiento",
+          "ability_key": "virgo_cloth_inheritance",
+          "description": "Al entrar en juego, paga 2 DIP. Elige un Caballero con tag [shun] en tu campo: se transforma en su Forma de Armadura Dorada de Virgo con Atributos completamente restaurados. El efecto persiste mientras esta carta permanezca en campo.",
+          "_pending": "Fase 2: al ser retirada esta carta del campo, revertir la transformación. Requiere trigger CARD_LEFT_FIELD y seguimiento objeto→caballero.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" },
+              { "type": "field_has_tag", "tag": "shun" }
+            ],
+            "actions": [
+              {
+                "type": "apply_player_damage",
+                "target": "self",
+                "amount": 2
+              },
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight",
+                  "tag": "shun"
+                },
+                "destination": "field",
+                "on_select": [
+                  {
+                    "type": "transform",
+                    "target": "selected",
+                    "into": {
+                      "shun_andromeda_v1": { "code": "virgo_shun_v1", "ce": 3, "ar": 7, "health": 8, "cosmos": 12 },
+                      "shun_andromeda_v2": { "code": "virgo_shun_v2", "ce": 2, "ar": 8, "health": 8, "cosmos": 10 },
+                      "shun_andromeda_v3": { "code": "virgo_shun_v3", "ce": 6, "ar": 8, "health": 9, "cosmos": 15 }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": "Will Tox"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import Match from '../../models/Match';
 import CardInPlay from '../../models/CardInPlay';
 import Card from '../../models/Card';
 import CardKnight from '../../models/CardKnight';
+import CardTechnique from '../../models/CardTechnique';
 import User from '../../models/User';
 import { applyHandVisibility } from '../serializers/handVisibility';
 import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
@@ -28,7 +29,10 @@ export class GameStateBuilder {
       include: [{
         model: Card,
         as: 'card',
-        include: [{ model: CardKnight, as: 'card_knight' }]
+        include: [
+          { model: CardKnight, as: 'card_knight' },
+          { model: CardTechnique, as: 'card_technique' },
+        ]
       }]
     });
 

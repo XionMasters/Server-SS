@@ -1410,6 +1410,7 @@
       "element": "water",
       "image_url": "bronzes/15.webp",
       "description": "Hijo de Shiryu, heredero del escudo del Dragón y la templanza de su padre.",
+      "tags": ["ryuho", "dragon", "bronze"],
       "stats": {
         "attack": 3,
         "defense": 3,
@@ -1558,6 +1559,7 @@
       "image_url": "bronzes/17.webp",
       "description": "Portador de la armadura de Sagitario, el arma más poderosa del Santuario.",
       "_note": "El portador de la armadura Gold hace de este bronce un epico especial.",
+      "tags": ["subaru", "sagittarius", "bronze"],
       "stats": {
         "attack": 4,
         "defense": 3,

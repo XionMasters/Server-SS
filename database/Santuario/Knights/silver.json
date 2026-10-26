@@ -64,6 +64,66 @@
       ],
       "collection_id": "santuario",
       "artist": null
+    },
+    {
+      "code": "shaina_ophiuchus_v1",
+      "name": "Shaina de Ofiuco",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "steel",
+      "image_url": "silvers/2.webp",
+      "description": "Caballera de Plata, temible en combate. Su descarga eléctrica paraliza al más valiente.",
+      "tags": ["shaina", "ophiuchus", "silver", "shaina_v1"],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Electric Charge",
+          "type": "activa",
+          "description": "El próximo BA de este caballero causa condición PAR en el soldado oponente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [],
+            "conditions": [],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "electric_charge",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Tutoring",
+          "type": "pasiva",
+          "description": "Cuando entra al campo de batalla, roba una carta.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

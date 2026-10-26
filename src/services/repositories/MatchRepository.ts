@@ -67,6 +67,7 @@ export class MatchRepository {
       if (newState.player2.field_helper) allCards.push(newState.player2.field_helper);
       if (newState.player1.field_occasion) allCards.push(newState.player1.field_occasion);
       if (newState.player2.field_occasion) allCards.push(newState.player2.field_occasion);
+      if (newState.scenario) allCards.push(newState.scenario);
 
       // Evita updates duplicados cuando una carta aparece referenciada por más de una vista.
       const uniqueCards = Array.from(new Map(allCards.map(c => [c.instance_id, c])).values());
@@ -96,9 +97,6 @@ export class MatchRepository {
       // 5️⃣ Mover al yomotsu las cartas que ya no están en ningún campo del GameState
       //    (murieron en combate esta acción)
       const liveInstanceIds = new Set(uniqueCards.map(c => c.instance_id));
-      if (newState.scenario?.instance_id) {
-        liveInstanceIds.add(newState.scenario.instance_id);
-      }
 
       const moved = await CardInPlay.update(
         { zone: 'yomotsu' },
