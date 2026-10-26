@@ -1,6 +1,6 @@
 // src/routes/users.routes.ts
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
 import User from '../models/User';
 
 const router = Router();

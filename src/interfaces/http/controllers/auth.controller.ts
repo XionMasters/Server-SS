@@ -1,21 +1,59 @@
-// src/controllers/auth.controller.ts
+// src/interfaces/http/controllers/auth.controller.ts
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt, { SignOptions } from 'jsonwebtoken';
+import { decode } from 'jsonwebtoken';
+import { randomUUID } from 'crypto';
 import { Op } from 'sequelize';
-import User from '../models/User';
-import UserSession from '../models/UserSession';
-import emailService from '../services/emailService';
-import transactionService from '../services/transactionService';
-import { assignStarterCards } from '../scripts/assignStarterCards';
-import ProfileAvatar from '../models/ProfileAvatar';
-import UserProfile from '../models/UserProfile';
-import UserAvatarUnlock from '../models/UserAvatarUnlock';
-import DeckBack from '../models/DeckBack';
-import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
+import User from '../../../models/User';
+import emailService from '../../../services/emailService';
+import transactionService from '../../../services/transactionService';
+import { assignStarterCards } from '../../../scripts/assignStarterCards';
+import ProfileAvatar from '../../../models/ProfileAvatar';
+import UserProfile from '../../../models/UserProfile';
+import UserAvatarUnlock from '../../../models/UserAvatarUnlock';
+import DeckBack from '../../../models/DeckBack';
+import UserDeckBackUnlock from '../../../models/UserDeckBackUnlock';
+import {
+  createUserAccessToken,
+  UserAccessTokenPayload,
+} from '../../../infrastructure/auth/token.service';
+import {
+  createUserSession,
+  deactivateAllUserSessions,
+  deactivateUserSession,
+} from '../../../infrastructure/auth/session.service';
+import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_clave_secreta_muy_segura';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const issueSessionToken = async (user: User, req: Request): Promise<string> => {
+  const sessionId = randomUUID();
+  const payload: UserAccessTokenPayload = {
+    userId: user.id,
+    username: user.username,
+    sessionId,
+  };
+  const token = createUserAccessToken(payload);
+  const tokenPayload = decode(token);
+
+  if (!tokenPayload || typeof tokenPayload === 'string' || !tokenPayload.exp) {
+    throw new Error('No se pudo obtener la expiración del token');
+  }
+
+  const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]
+    || req.socket.remoteAddress
+    || 'unknown';
+  const userAgent = req.headers['user-agent'] || 'unknown';
+
+  await createUserSession({
+    id: sessionId,
+    userId: user.id,
+    token,
+    expiresAt: new Date(tokenPayload.exp * 1000),
+    ipAddress: clientIp,
+    userAgent,
+  });
+
+  return token;
+};
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -144,17 +182,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       { starter_deck: 40 }
     );
 
-    // ✅ JWT CORREGIDO
-    const payload = { 
-      userId: user.id, 
-      username: user.username 
-    };
-    
-    const options: SignOptions = { 
-      expiresIn: JWT_EXPIRES_IN as any 
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, options);
+    const token = await issueSessionToken(user, req);
 
     res.status(201).json({
       message: 'Usuario registrado exitosamente. Revisa tu email para verificar tu cuenta.',
@@ -204,42 +232,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // ✅ INVALIDAR TODAS LAS SESIONES ANTERIORES DE ESTE USUARIO
-    await UserSession.update(
-      { is_active: false },
-      { where: { user_id: user.id, is_active: true } }
-    );
+    await deactivateAllUserSessions(user.id);
     console.log(`🔐 Sesiones anteriores invalidadas para usuario ${user.username}`);
 
-    // ✅ JWT CORREGIDO
-    const payload = { 
-      userId: user.id, 
-      username: user.username 
-    };
-    
-    const options: SignOptions = { 
-      expiresIn: JWT_EXPIRES_IN as any  
-    };
+    const token = await issueSessionToken(user, req);
 
-    const token = jwt.sign(payload, JWT_SECRET, options);
-
-    // ✅ CREAR NUEVA SESIÓN ACTIVA
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 días (mismo que JWT_EXPIRES_IN)
-
-    const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0] || req.socket.remoteAddress || 'unknown';
-    const userAgent = req.headers['user-agent'] || 'unknown';
-
-    const session = await UserSession.create({
-      user_id: user.id,
-      token,
-      is_active: true,
-      created_at: new Date(),
-      expires_at: expiresAt,
-      ip_address: clientIp,
-      user_agent: userAgent
-    });
-
-    console.log(`✅ Nueva sesión creada para ${user.username} (Session ID: ${session.id})`);
+    console.log(`✅ Nueva sesión creada para ${user.username}`);
 
     res.json({
       message: 'Login exitoso',
@@ -361,37 +359,15 @@ export const resendVerificationEmail = async (req: Request, res: Response): Prom
   }
 };
 
-export const logout = async (req: Request, res: Response): Promise<void> => {
+export const logout = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const user = (req as any).user;
-    
-    if (!user || !user.userId) {
+    if (!req.auth) {
       res.status(401).json({ error: 'No autenticado' });
       return;
     }
 
-    // Obtener el token del header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(400).json({ error: 'Token no encontrado' });
-      return;
-    }
-
-    const token = authHeader.substring(7);
-
-    // Marcar la sesión como inactiva
-    const session = await UserSession.findOne({
-      where: {
-        user_id: user.userId,
-        token: token,
-        is_active: true
-      }
-    });
-
-    if (session) {
-      await session.update({ is_active: false });
-      console.log(`✅ Sesión cerrada para usuario ${user.username}`);
-    }
+    await deactivateUserSession(req.auth.userId, req.auth.sessionId);
+    console.log(`✅ Sesión cerrada para usuario ${req.auth.username}`);
 
     res.json({
       success: true,

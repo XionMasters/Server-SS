@@ -1,6 +1,6 @@
-import { AuthenticatedWebSocket } from './websocket-auth.service';
-import { WebSocketPresenceService } from './websocket-presence.service';
-import { MatchesCoordinator } from '../coordinators/matchesCoordinator';
+import { AuthenticatedWebSocket } from './middleware/auth.middleware';
+import { WebSocketPresenceService } from './presence.service';
+import { MatchesCoordinator } from '../../services/coordinators/matchesCoordinator';
 
 type EventHandler = (ws: AuthenticatedWebSocket, data: any) => Promise<void> | void;
 export type RouterEventHandler = EventHandler;

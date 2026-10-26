@@ -1,10 +1,9 @@
 // src/routes/userCards.routes.ts
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/auth.middleware';
-import { 
-  getUserCards, 
-  addUserCard, 
-  getUserCardStats 
+import { authenticateToken } from '../interfaces/http/middleware/auth.middleware';
+import {
+  getUserCards,
+  getUserCardStats
 } from '../controllers/userCards.controller';
 
 const router = Router();
@@ -13,7 +12,6 @@ const router = Router();
 router.use(authenticateToken);
 
 router.get('/', getUserCards);
-router.post('/', addUserCard);
 router.get('/stats', getUserCardStats);
 
 export default router;

@@ -1,4 +1,4 @@
-// src/middleware/emailVerification.middleware.ts
+// src/interfaces/http/middleware/emailVerification.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 
 export interface VerifiedRequest extends Request {

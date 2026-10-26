@@ -1,10 +1,10 @@
-// src/services/websocket/websocket.panel.ts
+// src/infrastructure/websocket/handlers/admin.handler.ts
 // Admin Panel Dashboard - Lógica centralizada
-import * as jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { WebSocket } from 'ws';
-import User from '../../models/User';
-import Match from '../../models/Match';
+import User from '../../../models/User';
+import Match from '../../../models/Match';
+import { verifyAdminAccessToken } from '../../auth/token.service';
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -111,8 +111,7 @@ export async function handleAdminAuthentication(
   }
 
   try {
-    const jwtSecret = process.env.JWT_SECRET || 'secret-key-change-in-production';
-    const decoded = jwt.verify(adminToken, jwtSecret) as any;
+    const decoded = verifyAdminAccessToken(adminToken);
     
     if (decoded.role === 'admin') {
       ws.isAdmin = true;
@@ -125,7 +124,7 @@ export async function handleAdminAuthentication(
       });
       
       // Enviar stats iniciales
-      const { broadcastAdminStats: broadcast } = await import('./websocket.panel');
+      const { broadcastAdminStats: broadcast } = await import('./admin.handler');
       await broadcast(new Map()); // Se pasa vacío porque se usa dentro
       
       // Manejar mensajes de admin

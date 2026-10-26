@@ -20,7 +20,7 @@ import UserAvatarUnlock from './UserAvatarUnlock';
 import DeckBack from './DeckBack';
 import UserDeckBackUnlock from './UserDeckBackUnlock';
 import UserProfile from './UserProfile';
-import UserSession from './UserSession';
+import UserSession from '../infrastructure/database/models/UserSession';
 
 // Configurar relaciones entre User y Card
 User.belongsToMany(Card, {

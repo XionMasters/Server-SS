@@ -1,23 +1,23 @@
-// src/services/websocket.service.ts
+// src/infrastructure/websocket/server.ts
 // WebSocket nativo (no Socket.IO) para compatibilidad con Godot
 import { IncomingMessage } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
 import Match from '../../models/Match';
-import { GameStateBuilder } from '../game/GameStateBuilder';
+import { GameStateBuilder } from '../../services/game/GameStateBuilder';
 import UserProfile from '../../models/UserProfile';
 import ProfileAvatar from '../../models/ProfileAvatar';
-import { MatchStateService } from '../match/matchState.service';
-import { matchesCoordinator } from '../coordinators/matchesCoordinator';
-import { SelectionService } from '../game/SelectionService';
-import { authenticateSocket } from './websocket-auth.service';
-import { WebSocketPresenceService } from './websocket-presence.service';
-import { WebSocketChatService } from './websocket-chat.service';
+import { MatchStateService } from '../../services/match/matchState.service';
+import { matchesCoordinator } from '../../services/coordinators/matchesCoordinator';
+import { SelectionService } from '../../services/game/SelectionService';
+import { authenticateSocket } from './middleware/auth.middleware';
+import { WebSocketPresenceService } from './presence.service';
+import { WebSocketChatHandler } from './handlers/chat.handler';
 import { WebSocketRouter, RouterEventHandler } from './websocket-router';
 import {
   broadcastAdminStats,
   handleAdminDisconnectUser,
   handleAdminBlockUser
-} from './websocket.panel';
+} from './handlers/admin.handler';
 
 interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -28,7 +28,7 @@ interface AuthenticatedWebSocket extends WebSocket {
 }
 
 const presenceService = new WebSocketPresenceService();
-const chatService = new WebSocketChatService(presenceService);
+const chatHandler = new WebSocketChatHandler(presenceService);
 const router = new WebSocketRouter(matchesCoordinator, presenceService);
 
 const withAdmin = (handler: RouterEventHandler): RouterEventHandler => {
@@ -130,7 +130,7 @@ router.registerMany({
     await handleRequestMatchState(ws as AuthenticatedWebSocket, data);
   },
   chat_message: async (ws, data) => {
-    await chatService.handleChatMessage(ws as any, data);
+    await chatHandler.handleChatMessage(ws as any, data);
   },
   request_online_users: (ws) => {
     sendOnlineUsersList(ws as WebSocket);
@@ -586,7 +586,7 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
     const userId = ws.userId!;
 
     // Usar StartMatchService que centraliza toda la lógica
-    const { StartMatchService } = await import('../match/startMatch.service');
+    const { StartMatchService } = await import('../../services/match/startMatch.service');
     const result = await StartMatchService.createNewMatch(userId, userId, 'TEST');
 
     // Enviar match_found event al cliente con el estado construido
@@ -626,7 +626,7 @@ async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
 async function handleResumeTestMatch(ws: AuthenticatedWebSocket) {
   try {
     console.log(`♻️ ${ws.username} solicita reanudar partida TEST`);
-    const { StartMatchService } = await import('../match/startMatch.service');
+    const { StartMatchService } = await import('../../services/match/startMatch.service');
     const result = await StartMatchService.resumeTestMatch(ws.userId!);
 
     presenceService.sendToSocket(ws, 'match_found', result);

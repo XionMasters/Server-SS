@@ -1,6 +1,6 @@
 // src/scripts/create-chat-tables.ts
 import sequelize from '../config/database';
-import ChatMessage from '../models/ChatMessage';
+import ChatMessage from '../infrastructure/database/models/ChatMessage';
 
 async function createChatTables() {
   try {

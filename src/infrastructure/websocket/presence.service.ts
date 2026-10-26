@@ -1,4 +1,4 @@
-// src/services/websocket-presence.service.ts
+// src/infrastructure/websocket/presence.service.ts
 
 import { WebSocket } from 'ws';
 

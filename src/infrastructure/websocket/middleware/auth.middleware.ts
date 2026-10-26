@@ -1,10 +1,11 @@
-// src/services/websocket-auth.service.ts
+// src/infrastructure/websocket/middleware/auth.middleware.ts
 
 import { IncomingMessage } from 'http';
-import jwt from 'jsonwebtoken';
-import User from '../../models/User';
-import { handleAdminAuthentication } from './websocket.panel';
+import User from '../../../models/User';
+import { handleAdminAuthentication } from '../handlers/admin.handler';
 import { WebSocket } from 'ws';
+import { getActiveUserSession } from '../../auth/session.service';
+import { verifyUserAccessToken } from '../../auth/token.service';
 
 export interface AuthenticatedWebSocket extends WebSocket {
   userId?: string;
@@ -31,7 +32,7 @@ class WebSocketAuthError extends Error {
 /**
  * Autentica un socket entrante.
  * - Soporta usuario normal (JWT)
- * - Soporta admin vía admin_token
+ * - Soporta admin mediante el esquema Authorization: AdminBearer
  * - Setea metadata mínima en ws
  */
 export async function authenticateSocket(
@@ -68,11 +69,9 @@ export async function authenticateSocket(
     );
   }
 
-  const jwtSecret = process.env.JWT_SECRET || 'secret-key-change-in-production';
-
-  let decoded: any;
+  let decoded;
   try {
-    decoded = jwt.verify(token, jwtSecret);
+    decoded = verifyUserAccessToken(token);
   } catch (err) {
     throw new WebSocketAuthError(
       'INVALID_TOKEN',
@@ -80,10 +79,11 @@ export async function authenticateSocket(
     );
   }
 
-  if (!decoded?.userId) {
+  const session = await getActiveUserSession(decoded.userId, decoded.sessionId, token);
+  if (!session) {
     throw new WebSocketAuthError(
-      'INVALID_TOKEN',
-      'Token inválido'
+      'SESSION_INVALIDATED',
+      'Sesión inválida o cerrada'
     );
   }
 
@@ -109,7 +109,7 @@ export async function authenticateSocket(
 }
 
 /**
- * Extrae token JWT y admin_token desde header o query
+ * Extrae el token de usuario o admin desde Authorization.
  */
 function extractTokens(req: IncomingMessage): {
   token?: string;
@@ -120,16 +120,10 @@ function extractTokens(req: IncomingMessage): {
 
   const authHeader = req.headers.authorization;
 
-  if (authHeader) {
-    token = authHeader.startsWith('Bearer ')
-      ? authHeader.slice(7)
-      : authHeader;
-  }
-
-  if (!token && req.url) {
-    const url = new URL(req.url, `http://${req.headers.host}`);
-    token = url.searchParams.get('token') || undefined;
-    adminToken = url.searchParams.get('admin_token') || undefined;
+  if (authHeader?.startsWith('Bearer ')) {
+    token = authHeader.slice(7);
+  } else if (authHeader?.startsWith('AdminBearer ')) {
+    adminToken = authHeader.slice('AdminBearer '.length);
   }
 
   return { token, adminToken };
