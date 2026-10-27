@@ -1,6 +1,6 @@
 // src/scripts/cards/techniques.ts
-import Card from '../../models/Card';
-import CardAbility from '../../models/CardAbility';
+import Card from '../../infrastructure/database/models/Card';
+import CardAbility from '../../infrastructure/database/models/CardAbility';
 
 export const techniques = [
   // Técnicas de Athena

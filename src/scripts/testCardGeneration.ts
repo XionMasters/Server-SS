@@ -1,5 +1,5 @@
 // src/scripts/testCardGeneration.ts
-import { CardImageGenerator } from '../utils/cardImageGenerator';
+import { CardImageGenerator } from '../infrastructure/assets/cardImageGenerator';
 import path from 'path';
 
 async function testCardGeneration() {

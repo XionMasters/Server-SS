@@ -1,4 +1,4 @@
-import { BASE_MATCH_RULES } from '../game/rules/base.rules';
+import { BASE_MATCH_RULES } from '../domain/game/rules/base.rules';
 
 export interface DeckConstructionRules {
   minCards: number;

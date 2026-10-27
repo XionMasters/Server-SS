@@ -7,7 +7,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest",
-    "generate:cards": "ts-node src/scripts/generatesAllCards.ts",
+    "audit:user-cards": "ts-node scripts/audit-user-cards.ts",
+    "generate:cards": "ts-node src/scripts/generateAllCards.ts",
     "import:black": "ts-node src/scripts/import-black-cards.ts",
     "import:legendary": "ts-node src/scripts/import-legendary-cards.ts",
     "generate:packs": "ts-node src/scripts/generatePacks.ts",
@@ -30,7 +31,6 @@
   "type": "commonjs",
   "description": "",
   "dependencies": {
-    "@types/socket.io": "^3.0.1",
     "@types/ws": "^8.18.1",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
@@ -38,6 +38,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
@@ -45,6 +46,7 @@
     "pg": "^8.16.3",
     "sequelize": "^6.37.7",
     "sharp": "^0.34.5",
+    "uuid": "^8.3.2",
     "ws": "^8.18.3"
   },
   "devDependencies": {
@@ -56,6 +58,7 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.9.2",
     "@types/nodemailer": "^7.0.3",
+    "@types/pg": "^8.23.1",
     "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "jest": "^30.2.0",

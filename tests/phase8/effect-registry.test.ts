@@ -5,12 +5,13 @@
  * Ambos registries son pure functions — no necesitan BD ni WebSocket.
  */
 
-import { applyBasicAttackSideEffects, BasicAttackEffectContext } from '../../src/engine/attack/AttackEffectRegistry';
-import { applyTechniqueSemanticEffect, TechniqueSemanticContext, TaComboAction } from '../../src/engine/technique/TechniqueEffectRegistry';
-import { createEmptyGameState, type CardInGameState, type Player } from '../../src/engine/GameState';
-import { GameEventBus } from '../../src/engine/events/GameEventBus';
-import type { EngineContext } from '../../src/engine/EngineContext';
-import type { StatusEffect, StatusEffectType } from '../../src/engine/StatusEffects';
+import { applyBasicAttackSideEffects, BasicAttackEffectContext } from '../../src/domain/game/attack/AttackEffectRegistry';
+import { applyTechniqueSemanticEffect, TechniqueSemanticContext, TaComboAction } from '../../src/domain/game/technique/TechniqueEffectRegistry';
+import { createEmptyGameState, type CardInGameState, type Player } from '../../src/domain/game/GameState';
+import { GameEventBus } from '../../src/domain/game/events/GameEventBus';
+import type { EngineContext } from '../../src/domain/game/EngineContext';
+import { SeededRNG } from '../../src/domain/game/combat/RNG';
+import type { StatusEffect, StatusEffectType } from '../../src/domain/game/StatusEffects';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -18,7 +19,7 @@ import type { StatusEffect, StatusEffectType } from '../../src/engine/StatusEffe
 function makeEngineCtx(matchId = 'test-match'): EngineContext {
   const state = createEmptyGameState(matchId);
   const bus = new GameEventBus(); // no-op callback
-  return { state, bus };
+  return { state, rng: new SeededRNG(state.rng_seed), bus };
 }
 
 function makeKnight(params: {

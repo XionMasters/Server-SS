@@ -1,7 +1,7 @@
-import { AttackRulesEngine } from '../../src/engine/AttackRulesEngine';
-import { TurnRulesEngine } from '../../src/engine/TurnRulesEngine';
-import { createEmptyGameState, type CardInGameState } from '../../src/engine/GameState';
-import { AbilityEngine } from '../../src/engine/abilities/AbilityEngine';
+import { AttackRulesEngine } from '../../src/domain/game/AttackRulesEngine';
+import { TurnRulesEngine } from '../../src/domain/game/TurnRulesEngine';
+import { createEmptyGameState, type CardInGameState } from '../../src/domain/game/GameState';
+import { AbilityEngine } from '../../src/domain/game/abilities/AbilityEngine';
 
 function createKnight(params: {
   id: string;

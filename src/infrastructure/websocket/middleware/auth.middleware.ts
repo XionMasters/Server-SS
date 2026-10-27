@@ -1,8 +1,8 @@
 // src/infrastructure/websocket/middleware/auth.middleware.ts
 
 import { IncomingMessage } from 'http';
-import User from '../../../models/User';
-import { handleAdminAuthentication } from '../handlers/admin.handler';
+import User from '../../database/models/User';
+import { handleAdminAuthentication } from '../../../interfaces/websocket/handlers/admin.handler';
 import { WebSocket } from 'ws';
 import { getActiveUserSession } from '../../auth/session.service';
 import { verifyUserAccessToken } from '../../auth/token.service';
@@ -12,6 +12,7 @@ export interface AuthenticatedWebSocket extends WebSocket {
   username?: string;
   isAdmin?: boolean;
   isAlive?: boolean;
+  isEmailVerified?: boolean;
 }
 
 export interface AuthResult {
@@ -43,8 +44,15 @@ export async function authenticateSocket(
   const { token, adminToken } = extractTokens(req);
 
   // 1️⃣ Intentar autenticación admin
-  const isAdmin = await handleAdminAuthentication(ws, adminToken);
-  if (isAdmin) {
+  if (adminToken) {
+    const isAdmin = await handleAdminAuthentication(ws, adminToken);
+    if (!isAdmin) {
+      throw new WebSocketAuthError(
+        'INVALID_ADMIN_TOKEN',
+        'Token de admin inválido'
+      );
+    }
+
     ws.isAdmin = true;
 
     return {
@@ -52,13 +60,6 @@ export async function authenticateSocket(
       username: 'admin',
       isAdmin: true
     };
-  }
-
-  if (adminToken) {
-    throw new WebSocketAuthError(
-      'INVALID_ADMIN_TOKEN',
-      'Token de admin inválido o expirado'
-    );
   }
 
   // 2️⃣ Validar token usuario
@@ -96,10 +97,18 @@ export async function authenticateSocket(
     );
   }
 
+  if (user.blocked_at) {
+    throw new WebSocketAuthError(
+      'USER_BLOCKED',
+      'Tu cuenta ha sido bloqueada'
+    );
+  }
+
   // 3️⃣ Setear metadata en socket
   ws.userId = user.id;
   ws.username = user.username;
   ws.isAdmin = false;
+  ws.isEmailVerified = !!user.is_email_verified;
 
   return {
     userId: user.id,
@@ -110,6 +119,8 @@ export async function authenticateSocket(
 
 /**
  * Extrae el token de usuario o admin desde Authorization.
+ * Los navegadores no pueden enviar headers en un WebSocket, así que el panel
+ * admin envía su token como subprotocolo: `Sec-WebSocket-Protocol: admin, <jwt>`.
  */
 function extractTokens(req: IncomingMessage): {
   token?: string;
@@ -124,7 +135,21 @@ function extractTokens(req: IncomingMessage): {
     token = authHeader.slice(7);
   } else if (authHeader?.startsWith('AdminBearer ')) {
     adminToken = authHeader.slice('AdminBearer '.length);
+  } else {
+    adminToken = extractAdminSubprotocolToken(req.headers['sec-websocket-protocol']);
   }
 
   return { token, adminToken };
+}
+
+export const ADMIN_SUBPROTOCOL = 'admin';
+
+function extractAdminSubprotocolToken(header: string | string[] | undefined): string | undefined {
+  const raw = Array.isArray(header) ? header.join(',') : header;
+  if (!raw) return undefined;
+
+  const protocols = raw.split(',').map((protocol) => protocol.trim()).filter(Boolean);
+  if (protocols[0] !== ADMIN_SUBPROTOCOL || !protocols[1]) return undefined;
+
+  return protocols[1];
 }

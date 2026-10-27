@@ -1,6 +1,6 @@
 // Script para limpiar partidas en waiting/activas
 import sequelize from '../config/database';
-import Match from '../models/Match';
+import Match from '../infrastructure/database/models/Match';
 
 async function cleanMatches() {
   try {

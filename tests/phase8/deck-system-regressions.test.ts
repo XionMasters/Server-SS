@@ -35,41 +35,41 @@ jest.mock('../../src/config/database', () => ({
   },
 }));
 
-jest.mock('../../src/models/Deck', () => ({
+jest.mock('../../src/infrastructure/database/models/Deck', () => ({
   __esModule: true,
   default: mockDeckModel,
 }));
 
-jest.mock('../../src/models/DeckCard', () => ({
+jest.mock('../../src/infrastructure/database/models/DeckCard', () => ({
   __esModule: true,
   default: mockDeckCardModel,
 }));
 
-jest.mock('../../src/models/Card', () => ({
+jest.mock('../../src/infrastructure/database/models/Card', () => ({
   __esModule: true,
   default: mockCardModel,
 }));
 
-jest.mock('../../src/models/UserCard', () => ({
+jest.mock('../../src/infrastructure/database/models/UserCard', () => ({
   __esModule: true,
   default: mockUserCardModel,
 }));
 
-jest.mock('../../src/models/CardKnight', () => ({
+jest.mock('../../src/infrastructure/database/models/CardKnight', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/models/DeckBack', () => ({
+jest.mock('../../src/infrastructure/database/models/DeckBack', () => ({
   __esModule: true,
   default: {
     findOne: jest.fn(),
   },
 }));
 
-import { DeckService, ServiceError } from '../../src/services/deck.service';
-import { generateDeck } from '../../src/utils/deckGenerator';
-import { validateDeck } from '../../src/utils/deckValidator';
+import { DeckService, ServiceError } from '../../src/app/decks/deck.service';
+import { generateDeck } from '../../src/app/decks/deckGenerator';
+import { validateDeck } from '../../src/app/decks/deckValidator';
 
 describe('Deck system regressions', () => {
   beforeEach(() => {

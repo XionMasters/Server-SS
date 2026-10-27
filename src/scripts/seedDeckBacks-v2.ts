@@ -1,5 +1,5 @@
 import { sequelize } from '../config/database';
-import DeckBack from '../models/DeckBack';
+import DeckBack from '../infrastructure/database/models/DeckBack';
 
 /**
  * Script de seed mejorado para dorsos de mazo

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import sequelize from '../config/database';
-import ProfileAvatar from '../models/ProfileAvatar';
-import Card from '../models/Card';
+import ProfileAvatar from '../infrastructure/database/models/ProfileAvatar';
+import Card from '../infrastructure/database/models/Card';
 
 dotenv.config();
 

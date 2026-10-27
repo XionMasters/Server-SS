@@ -115,8 +115,10 @@ function connectWebSocket() {
 
     shouldReconnect = true;
 
-    const wsUrl = `ws://${window.location.host}/ws?admin_token=${token}`;
-    ws = new WebSocket(wsUrl);
+    // El token viaja como subprotocolo, no en la URL (no queda en logs ni historial)
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    ws = new WebSocket(wsUrl, ['admin', token]);
 
     ws.onopen = () => {
         console.log('✅ WebSocket conectado');
@@ -205,12 +207,16 @@ function updateDashboard(data) {
     document.getElementById('searchingCount').textContent = data.searchingUsers?.length || 0;
     updateUserList('searchingList', data.searchingUsers || [], true);
 
+    // Usuarios bloqueados
+    document.getElementById('blockedCount').textContent = data.blockedUsers?.length || 0;
+    updateUserList('blockedList', data.blockedUsers || [], false, true);
+
     // Partidas activas
     document.getElementById('matchesCount').textContent = data.activeMatches?.length || 0;
     updateMatchList(data.activeMatches || []);
 }
 
-function updateUserList(elementId, users, searching = false) {
+function updateUserList(elementId, users, searching = false, blocked = false) {
     const list = document.getElementById(elementId);
     
     if (users.length === 0) {
@@ -223,18 +229,23 @@ function updateUserList(elementId, users, searching = false) {
             <div class="user-info-wrapper">
                 <div>
                     <div class="user-name">
-                        ${user.username}
+                        ${escHtml(user.username)}
                         ${searching ? '<span class="badge searching">Buscando</span>' : ''}
+                        ${blocked ? '<span class="badge blocked">Bloqueado</span>' : ''}
                     </div>
-                    <div class="user-id">${user.id}</div>
+                    <div class="user-id">${escHtml(user.id)}</div>
                 </div>
                 <div class="user-actions">
-                    <button class="btn-disconnect" data-action="disconnect" data-user-id="${user.id}" data-username="${user.username}" title="Desconectar">
+                    ${blocked ? `
+                    <button class="btn-unblock" data-action="unblock" data-user-id="${escHtml(user.id)}" data-username="${escHtml(user.username)}" title="Desbloquear">
+                        ✅
+                    </button>` : `
+                    <button class="btn-disconnect" data-action="disconnect" data-user-id="${escHtml(user.id)}" data-username="${escHtml(user.username)}" title="Desconectar">
                         🔌
                     </button>
-                    <button class="btn-block" data-action="block" data-user-id="${user.id}" data-username="${user.username}" title="Bloquear">
+                    <button class="btn-block" data-action="block" data-user-id="${escHtml(user.id)}" data-username="${escHtml(user.username)}" title="Bloquear">
                         🚫
-                    </button>
+                    </button>`}
                 </div>
             </div>
         </li>
@@ -254,11 +265,11 @@ function updateMatchList(matches) {
         const badge = isWaiting ? 'waiting' : 'active';
         const badgeText = isWaiting ? 'Esperando' : match.phase;
         
-        const player1Name = match.player1_username || 'Jugador 1';
-        const player2Name = match.player2_username || '(vacío)';
+        const player1Name = escHtml(match.player1_username || 'Jugador 1');
+        const player2Name = escHtml(match.player2_username || '(vacío)');
 
         return `
-            <li class="match-item ${isWaiting ? 'waiting' : ''}" data-match-id="${match.id}" id="match-item-${match.id}">
+            <li class="match-item ${isWaiting ? 'waiting' : ''}" data-match-id="${escHtml(match.id)}" id="match-item-${escHtml(match.id)}">
                 <div class="match-header">
                     <div>
                         <div class="match-info">
@@ -267,7 +278,7 @@ function updateMatchList(matches) {
                         </div>
                         <div class="timestamp">Turno ${match.current_turn} &bull; ${fmtDate(match.created_at)}</div>
                     </div>
-                    <span class="badge ${badge}">${badgeText}</span>
+                    <span class="badge ${badge}">${escHtml(badgeText)}</span>
                 </div>
             </li>
         `;
@@ -314,6 +325,7 @@ window.onload = () => {
         const username = btn.dataset.username;
         if (action === 'disconnect') disconnectUser(userId, username);
         if (action === 'block') blockUser(userId, username);
+        if (action === 'unblock') unblockUser(userId, username);
     });
 };
 
@@ -394,9 +406,9 @@ function renderInspector(d) {
                 extraHtml = `<div class="knight-status-row">${actedBadge}${modeBadge}</div>${effectsHtml ? `<div class="effects-row">${effectsHtml}</div>` : ''}`;
             }
 
-            return `<div class="card-chip ${rarCls}" title="${c.instance_id}">
-                <span class="cname">${c.name}${posLabel}</span>
-                <span class="cmeta">${c.type} · ${stats}</span>
+            return `<div class="card-chip ${rarCls}" title="${escHtml(c.instance_id)}">
+                <span class="cname">${escHtml(c.name)}${posLabel}</span>
+                <span class="cmeta">${escHtml(c.type)} · ${escHtml(stats)}</span>
                 ${extraHtml}
             </div>`;
         }).join('');
@@ -414,7 +426,7 @@ function renderInspector(d) {
         return `
             <div class="player-box ${isActive ? 'active-player' : ''}">
                 <h3>
-                    👤 ${p.username}
+                    👤 ${escHtml(p.username)}
                     ${isActive ? '<span class="turn-badge">SU TURNO</span>' : ''}
                 </h3>
                 <div class="player-stats">
@@ -470,6 +482,11 @@ function blockUser(userId, username) {
     
     console.log(`🚫 Bloqueando a ${username}`);
     sendEvent('admin_block_user', { user_id: userId });
+}
+
+function unblockUser(userId, username) {
+    if (!confirm(`¿Desbloquear a ${username}?`)) return;
+    sendEvent('admin_unblock_user', { user_id: userId });
 }
 
 // =============================================
@@ -858,7 +875,9 @@ function validateJsonTA(btn) {
 
 function escHtml(str) {
     if (str == null) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // Incluye comillas: también se usa dentro de atributos (data-username="...")
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 // ── Save Card ─────────────────────────────────────────────────────

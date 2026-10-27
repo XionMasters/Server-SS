@@ -1,5 +1,5 @@
 import { sequelize } from '../config/database';
-import DeckBack from '../models/DeckBack';
+import DeckBack from '../infrastructure/database/models/DeckBack';
 
 async function seedDeckBacks() {
   try {

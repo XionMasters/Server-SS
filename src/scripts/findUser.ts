@@ -1,5 +1,5 @@
 // Script temporal para encontrar un usuario
-import User from '../models/User';
+import User from '../infrastructure/database/models/User';
 import { sequelize } from '../config/database';
 
 const findUser = async () => {

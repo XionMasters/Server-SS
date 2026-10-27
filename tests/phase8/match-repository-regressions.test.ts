@@ -1,23 +1,23 @@
 import { Op } from 'sequelize';
-import { createEmptyGameState, type CardInGameState, type GameScenario } from '../../src/engine/GameState';
-import { CardRulesEngine } from '../../src/engine/CardRulesEngine';
-import { MatchRepository } from '../../src/services/repositories/MatchRepository';
-import CardInPlay from '../../src/models/CardInPlay';
-import { MatchStateMapper } from '../../src/services/mappers/MatchStateMapper';
+import { createEmptyGameState, type CardInGameState, type GameScenario } from '../../src/domain/game/GameState';
+import { CardRulesEngine } from '../../src/domain/game/CardRulesEngine';
+import { MatchRepository } from '../../src/infrastructure/database/repositories/MatchRepository';
+import CardInPlay from '../../src/infrastructure/database/models/CardInPlay';
+import { MatchStateMapper } from '../../src/app/matches/mappers/MatchStateMapper';
 
-jest.mock('../../src/models/CardInPlay', () => ({
+jest.mock('../../src/infrastructure/database/models/CardInPlay', () => ({
   __esModule: true,
   default: {
     update: jest.fn(),
   },
 }));
 
-jest.mock('../../src/models/Match', () => ({
+jest.mock('../../src/infrastructure/database/models/Match', () => ({
   __esModule: true,
   default: class Match {},
 }));
 
-jest.mock('../../src/services/mappers/MatchStateMapper', () => ({
+jest.mock('../../src/app/matches/mappers/MatchStateMapper', () => ({
   MatchStateMapper: {
     getUpdatesFromState: jest.fn(() => ({
       current_turn: 1,

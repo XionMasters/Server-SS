@@ -1,7 +1,7 @@
-import { AttackManager } from '../../src/services/game/attackManager';
-import { ProcessedActionsRegistry } from '../../src/services/registries/ProcessedActionsRegistry';
+import { AttackManager } from '../../src/app/matches/actions/attackManager';
+import { ProcessedActionsRegistry } from '../../src/infrastructure/database/repositories/ProcessedActionsRegistry';
 
-jest.mock('../../src/services/registries/ProcessedActionsRegistry', () => ({
+jest.mock('../../src/infrastructure/database/repositories/ProcessedActionsRegistry', () => ({
   ProcessedActionsRegistry: {
     find: jest.fn(),
     register: jest.fn(),
@@ -11,6 +11,9 @@ jest.mock('../../src/services/registries/ProcessedActionsRegistry', () => ({
 describe('AttackManager idempotency cache', () => {
   test('retry returns cached evaded value', async () => {
     (ProcessedActionsRegistry.find as jest.Mock).mockResolvedValue({
+      match_id: 'm1',
+      player_number: 1,
+      action_type: 'attack',
       cached_result: {
         newState: { match_id: 'm1' },
         damage: 0,

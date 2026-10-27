@@ -1,7 +1,7 @@
-// src/models/UserSession.ts
+// src/infrastructure/database/models/UserSession.ts
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../../../config/database';
-import User from '../../../models/User';
+import User from './User';
 
 class UserSession extends Model {
   declare id: string;

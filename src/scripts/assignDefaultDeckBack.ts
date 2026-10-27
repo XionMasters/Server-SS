@@ -1,8 +1,8 @@
 import { sequelize } from '../config/database';
-import DeckBack from '../models/DeckBack';
-import Deck from '../models/Deck';
-import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
-import User from '../models/User';
+import DeckBack from '../infrastructure/database/models/DeckBack';
+import Deck from '../infrastructure/database/models/Deck';
+import UserDeckBackUnlock from '../infrastructure/database/models/UserDeckBackUnlock';
+import User from '../infrastructure/database/models/User';
 
 async function assignDefaultDeckBack() {
   try {

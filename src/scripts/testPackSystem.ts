@@ -1,8 +1,8 @@
 import sequelize from '../config/database';
-import User from '../models/User';
-import Pack from '../models/Pack';
-import Card from '../models/Card';
-import '../models/associations';
+import User from '../infrastructure/database/models/User';
+import Pack from '../infrastructure/database/models/Pack';
+import Card from '../infrastructure/database/models/Card';
+import '../infrastructure/database/models/associations';
 
 /**
  * Script de prueba del sistema de compra y apertura de sobres

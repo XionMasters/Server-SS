@@ -1,13 +1,13 @@
 import sequelize from '../config/database';
-import User from '../models/User';
-import Pack from '../models/Pack';
-import UserPack from '../models/UserPack';
-import Card from '../models/Card';
-import UserCard from '../models/UserCard';
-import UserTransaction from '../models/UserTransaction';
-import UserCardTransaction from '../models/UserCardTransaction';
-import transactionService from '../services/transactionService';
-import '../models/associations';
+import User from '../infrastructure/database/models/User';
+import Pack from '../infrastructure/database/models/Pack';
+import UserPack from '../infrastructure/database/models/UserPack';
+import Card from '../infrastructure/database/models/Card';
+import UserCard from '../infrastructure/database/models/UserCard';
+import UserTransaction from '../infrastructure/database/models/UserTransaction';
+import UserCardTransaction from '../infrastructure/database/models/UserCardTransaction';
+import transactionService from '../infrastructure/database/services/transaction.service';
+import '../infrastructure/database/models/associations';
 
 /**
  * Simulación completa de compra y apertura de sobres

@@ -6,6 +6,10 @@ const mockUserPackModel = {
   findAll: jest.fn(),
 };
 
+const mockCardModel = {
+  findAll: jest.fn(),
+};
+
 jest.mock('../../src/config/database', () => ({
   __esModule: true,
   sequelize: {
@@ -13,47 +17,49 @@ jest.mock('../../src/config/database', () => ({
   },
 }));
 
-jest.mock('../../src/models/Pack', () => ({
+jest.mock('../../src/infrastructure/database/models/Pack', () => ({
   __esModule: true,
   default: mockPackModel,
 }));
 
-jest.mock('../../src/models/UserPack', () => ({
+jest.mock('../../src/infrastructure/database/models/UserPack', () => ({
   __esModule: true,
   default: mockUserPackModel,
 }));
 
-jest.mock('../../src/models/User', () => ({
+jest.mock('../../src/infrastructure/database/models/User', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/models/Card', () => ({
+jest.mock('../../src/infrastructure/database/models/Card', () => ({
+  __esModule: true,
+  default: mockCardModel,
+}));
+
+jest.mock('../../src/infrastructure/database/models/CardKnight', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/models/CardKnight', () => ({
+jest.mock('../../src/infrastructure/database/models/CardAbility', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/models/CardAbility', () => ({
+jest.mock('../../src/infrastructure/database/models/UserCard', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/models/UserCard', () => ({
+jest.mock('../../src/infrastructure/database/services/transaction.service', () => ({
   __esModule: true,
   default: {},
 }));
 
-jest.mock('../../src/services/transactionService', () => ({
-  __esModule: true,
-  default: {},
-}));
-
-import { getAvailablePacks, getUserPacks } from '../../src/controllers/packs.controller';
+import { getAvailablePacks, getUserPacks } from '../../src/interfaces/http/controllers/packs.controller';
+import { generateRandomCard } from '../../src/app/packs/pack.service';
+import { SeededRNG } from '../../src/domain/game/combat/RNG';
 
 function createMockResponse() {
   return {
@@ -123,5 +129,18 @@ describe('Pack image regressions', () => {
       ],
       total: 1,
     });
+  });
+
+  test('pack card selection is reproducible from its seeded random source', async () => {
+    const cards = [{ id: 'card-1' }, { id: 'card-2' }, { id: 'card-3' }];
+    mockCardModel.findAll.mockResolvedValue(cards);
+
+    const first = await generateRandomCard({} as any, new SeededRNG(98765), 'common');
+    const replay = await generateRandomCard({} as any, new SeededRNG(98765), 'common');
+
+    expect(replay).toBe(first);
+    expect(mockCardModel.findAll).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      where: { rarity: 'common' },
+    }));
   });
 });

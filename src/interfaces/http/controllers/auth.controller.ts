@@ -1,188 +1,38 @@
-// src/interfaces/http/controllers/auth.controller.ts
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import { decode } from 'jsonwebtoken';
-import { randomUUID } from 'crypto';
-import { Op } from 'sequelize';
-import User from '../../../models/User';
-import emailService from '../../../services/emailService';
-import transactionService from '../../../services/transactionService';
-import { assignStarterCards } from '../../../scripts/assignStarterCards';
-import ProfileAvatar from '../../../models/ProfileAvatar';
-import UserProfile from '../../../models/UserProfile';
-import UserAvatarUnlock from '../../../models/UserAvatarUnlock';
-import DeckBack from '../../../models/DeckBack';
-import UserDeckBackUnlock from '../../../models/UserDeckBackUnlock';
-import {
-  createUserAccessToken,
-  UserAccessTokenPayload,
-} from '../../../infrastructure/auth/token.service';
-import {
-  createUserSession,
-  deactivateAllUserSessions,
-  deactivateUserSession,
-} from '../../../infrastructure/auth/session.service';
+import { AuthUseCaseError } from '../../../app/auth/auth-use-case.error';
+import { EmailVerificationUseCase } from '../../../app/auth/email-verification.use-case';
+import { GetProfileUseCase } from '../../../app/auth/get-profile.use-case';
+import { LoginUseCase } from '../../../app/auth/login.use-case';
+import { LogoutUseCase } from '../../../app/auth/logout.use-case';
+import { RegisterUseCase } from '../../../app/auth/register.use-case';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
 
-const issueSessionToken = async (user: User, req: Request): Promise<string> => {
-  const sessionId = randomUUID();
-  const payload: UserAccessTokenPayload = {
-    userId: user.id,
-    username: user.username,
-    sessionId,
-  };
-  const token = createUserAccessToken(payload);
-  const tokenPayload = decode(token);
+const registerUseCase = new RegisterUseCase();
+const loginUseCase = new LoginUseCase();
+const logoutUseCase = new LogoutUseCase();
+const getProfileUseCase = new GetProfileUseCase();
+const emailVerificationUseCase = new EmailVerificationUseCase();
 
-  if (!tokenPayload || typeof tokenPayload === 'string' || !tokenPayload.exp) {
-    throw new Error('No se pudo obtener la expiración del token');
+const getClientMetadata = (req: Request) => ({
+  ipAddress: (req.headers['x-forwarded-for'] as string)?.split(',')[0]
+    || req.socket.remoteAddress
+    || 'unknown',
+  userAgent: req.headers['user-agent'] || 'unknown',
+});
+
+const sendUseCaseError = (res: Response, error: unknown, context: string): void => {
+  if (error instanceof AuthUseCaseError) {
+    res.status(error.statusCode).json({ error: error.message });
+    return;
   }
 
-  const clientIp = (req.headers['x-forwarded-for'] as string)?.split(',')[0]
-    || req.socket.remoteAddress
-    || 'unknown';
-  const userAgent = req.headers['user-agent'] || 'unknown';
-
-  await createUserSession({
-    id: sessionId,
-    userId: user.id,
-    token,
-    expiresAt: new Date(tokenPayload.exp * 1000),
-    ipAddress: clientIp,
-    userAgent,
-  });
-
-  return token;
+  console.error(context, error);
+  res.status(500).json({ error: 'Error interno del servidor' });
 };
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, email, password } = req.body;
-
-    // Validaciones básicas
-    if (!username || !email || !password) {
-      res.status(400).json({ error: 'Todos los campos son requeridos' });
-      return;
-    }
-
-    if (password.length < 6) {
-      res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
-      return;
-    }
-
-    // Verificar si el usuario ya existe (case-insensitive)
-    const existingUser = await User.findOne({
-      where: {
-        [Op.or]: [
-          { email: { [Op.iLike]: email } },
-          { username: { [Op.iLike]: username } }
-        ]
-      }
-    });
-
-    if (existingUser) {
-      if (existingUser.email.toLowerCase() === email.toLowerCase()) {
-        res.status(400).json({ error: 'El email ya está registrado' });
-        return;
-      }
-      if (existingUser.username.toLowerCase() === username.toLowerCase()) {
-        res.status(400).json({ error: 'El nombre de usuario ya existe' });
-        return;
-      }
-      res.status(400).json({ error: 'El usuario o email ya existe' });
-      return;
-    }
-
-    // Hash de la contraseña
-    const saltRounds = 12;
-    const password_hash = await bcrypt.hash(password, saltRounds);
-
-    // Generar token de verificación
-    const verificationToken = emailService.generateVerificationToken();
-    const verificationExpires = emailService.generateExpirationDate();
-
-    // Crear usuario
-    const user = await User.create({
-      username,
-      email,
-      password_hash,
-      currency: 400, // 4 sobres × 100 monedas = 400
-      is_email_verified: false,
-      email_verification_token: verificationToken,
-      email_verification_expires: verificationExpires
-    });
-
-    // Enviar email de verificación
-    try {
-      await emailService.sendVerificationEmail(email, username, verificationToken);
-    } catch (emailError) {
-      console.error('Error enviando email de verificación:', emailError);
-      // No fallar el registro si hay error en el email
-    }
-
-    // ✅ ASIGNAR CARTAS INICIALES
-    await assignStarterCards(user.id);
-
-    // ✅ ASIGNAR AVATARES POR DEFECTO
-    try {
-      // Obtener todos los avatares default activos
-      const defaultAvatars = await ProfileAvatar.findAll({ where: { unlock_type: 'default', is_active: true } });
-      if (defaultAvatars.length > 0) {
-        // Crear perfil si no existe (debería no existir recién registrado)
-        const mainAvatar = defaultAvatars[0];
-        const userProfile = await UserProfile.create({
-          user_id: user.id,
-          avatar_image_id: mainAvatar.id
-        });
-
-        // Desbloquear todos los avatares default
-        for (const avatar of defaultAvatars) {
-          await UserAvatarUnlock.create({
-            user_id: user.id,
-            avatar_id: avatar.id,
-            unlock_source: 'registration_default'
-          });
-        }
-      }
-    } catch (avatarError) {
-      console.error('Error asignando avatares por defecto:', avatarError);
-    }
-
-    // ✅ DESBLOQUEAR DORSOS POR DEFECTO
-    try {
-      const defaultDeckBacks = await DeckBack.findAll({ 
-        where: { unlock_type: 'default', is_active: true } 
-      });
-      for (const deckBack of defaultDeckBacks) {
-        await UserDeckBackUnlock.findOrCreate({
-          where: { 
-            user_id: user.id, 
-            deck_back_id: deckBack.id 
-          },
-          defaults: {
-            user_id: user.id,
-            deck_back_id: deckBack.id,
-            unlock_source: 'initial_setup'
-          }
-        });
-      }
-    } catch (deckBackError) {
-      console.error('Error asignando dorsos por defecto:', deckBackError);
-    }
-
-    // ✅ REGISTRAR TRANSACCIÓN DE MONEDAS INICIALES
-    await transactionService.logCurrencyTransaction(
-      user.id,
-      400,
-      'EARN',
-      'REGISTRATION_BONUS',
-      'Monedas de bienvenida por registro',
-      'user',
-      user.id,
-      { starter_deck: 40 }
-    );
-
-    const token = await issueSessionToken(user, req);
+    const { user, token } = await registerUseCase.execute(req.body, getClientMetadata(req));
 
     res.status(201).json({
       message: 'Usuario registrado exitosamente. Revisa tu email para verificar tu cuenta.',
@@ -192,52 +42,23 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         username: user.username,
         email: user.email,
         currency: user.currency,
-        is_email_verified: user.is_email_verified
+        is_email_verified: user.is_email_verified,
       },
-      starter_cards: 6, // Informar que se asignaron cartas iniciales
-      verification_required: true
+      starter_cards: 6,
+      verification_required: true,
     });
-
   } catch (error) {
-    console.error('Error en registro:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    sendUseCaseError(res, error, 'Error en registro:');
   }
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      res.status(400).json({ error: 'Email y contraseña son requeridos' });
-      return;
-    }
-
-    // Buscar usuario (case-insensitive)
-    const user = await User.findOne({ 
-      where: { 
-        email: { [Op.iLike]: email } 
-      } 
-    });
-    if (!user) {
-      res.status(401).json({ error: 'Credenciales inválidas' });
-      return;
-    }
-
-    // Verificar contraseña
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    if (!isPasswordValid) {
-      res.status(401).json({ error: 'Credenciales inválidas' });
-      return;
-    }
-
-    // ✅ INVALIDAR TODAS LAS SESIONES ANTERIORES DE ESTE USUARIO
-    await deactivateAllUserSessions(user.id);
-    console.log(`🔐 Sesiones anteriores invalidadas para usuario ${user.username}`);
-
-    const token = await issueSessionToken(user, req);
-
-    console.log(`✅ Nueva sesión creada para ${user.username}`);
+    const { user, token } = await loginUseCase.execute(
+      req.body.email,
+      req.body.password,
+      getClientMetadata(req)
+    );
 
     res.json({
       message: 'Login exitoso',
@@ -246,136 +67,80 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         username: user.username,
         email: user.email,
-        currency: user.currency
-      }
-    });
-
-  } catch (error) {
-    console.error('Error en login:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-};
-
-export const getProfile = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const user = (req as any).user;
-    
-    res.json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
         currency: user.currency,
-        is_email_verified: user.is_email_verified,
-        created_at: user.created_at
-      }
+      },
     });
   } catch (error) {
-    console.error('Error obteniendo perfil:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    sendUseCaseError(res, error, 'Error en login:');
   }
 };
+
+export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  if (!req.user) {
+    res.status(401).json({ error: 'No autenticado' });
+    return;
+  }
+
+  res.json({ user: getProfileUseCase.execute(req.user) });
+};
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]!));
+
+// Página mínima para quien abre el enlace del email en el navegador
+const verificationPage = (title: string, message: string) => `<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHtml(title)}</title>
+<style>body{font-family:Arial,sans-serif;background:#1b1a2e;color:#eee;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:16px}
+main{max-width:480px;background:#2a2945;padding:32px;border-radius:12px;text-align:center}h1{margin-top:0}</style>
+</head><body><main><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p></main></body></html>`;
 
 export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+  const wantsHtml = req.accepts(['json', 'html']) === 'html';
+
   try {
-    const { token } = req.query;
+    await emailVerificationUseCase.verify(req.query.token);
+    const message = '¡Email verificado exitosamente! Tu cuenta está ahora activada.';
 
-    if (!token || typeof token !== 'string') {
-      res.status(400).json({ error: 'Token de verificación requerido' });
+    if (wantsHtml) {
+      res.send(verificationPage('✅ Email verificado', `${message} Ya puedes volver al juego.`));
       return;
     }
-
-    // Buscar usuario con el token de verificación
-    const user = await User.findOne({
-      where: {
-        email_verification_token: token,
-        email_verification_expires: {
-          [Op.gt]: new Date() // Token no expirado
-        }
-      }
-    });
-
-    if (!user) {
-      res.status(400).json({ error: 'Token de verificación inválido o expirado' });
-      return;
-    }
-
-    // Verificar email
-    user.is_email_verified = true;
-    user.email_verification_token = null;
-    user.email_verification_expires = null;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: '¡Email verificado exitosamente! Tu cuenta está ahora activada.'
-    });
-
+    res.json({ success: true, message });
   } catch (error) {
-    console.error('Error verificando email:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    if (wantsHtml && error instanceof AuthUseCaseError) {
+      res.status(error.statusCode).send(verificationPage(
+        '❌ No se pudo verificar',
+        `${error.message}. Puedes pedir un nuevo enlace desde el juego.`
+      ));
+      return;
+    }
+    sendUseCaseError(res, error, 'Error verificando email:');
   }
 };
 
 export const resendVerificationEmail = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email } = req.body;
-
-    if (!email) {
-      res.status(400).json({ error: 'Email es requerido' });
-      return;
-    }
-
-    const user = await User.findOne({ where: { email } });
-    if (!user) {
-      res.status(404).json({ error: 'Usuario no encontrado' });
-      return;
-    }
-
-    if (user.is_email_verified) {
-      res.status(400).json({ error: 'Email ya está verificado' });
-      return;
-    }
-
-    // Generar nuevo token
-    const verificationToken = emailService.generateVerificationToken();
-    const verificationExpires = emailService.generateExpirationDate();
-
-    user.email_verification_token = verificationToken;
-    user.email_verification_expires = verificationExpires;
-    await user.save();
-
-    // Enviar nuevo email
-    await emailService.sendVerificationEmail(email, user.username, verificationToken);
-
+    await emailVerificationUseCase.resend(req.body.email);
     res.json({
       success: true,
-      message: 'Email de verificación reenviado'
+      message: 'Si la cuenta requiere verificación, se enviará un email.',
     });
-
   } catch (error) {
-    console.error('Error reenviando email:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    sendUseCaseError(res, error, 'Error reenviando email:');
   }
 };
 
 export const logout = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  if (!req.auth) {
+    res.status(401).json({ error: 'No autenticado' });
+    return;
+  }
+
   try {
-    if (!req.auth) {
-      res.status(401).json({ error: 'No autenticado' });
-      return;
-    }
-
-    await deactivateUserSession(req.auth.userId, req.auth.sessionId);
-    console.log(`✅ Sesión cerrada para usuario ${req.auth.username}`);
-
-    res.json({
-      success: true,
-      message: 'Sesión cerrada correctamente'
-    });
-
+    await logoutUseCase.execute(req.auth.userId, req.auth.sessionId);
+    res.json({ success: true, message: 'Sesión cerrada correctamente' });
   } catch (error) {
-    console.error('Error en logout:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    sendUseCaseError(res, error, 'Error en logout:');
   }
 };

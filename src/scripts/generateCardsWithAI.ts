@@ -1,10 +1,10 @@
 // src/scripts/generateCardsWithAI.ts
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
-import '../models/associations'; // Importar asociaciones
-import { CardImageGenerator } from '../utils/cardImageGenerator';
-import aiArtService from '../services/aiArtService';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
+import '../infrastructure/database/models/associations'; // Importar asociaciones
+import { CardImageGenerator } from '../infrastructure/assets/cardImageGenerator';
+import aiArtService from '../infrastructure/ai-art/aiArtService';
 import path from 'path';
 import fs from 'fs';
 

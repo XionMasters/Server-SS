@@ -1,13 +1,15 @@
 // src/config/database.ts
 import { DataTypes, Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
 const sequelize = new Sequelize({
   database: process.env.DB_NAME || 'caballeros_cosmicos',
   username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'password',
+  password: process.env.DB_PASSWORD,
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   dialect: 'postgres',
@@ -23,7 +25,7 @@ const sequelize = new Sequelize({
 export const connectDatabase = async (): Promise<void> => {
   try {
     // Importar asociaciones después de que sequelize esté definido
-    await import('../models/associations');
+    await import('../infrastructure/database/models/associations');
     
     await sequelize.authenticate();
     console.log('✅ Conectado a la base de datos PostgreSQL');
@@ -60,6 +62,42 @@ export const connectDatabase = async (): Promise<void> => {
             defaultValue: null,
           });
           console.log('✅ Columna pending_selection agregada.');
+        }
+        if (!matchColumns['rng_seed']) {
+          console.log('🔧 Agregando columna rng_seed a tabla matches...');
+          await queryInterface.addColumn('matches', 'rng_seed', {
+            type: DataTypes.BIGINT,
+            allowNull: true,
+          });
+          await sequelize.query(`
+            UPDATE matches
+            SET rng_seed = hashtext(id::text)
+            WHERE rng_seed IS NULL
+          `);
+          await queryInterface.changeColumn('matches', 'rng_seed', {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            defaultValue: 0,
+          });
+          console.log('✅ Columna rng_seed agregada y normalizada.');
+        }
+
+        const userColumns = await queryInterface.describeTable('users');
+        if (!userColumns['blocked_at']) {
+          console.log('🔧 Agregando columna blocked_at a tabla users...');
+          await sequelize.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS blocked_at TIMESTAMPTZ NULL');
+          console.log('✅ Columna blocked_at agregada.');
+        }
+
+        const abilityColumns = await queryInterface.describeTable('card_abilities');
+        if (!abilityColumns['ability_key']) {
+          console.log('🔧 Aplicando migración 009 (card_abilities.ability_key)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/009_add_ability_key_to_card_abilities.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Columna ability_key agregada y rellenada.');
         }
 
         const cardColumns = await queryInterface.describeTable('cards');
@@ -106,8 +144,10 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Columna deck_cover_card_id agregada');
         }
       } catch (colError: any) {
-        if (!colError.message.includes('already exists')) {
-          console.warn('⚠️  No se pudieron aplicar migraciones defensivas:', colError.message);
+        // Arrancar con un esquema a medias produce errores confusos más tarde (F12)
+        if (!colError.message?.includes('already exists')) {
+          console.error('❌ No se pudieron aplicar migraciones defensivas:', colError.message);
+          throw colError;
         }
       }
     }

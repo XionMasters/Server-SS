@@ -1,6 +1,6 @@
 // src/scripts/generatePacks.ts
 import { sequelize } from '../config/database';
-import Pack from '../models/Pack';
+import Pack from '../infrastructure/database/models/Pack';
 
 const generatePacks = async () => {
   try {

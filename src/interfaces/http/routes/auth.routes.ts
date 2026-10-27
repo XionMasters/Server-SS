@@ -9,15 +9,15 @@ import {
   resendVerificationEmail 
 } from '../controllers/auth.controller';
 import { authenticateToken } from '../middleware/auth.middleware';
-import { validateSession } from '../middleware/validateSession';
+import { authRateLimit } from '../middleware/rate-limit.middleware';
 
 const router = Router();
 
-router.post('/register', register);
-router.post('/login', login);
-router.post('/logout', authenticateToken, validateSession, logout);
-router.get('/profile', authenticateToken, validateSession, getProfile);
+router.post('/register', authRateLimit, register);
+router.post('/login', authRateLimit, login);
+router.post('/logout', authenticateToken, logout);
+router.get('/profile', authenticateToken, getProfile);
 router.get('/verify-email', verifyEmail);
-router.post('/resend-verification', resendVerificationEmail);
+router.post('/resend-verification', authRateLimit, resendVerificationEmail);
 
 export default router;

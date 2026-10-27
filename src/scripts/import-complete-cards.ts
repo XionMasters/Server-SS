@@ -1,8 +1,8 @@
 // Script para importar cartas completas desde JSON con todos sus datos
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
-import CardAbility from '../models/CardAbility';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
+import CardAbility from '../infrastructure/database/models/CardAbility';
 import fs from 'fs';
 import path from 'path';
 

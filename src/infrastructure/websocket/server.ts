@@ -1,142 +1,82 @@
 // src/infrastructure/websocket/server.ts
-// WebSocket nativo (no Socket.IO) para compatibilidad con Godot
+// WebSocket nativo (no Socket.IO) para compatibilidad con Godot.
+// Solo gestiona conexión, autenticación, heartbeat y enrutado; los handlers viven en interfaces/websocket.
 import { IncomingMessage } from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
-import Match from '../../models/Match';
-import { GameStateBuilder } from '../../services/game/GameStateBuilder';
-import UserProfile from '../../models/UserProfile';
-import ProfileAvatar from '../../models/ProfileAvatar';
-import { MatchStateService } from '../../services/match/matchState.service';
-import { matchesCoordinator } from '../../services/coordinators/matchesCoordinator';
-import { SelectionService } from '../../services/game/SelectionService';
-import { authenticateSocket } from './middleware/auth.middleware';
+import Match from '../database/models/Match';
+import UserProfile from '../database/models/UserProfile';
+import ProfileAvatar from '../database/models/ProfileAvatar';
+import { matchesCoordinator } from '../../app/matches/coordinators/matchesCoordinator';
+import { authenticateSocket, AuthenticatedWebSocket } from './middleware/auth.middleware';
 import { WebSocketPresenceService } from './presence.service';
-import { WebSocketChatHandler } from './handlers/chat.handler';
+import { WebSocketChatHandler } from '../../interfaces/websocket/handlers/chat.handler';
 import { WebSocketRouter, RouterEventHandler } from './websocket-router';
+import { SocketRateLimiter } from './rate-limiter';
 import {
+  ADMIN_EVENTS,
   broadcastAdminStats,
   handleAdminDisconnectUser,
-  handleAdminBlockUser
-} from './handlers/admin.handler';
+  handleAdminBlockUser,
+  handleAdminUnblockUser
+} from '../../interfaces/websocket/handlers/admin.handler';
+import { createMatchHandlers } from '../../interfaces/websocket/handlers/match.handler';
+import { createPresenceHandlers } from '../../interfaces/websocket/handlers/presence.handler';
 
-interface AuthenticatedWebSocket extends WebSocket {
-  userId?: string;
-  username?: string;
-  isAlive?: boolean;
-  isAdmin?: boolean;
-  isSearchingMatch?: boolean;
-}
+const DEFAULT_AVATAR_URL = '/assets/avatars/avatar_1.png';
+const MAX_MESSAGE_BYTES = 64 * 1024;
 
 const presenceService = new WebSocketPresenceService();
 const chatHandler = new WebSocketChatHandler(presenceService);
 const router = new WebSocketRouter(matchesCoordinator, presenceService);
+const presenceHandlers = createPresenceHandlers(presenceService);
+const { broadcastOnlineUsers } = presenceHandlers;
+const { handlers: matchHandlers, broadcastMatchUpdate } = createMatchHandlers(
+  presenceService,
+  async (ws, action) => {
+    await router.route(ws as any, 'match_action', action);
+  }
+);
+
+matchesCoordinator.setNotifier((userIds, event, payload) => {
+  presenceService.sendToUsers(userIds, event, payload);
+});
 
 const withAdmin = (handler: RouterEventHandler): RouterEventHandler => {
   return async (ws, data) => {
-    const authWs = ws as AuthenticatedWebSocket;
-    if (!authWs.isAdmin) return;
+    if (!ws.isAdmin) return;
     await handler(ws, data);
   };
 };
 
-const routeLegacyMatchAction = async (
-  ws: AuthenticatedWebSocket,
-  action: Record<string, any>
-) => {
-  await router.route(ws as any, 'match_action', action);
+// Mismo requisito que las rutas HTTP de partidas: email verificado
+const withVerifiedEmail = (handler: RouterEventHandler): RouterEventHandler => {
+  return async (ws, data) => {
+    if (!ws.isEmailVerified) {
+      presenceService.sendToSocket(ws as WebSocket, 'error', {
+        code: 'EMAIL_NOT_VERIFIED',
+        message: 'Debes verificar tu email para realizar esta acción'
+      });
+      return;
+    }
+    await handler(ws, data);
+  };
 };
 
+const verifiedMatchHandlers = Object.fromEntries(
+  Object.entries(matchHandlers).map(([event, handler]) => [event, withVerifiedEmail(handler)])
+);
+
 router.registerMany({
-  request_test_match: async (ws) => {
-    await handleRequestTestMatch(ws as AuthenticatedWebSocket);
-  },
-  resume_test_match: async (ws) => {
-    await handleResumeTestMatch(ws as AuthenticatedWebSocket);
-  },
-  abandon_test_match: async (ws, data) => {
-    await handleAbandonTestMatch(ws as AuthenticatedWebSocket, data as { match_id: string });
-  },
-  search_match: async (ws) => {
-    await handleSearchMatch(ws as AuthenticatedWebSocket);
-  },
-  cancel_search: async (ws) => {
-    await handleCancelSearch(ws as AuthenticatedWebSocket);
-  },
-  play_card: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'PLAY_CARD',
-      match_id: data.match_id,
-      card_id: data.card_id,
-      zone: data.zone,
-      position: data.position,
-      action_id: data.action_id
-    });
-  },
-  declare_attack: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'ATTACK',
-      match_id: data.match_id,
-      attacker_id: data.attacker_id,
-      defender_id: data.defender_id,
-      action_id: data.action_id
-    });
-  },
-  end_turn: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'END_TURN',
-      match_id: data.match_id,
-      action_id: data.action_id
-    });
-  },
-  start_first_turn: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'START_FIRST_TURN',
-      match_id: data.match_id,
-      action_id: data.action_id
-    });
-  },
-  change_defensive_mode: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'CHANGE_DEFENSIVE_MODE',
-      match_id: data.match_id,
-      knight_id: data.knight_id,
-      mode: data.mode,
-      action_id: data.action_id
-    });
-  },
-  use_ability: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'USE_ABILITY',
-      match_id: data.match_id,
-      card_id: data.card_id,
-      ability_name: data.ability_name,
-      action_id: data.action_id
-    });
-  },
-  use_technique: async (ws, data) => {
-    await routeLegacyMatchAction(ws as AuthenticatedWebSocket, {
-      type: 'TECHNIQUE_ATTACK',
-      match_id: data.match_id,
-      knight_id: data.knight_id,
-      technique_id: data.technique_id,
-      defender_id: data.defender_id,
-      action_id: data.action_id,
-    });
-  },
-  resolve_selection: async (ws, data) => {
-    await handleResolveSelection(ws as AuthenticatedWebSocket, data);
-  },
-  request_match_state: async (ws, data) => {
-    await handleRequestMatchState(ws as AuthenticatedWebSocket, data);
-  },
+  ...verifiedMatchHandlers,
+  // Igual que GET /api/chat: el chat solo exige sesión, no email verificado
   chat_message: async (ws, data) => {
     await chatHandler.handleChatMessage(ws as any, data);
   },
   request_online_users: (ws) => {
-    sendOnlineUsersList(ws as WebSocket);
+    presenceHandlers.sendOnlineUsersList(ws as WebSocket);
   },
   update_status: async (ws, data) => {
-    await handleUpdateStatus(ws as WebSocket, data);
+    await presenceHandlers.handleUpdateStatus(ws as WebSocket, data);
   },
   get_admin_stats: withAdmin(async () => {
     await broadcastAdminStats(presenceService.getPrimarySocketsMap());
@@ -145,16 +85,114 @@ router.registerMany({
     await handleAdminDisconnectUser(data, presenceService.getPrimarySocketsMap());
   }),
   admin_block_user: withAdmin(async (_ws, data) => {
-    await handleAdminBlockUser(data, presenceService.getPrimarySocketsMap());
+    await handleAdminBlockUser(data, presenceService.getPrimarySocketsMap(), presenceService.getSocketSetsMap());
+  }),
+  admin_unblock_user: withAdmin(async (_ws, data) => {
+    await handleAdminUnblockUser(data, presenceService.getPrimarySocketsMap());
   }),
   ping: (ws) => {
-    // Responder al heartbeat del cliente
     presenceService.sendToSocket(ws as WebSocket, 'pong', { ts: Date.now() });
   },
 });
 
-// Matchmaking handler implementado más abajo (handleSearchMatch)
-// (eliminada versión simplificada anterior)
+// El match_action genérico también exige email verificado
+router.register('match_action', withVerifiedEmail(router.getHandler('match_action')!));
+
+export { broadcastMatchUpdate };
+
+async function resolveAvatarUrl(userId: string): Promise<string> {
+  try {
+    const userProfile = await UserProfile.findOne({ where: { user_id: userId } });
+
+    let avatarUrl = '/assets/bronzes/1.webp';
+    if (userProfile && userProfile.avatar_image_id) {
+      const avatar = await ProfileAvatar.findByPk(userProfile.avatar_image_id);
+      avatarUrl = avatar?.image_url || avatarUrl;
+    }
+    return avatarUrl.startsWith('http') ? avatarUrl : '/' + avatarUrl.replace(/^\//, '');
+  } catch (error) {
+    console.error('Error obteniendo avatar del usuario:', error);
+    return DEFAULT_AVATAR_URL;
+  }
+}
+
+/**
+ * Autentica el socket y registra su presencia.
+ * Devuelve true si el socket quedó listo para recibir eventos.
+ */
+async function setupConnection(ws: AuthenticatedWebSocket, req: IncomingMessage): Promise<boolean> {
+  try {
+    const authResult = await authenticateSocket(ws, req);
+
+    if (authResult.isAdmin) {
+      await broadcastAdminStats(presenceService.getPrimarySocketsMap());
+      return true;
+    }
+
+    const recoveryResult = await matchesCoordinator.recoverOnSocketConnect(
+      ws.userId!,
+      (userId: string) => presenceService.isUserOnline(userId)
+    );
+
+    if (!recoveryResult.success) {
+      console.error('❌ Error en recuperación de partida:', recoveryResult.error || 'Unknown error');
+    } else if ((recoveryResult.data?.cleanedWaitingCount ?? 0) > 0) {
+      console.log(`🧹 Limpiando ${recoveryResult.data?.cleanedWaitingCount} partida(s) obsoleta(s) de ${ws.username}`);
+    }
+
+    const avatarUrl = await resolveAvatarUrl(ws.userId!);
+
+    // El cliente pudo cerrar mientras autenticábamos: no registrar un usuario fantasma
+    if (ws.readyState !== WebSocket.OPEN) {
+      return false;
+    }
+
+    const resumed = recoveryResult.success ? recoveryResult.data?.matchResumed : null;
+    if (resumed) {
+      console.log(`♻️ ${ws.username} tiene partida activa para reanudar: ${resumed.match_id} (${resumed.phase})`);
+      presenceService.sendToSocket(ws, 'match_resumed', resumed);
+    }
+
+    presenceService.registerConnection(ws, ws.userId!, ws.username!, avatarUrl);
+    broadcastOnlineUsers();
+
+    console.log(`✅ Usuario conectado: ${ws.username} (${ws.userId})`);
+
+    presenceService.sendToSocket(ws, 'connected', {
+      message: 'Conectado al servidor',
+      user_id: ws.userId,
+      username: ws.username,
+      has_active_match: !!resumed
+    });
+
+    await broadcastAdminStats(presenceService.getPrimarySocketsMap());
+    return true;
+  } catch (error: any) {
+    const code = error?.code || 'INVALID_TOKEN';
+    const message = error?.message || 'Token inválido';
+    console.error('❌ Error autenticación WebSocket:', message);
+    presenceService.sendToSocket(ws, 'error', { code, message });
+    ws.close(1008, code);
+    return false;
+  }
+}
+
+async function handleUserDisconnect(ws: AuthenticatedWebSocket, code: number, reason: Buffer) {
+  console.log(`❌ Usuario desconectado: ${ws.username} code=${code} reason=${reason?.toString?.() || ''}`);
+  presenceService.removeConnection(ws);
+  broadcastOnlineUsers();
+
+  if (!presenceService.isUserOnline(ws.userId!)) {
+    const destroyed = await Match.destroy({
+      where: { player1_id: ws.userId!, phase: 'waiting' }
+    });
+    if (destroyed > 0) {
+      console.log(`🧹 Partida(s) en espera eliminada(s) de ${ws.username}: ${destroyed}`);
+    }
+  }
+
+  await broadcastAdminStats(presenceService.getPrimarySocketsMap());
+}
 
 /**
  * Inicializa el servidor de WebSockets nativos
@@ -162,12 +200,13 @@ router.registerMany({
 export const initializeWebSocketServer = (server: any) => {
   const wss = new WebSocketServer({
     server,
-    path: '/ws'  // Ruta específica para WebSocket
+    path: '/ws',
+    // Ningún evento legítimo se acerca a esto (por defecto ws acepta 100 MB)
+    maxPayload: MAX_MESSAGE_BYTES
   });
 
   console.log('🔌 WebSocket server initialized (native WS for Godot) at /ws');
 
-  // Heartbeat para detectar conexiones muertas
   const interval = setInterval(() => {
     wss.clients.forEach((ws: AuthenticatedWebSocket) => {
       if (ws.isAlive === false) {
@@ -177,141 +216,66 @@ export const initializeWebSocketServer = (server: any) => {
       ws.isAlive = false;
       ws.ping();
     });
-  }, 30000); // 30 segundos
+  }, 30000);
 
   wss.on('close', () => {
     clearInterval(interval);
   });
 
-  wss.on('connection', async (ws: AuthenticatedWebSocket, req: IncomingMessage) => {
+  wss.on('connection', (ws: AuthenticatedWebSocket, req: IncomingMessage) => {
     ws.isAlive = true;
+
+    // Los listeners se registran de inmediato para no perder mensajes ni cierres
+    // ocurridos durante la autenticación; se procesan cuando `ready` se resuelve.
+    const ready = setupConnection(ws, req);
 
     ws.on('pong', () => {
       ws.isAlive = true;
     });
 
-    // Autenticación desde el header Authorization o query parameter
-    try {
-      const authResult = await authenticateSocket(ws, req);
+    const rateLimiter = new SocketRateLimiter();
 
-      if (authResult.isAdmin) {
-        return; // No continuar con autenticación de usuario normal
-      }
-
-      const recoveryResult = await matchesCoordinator.recoverOnSocketConnect(
-        ws.userId!,
-        (userId: string) => presenceService.isUserOnline(userId)
-      );
-
-      if (!recoveryResult.success) {
-        console.error('❌ Error en recuperación de partida:', recoveryResult.error || 'Unknown error');
-      } else if (recoveryResult.data?.cleanedWaitingCount > 0) {
-        console.log(`🧹 Limpiando ${recoveryResult.data.cleanedWaitingCount} partida(s) obsoleta(s) de ${ws.username}`);
-      }
-
-      if (recoveryResult.success && recoveryResult.data?.matchResumed) {
-        const resumed = recoveryResult.data.matchResumed;
-        console.log(`♻️ ${ws.username} tiene partida activa para reanudar:`);
-        console.log(`   - Match ID: ${resumed.match_id}`);
-        console.log(`   - Fase: ${resumed.phase}`);
-        console.log(`   - ${resumed.player1?.username} vs ${resumed.player2?.username}`);
-
-        presenceService.sendToSocket(ws, 'match_resumed', resumed);
-      }
-
-      // Agregar usuario a la lista de usuarios en línea con su avatar
-      let normalizedAvatarUrl = '/assets/avatars/avatar_1.png';
-      try {
-        const userProfile = await UserProfile.findOne({
-          where: { user_id: ws.userId }
-        });
-
-        let avatarUrl = '/assets/bronzes/1.webp';
-        if (userProfile && userProfile.avatar_image_id) {
-          const avatar = await ProfileAvatar.findByPk(userProfile.avatar_image_id);
-          avatarUrl = avatar?.image_url || avatarUrl;
-        }
-        normalizedAvatarUrl = avatarUrl.startsWith('http') ? avatarUrl : '/' + avatarUrl.replace(/^\//, '');
-      } catch (error) {
-        console.error('Error obteniendo avatar del usuario:', error);
-        normalizedAvatarUrl = '/assets/avatars/avatar_1.png';
-      }
-
-      presenceService.registerConnection(ws, ws.userId!, ws.username!, normalizedAvatarUrl);
-      broadcastOnlineUsers();
-
-      console.log(`✅ Usuario conectado: ${ws.username} (${ws.userId})`);
-
-      presenceService.sendToSocket(ws, 'connected', {
-        message: 'Conectado al servidor',
-        user_id: ws.userId,
-        username: ws.username,
-        has_active_match: !!(recoveryResult.success && recoveryResult.data?.matchResumed)
-      });
-
-      // Actualizar stats de admin
-      await broadcastAdminStats(presenceService.getPrimarySocketsMap());
-
-    } catch (error: any) {
-      const code = error?.code || 'INVALID_TOKEN';
-      const message = error?.message || 'Token inválido';
-      console.error('❌ Error autenticación WebSocket:', message);
-      presenceService.sendToSocket(ws, 'error', { code, message });
-      ws.close(1008, message);
-      return;
-    }
-
-    // =====================================
-    // MANEJAR MENSAJES
-    // =====================================
     ws.on('message', async (raw: Buffer) => {
+      const decision = rateLimiter.check();
+      if (decision === 'disconnect') {
+        console.warn(`🚫 Cerrando socket de ${ws.username ?? 'desconocido'} por exceso de eventos`);
+        ws.close(1008, 'RATE_LIMITED');
+        return;
+      }
+      if (decision === 'reject') {
+        presenceService.sendToSocket(ws, 'error', {
+          code: 'RATE_LIMITED',
+          message: 'Demasiados eventos, espera un momento'
+        });
+        return;
+      }
+
+      if (!(await ready)) return;
+
       try {
         const parsed = JSON.parse(raw.toString());
         if (!parsed.event) return;
+        if (ws.isAdmin && !ADMIN_EVENTS.has(parsed.event)) return;
 
-        if (parsed.event != 'ping') {
+        if (parsed.event !== 'ping') {
           console.log(`📨 Evento recibido: ${parsed.event} de ${ws.username}`);
         }
         await router.route(ws as any, parsed.event, parsed.data || {});
-
-
       } catch (error: any) {
         console.error('Error procesando mensaje:', error);
-        if (ws.userId) {
-          presenceService.sendToUser(ws.userId, 'error', {
-            code: 'PARSE_ERROR',
-            message: 'Error procesando mensaje'
-          });
-        }
+        presenceService.sendToSocket(ws, 'error', {
+          code: 'PARSE_ERROR',
+          message: 'Error procesando mensaje'
+        });
       }
     });
 
-    // =====================================
-    // DESCONEXIÓN
-    // =====================================
     ws.on('close', async (code: number, reason: Buffer) => {
-      if (ws.userId && ws.username) {
-        console.log(`❌ Usuario desconectado: ${ws.username} code=${code} reason=${reason?.toString?.() || ''}`);
-        presenceService.removeConnection(ws);
-        const userStillOnline = presenceService.isUserOnline(ws.userId);
-        broadcastOnlineUsers();
-
-        if (!userStillOnline) {
-          const waitingMatch = await Match.findOne({
-            where: {
-              player1_id: ws.userId,
-              phase: 'waiting'
-            }
-          });
-
-          if (waitingMatch) {
-            await waitingMatch.destroy();
-            console.log(`🧹 Partida en espera eliminada: ${waitingMatch.id}`);
-          }
-        }
-
-        // Actualizar stats de admin
-        await broadcastAdminStats(presenceService.getPrimarySocketsMap());
+      try {
+        if (!(await ready) || ws.isAdmin || !ws.userId) return;
+        await handleUserDisconnect(ws, code, reason);
+      } catch (error) {
+        console.error('Error gestionando desconexión:', error);
       }
     });
 
@@ -320,348 +284,3 @@ export const initializeWebSocketServer = (server: any) => {
     });
   });
 };
-
-// =====================================
-// HANDLERS DE EVENTOS
-// =====================================
-
-async function handleSearchMatch(ws: AuthenticatedWebSocket) {
-  try {
-    const userId = ws.userId!;
-    const username = ws.username!;
-
-    console.log(`🔍 ${username} busca partida...`);
-
-    // 🎯 DELEGAMOS TODA LA LÓGICA AL COORDINADOR
-    const result = await matchesCoordinator.findMatchOrCreate(
-      userId,
-      presenceService.getPrimarySocketsMap(),
-      presenceService.getSocketSetsMap()
-    );
-
-    // Manejar respuesta según el resultado
-    if (!result.success) {
-      return presenceService.sendToSocket(ws, 'error', {
-        code: 'SEARCH_ERROR',
-        message: result.error || 'Error al buscar partida'
-      });
-    }
-
-    // ✅ Match encontrado - notificar a cada jugador con su propia perspectiva
-    if (result.status === 'match_found') {
-      console.log(`✅ Match encontrado: ${result.match_id}`);
-
-      const matchData = result.data;
-      const player1Id = matchData.player1.id as string;
-      const player2Id = matchData.player2.id as string;
-
-      // Construir estado por perspectiva para cada jugador
-      const matchRecord = await Match.findByPk(result.match_id);
-
-      if (matchRecord) {
-        const [gs1, gs2] = await Promise.all([
-          GameStateBuilder.buildFromMatch(matchRecord, { perspectivePlayer: 1 }),
-          GameStateBuilder.buildFromMatch(matchRecord, { perspectivePlayer: 2 })
-        ]);
-        presenceService.broadcastToUsers([player1Id], 'match_found', { match_id: result.match_id, game_state: gs1 });
-        presenceService.broadcastToUsers([player2Id], 'match_found', { match_id: result.match_id, game_state: gs2 });
-      } else {
-        // Fallback: enviar datos originales (sin game_state) — iniciará con error gracioso
-        const recipients = [player1Id, player2Id].filter(Boolean);
-        presenceService.broadcastToUsers(recipients, 'match_found', matchData);
-      }
-    }
-    // ⏳ En espera de rival
-    else {
-      console.log(`⏳ ${username} esperando rival... (Match ID: ${result.match_id})`);
-
-      presenceService.sendToSocket(ws, 'searching', {
-        message: 'Buscando rival...',
-        match_id: result.match_id
-      });
-    }
-
-    // Actualizar stats de admin
-    await broadcastAdminStats(presenceService.getPrimarySocketsMap());
-
-  } catch (error: any) {
-    console.error('Error en search_match:', error);
-    presenceService.sendToSocket(ws, 'error', {
-      code: 'SEARCH_ERROR',
-      message: 'Error al buscar partida'
-    });
-  }
-}
-
-async function handleCancelSearch(ws: AuthenticatedWebSocket) {
-  try {
-    const userId = ws.userId!;
-    const username = ws.username!;
-
-    console.log(`🔍 ${username} intenta cancelar búsqueda...`);
-
-    const waitingMatch = await Match.findOne({
-      where: {
-        player1_id: userId,
-        phase: 'waiting'
-      }
-    });
-
-    if (waitingMatch) {
-      console.log(`   - Partida encontrada: ${waitingMatch.id}`);
-      await waitingMatch.destroy();
-      console.log(`✅ ${username} canceló la búsqueda exitosamente`);
-
-      presenceService.sendToSocket(ws, 'search_cancelled', {
-        success: true,
-        message: 'Búsqueda cancelada'
-      });
-
-      // Actualizar stats de admin
-      await broadcastAdminStats(presenceService.getPrimarySocketsMap());
-    } else {
-      console.log(`⚠️ ${username} no tiene partida en espera para cancelar`);
-      presenceService.sendToSocket(ws, 'search_cancelled', {
-        success: false,
-        message: 'No hay búsqueda activa'
-      });
-    }
-  } catch (error) {
-    console.error('Error cancelando búsqueda:', error);
-    presenceService.sendToSocket(ws, 'error', {
-      code: 'CANCEL_ERROR',
-      message: 'Error al cancelar búsqueda'
-    });
-  }
-}
-
-async function handleResolveSelection(ws: AuthenticatedWebSocket, data: any) {
-  try {
-    const userId = ws.userId!;
-    const { match_id, selection_id, chosen_card_id, action_id } = data ?? {};
-
-    if (!match_id || !selection_id || !chosen_card_id || !action_id) {
-      presenceService.sendToSocket(ws, 'error', {
-        code: 'MISSING_FIELDS',
-        message: 'Se requieren match_id, selection_id, chosen_card_id y action_id'
-      });
-      return;
-    }
-
-    const result = await SelectionService.resolveSelection({
-      match_id,
-      user_id: userId,
-      selection_id,
-      chosen_card_id,
-      action_id,
-    });
-
-    if (!result.success) {
-      presenceService.sendToSocket(ws, 'error', {
-        code: result.code || 'SELECTION_ERROR',
-        message: result.error || 'Error resolviendo selección'
-      });
-      return;
-    }
-
-    // Broadcast del estado actualizado a ambos jugadores
-    await broadcastMatchUpdate(match_id);
-  } catch (error: any) {
-    console.error('Error en resolve_selection:', error);
-    presenceService.sendToSocket(ws, 'error', {
-      code: 'SELECTION_ERROR',
-      message: 'Error resolviendo selección'
-    });
-  }
-}
-
-async function handleRequestMatchState(ws: AuthenticatedWebSocket, data: any) {
-  try {
-    const userId = ws.userId!;
-    const matchId = data?.match_id;
-
-    if (!matchId) {
-      presenceService.sendToSocket(ws, 'error', {
-        code: 'MATCH_ID_REQUIRED',
-        message: 'match_id es requerido'
-      });
-      return;
-    }
-
-    const result = await matchesCoordinator.getMatchState(matchId, userId);
-
-    if (!result.success) {
-      presenceService.sendToSocket(ws, 'error', {
-        code: (result as any).code || 'MATCH_STATE_ERROR',
-        message: result.error || 'Error obteniendo estado de partida'
-      });
-      return;
-    }
-
-    presenceService.sendToSocket(ws, 'match_state', result.data);
-  } catch (error: any) {
-    console.error('Error en request_match_state:', error);
-    presenceService.sendToSocket(ws, 'error', {
-      code: 'MATCH_STATE_ERROR',
-      message: 'Error obteniendo estado de partida'
-    });
-  }
-}
-
-// ==================== PRESENCE HANDLERS ====================
-
-async function handleUpdateStatus(ws: WebSocket, data: any) {
-  try {
-    const { status } = data;
-    const userId = (ws as any).userId;
-
-    if (!['online', 'in_match', 'away'].includes(status)) {
-      presenceService.sendToSocket(ws, 'error', { error: 'Estado inválido' });
-      return;
-    }
-
-    presenceService.updateUserStatus(userId, status);
-    broadcastOnlineUsers();
-
-    const userInfo = presenceService.getOnlineUsers().find(user => user.userId === userId);
-    if (userInfo) {
-      console.log(`👤 ${userInfo.username} cambió estado a: ${status}`);
-    }
-  } catch (error) {
-    console.error('Error actualizando estado de usuario:', error);
-  }
-}
-
-function sendOnlineUsersList(ws: WebSocket) {
-  const users = presenceService.getOnlineUsers().map(u => ({
-    user_id: u.userId,
-    username: u.username,
-    avatar_url: u.avatarUrl || '/assets/avatars/avatar_1.png',
-    status: u.status,
-    connected_at: u.connectedAt.toISOString()
-  }));
-  presenceService.sendToSocket(ws, 'online_users', { users });
-}
-
-function broadcastOnlineUsers() {
-  const users = presenceService.getOnlineUsers().map(u => ({
-    user_id: u.userId,
-    username: u.username,
-    avatar_url: u.avatarUrl || '/assets/avatars/avatar_1.png',
-    status: u.status,
-    connected_at: u.connectedAt.toISOString()
-  }));
-  presenceService.broadcast('online_users', { users });
-  console.log(`📡 Broadcast: ${users.length} usuarios en línea`);
-}
-
-/**
- * Broadcast de actualización de partida a ambos jugadores
- */
-export async function broadcastMatchUpdate(matchId: string) {
-  try {
-    const matchStateResult = await MatchStateService.buildBroadcastMatchState(matchId);
-    if (!matchStateResult.success || !matchStateResult.data) {
-      console.error('❌ Error construyendo estado para broadcast:', matchStateResult.error || matchId);
-      return;
-    }
-
-    const matchState = matchStateResult.data;
-    const recipients = [matchState.player1_id, matchState.player2_id].filter(Boolean);
-    presenceService.broadcastToUsers(recipients, 'match_update', matchState);
-
-    console.log(`📡 Match update broadcast: ${matchId}`);
-  } catch (error) {
-    console.error('Error broadcasting match update:', error);
-  }
-}
-
-/**
- * TEST Match Handler - Usuario quiere jugar contra sí mismo
- */
-async function handleRequestTestMatch(ws: AuthenticatedWebSocket) {
-  try {
-    console.log(`🎭 ${ws.username} solicita partida TEST`);
-
-    const userId = ws.userId!;
-
-    // Usar StartMatchService que centraliza toda la lógica
-    const { StartMatchService } = await import('../../services/match/startMatch.service');
-    const result = await StartMatchService.createNewMatch(userId, userId, 'TEST');
-
-    // Enviar match_found event al cliente con el estado construido
-    console.log(`📡 Enviando match_found a ${ws.username}...`);
-    presenceService.sendToSocket(ws, 'match_found', result);
-    console.log(`✅ match_found enviada a ${ws.username}`);
-
-  } catch (error: any) {
-    console.error('❌ Error en handleRequestTestMatch:', error);
-
-    // Adaptar mensajes de error comunes
-    let errorMessage = 'Error creando partida TEST';
-    let errorCode = 'TEST_MATCH_ERROR';
-
-    if (error.message.includes('mazo activo')) {
-      errorCode = 'NO_ACTIVE_DECK';
-      errorMessage = error.message;
-    } else if (error.message.includes('activa en curso') || error.message.includes('partida activa') || error.message.includes('ALREADY_IN_MATCH')) {
-      errorCode = 'ALREADY_IN_MATCH';
-      errorMessage = error.message;
-    } else if (error.message.includes('esperando')) {
-      errorCode = 'RATE_LIMIT';
-      errorMessage = error.message;
-    }
-
-    presenceService.sendToSocket(ws, 'match_error', {
-      code: errorCode,
-      message: errorMessage,
-      error: error.message
-    });
-  }
-}
-
-/**
- * Reanudar partida TEST activa
- */
-async function handleResumeTestMatch(ws: AuthenticatedWebSocket) {
-  try {
-    console.log(`♻️ ${ws.username} solicita reanudar partida TEST`);
-    const { StartMatchService } = await import('../../services/match/startMatch.service');
-    const result = await StartMatchService.resumeTestMatch(ws.userId!);
-
-    presenceService.sendToSocket(ws, 'match_found', result);
-    console.log(`✅ match_found (resume) enviada a ${ws.username}`);
-  } catch (error: any) {
-    console.error('❌ Error en handleResumeTestMatch:', error);
-    presenceService.sendToSocket(ws, 'match_error', {
-      code: 'RESUME_ERROR',
-      message: error.message || 'Error reanudando partida TEST',
-      error: error.message
-    });
-  }
-}
-
-/**
- * Abandonar partida TEST activa y crear una nueva
- */
-async function handleAbandonTestMatch(ws: AuthenticatedWebSocket, data: { match_id: string }) {
-  try {
-    console.log(`🗑️ ${ws.username} abandonando partida TEST: ${data.match_id}`);
-    const result = await matchesCoordinator.abandonMatch(data.match_id, ws.userId!);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Error abandonando partida');
-    }
-
-    console.log(`✅ Partida abandonada, creando nueva TEST...`);
-    // Crear nueva partida TEST inmediatamente
-    await handleRequestTestMatch(ws);
-  } catch (error: any) {
-    console.error('❌ Error en handleAbandonTestMatch:', error);
-    presenceService.sendToSocket(ws, 'match_error', {
-      code: 'ABANDON_ERROR',
-      message: error.message || 'Error abandonando partida TEST',
-      error: error.message
-    });
-  }
-}

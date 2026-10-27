@@ -1,7 +1,7 @@
 import { sequelize } from '../config/database';
-import User from '../models/User';
-import DeckBack from '../models/DeckBack';
-import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
+import User from '../infrastructure/database/models/User';
+import DeckBack from '../infrastructure/database/models/DeckBack';
+import UserDeckBackUnlock from '../infrastructure/database/models/UserDeckBackUnlock';
 
 async function assignBacksToUsers() {
   try {

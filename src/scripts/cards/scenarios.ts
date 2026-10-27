@@ -1,6 +1,6 @@
 // src/scripts/cards/scenarios.ts
-import Card from '../../models/Card';
-import CardAbility from '../../models/CardAbility';
+import Card from '../../infrastructure/database/models/Card';
+import CardAbility from '../../infrastructure/database/models/CardAbility';
 
 export const scenarios = [
   // Santuario de Athena

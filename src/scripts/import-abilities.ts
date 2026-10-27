@@ -1,8 +1,8 @@
 // Script para agregar habilidades a las cartas
 // Las habilidades se definen en abilities-data.json
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import CardAbility from '../models/CardAbility';
+import Card from '../infrastructure/database/models/Card';
+import CardAbility from '../infrastructure/database/models/CardAbility';
 import fs from 'fs';
 import path from 'path';
 

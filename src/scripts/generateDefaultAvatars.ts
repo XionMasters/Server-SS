@@ -4,10 +4,10 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import { sequelize } from '../config/database';
-import ProfileAvatar from '../models/ProfileAvatar';
-import User from '../models/User';
-import UserProfile from '../models/UserProfile';
-import UserAvatarUnlock from '../models/UserAvatarUnlock';
+import ProfileAvatar from '../infrastructure/database/models/ProfileAvatar';
+import User from '../infrastructure/database/models/User';
+import UserProfile from '../infrastructure/database/models/UserProfile';
+import UserAvatarUnlock from '../infrastructure/database/models/UserAvatarUnlock';
 
 const AVATAR_DIR = path.resolve(__dirname, '../assets/avatars');
 

@@ -10,7 +10,7 @@ export interface AdminAccessTokenPayload extends JwtPayload {
   role: 'admin';
 }
 
-const getRequiredEnvironmentValue = (name: 'JWT_SECRET' | 'ADMIN_PASSWORD'): string => {
+const getRequiredEnvironmentValue = (name: 'JWT_SECRET' | 'ADMIN_PASSWORD' | 'DB_PASSWORD'): string => {
   const value = process.env[name];
 
   if (!value) {
@@ -26,6 +26,7 @@ const getJwtExpiresIn = (): SignOptions['expiresIn'] =>
 export const validateSecurityConfiguration = (): void => {
   getRequiredEnvironmentValue('JWT_SECRET');
   getRequiredEnvironmentValue('ADMIN_PASSWORD');
+  getRequiredEnvironmentValue('DB_PASSWORD');
 
   if (!process.env.CORS_ORIGIN) {
     throw new Error('La variable de entorno CORS_ORIGIN es obligatoria');

@@ -1,6 +1,6 @@
 import { sequelize } from '../config/database';
-import User from '../models/User';
-import DeckBack from '../models/DeckBack';
+import User from '../infrastructure/database/models/User';
+import DeckBack from '../infrastructure/database/models/DeckBack';
 
 async function check() {
   try {

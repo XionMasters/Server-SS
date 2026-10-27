@@ -1,7 +1,7 @@
 // Script para importar todas las cartas desde las carpetas de assets
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
 import fs from 'fs';
 import path from 'path';
 

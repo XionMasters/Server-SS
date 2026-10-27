@@ -2,8 +2,8 @@
 // Script para importar traducciones de ejemplo de las cartas existentes
 
 import sequelize from '../config/database';
-import Card from '../models/Card';
-import CardTranslation from '../models/CardTranslation';
+import Card from '../infrastructure/database/models/Card';
+import CardTranslation from '../infrastructure/database/models/CardTranslation';
 
 // Traducciones de ejemplo para algunas cartas icónicas
 const sampleTranslations = [

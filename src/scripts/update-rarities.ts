@@ -2,7 +2,7 @@
 // Crea un archivo rarity-mapping.json con el formato:
 // { "image_url": "rarity" }
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
+import Card from '../infrastructure/database/models/Card';
 import fs from 'fs';
 import path from 'path';
 

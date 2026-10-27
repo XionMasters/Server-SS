@@ -1,4 +1,4 @@
-import { createEmptyGameState, type CardInGameState } from '../../src/engine/GameState';
+import { createEmptyGameState, type CardInGameState } from '../../src/domain/game/GameState';
 
 jest.mock('../../src/config/database', () => ({
   sequelize: {
@@ -6,7 +6,7 @@ jest.mock('../../src/config/database', () => ({
   },
 }));
 
-jest.mock('../../src/models/CardInPlay', () => ({
+jest.mock('../../src/infrastructure/database/models/CardInPlay', () => ({
   __esModule: true,
   default: {
     findAll: jest.fn(),
@@ -14,45 +14,45 @@ jest.mock('../../src/models/CardInPlay', () => ({
   },
 }));
 
-jest.mock('../../src/models/Card', () => ({
+jest.mock('../../src/infrastructure/database/models/Card', () => ({
   __esModule: true,
   default: {
     findOne: jest.fn(),
   },
 }));
 
-jest.mock('../../src/models/CardKnight', () => ({
+jest.mock('../../src/infrastructure/database/models/CardKnight', () => ({
   __esModule: true,
   default: class CardKnight {},
 }));
 
-jest.mock('../../src/models/CardAbility', () => ({
+jest.mock('../../src/infrastructure/database/models/CardAbility', () => ({
   __esModule: true,
   default: {
     findAll: jest.fn(),
   },
 }));
 
-jest.mock('../../src/services/mappers/MatchStateMapper', () => ({
+jest.mock('../../src/app/matches/mappers/MatchStateMapper', () => ({
   MatchStateMapper: {
     fromMatch: jest.fn(),
   },
 }));
 
-jest.mock('../../src/services/repositories/MatchRepository', () => ({
+jest.mock('../../src/infrastructure/database/repositories/MatchRepository', () => ({
   MatchRepository: {
     applyState: jest.fn(),
   },
 }));
 
-jest.mock('../../src/services/registries/ProcessedActionsRegistry', () => ({
+jest.mock('../../src/infrastructure/database/repositories/ProcessedActionsRegistry', () => ({
   ProcessedActionsRegistry: {
     find: jest.fn(),
     register: jest.fn(),
   },
 }));
 
-jest.mock('../../src/engine/EngineContext', () => ({
+jest.mock('../../src/domain/game/EngineContext', () => ({
   createEngineContext: jest.fn((state: any) => ({
     state,
     bus: {
@@ -62,28 +62,28 @@ jest.mock('../../src/engine/EngineContext', () => ({
   })),
 }));
 
-jest.mock('../../src/engine/events/GameEvents', () => ({
+jest.mock('../../src/domain/game/events/GameEvents', () => ({
   GameEventType: {
     CARD_PLAYED: 'CARD_PLAYED',
   },
   createEvent: jest.fn((event: any) => event),
 }));
 
-jest.mock('../../src/engine/abilities/AbilityEngine', () => ({
+jest.mock('../../src/domain/game/abilities/AbilityEngine', () => ({
   AbilityEngine: {
     getCardEntryEffects: jest.fn(() => []),
   },
 }));
 
 import { sequelize } from '../../src/config/database';
-import CardInPlay from '../../src/models/CardInPlay';
-import Card from '../../src/models/Card';
-import CardAbility from '../../src/models/CardAbility';
-import { MatchStateMapper } from '../../src/services/mappers/MatchStateMapper';
-import { MatchRepository } from '../../src/services/repositories/MatchRepository';
-import { ProcessedActionsRegistry } from '../../src/services/registries/ProcessedActionsRegistry';
-import { CardManager } from '../../src/services/game/cardManager';
-import { KnightManager } from '../../src/services/game/knightManager';
+import CardInPlay from '../../src/infrastructure/database/models/CardInPlay';
+import Card from '../../src/infrastructure/database/models/Card';
+import CardAbility from '../../src/infrastructure/database/models/CardAbility';
+import { MatchStateMapper } from '../../src/app/matches/mappers/MatchStateMapper';
+import { MatchRepository } from '../../src/infrastructure/database/repositories/MatchRepository';
+import { ProcessedActionsRegistry } from '../../src/infrastructure/database/repositories/ProcessedActionsRegistry';
+import { CardManager } from '../../src/app/matches/actions/cardManager';
+import { KnightManager } from '../../src/app/matches/actions/knightManager';
 
 function createTx() {
   return { LOCK: { UPDATE: 'UPDATE' } };

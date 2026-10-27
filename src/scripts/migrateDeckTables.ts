@@ -1,5 +1,5 @@
 import sequelize from '../config/database';
-import '../models/associations';
+import '../infrastructure/database/models/associations';
 
 /**
  * Migración para crear tablas de decks

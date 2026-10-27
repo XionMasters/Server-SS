@@ -1,8 +1,8 @@
 import sequelize from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
-import '../models/associations';
-import { CardImageGeneratorV2 } from '../utils/cardImageGeneratorV2';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
+import '../infrastructure/database/models/associations';
+import { CardImageGeneratorV2 } from '../infrastructure/assets/cardImageGeneratorV2';
 import path from 'path';
 import fs from 'fs';
 

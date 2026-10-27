@@ -1,6 +1,6 @@
 import { AuthenticatedWebSocket } from './middleware/auth.middleware';
 import { WebSocketPresenceService } from './presence.service';
-import { MatchesCoordinator } from '../../services/coordinators/matchesCoordinator';
+import { MatchesCoordinator } from '../../app/matches/coordinators/matchesCoordinator';
 
 type EventHandler = (ws: AuthenticatedWebSocket, data: any) => Promise<void> | void;
 export type RouterEventHandler = EventHandler;
@@ -17,6 +17,10 @@ export class WebSocketRouter {
 
   register(event: string, handler: EventHandler) {
     this.handlers.set(event, handler);
+  }
+
+  getHandler(event: string): EventHandler | undefined {
+    return this.handlers.get(event);
   }
 
   registerMany(handlers: Record<string, EventHandler>) {
@@ -98,11 +102,11 @@ export class WebSocketRouter {
     try {
       await handler(ws, data);
     } catch (error: any) {
-      console.error(`❌ Error en handler ${event}:`, error?.message || error);
+      console.error(`❌ Error en handler ${event}:`, error);
       if (ws.userId) {
         this.presenceService.sendToUser(ws.userId, 'error', {
           code: 'HANDLER_ERROR',
-          message: error?.message || 'Error procesando evento'
+          message: 'Error procesando evento'
         });
       }
     }

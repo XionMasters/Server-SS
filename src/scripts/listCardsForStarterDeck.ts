@@ -5,7 +5,7 @@
  */
 
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
+import Card from '../infrastructure/database/models/Card';
 
 interface CardSummary {
   id: string;

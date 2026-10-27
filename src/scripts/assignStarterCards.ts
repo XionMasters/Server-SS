@@ -1,12 +1,12 @@
 // src/scripts/assignStarterCards.ts
-import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import UserCard from '../models/UserCard';
-import Deck from '../models/Deck';
-import DeckCard from '../models/DeckCard';
-import DeckBack from '../models/DeckBack';
-import UserDeckBackUnlock from '../models/UserDeckBackUnlock';
-import transactionService from '../services/transactionService';
+import { Transaction } from 'sequelize';
+import Card from '../infrastructure/database/models/Card';
+import UserCard from '../infrastructure/database/models/UserCard';
+import Deck from '../infrastructure/database/models/Deck';
+import DeckCard from '../infrastructure/database/models/DeckCard';
+import DeckBack from '../infrastructure/database/models/DeckBack';
+import UserDeckBackUnlock from '../infrastructure/database/models/UserDeckBackUnlock';
+import transactionService from '../infrastructure/database/services/transaction.service';
 import { 
   STARTER_DECK_CARDS, 
   STARTER_DECK_NAME, 
@@ -18,7 +18,7 @@ import {
  * Asigna el deck inicial de 40 cartas a un nuevo usuario
  * y crea el deck pre-configurado listo para jugar
  */
-export const assignStarterCards = async (userId: string): Promise<void> => {
+export const assignStarterCards = async (userId: string, transaction?: Transaction): Promise<void> => {
   try {
     console.log(`🎁 Asignando deck inicial para usuario: ${userId}`);
 
@@ -33,7 +33,8 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
     const cards = await Card.findAll({
       where: {
         id: cardIds
-      }
+      },
+      transaction
     });
 
     if (cards.length === 0) {
@@ -65,13 +66,14 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
           quantity: deckCard.quantity,
           is_foil: false,
           acquired_at: new Date()
-        }
+        },
+        transaction
       });
 
       // Si ya existía, sumar la cantidad
       if (!created) {
         userCard.quantity += deckCard.quantity;
-        await userCard.save();
+        await userCard.save({ transaction });
       }
 
       totalCardsAssigned += deckCard.quantity;
@@ -93,7 +95,8 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
           card_type: card.type,
           source: 'starter_deck',
           quantity: deckCard.quantity
-        }
+        },
+        transaction
       );
     }
 
@@ -105,19 +108,20 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
       name: STARTER_DECK_NAME,
       description: STARTER_DECK_DESCRIPTION,
       is_active: true // Marcar como deck activo por defecto
-    });
+    }, { transaction });
 
     console.log(`📦 Deck inicial creado: ${deck.id}`);
 
     // Asignar dorso por defecto al deck
     try {
       const defaultDeckBack = await DeckBack.findOne({
-        where: { unlock_type: 'default', is_active: true }
+        where: { unlock_type: 'default', is_active: true },
+        transaction
       });
 
       if (defaultDeckBack) {
         deck.current_deck_back_id = defaultDeckBack.id;
-        await deck.save();
+        await deck.save({ transaction });
         console.log(`🎨 Dorso por defecto asignado al deck: ${defaultDeckBack.name}`);
 
         // Desbloquear el dorso por defecto para el usuario
@@ -130,7 +134,8 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
             user_id: userId,
             deck_back_id: defaultDeckBack.id,
             unlock_source: 'initial_setup'
-          }
+          },
+          transaction
         });
         console.log(`🔓 Dorso desbloqueado para el usuario`);
       }
@@ -148,7 +153,7 @@ export const assignStarterCards = async (userId: string): Promise<void> => {
         quantity: dc.quantity
       }));
 
-    await DeckCard.bulkCreate(deckCardEntries);
+    await DeckCard.bulkCreate(deckCardEntries, { transaction });
 
     console.log(`🎴 ${deckCardEntries.length} tipos de cartas agregadas al deck`);
     console.log(`🎉 Deck inicial completo para usuario ${userId}!`);

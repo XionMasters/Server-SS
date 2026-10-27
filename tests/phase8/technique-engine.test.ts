@@ -5,9 +5,9 @@
  * Verifican: cálculo de daño, ignore_ar, ta_effects, multi-hit, Modo Defensa.
  */
 
-import { TechniqueRulesEngine, TechniqueStats } from '../../src/engine/TechniqueRulesEngine';
-import { createEmptyGameState, type CardInGameState } from '../../src/engine/GameState';
-import type { StatusEffect } from '../../src/engine/StatusEffects';
+import { TechniqueRulesEngine, TechniqueStats } from '../../src/domain/game/TechniqueRulesEngine';
+import { createEmptyGameState, type CardInGameState } from '../../src/domain/game/GameState';
+import type { StatusEffect } from '../../src/domain/game/StatusEffects';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

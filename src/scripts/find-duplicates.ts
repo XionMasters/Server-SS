@@ -1,7 +1,7 @@
 // Script para encontrar y eliminar cartas duplicadas
 import { sequelize } from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
 import { QueryTypes } from 'sequelize';
 
 async function findDuplicates() {

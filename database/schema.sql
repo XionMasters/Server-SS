@@ -397,6 +397,7 @@ CREATE TABLE matches (
     player2_deck_order  JSONB            DEFAULT '[]',
     player1_deck_index  INTEGER          NOT NULL DEFAULT 0,
     player2_deck_index  INTEGER          NOT NULL DEFAULT 0,
+    rng_seed            BIGINT           NOT NULL DEFAULT 0,
     started_at          TIMESTAMPTZ,
     finished_at         TIMESTAMPTZ,
     created_at          TIMESTAMPTZ      NOT NULL DEFAULT NOW(),

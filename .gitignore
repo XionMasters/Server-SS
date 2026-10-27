@@ -16,6 +16,7 @@ dist/
 *.pyc
 .python-version
 .env.*.local
+.env.pollinations
 *auth_token*
 *.pem
 # Card generator - imagenes generadas (se regeneran con generate.py)

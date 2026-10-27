@@ -1,7 +1,7 @@
 // src/interfaces/http/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../../../models/User';
+import User from '../../../infrastructure/database/models/User';
 import { getActiveUserSession } from '../../../infrastructure/auth/session.service';
 import { verifyUserAccessToken } from '../../../infrastructure/auth/token.service';
 
@@ -46,6 +46,11 @@ export const authenticateToken = async (
 
     if (!user) {
       res.status(401).json({ error: 'Usuario no encontrado' });
+      return;
+    }
+
+    if (user.blocked_at) {
+      res.status(403).json({ error: 'Tu cuenta ha sido bloqueada', code: 'USER_BLOCKED' });
       return;
     }
 

@@ -2,10 +2,10 @@ import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import sequelize from '../config/database';
-import Card from '../models/Card';
-import CardKnight from '../models/CardKnight';
-import CardAbility from '../models/CardAbility';
-import CardTranslation from '../models/CardTranslation';
+import Card from '../infrastructure/database/models/Card';
+import CardKnight from '../infrastructure/database/models/CardKnight';
+import CardAbility from '../infrastructure/database/models/CardAbility';
+import CardTranslation from '../infrastructure/database/models/CardTranslation';
 
 dotenv.config();
 

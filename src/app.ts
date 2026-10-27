@@ -5,40 +5,29 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import path from 'path';
+import { createCorsOptions } from './interfaces/http/cors-options';
 
 // Routes
 import authRoutes from './interfaces/http/routes/auth.routes';
-import userRoutes from './routes/users.routes';
-import cardRoutes from './routes/cards.routes';
-import userCardsRoutes from './routes/userCards.routes';
-import packsRoutes from './routes/packs.routes';
-import transactionsRoutes from './routes/transactions.routes';
-import decksRoutes from './routes/decks.routes';
-import matchesRoutes from './routes/matches.routes';
-import adminRoutes from './routes/admin.routes';
-import profileRoutes from './routes/profile.routes';
+import userRoutes from './interfaces/http/routes/users.routes';
+import cardRoutes from './interfaces/http/routes/cards.routes';
+import userCardsRoutes from './interfaces/http/routes/userCards.routes';
+import packsRoutes from './interfaces/http/routes/packs.routes';
+import transactionsRoutes from './interfaces/http/routes/transactions.routes';
+import decksRoutes from './interfaces/http/routes/decks.routes';
+import matchesRoutes from './interfaces/http/routes/matches.routes';
+import adminRoutes from './interfaces/http/routes/admin.routes';
+import adminPanelRoutes from './interfaces/http/routes/admin-panel.routes';
+import profileRoutes from './interfaces/http/routes/profile.routes';
 import chatRoutes from './interfaces/http/routes/chat.routes';
 
 dotenv.config();
 
 const app = express();
-const allowedOrigins = process.env.CORS_ORIGIN
-  ?.split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean) || [];
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-      return;
-    }
-
-    callback(new Error('Origen no permitido por CORS'));
-  }
-}));
+app.use(cors(createCorsOptions(process.env.CORS_ORIGIN)));
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 
@@ -59,7 +48,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/admin', (_req, res, next) => {
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws: wss:;");
   next();
-}, adminRoutes);
+}, adminPanelRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Health check
