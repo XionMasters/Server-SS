@@ -26,6 +26,11 @@ jest.mock('../../src/infrastructure/database/models/CardKnight', () => ({
   default: class CardKnight {},
 }));
 
+jest.mock('../../src/infrastructure/database/models/CardTechnique', () => ({
+  __esModule: true,
+  default: class CardTechnique {},
+}));
+
 jest.mock('../../src/infrastructure/database/models/CardAbility', () => ({
   __esModule: true,
   default: {

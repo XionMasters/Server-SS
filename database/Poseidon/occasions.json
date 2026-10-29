@@ -1,0 +1,366 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'occasion' de la saga Poseidón. Efectos de un solo uso: la habilidad 'activa' con trigger CARD_PLAYED se resuelve al jugar la propia carta (PassiveTriggerEngine).",
+  "saga": "Poseidon",
+  "type": "occasion",
+  "cards": [
+    {
+      "code": "great_flood",
+      "name": "El Gran Diluvio",
+      "rarity": "epic",
+      "cost": 4,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/great_flood.webp",
+      "art_prompt": "Poseidon's great flood submerging the world under endless rain, as shown in the anime. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Inflige 2 de daño a todos los caballeros rivales.",
+      "abilities": [
+        { "name": "Diluvio", "type": "activa", "description": "Al jugarse, inflige 2 de daño a todos los caballeros rivales.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "apply_damage", "amount": 2, "target": "all_enemies" }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "poseidon_blessing",
+      "name": "Bendición de Poseidón",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/poseidon_blessing.webp",
+      "art_prompt": "Poseidon's cosmo spreading healing light over his Marinas. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Cura 3 LP a todos los caballeros aliados en campo.",
+      "abilities": [
+        { "name": "Bendición del Mar", "type": "activa", "description": "Al jugarse, cura 3 LP a todos los aliados.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "heal", "amount": 3, "target": "all_allies" }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "tide_call",
+      "name": "Llamada de la Marea",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/tide_call.webp",
+      "art_prompt": "The tide rising over the shore at sunset near Julian Solo's mansion. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Roba dos cartas.",
+      "abilities": [
+        { "name": "Marea Alta", "type": "activa", "description": "Al jugarse, roba dos cartas.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "draw_card", "amount": 2 }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "return_from_abyss",
+      "name": "Regreso del Abismo",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "dark",
+      "image_url": "occasions/return_from_abyss.webp",
+      "art_prompt": "A warrior rising from the abyss of the Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Elige un caballero de tu Yomotsu y llévalo al campo de batalla.",
+      "abilities": [
+        { "name": "Resurgir", "type": "activa", "description": "Elige un caballero del Yomotsu y llévalo al campo.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "yomotsu", "filter": { "type": "knight" }, "destination": "field", "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "field" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "athena_sacrifice",
+      "name": "Sacrificio en el Pilar Principal",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "occasions/athena_sacrifice.webp",
+      "art_prompt": "Saori Kido (Athena) trapped inside the Main Breadwinner pillar, enduring the flood to protect the world. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Pierdes 3 LP; todos tus caballeros ganan +2 CE hasta tu próximo turno.",
+      "abilities": [
+        { "name": "Sacrificio", "type": "activa", "description": "Paga 3 LP; tus caballeros ganan +2 CE.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "apply_player_damage", "target": "self", "amount": 3 }, { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "value": 2, "duration": 1 }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "undertow",
+      "name": "Resaca",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/undertow.webp",
+      "art_prompt": "A Bronze Saint being swept away by a violent current in the Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Devuelve a la mano de su dueño un caballero rival con 3 LP o menos.",
+      "abilities": [
+        { "name": "Arrastre", "type": "activa", "description": "Devuelve a la mano un caballero rival con LP ≤ 3.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight", "health_max": 3 }, "destination": "hand", "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "tidal_wave",
+      "name": "Maremoto",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/tidal_wave.webp",
+      "art_prompt": "A gigantic tidal wave hitting a Bronze Saint. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Inflige 4 de daño a un caballero rival.",
+      "abilities": [
+        { "name": "Ola Gigante", "type": "activa", "description": "Inflige 4 de daño a un caballero rival.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_damage", "amount": 4, "target": "selected" }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "generals_oath",
+      "name": "Juramento de los Generales",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/generals_oath.webp",
+      "art_prompt": "The seven Marina Generals gathered before Poseidon's throne. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Tus caballeros [general] ganan +1 CE y +1 AR hasta tu próximo turno.",
+      "abilities": [
+        { "name": "Juramento", "type": "activa", "description": "Tus [general] ganan +1 CE y +1 AR.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "general" }, "value": 1, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "all_allies", "filter": { "tag": "general" }, "value": 1, "duration": 1 }
+            ] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "kanon_betrayal",
+      "name": "La Traición de Kanon",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "dark",
+      "image_url": "occasions/kanon_betrayal.webp",
+      "art_prompt": "Kanon revealing his manipulation of Poseidon, shadowed face, Gemini memories behind him. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El rival descarta dos cartas al azar.",
+      "abilities": [
+        { "name": "Engaño", "type": "activa", "description": "El rival descarta dos cartas al azar.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "discard_opponent_random", "amount": 2 }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "sunken_sanctuary",
+      "name": "Refugio Sumergido",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/sunken_sanctuary.webp",
+      "art_prompt": "A hidden corner of the Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado entra en Modo Evasión hasta tu próximo turno.",
+      "abilities": [
+        { "name": "Ocultarse", "type": "activa", "description": "Un aliado gana Modo Evasión.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "evasion", "target": "selected", "duration": 1 }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "cosmic_current",
+      "name": "Corriente Cósmica",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/cosmic_current.webp",
+      "art_prompt": "A Saint burning his cosmo inside the Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado recupera 3 CP.",
+      "abilities": [
+        { "name": "Recarga", "type": "activa", "description": "Un aliado recupera 3 CP.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "restore_cosmos", "amount": 3, "target": "selected" }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "pressure_of_the_deep",
+      "name": "Presión del Abismo",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/pressure_of_the_deep.webp",
+      "art_prompt": "A Bronze Saint crushed under the weight of the ocean sky of the Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Reduce permanentemente 2 AR de un caballero rival.",
+      "abilities": [
+        { "name": "Aplastar", "type": "activa", "description": "-2 AR permanente a un rival.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "permanent_ar_reduce", "target": "selected", "amount": 2 }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "siren_song",
+      "name": "Canto de Sirena",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/siren_song.webp",
+      "art_prompt": "Sorrento playing his flute, enemies clutching their ears in pain. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Hechiza a un caballero rival: no podrá atacar en su próximo turno.",
+      "abilities": [
+        { "name": "Hechizo", "type": "activa", "description": "Congela a un rival durante su próximo turno.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "frozen", "target": "selected", "duration": 2 }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "fishermans_luck",
+      "name": "Suerte del Pescador",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Neutral",
+      "element": "water",
+      "image_url": "occasions/fishermans_luck.webp",
+      "art_prompt": "A Greek fisherman at Cape Sounion at dawn. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Lanza una moneda: si sale cara, roba tres cartas.",
+      "abilities": [
+        { "name": "Pesca", "type": "activa", "description": "Moneda: cara, roba 3 cartas.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "coin_flip_then", "on_heads": [{ "type": "draw_card", "amount": 3 }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "broken_pillar",
+      "name": "Pilar Derrumbado",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "image_url": "occasions/broken_pillar.webp",
+      "art_prompt": "Bronze Saints destroying one of the Ocean Pillars with the Libra weapons. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Destruye el objeto u ocasión del rival, o el escenario activo.",
+      "abilities": [
+        { "name": "Derrumbe", "type": "activa", "description": "Envía al Yomotsu un objeto/ocasión rival o el escenario.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_support_opponent", "destination": "yomotsu", "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "yomotsu" }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "bronze_resolve",
+      "name": "Determinación de Bronce",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "occasions/bronze_resolve.webp",
+      "art_prompt": "Seiya standing back up battered in his Pegasus Cloth, burning cosmo. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Si tienes 10 LP o menos, un caballero aliado gana +3 CE hasta tu próximo turno.",
+      "abilities": [
+        { "name": "Voluntad", "type": "activa", "description": "Con LP ≤ 10, un aliado gana +3 CE.",
+          "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "player_lp_below", "amount": 10 }],
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "ce_boost", "target": "selected", "value": 3, "duration": 1 }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "ocean_tribute",
+      "name": "Tributo al Océano",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "occasions/ocean_tribute.webp",
+      "art_prompt": "Offerings to Poseidon at an ancient Greek temple by the sea. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Pierdes 1 LP; roba dos cartas.",
+      "abilities": [
+        { "name": "Tributo", "type": "activa", "description": "Paga 1 LP, roba 2.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "apply_player_damage", "target": "self", "amount": 1 }, { "type": "draw_card", "amount": 2 }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "amphora_seal",
+      "name": "Sello del Ánfora",
+      "rarity": "legendary",
+      "cost": 5,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "image_url": "occasions/amphora_seal.webp",
+      "art_prompt": "Athena sealing Poseidon's spirit inside her sacred amphora. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Envía al Yomotsu un caballero rival con tag [god].",
+      "abilities": [
+        { "name": "Sellado", "type": "activa", "description": "Sella a un dios rival.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight", "tag": "god" }, "on_select": [{ "type": "kill", "target": "selected" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "drowning_grip",
+      "name": "Abrazo del Ahogado",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "dark",
+      "image_url": "occasions/drowning_grip.webp",
+      "art_prompt": "A Bronze Saint drowning in the flooded Undersea Sanctuary. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Envenena a un caballero rival: pierde 1 LP al inicio de sus próximos 3 turnos.",
+      "abilities": [
+        { "name": "Asfixia", "type": "activa", "description": "Veneno 1 LP por 3 turnos.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "poison", "target": "selected", "value": 1, "duration": 3 }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "trident_strike",
+      "name": "Golpe del Tridente",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "steel",
+      "image_url": "occasions/trident_strike.webp",
+      "art_prompt": "Poseidon striking with his golden trident. Iconic scene recreated from the Poseidon arc of the anime, cinematic framing. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Inflige 3 de daño directo al LP del rival.",
+      "abilities": [
+        { "name": "Golpe Divino", "type": "activa", "description": "3 de daño al jugador rival.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "apply_player_damage", "target": "opponent", "amount": 3 }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["battlefield"], "collection_id": "poseidon", "artist": null
+    }
+  ]
+}

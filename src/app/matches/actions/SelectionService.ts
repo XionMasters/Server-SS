@@ -30,7 +30,6 @@ import { createEngineContext } from '../../../domain/game/EngineContext';
 import { GameEventBus } from '../../../domain/game/events/GameEventBus';
 import { createEvent } from '../../../domain/game/events/GameEvents';
 import { parseStatusEffects, computeCeBonus, computeArBonus, deriveModeFromEffects } from '../../../domain/game/StatusEffects';
-import { CardDrawService } from './CardDrawService';
 import { ProcessedActionsRegistry } from '../../../infrastructure/database/repositories/ProcessedActionsRegistry';
 import { SeededRNG } from '../../../domain/game/combat/RNG';
 
@@ -169,14 +168,8 @@ export class SelectionService {
           actionResult.state.rng_seed = seededRng.getSeed();
         }
 
-        // 8b. Robar cartas si draw_card action fue ejecutada en on_select
-        if (actionResult.extras.draw_card_count && actionResult.extras.draw_card_count > 0) {
-          const drawPlayer = (actionResult.extras.draw_card_player ?? playerNumber) as 1 | 2;
-          const drawCount = actionResult.extras.draw_card_count as number;
-          for (let i = 0; i < drawCount; i++) {
-            await CardDrawService.drawCard(match_id, drawPlayer, tx);
-          }
-        }
+        // 8b. Los robos de draw_card quedan en state.pending_draws y los
+        //     ejecuta MatchRepository.applyState (step 10).
 
         // 8c. Transformaciones: actualizar card_id en BD para cartas que cambiaron de forma.
         // Los stats (CE, AR, HP, CP) ya están actualizados en actionResult.state y los

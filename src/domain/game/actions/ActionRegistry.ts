@@ -7,6 +7,12 @@
  * Acciones disponibles:
  *   apply_status    → aplica/refresca un StatusEffect en los targets resueltos
  *   coin_flip_then  → lanza una moneda; ejecuta heads[]/on_heads[] si cara, tails[]/on_fail[] si cruz
+ *   modify_stat     → modifica permanentemente attack/defense/cosmos/health
+ *   heal_player     → cura LP de un jugador
+ *   (ver cada entrada del registro para el resto)
+ *
+ * Las acciones con target aceptan `filter` ({ type, code, tag, health_max, status })
+ * para restringir los targets resueltos (ej: all_allies con tag 'general').
  *
  * Regla de stacking de apply_status:
  *   Si ya existe un efecto del mismo tipo con el mismo source en la carta,
@@ -36,7 +42,10 @@ const STATUS_INTERACTIONS: Record<string, { blockedBy?: string[]; removes?: stri
 };
 import type { ActionDefinition, ApplyStatusAction, CoinFlipAction, KillAction } from '../abilities/AbilityDefinition';
 import { normalizeCardType } from '../CardTypes';
-import { addOrRefreshEffect, removeEffect, computeCeBonus, computeArBonus, type StatusEffectType } from '../StatusEffects';
+import {
+  addOrRefreshEffect, removeEffect, computeCeBonus, computeArBonus, deriveModeFromEffects,
+  isModeEffectType, type StatusEffectType,
+} from '../StatusEffects';
 import { createEvent, type GameEvent } from '../events/GameEvents';
 import type { GameEventBus } from '../events/GameEventBus';
 import type { EngineContext } from '../EngineContext';
@@ -82,7 +91,7 @@ type ActionFn<T extends ActionDefinition = ActionDefinition> = (
   result: ActionResult,
 ) => void;
 
-type CardMoveOrigin = 'graveyard' | 'passive_watchers' | 'hand' | 'field_knight' | 'field_technique' | 'field_helper' | 'field_occasion';
+type CardMoveOrigin = 'graveyard' | 'passive_watchers' | 'hand' | 'field_knight' | 'field_technique' | 'field_helper' | 'field_occasion' | 'field_scenario';
 
 function getEngineContext(ctx: ActionContext, state: GameState): EngineContext {
   if (!ctx.bus) {
@@ -149,10 +158,23 @@ function _detachCardFromKnownZones(
     }
   }
 
+  // Escenario compartido: pertenece al jugador que lo jugó
+  if (state.scenario?.instance_id === cardId) {
+    const card = state.scenario;
+    state.scenario = null;
+    const player = card.player_number === 1 ? state.player1 : state.player2;
+    return { card, player, from: 'field_scenario' };
+  }
+
   return null;
 }
 
 function _sendCardToHand(player: any, card: any): void {
+  // Una carta que vuelve a la mano pierde los efectos que tenía en juego
+  card.status_effects = [];
+  card.is_exhausted = false;
+  card.attacked_this_turn = false;
+  if (card.card_type === 'knight' && card.max_health) card.current_health = card.max_health;
   card.zone = 'hand';
   card.position = player.hand.length;
   player.hand.push(card);
@@ -163,6 +185,58 @@ function _sendCardToCositos(player: any, card: any): void {
   player.costos_count += 1;
 }
 
+function _sendCardToYomotsu(player: any, card: any): void {
+  card.zone = 'yomotsu';
+  if (!Array.isArray(player.graveyard)) player.graveyard = [];
+  player.graveyard.push(card);
+  player.graveyard_count = player.graveyard.length;
+}
+
+function _targetContext(ctx: ActionContext, result: ActionResult): TargetContext {
+  return {
+    state: result.state,
+    playerNumber: ctx.playerNumber,
+    sourceCardId: ctx.sourceCardId,
+    event: ctx.event,
+    rng: ctx.rng,
+    selectedCardId: ctx.selectedCardId,
+  };
+}
+
+/**
+ * Filtro declarativo común a targets y selecciones.
+ * Estructura: { type?, code?, tag?: string | string[], health_max?, status? }
+ * Si la carta tiene varios tags, basta con que coincida uno.
+ */
+export function matchesCardFilter(card: any, filter: any): boolean {
+  if (!filter) return true;
+  if (filter.type) {
+    const wanted = (Array.isArray(filter.type) ? filter.type : [filter.type]).map(normalizeCardType);
+    if (!wanted.includes(card.card_type)) return false;
+  }
+  if (filter.code && card.card_code !== filter.code) return false;
+  if (filter.tag) {
+    const tags: string[] = Array.isArray(filter.tag) ? filter.tag : [filter.tag];
+    if (!Array.isArray(card.tags) || !tags.some(t => card.tags.includes(t))) return false;
+  }
+  if (typeof filter.health_max === 'number' && (card.current_health ?? 0) > filter.health_max) return false;
+  if (filter.status && !(card.status_effects ?? []).some((e: any) => e.type === filter.status)) return false;
+  return true;
+}
+
+/** Resuelve el target declarado y aplica `action.filter` si existe. */
+function _resolveTargets(action: any, ctx: ActionContext, result: ActionResult, fallback: string): any[] {
+  const targets = TargetResolver.resolve(action.target ?? fallback, _targetContext(ctx, result));
+  return action.filter ? targets.filter(c => matchesCardFilter(c, action.filter)) : targets;
+}
+
+/** Recalcula ce/ar/mode desde base + status_effects tras modificar efectos. */
+function _recomputeDerived(card: any): void {
+  if (typeof card.base_ce === 'number') card.ce = card.base_ce + computeCeBonus(card.status_effects ?? []);
+  if (typeof card.base_ar === 'number') card.ar = Math.max(0, card.base_ar + computeArBonus(card.status_effects ?? []));
+  card.mode = deriveModeFromEffects(card.status_effects ?? []);
+}
+
 const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   // Aplica un StatusEffect a los targets resueltos.
   // Stacking: si el mismo tipo+source ya existe, refresca duración/valor en lugar de duplicar.
@@ -171,18 +245,16 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       throw new Error(`[ActionRegistry] apply_status: falta el campo "status" en la definición`);
     }
 
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    const targets = _resolveTargets(action, ctx, result, 'self');
 
     for (const card of targets) {
       let statusEffects: any[] = card.status_effects ?? [];
+
+      // Los modos de combate son excluyentes: aplicar uno reemplaza al anterior.
+      if (isModeEffectType(action.status as StatusEffectType)) {
+        statusEffects = statusEffects.filter((s: any) => !isModeEffectType(s.type));
+        card.status_effects = statusEffects;
+      }
 
       const interaction = STATUS_INTERACTIONS[action.status];
 
@@ -227,6 +299,8 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
         } as any);
       }
 
+      _recomputeDerived(card);
+
       // Deduplicar más tarde con Set en AbilityEngine.execute
       result.affectedIds.push(card.instance_id);
 
@@ -248,15 +322,8 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     if (!ctx.bus) {
       throw new Error('[ActionRegistry] apply_damage requiere un GameEventBus en ctx.bus');
     }
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    // Copia: applyDamage puede sacar cartas de field_knights mientras iteramos.
+    const targets = [..._resolveTargets(action, ctx, result, 'target')];
     const engineCtx = getEngineContext(ctx, result.state);
     for (const card of targets) {
       applyDamage(engineCtx, card.instance_id, action.amount ?? 0, ctx.sourceCardId);
@@ -318,15 +385,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     if (!ctx.bus) {
       throw new Error('[ActionRegistry] kill requiere un GameEventBus en ctx.bus');
     }
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    const targets = [..._resolveTargets(action, ctx, result, 'target')];
     const engineCtx = getEngineContext(ctx, result.state);
     for (const card of targets) {
       killKnight(engineCtx, card.instance_id, ctx.sourceCardId, 'effect');
@@ -343,15 +402,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     if (!ctx.bus) {
       throw new Error('[ActionRegistry] heal requiere un GameEventBus en ctx.bus');
     }
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    const targets = _resolveTargets(action, ctx, result, 'self');
     const engineCtx = getEngineContext(ctx, result.state);
     for (const card of targets) {
       heal(engineCtx, card.instance_id, action.amount ?? 0, ctx.sourceCardId);
@@ -363,21 +414,14 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
    * Restaura CP (Cosmos Points) a los targets resueltos.
    * Opuesto de apply_cosmos_damage para carta — no tiene tope ya que max_cosmos no está en
    * GameState; el exceso simplemente queda como reserva hasta que se use.
-   * Estructura: { type: 'restore_cosmos', target: TargetType, amount: number }
+   * Un amount negativo drena CP (sin bajar de 0).
+   * Estructura: { type: 'restore_cosmos', target: TargetType, amount: number, filter? }
    */
   restore_cosmos: (action: any, ctx, result) => {
     const amount: number = action.amount ?? 0;
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'self', targetCtx);
+    const targets = _resolveTargets(action, ctx, result, 'self');
     for (const card of targets) {
-      (card as any).current_cosmos = ((card as any).current_cosmos ?? 0) + amount;
+      (card as any).current_cosmos = Math.max(0, ((card as any).current_cosmos ?? 0) + amount);
       result.affectedIds.push(card.instance_id);
     }
   },
@@ -460,42 +504,35 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       visible_card_ids: undefined, // El servicio lo rellena para deck search; aquí para field
     };
 
-    // Para selección de campo propio: los caballeros ya están en GameState → poblar visible_card_ids aquí
-    if (action.zone === 'field') {
-      const player = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
-      let candidates: any[] = player.field_knights;
-      if (action.filter?.type) {
-        candidates = candidates.filter((c: any) => c.card_type === normalizeCardType(action.filter.type));
-      }
-      if (action.filter?.code) {
-        candidates = candidates.filter((c: any) => c.card_code === action.filter.code);
-      }
-      if (action.filter?.tag) {
-        candidates = candidates.filter((c: any) => Array.isArray(c.tags) && c.tags.includes(action.filter.tag));
-      }
-      result.state.pending_selection.visible_card_ids = candidates.map((c: any) => c.instance_id);
+    // Zonas que ya están en GameState → poblar visible_card_ids aquí.
+    //   field                  → caballeros propios
+    //   field_opponent         → caballeros rivales
+    //   field_support_opponent → objeto/ocasión rival + escenario activo
+    //   yomotsu                → yomotsu propio
+    const player   = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
+    const opponent = ctx.playerNumber === 1 ? result.state.player2 : result.state.player1;
+    let candidates: any[] | null = null;
+    if (action.zone === 'field') candidates = player.field_knights;
+    if (action.zone === 'field_opponent') candidates = opponent.field_knights;
+    if (action.zone === 'field_support_opponent') {
+      candidates = [
+        ...(opponent.field_occasion ? [opponent.field_occasion] : []),
+        ...(result.state.scenario ? [result.state.scenario] : []),
+      ];
     }
+    if (action.zone === 'yomotsu') candidates = player.graveyard ?? [];
 
-    // Para selección de campo oponente: leer caballeros del jugador contrario
-    if (action.zone === 'field_opponent') {
-      const opponent = ctx.playerNumber === 1 ? result.state.player2 : result.state.player1;
-      let candidates: any[] = opponent.field_knights;
-      if (action.filter?.type) {
-        candidates = candidates.filter((c: any) => c.card_type === normalizeCardType(action.filter.type));
+    if (candidates) {
+      const visible = candidates.filter((c: any) => matchesCardFilter(c, action.filter));
+      result.state.pending_selection.visible_card_ids = visible.map((c: any) => c.instance_id);
+
+      // Sin opciones válidas: no bloquear la partida esperando una selección imposible.
+      if (visible.length === 0) {
+        result.state.pending_selection = null;
+        result.extras.selection_skipped = true;
+        result.extras.stop_chain = true;
+        return;
       }
-      if (action.filter?.code) {
-        candidates = candidates.filter((c: any) => c.card_code === action.filter.code);
-      }
-      if (action.filter?.tag) {
-        candidates = candidates.filter((c: any) => Array.isArray(c.tags) && c.tags.includes(action.filter.tag));
-      }
-      if (action.filter?.status) {
-        candidates = candidates.filter((c: any) =>
-          Array.isArray(c.status_effects) &&
-          c.status_effects.some((e: any) => e.type === action.filter.status)
-        );
-      }
-      result.state.pending_selection.visible_card_ids = candidates.map((c: any) => c.instance_id);
     }
 
     result.extras.selection_required = true;
@@ -512,15 +549,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
    * Estructura: { type: 'send_to_zone', target: 'selected', destination: 'hand'|'field'|'cositos' }
    */
   send_to_zone: (action: any, ctx, result) => {
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'selected', targetCtx);
+    const targets = [..._resolveTargets(action, ctx, result, 'selected')];
     if (targets.length === 0) return;
 
     const destination: string = action.destination ?? 'hand';
@@ -547,6 +576,8 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
           _sendCardToHand(detached.player, detached.card);
         } else if (destination === 'cositos') {
           _sendCardToCositos(detached.player, detached.card);
+        } else if (destination === 'yomotsu') {
+          _sendCardToYomotsu(detached.player, detached.card);
         }
       }
 
@@ -572,30 +603,33 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
 
   /**
    * Roba cartas del mazo al conjunto de la mano.
-   * El engine decrementa deck_count y emite los eventos.
-   * El servicio (CardDrawService / SelectionService) ejecuta el movimiento real en BD.
-   * Estructura: { type: 'draw_card', amount: N }
+   * El engine decrementa deck_count, emite los eventos y anota el robo en
+   * state.pending_draws; MatchRepository.applyState mueve las cartas en BD.
+   * Estructura: { type: 'draw_card', amount: N, player?: 'self' | 'opponent' }
    */
   draw_card: (action: any, ctx, result) => {
     const amount: number = action.amount ?? 1;
+    const drawerNumber: 1 | 2 = action.player === 'opponent'
+      ? (ctx.playerNumber === 1 ? 2 : 1)
+      : ctx.playerNumber;
+    const player = drawerNumber === 1 ? result.state.player1 : result.state.player2;
+    if (!result.state.pending_draws) result.state.pending_draws = { 1: 0, 2: 0 };
 
     for (let i = 0; i < amount; i++) {
-      const player = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
-      if (player.deck_count > 0) {
-        player.deck_count -= 1;
-      }
+      if (player.deck_count <= 0) break;
+      player.deck_count -= 1;
+      result.state.pending_draws[drawerNumber] += 1;
       const remaining = player.deck_count;
       if (ctx.bus) {
-        ctx.bus.emit(createEvent({ type: 'ALLY_DREW_CARD', playerNumber: ctx.playerNumber,
+        ctx.bus.emit(createEvent({ type: 'ALLY_DREW_CARD', playerNumber: drawerNumber,
           origin: 'system', payload: { cardId: '', remainingDeck: remaining } }));
-        ctx.bus.emit(createEvent({ type: 'OPPONENT_DREW_CARD', playerNumber: ctx.playerNumber,
+        ctx.bus.emit(createEvent({ type: 'OPPONENT_DREW_CARD', playerNumber: drawerNumber,
           origin: 'system', payload: { remainingDeck: remaining } }));
       }
     }
-    // El servicio interpreta esto para mover cartas en BD
     result.extras.draw_card_count = (result.extras.draw_card_count ?? 0) + amount;
     if (!result.extras.draw_card_player) {
-      result.extras.draw_card_player = ctx.playerNumber;
+      result.extras.draw_card_player = drawerNumber;
     }
   },
 
@@ -752,15 +786,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   permanent_ar_reduce: (action: any, ctx, result) => {
     const amount: number = action.amount ?? 0;
     if (amount <= 0) return;
-    const targetCtx: TargetContext = {
-      state: result.state,
-      playerNumber: ctx.playerNumber,
-      sourceCardId: ctx.sourceCardId,
-      event: ctx.event,
-      rng: ctx.rng,
-      selectedCardId: ctx.selectedCardId,
-    };
-    const targets = TargetResolver.resolve(action.target ?? 'target', targetCtx);
+    const targets = _resolveTargets(action, ctx, result, 'target');
     for (const target of targets) {
       target.base_ar = Math.max(0, (target.base_ar ?? 0) - amount);
       target.ar      = Math.max(0, target.base_ar + computeArBonus(target.status_effects ?? []));
@@ -769,19 +795,74 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
   },
 
   /**
-   * Marca que el oponente debe descartar una carta aleatoria de su mano.
-   * El engine solo registra la intención en extras; el servicio ejecuta el descarte en BD.
+   * El oponente descarta cartas aleatorias de su mano al yomotsu.
+   * MatchRepository.applyState persiste la zona de las cartas del graveyard.
    * Estructura: { type: 'discard_opponent_random', amount: number }
    */
   discard_opponent_random: (action: any, ctx, result) => {
     const amount: number = action.amount ?? 1;
+    const opponentNumber: 1 | 2 = ctx.playerNumber === 1 ? 2 : 1;
+    const opponent = opponentNumber === 1 ? result.state.player1 : result.state.player2;
     if (!Array.isArray(result.extras.discard_opponent_random)) {
       result.extras.discard_opponent_random = [];
     }
-    (result.extras.discard_opponent_random as any[]).push({
-      player: ctx.playerNumber === 1 ? 2 : 1,
-      amount,
-    });
+
+    for (let i = 0; i < amount && opponent.hand.length > 0; i++) {
+      const idx = Math.floor(ctx.rng() * opponent.hand.length);
+      const [card] = opponent.hand.splice(idx, 1);
+      _sendCardToYomotsu(opponent, card);
+      result.affectedIds.push(card.instance_id);
+      (result.extras.discard_opponent_random as any[]).push({ player: opponentNumber, card_id: card.instance_id });
+    }
+    opponent.hand.forEach((c: any, i: number) => { c.position = i; });
+  },
+
+  /**
+   * Modifica un stat de los targets de forma permanente.
+   *   attack  → base_ce        defense → base_ar
+   *   cosmos  → current_cosmos health  → current_health y max_health
+   * Estructura: { type: 'modify_stat', stat, amount, target?, filter? }
+   */
+  modify_stat: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 0;
+    if (amount === 0) return;
+    const targets = _resolveTargets(action, ctx, result, 'self');
+    for (const card of targets) {
+      switch (action.stat) {
+        case 'attack':
+          card.base_ce = Math.max(0, (card.base_ce ?? 0) + amount);
+          break;
+        case 'defense':
+          card.base_ar = Math.max(0, (card.base_ar ?? 0) + amount);
+          break;
+        case 'cosmos':
+          card.current_cosmos = Math.max(0, (card.current_cosmos ?? 0) + amount);
+          break;
+        case 'health':
+          card.max_health = Math.max(1, (card.max_health ?? 0) + amount);
+          card.current_health = Math.min(card.max_health, Math.max(1, (card.current_health ?? 0) + amount));
+          break;
+        default:
+          throw new Error(`[ActionRegistry] modify_stat: stat desconocido "${action.stat}"`);
+      }
+      _recomputeDerived(card);
+      result.affectedIds.push(card.instance_id);
+    }
+  },
+
+  /**
+   * Cura LP de un jugador.
+   * Estructura: { type: 'heal_player', target: 'self'|'opponent', amount: number }
+   */
+  heal_player: (action: any, ctx, result) => {
+    const amount: number = Math.max(0, action.amount ?? 0);
+    const targetPlayerNumber: 1 | 2 = action.target === 'opponent'
+      ? (ctx.playerNumber === 1 ? 2 : 1)
+      : ctx.playerNumber;
+    const targetPlayer = targetPlayerNumber === 1 ? result.state.player1 : result.state.player2;
+    targetPlayer.life += amount;
+    if (!Array.isArray(result.extras.player_heal_applied)) result.extras.player_heal_applied = [];
+    (result.extras.player_heal_applied as any[]).push({ target_player: targetPlayerNumber, amount });
   },
 };
 

@@ -56,16 +56,21 @@ export interface AbilityContext {
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
 /**
- * Busca una carta en todas las zonas accesibles del jugador (campo + mano).
- * Si en el futuro añadimos más zonas activas (banco, escenario),
- * basta con agregar la búsqueda aquí.
+ * Busca una carta en todas las zonas accesibles del jugador:
+ * campo (caballeros, técnicas, helper, ocasión/objeto), escenario compartido,
+ * mano y cartas fuera del campo con triggers reactivos.
  */
-function findSourceCard(player: any, sourceCardId: string): any {
+function findSourceCard(state: GameState, player: any, sourceCardId: string): any {
+    const byId = (c: any) => c?.instance_id === sourceCardId;
     return (
-        player.field_knights.find((c: any) => c.instance_id === sourceCardId) ??
-        (player.hand ?? []).find((c: any) => c.instance_id === sourceCardId) ??
+        player.field_knights.find(byId) ??
+        (player.field_techniques ?? []).find(byId) ??
+        (byId(player.field_helper) ? player.field_helper : undefined) ??
+        (byId(player.field_occasion) ? player.field_occasion : undefined) ??
+        (byId(state.scenario) ? state.scenario : undefined) ??
+        (player.hand ?? []).find(byId) ??
         // Cartas fuera del campo con triggers reactivos (yomotsu, mazo, etc.)
-        (player.passive_watchers ?? []).find((c: any) => c.instance_id === sourceCardId) ??
+        (player.passive_watchers ?? []).find(byId) ??
         null
     );
 }
@@ -77,7 +82,8 @@ function buildConditionContext(
     event: GameEvent,
 ): ConditionContext {
     const player = playerNumber === 1 ? state.player1 : state.player2;
-    const sourceCard = findSourceCard(player, sourceCardId);
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    const sourceCard = findSourceCard(state, player, sourceCardId);
     if (!sourceCard) {
         throw new Error(
             `[AbilityEngine] Carta fuente "${sourceCardId}" no encontrada en campo ni mano`,
@@ -96,6 +102,12 @@ function buildConditionContext(
             field_knights: player.field_knights,
             life: (player as any).life,
             cosmos: (player as any).cosmos,
+        },
+        opponent: {
+            hand: (opponent as any).hand ?? [],
+            field_knights: opponent.field_knights,
+            life: (opponent as any).life,
+            cosmos: (opponent as any).cosmos,
         },
         event,
     };

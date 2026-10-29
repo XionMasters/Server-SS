@@ -9,6 +9,7 @@
  *   'target'      → la carta elegida por el cliente (event.targetCardId)
  *   'all_allies'  → todos los caballeros propios en campo
  *   'all_enemies' → todos los caballeros rivales en campo
+ *   'all_knights' → todos los caballeros en campo (ambos jugadores)
  *   'adjacent_allies' → caballeros propios adyacentes al que activa la habilidad (por ejemplo, para habilidades de soporte)
  *   'adjacent_enemies' → caballeros rivales adyacentes al que activa la habilidad (por ejemplo, para habilidades de ataque en área)
  *   'target_and_adjacent_enemies' → la carta objetivo y sus adyacentes rivales (por ejemplo, para habilidades de ataque en área dirigidas)
@@ -48,6 +49,7 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
   self: ({ state, playerNumber, sourceCardId }) => {
     const player = playerNumber === 1 ? state.player1 : state.player2;
     const zones = [
+      ...(state.scenario ? [state.scenario] : []),
       ...(player.field_knights ?? []),
       ...(player.field_techniques ?? []),
       ...(player.field_helper ? [player.field_helper] : []),
@@ -74,6 +76,9 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
 
   all_enemies: ({ state, playerNumber }) =>
     (playerNumber === 1 ? state.player2 : state.player1).field_knights,
+
+  /** Todos los caballeros en campo de ambos jugadores. */
+  all_knights: ({ state }) => [...state.player1.field_knights, ...state.player2.field_knights],
 
   adjacent_allies: ({ state, playerNumber, sourceCardId }) => {
     const player = playerNumber === 1 ? state.player1 : state.player2;
@@ -165,11 +170,14 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
         ...player.hand,
         ...player.field_knights,
         ...player.field_techniques,
+        ...(player.field_helper ? [player.field_helper] : []),
+        ...(player.field_occasion ? [player.field_occasion] : []),
         ...player.passive_watchers,
       ];
       const card = zones.find(c => c.instance_id === selectedCardId);
       if (card) return [card];
     }
+    if (state.scenario?.instance_id === selectedCardId) return [state.scenario];
     return [];
   },
 };

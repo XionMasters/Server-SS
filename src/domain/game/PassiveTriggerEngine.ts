@@ -66,7 +66,26 @@ function getAllFieldCards(state: GameState): CardInGameState[] {
     ...state.player2.field_techniques,
     ...(state.player2.field_helper   ? [state.player2.field_helper]   : []),
     ...(state.player2.field_occasion ? [state.player2.field_occasion] : []),
+    ...(state.scenario ? [state.scenario] : []),
   ];
+}
+
+/** Triggers que nunca se despachan por evento. */
+const NON_EVENT_TRIGGERS = new Set(['ACTIVE', 'NONE']);
+
+/**
+ * Decide si una habilidad reacciona al evento.
+ *   - 'pasiva' de cualquier carta: reacciona a cualquier evento de su trigger.
+ *   - Habilidades de cartas no-caballero ('activa' de ocasión, 'equipamiento' de objeto,
+ *     'campo' de escenario, etc.): son el efecto de la propia carta. Con CARD_PLAYED
+ *     solo se resuelven cuando la carta jugada es ella misma.
+ */
+function isReactiveAbility(card: CardInGameState, abilityType: string, trigger: string, event: GameEvent): boolean {
+  if (NON_EVENT_TRIGGERS.has(trigger) || trigger !== event.type) return false;
+  if (abilityType === 'pasiva') return true;
+  if (card.card_type === 'knight') return false;
+  if (trigger === GameEventType.CARD_PLAYED) return event.sourceCardId === card.instance_id;
+  return true;
 }
 
 function getAllPassiveWatchers(state: GameState): CardInGameState[] {
@@ -119,11 +138,9 @@ export const PassiveTriggerEngine = {
       if (!isPerspectiveAllowed(card, event)) continue;
 
       for (const rawAbility of card.raw_abilities) {
-        // Solo pasivas — las activas requieren acción explícita del jugador
-        if (rawAbility.type !== 'pasiva') continue;
-
+        // Las activas de caballero requieren acción explícita del jugador
         const def = rawAbility.effects;
-        if (def.trigger !== event.type) continue;
+        if (!isReactiveAbility(card, rawAbility.type, def.trigger, event)) continue;
 
         try {
           // Validar condiciones antes de ejecutar

@@ -18,6 +18,7 @@
  *                      Ej: { "type": "event_card_code", "code": ["ikki_phoenix", "ikki_phoenix_v2", "ikki_leo"] }
  *   attack_type_is   → valida payload.attack_type del evento (ej: BA | TA)
  *   event_source_is_self → true si event.sourceCardId === sourceCard.instance_id
+ *   event_target_is_self → true si event.targetCardId === sourceCard.instance_id
  *   event_player_damage_min → valida payload.damage_to_player >= amount
  *   event_target_health_pct_below → valida payload.target_health_pct < percent
  *   event_death_reason_not → verdadero si payload.death_reason !== value
@@ -134,6 +135,15 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
   event_source_is_self: (_cond, ctx) => {
     if (!ctx.sourceCard.instance_id) return false;
     return ctx.event.sourceCardId === ctx.sourceCard.instance_id;
+  },
+
+  /**
+   * Verdadero si el objetivo del evento es la carta que porta la habilidad.
+   * Ej: KNIGHT_DIED con targetCardId = el caballero muerto → "cuando esta carta muere".
+   */
+  event_target_is_self: (_cond, ctx) => {
+    if (!ctx.sourceCard.instance_id) return false;
+    return ctx.event.targetCardId === ctx.sourceCard.instance_id;
   },
 
   /** Verdadero si el evento reporta daño al jugador >= amount. */

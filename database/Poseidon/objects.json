@@ -1,0 +1,227 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'object' de la saga Poseidón. Se juegan en field_occasion. La habilidad 'equipamiento' con trigger CARD_PLAYED se resuelve al jugar la propia carta; sus bonos son permanentes sobre el caballero elegido.",
+  "saga": "Poseidon",
+  "type": "object",
+  "cards": [
+    {
+      "code": "poseidon_trident",
+      "name": "Tridente de Poseidón",
+      "rarity": "legendary", "cost": 4, "generate": 0, "faction": "Poseidon", "element": "steel",
+      "image_url": "objects/poseidon_trident.webp",
+      "art_prompt": "Poseidon's golden trident. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero [poseidon] gana +3 CE permanentemente.",
+      "abilities": [
+        { "name": "Arma Divina", "type": "equipamiento", "ability_key": "poseidon_trident_equip", "description": "Un aliado [poseidon] gana +3 CE.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight", "tag": "poseidon" }, "on_select": [{ "type": "apply_status", "status": "ce_boost", "target": "selected", "value": 3 }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "athena_amphora",
+      "name": "Ánfora de Athena",
+      "rarity": "legendary", "cost": 4, "generate": 0, "faction": "Athena", "element": "light",
+      "image_url": "objects/athena_amphora.webp",
+      "art_prompt": "Athena's sacred amphora used to seal Poseidon. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, los caballeros [poseidon] rivales no pueden atacar durante sus próximos 2 turnos.",
+      "abilities": [
+        { "name": "Prisión Sagrada", "type": "equipamiento", "ability_key": "athena_amphora_seal", "description": "Congela a los [poseidon] rivales 2 turnos.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "apply_status", "status": "frozen", "target": "all_enemies", "filter": { "tag": "poseidon" }, "duration": 3 }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "libra_cloth_weapons",
+      "name": "Armas de Libra",
+      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Athena", "element": "steel",
+      "image_url": "objects/libra_cloth_weapons.webp",
+      "art_prompt": "The twelve weapons of the Libra Gold Cloth. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Pierdes 2 LP; el siguiente BA de un caballero aliado ignora la AR y gana +2 CE hasta tu próximo turno.",
+      "abilities": [
+        { "name": "Permiso de Dohko", "type": "equipamiento", "ability_key": "libra_weapons_pillar", "description": "Un aliado ignora AR en su siguiente BA y gana +2 CE.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_player_damage", "target": "self", "amount": 2 },
+              { "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [
+                { "type": "apply_status", "status": "ignore_armor", "target": "selected" },
+                { "type": "apply_status", "status": "ce_boost", "target": "selected", "value": 2, "duration": 1 } ] }
+            ] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "sorrento_flute",
+      "name": "Flauta de Sorrento",
+      "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "objects/sorrento_flute.webp",
+      "art_prompt": "Sorrento's golden flute. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero [siren] recupera 4 CP.",
+      "abilities": [
+        { "name": "Melodía", "type": "equipamiento", "ability_key": "sorrento_flute_equip", "description": "Un [siren] aliado recupera 4 CP.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight", "tag": "siren" }, "on_select": [{ "type": "restore_cosmos", "amount": 4, "target": "selected" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "chrysaor_spear",
+      "name": "Lanza de Chrysaor",
+      "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "steel",
+      "image_url": "objects/chrysaor_spear.webp",
+      "art_prompt": "Krishna's golden Chrysaor lance. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado gana +2 CE permanentemente.",
+      "abilities": [
+        { "name": "Lanza Dorada", "type": "equipamiento", "ability_key": "chrysaor_spear_equip", "description": "Un aliado gana +2 CE.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "attack", "amount": 2, "target": "selected" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "seadragon_scale",
+      "name": "Escama de Dragón Marino",
+      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "objects/seadragon_scale.webp",
+      "art_prompt": "The Sea Dragon Scale in its object (totem) form. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado gana +2 AR permanentemente.",
+      "abilities": [
+        { "name": "Escama Oriental", "type": "equipamiento", "ability_key": "seadragon_scale_equip", "description": "Un aliado gana +2 AR.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "defense", "amount": 2, "target": "selected" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "kraken_scale",
+      "name": "Escama de Kraken",
+      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "objects/kraken_scale.webp",
+      "art_prompt": "The Kraken Scale in its object (totem) form. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado gana +1 AR y +2 LP máximos.",
+      "abilities": [
+        { "name": "Coraza Ártica", "type": "equipamiento", "ability_key": "kraken_scale_equip", "description": "+1 AR y +2 LP a un aliado.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [
+              { "type": "modify_stat", "stat": "defense", "amount": 1, "target": "selected" },
+              { "type": "modify_stat", "stat": "health", "amount": 2, "target": "selected" } ] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "coral_shield",
+      "name": "Escudo de Coral",
+      "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "earth",
+      "image_url": "objects/coral_shield.webp",
+      "art_prompt": "A coral shield from the Undersea Temple armory. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado gana +1 AR permanentemente.",
+      "abilities": [
+        { "name": "Coral", "type": "equipamiento", "ability_key": "coral_shield_equip", "description": "+1 AR a un aliado.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "defense", "amount": 1, "target": "selected" }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "pearl_of_the_abyss",
+      "name": "Perla del Abismo",
+      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "dark",
+      "image_url": "objects/pearl_of_the_abyss.webp",
+      "art_prompt": "A glowing black pearl from the depths of the Undersea Sanctuary. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, roba una carta y un caballero aliado recupera 2 CP.",
+      "abilities": [
+        { "name": "Brillo Oscuro", "type": "equipamiento", "ability_key": "pearl_abyss", "description": "Roba 1 y +2 CP a un aliado.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "draw_card", "amount": 1 },
+              { "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "restore_cosmos", "amount": 2, "target": "selected" }] }
+            ] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "solo_fortune",
+      "name": "Fortuna de la Familia Solo",
+      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "light",
+      "image_url": "objects/solo_fortune.webp",
+      "art_prompt": "The Solo family treasure on Julian Solo's luxury ship. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, roba dos cartas.",
+      "abilities": [
+        { "name": "Riqueza", "type": "equipamiento", "ability_key": "solo_fortune", "description": "Roba 2 cartas.",
+          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "draw_card", "amount": 2 }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "scylla_fangs",
+      "name": "Colmillos de Scylla",
+      "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "earth",
+      "image_url": "objects/scylla_fangs.webp",
+      "art_prompt": "Golden fangs from the Scylla Scale. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado gana +1 CE permanentemente.",
+      "abilities": [
+        { "name": "Mordisco", "type": "equipamiento", "ability_key": "scylla_fangs_equip", "description": "+1 CE a un aliado.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "attack", "amount": 1, "target": "selected" }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "lymnades_mask",
+      "name": "Máscara de Lymnades",
+      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "dark",
+      "image_url": "objects/lymnades_mask.webp",
+      "art_prompt": "A golden mask from the Lymnades Scale. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Un caballero aliado entra en Modo Evasión durante 2 turnos.",
+      "abilities": [
+        { "name": "Disfraz", "type": "equipamiento", "ability_key": "lymnades_mask_equip", "description": "Modo Evasión 2 turnos a un aliado.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "evasion", "target": "selected", "duration": 2 }] }] } }
+      ],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "seahorse_wings",
+      "name": "Alas de Caballo Marino",
+      "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "wind",
+      "image_url": "objects/seahorse_wings.webp",
+      "art_prompt": "The fin-shaped wings of the Sea Horse Scale. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El siguiente BA de un caballero aliado ignora el Modo Evasión.",
+      "abilities": [
+        { "name": "Vuelo", "type": "equipamiento", "ability_key": "seahorse_wings_equip", "description": "Ignora Modo Evasión en el siguiente BA.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "ignore_evade_mode", "target": "selected" }] }] } }
+      ],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "main_pillar_relic",
+      "name": "Reliquia del Soporte Principal",
+      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Poseidon", "element": "earth",
+      "image_url": "objects/main_pillar_relic.webp",
+      "art_prompt": "The heart of the Main Breadwinner pillar. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, cura 2 LP a todos tus caballeros y te cura 2 LP.",
+      "abilities": [
+        { "name": "Sostén del Mundo", "type": "equipamiento", "ability_key": "main_pillar_relic", "description": "Cura 2 a aliados y 2 al jugador.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "heal", "amount": 2, "target": "all_allies" }, { "type": "heal_player", "amount": 2, "target": "self" }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "golden_arrow_athena",
+      "name": "Flecha Dorada de Sagitario",
+      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Athena", "element": "light",
+      "image_url": "objects/golden_arrow_athena.webp",
+      "art_prompt": "The golden arrow of the Sagittarius Gold Cloth. The object drawn as it appears in the anime, centered, glowing cosmo aura, Undersea Temple background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Inflige 5 de daño a un caballero rival con tag [god] o [general].",
+      "abilities": [
+        { "name": "Disparo Celestial", "type": "equipamiento", "ability_key": "golden_arrow_shot", "description": "5 de daño a un dios o general rival.",
+          "effects": { "trigger": "CARD_PLAYED",
+            "actions": [{ "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight", "tag": ["god", "general"] }, "on_select": [{ "type": "apply_damage", "amount": 5, "target": "selected" }] }] } }
+      ],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+    }
+  ]
+}

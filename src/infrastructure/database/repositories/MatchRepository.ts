@@ -43,6 +43,21 @@ export class MatchRepository {
    * @param newState GameState actualizado
    * @param transaction Transacción Sequelize (para atomicidad)
    */
+  /** Mueve la carta superior del mazo al final de la mano. */
+  private static async _drawTopCard(matchId: string, playerNumber: 1 | 2, transaction: any) {
+    const topCard = await CardInPlay.findOne({
+      where: { match_id: matchId, player_number: playerNumber, zone: 'deck' },
+      order: [['position', 'ASC']],
+      transaction,
+    });
+    if (!topCard) return;
+    const handCount = await CardInPlay.count({
+      where: { match_id: matchId, player_number: playerNumber, zone: 'hand' },
+      transaction,
+    });
+    await topCard.update({ zone: 'hand', position: handCount }, { transaction });
+  }
+
   static async applyState(match: Match, newState: GameState, transaction: any) {
     try {
       // 1️⃣ Obtener updates desde el estado puro
@@ -55,13 +70,17 @@ export class MatchRepository {
       await match.save({ transaction });
 
       // 4️⃣ Persistir estado de cartas (is_exhausted, attacked_this_turn, mode, health)
+      // graveyard incluido: cartas descartadas/destruidas por efectos (mano → yomotsu)
+      // no pasan por el sweep de campo y necesitan su zona sincronizada.
       const allCards = [
         ...newState.player1.field_knights,
         ...newState.player1.field_techniques,
         ...newState.player1.hand,
+        ...(newState.player1.graveyard ?? []),
         ...newState.player2.field_knights,
         ...newState.player2.field_techniques,
         ...newState.player2.hand,
+        ...(newState.player2.graveyard ?? []),
       ];
       if (newState.player1.field_helper) allCards.push(newState.player1.field_helper);
       if (newState.player2.field_helper) allCards.push(newState.player2.field_helper);
@@ -81,10 +100,12 @@ export class MatchRepository {
             is_defensive_mode: card.mode ?? 'normal',
             // status_effects persistido como JSON (fuente de verdad para modo y boosts)
             status_effects: JSON.stringify(card.status_effects ?? []),
-            // Guardar stats resultado de boosts activos
+            // Stats BASE (sin boosts): el mapper reconstruye ce/ar sumando los
+            // boosts de status_effects. Guardar el valor con boosts los duplicaría
+            // en cada recarga.
             current_health: card.current_health,
-            current_attack: card.ce,
-            current_defense: card.ar,
+            current_attack: card.base_ce ?? card.ce,
+            current_defense: card.base_ar ?? card.ar,
             current_cosmos: card.current_cosmos,
             // Sincronizar zona y posición (maneja transiciones yomotsu → campo / campo → mano)
             zone: card.zone as any,
@@ -112,6 +133,17 @@ export class MatchRepository {
 
       if (moved[0] > 0) {
         console.log(`⚰️  [MatchRepository] ${moved[0]} carta(s) movida(s) al yomotsu (match: ${match.id})`);
+      }
+
+      // 6️⃣ Robos pendientes generados por efectos (draw_card): mover del mazo a la mano.
+      //    deck_count ya fue descontado por el motor.
+      if (newState.pending_draws) {
+        for (const playerNumber of [1, 2] as const) {
+          for (let i = 0; i < newState.pending_draws[playerNumber]; i++) {
+            await this._drawTopCard(match.id, playerNumber, transaction);
+          }
+        }
+        newState.pending_draws = undefined;
       }
 
       return { success: true };

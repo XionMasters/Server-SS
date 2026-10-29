@@ -1,0 +1,147 @@
+{
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Formas de Poseidón. Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Poseidon",
+  "type": "knight",
+  "rank": "God",
+  "cards": [
+    {
+      "code": "julian_solo",
+      "name": "Julian Solo",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 3,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "legendary/1.webp",
+      "art_prompt": "Julian Solo, heir of the Solo family, long blue hair, elegant white suit, on his ship before awakening as Poseidon. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Heredero de la familia Solo, recipiente humano del dios de los mares.",
+      "tags": ["julian", "poseidon"],
+      "stats": { "attack": 2, "defense": 3, "health": 8, "cosmos": 10, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Fortuna de los Solo",
+          "type": "pasiva",
+          "description": "Al entrar en juego, roba dos cartas.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [{ "type": "draw_card", "amount": 2, "target": "self" }]
+          }
+        },
+        {
+          "name": "Despertar Divino",
+          "type": "activa",
+          "description": "Paga 8 CP; Julian se transforma en Poseidón, Emperador de los Mares, con sus atributos completos.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 8 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 8 }],
+            "actions": [
+              { "type": "transform", "target": "self", "into": { "julian_solo": { "code": "poseidon_emperor", "ce": 7, "ar": 7, "health": 14, "cosmos": 15 } } }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "poseidon_emperor",
+      "name": "Poseidón, Emperador de los Mares",
+      "rarity": "legendary",
+      "cost": 5,
+      "generate": 4,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "legendary/2.webp",
+      "art_prompt": "Poseidon, Emperor of the Seas, possessing Julian Solo, wearing his divine Scale, holding his golden trident, on his throne in the Undersea Temple. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El dios de los océanos reclama la Tierra para inundarla y purificarla.",
+      "tags": ["poseidon", "god"],
+      "stats": { "attack": 7, "defense": 7, "health": 14, "cosmos": 15, "can_defend": true, "defense_reduction": 0.4 },
+      "abilities": [
+        {
+          "name": "Ira del Tridente",
+          "type": "activa",
+          "description": "Paga 6 CP; inflige 3 de daño a todos los caballeros rivales.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 6 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 6 }],
+            "actions": [{ "type": "apply_damage", "amount": 3, "target": "all_enemies" }]
+          }
+        },
+        {
+          "name": "Señor de los Generales",
+          "type": "pasiva",
+          "description": "Al entrar en juego, todos tus caballeros [general] ganan +1 CE.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "general" }, "value": 1 }]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "poseidon_spirit",
+      "name": "Espíritu de Poseidón",
+      "rarity": "legendary",
+      "cost": 4,
+      "generate": 3,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "legendary/3.webp",
+      "art_prompt": "The spirit of Poseidon as a giant ghostly presence emerging from the sea, glowing eyes, about to be sealed in Athena's amphora. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El cosmos de Poseidón vaga libre tras ser sellado, buscando un nuevo recipiente.",
+      "tags": ["poseidon", "god", "spirit"],
+      "stats": { "attack": 6, "defense": 5, "health": 10, "cosmos": 14, "can_defend": false, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Posesión",
+          "type": "activa",
+          "description": "Paga 5 CP; drena el alma de un caballero rival: le inflige 4 de daño y el Espíritu recupera 4 LP.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 5 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 5 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [
+                  { "type": "apply_damage", "amount": 4, "target": "selected" },
+                  { "type": "heal", "amount": 4, "target": "self" }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "Inmortal",
+          "type": "pasiva",
+          "description": "Cuando muere, regresa del Yomotsu a tu mano.",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "conditions": [{ "type": "event_target_is_self" }],
+            "actions": [{ "type": "send_to_zone", "target": "self", "destination": "hand" }]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    }
+  ]
+}

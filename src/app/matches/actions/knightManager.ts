@@ -21,12 +21,14 @@ import { MatchRepository } from '../../../infrastructure/database/repositories/M
 import { ProcessedActionsRegistry } from '../../../infrastructure/database/repositories/ProcessedActionsRegistry';
 import { GameState } from '../../../domain/game/GameState';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
+import Card from '../../../infrastructure/database/models/Card';
 import CardAbility from '../../../infrastructure/database/models/CardAbility';
 import { GameEventType, type GameEvent, createEvent } from '../../../domain/game/events/GameEvents';
 import { parseAbilityDef } from '../../../domain/game/abilities/AbilityDefinition';
 import { createEngineContext } from '../../../domain/game/EngineContext';
 import { killKnight } from '../../../domain/game/actions/KillAction';
 import { createCardDefinitionCache } from '../../../infrastructure/cache/card-definition.cache';
+import { attachCardDefinitions } from './attachCardDefinitions';
 
 // Ability cache
 // Cacheamos por card_id para evitar N+1 queries a card_abilities.
@@ -96,6 +98,7 @@ export class KnightManager {
           transaction: tx,
           lock: tx.LOCK.UPDATE,
         });
+        await attachCardDefinitions(cardsInPlay, tx);
         (match as any).cards_in_play = cardsInPlay;
         const state = MatchStateMapper.fromMatch(match);
         const execResult = await executor(state, tx);
@@ -370,6 +373,22 @@ export class KnightManager {
             { zone: 'yomotsu' },
             { where: { id: discardCardId, match_id: match.id }, transaction: tx },
           );
+        }
+
+        // Transformaciones (ej: Julian Solo → Poseidón): actualizar card_id en BD.
+        // Los stats nuevos los persiste applyState.
+        if (Array.isArray(execution.extras?.transforms)) {
+          for (const t of execution.extras!.transforms as { instance_id: string; into_code: string }[]) {
+            const newCardDef = await Card.findOne({ where: { code: t.into_code }, attributes: ['id'], transaction: tx });
+            if (!newCardDef) {
+              console.warn(`[KnightManager] transform: carta destino no encontrada en DB: "${t.into_code}"`);
+              continue;
+            }
+            await CardInPlay.update(
+              { card_id: (newCardDef as any).id },
+              { where: { id: t.instance_id, match_id: match.id }, transaction: tx },
+            );
+          }
         }
 
         return { newState: execution.newState, extras: execution.extras ?? {}, events: execution.events ?? [] };

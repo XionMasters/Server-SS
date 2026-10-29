@@ -28,6 +28,7 @@ import { normalizeCardType } from '../../../domain/game/CardTypes';
 import { createEngineContext } from '../../../domain/game/EngineContext';
 import { GameEventType, createEvent } from '../../../domain/game/events/GameEvents';
 import { createCardDefinitionCache } from '../../../infrastructure/cache/card-definition.cache';
+import { attachCardDefinitions } from './attachCardDefinitions';
 
 // Card definition cache
 // card_id -> { bdStats, abilities }; admin la invalida al editar o borrar cartas
@@ -108,6 +109,7 @@ export class CardManager {
           transaction: tx,
           lock: tx.LOCK.UPDATE,
         });
+        await attachCardDefinitions(cardsInPlay, tx);
         (match as any).cards_in_play = cardsInPlay;
         const state = MatchStateMapper.fromMatch(match);
         const execResult = await executor(state, tx);
@@ -228,32 +230,12 @@ export class CardManager {
           state, playerNumber, cardId, dbZone, position, bdStats,
         );
 
-        // Inicializar stats de caballero si aplica.
-        // Aplicar efectos pasivos de entrada al nodo en newState.
-        // applyState persiste status_effects desde GameState a DB (step 4).
-        if (bdStats.card_type === 'knight' && abilities.length > 0) {
-          const entryEffects = AbilityEngine.getCardEntryEffects(abilities) as StatusEffect[];
-          if (entryEffects.length > 0) {
-            const pl = playerNumber === 1 ? newState.player1 : newState.player2;
-            const cardInNewState =
-              dbZone === 'field_knight'  ? pl.field_knights.find(c => c.instance_id === cardId) :
-              dbZone === 'field_support' ? pl.field_techniques.find(c => c.instance_id === cardId) :
-              dbZone === 'field_helper'  ? (pl.field_helper?.instance_id === cardId ? pl.field_helper : undefined) :
-              undefined;
-            if (cardInNewState) {
-              const newTypes = new Set(entryEffects.map(e => e.type));
-              cardInNewState.status_effects = [
-                ...(cardInNewState.status_effects ?? []).filter((e: StatusEffect) => !newTypes.has(e.type)),
-                ...entryEffects,
-              ];
-            }
-          }
-        }
-
         // Mueve zona+posicion en BD; stats los persiste applyState step 4.
         await (cardInPlay as any).update({ zone: dbZone, position }, { transaction: tx });
 
-        // Emitir CARD_PLAYED (puede disparar pasivas de cartas ya en campo).
+        // Emitir CARD_PLAYED: dispara las pasivas de entrada de la propia carta
+        // (con raw_abilities cargadas por attachCardDefinitions), el efecto de
+        // ocasiones/objetos/escenarios/helpers y las pasivas de cartas ya en campo.
         const ctx = createEngineContext(newState);
         ctx.bus.emit(createEvent({
           type: GameEventType.CARD_PLAYED,

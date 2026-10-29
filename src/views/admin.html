@@ -276,9 +276,9 @@
                         <summary>⚡ Triggers</summary>
                         <div class="catalog-items">
                             <div class="catalog-item"><code>ACTIVE</code><span>Hab. activada manualmente</span></div>
-                            <div class="catalog-item"><code>CARD_PLAYED</code><span>Carta jugada al campo</span></div>
+                            <div class="catalog-item"><code>CARD_PLAYED</code><span>Carta jugada al campo. En ocasiones/objetos/escenarios/helpers solo se resuelve al jugar la propia carta</span></div>
                             <div class="catalog-item"><code>ATTACK_CONNECTED</code><span>Ataque conectado (no evadido). Distinto de DAMAGE_DEALT</span></div>
-                            <div class="catalog-item"><code>TURN_START</code><span>Inicio del turno</span></div>
+                            <div class="catalog-item"><code>TURN_START</code><span>Inicio del turno (solo cartas del jugador activo, incluido su escenario)</span></div>
                             <div class="catalog-item"><code>TURN_END</code><span>Fin del turno</span></div>
                             <div class="catalog-item"><code>KNIGHT_DIED</code><span>Caballero eliminado (cualquiera)</span></div>
                             <div class="catalog-item"><code>ALLY_DIED</code><span>Aliado del portador eliminado</span></div>
@@ -294,17 +294,24 @@
                     <details class="catalog-section">
                         <summary>🎯 Actions</summary>
                         <div class="catalog-items">
-                            <div class="catalog-item"><code>apply_status</code><span>Aplica status a targets</span></div>
+                            <div class="catalog-item"><code>filter</code><span>Común a toda acción con target: {type?, code?, tag?: string|string[], health_max?, status?}. Ej: all_allies + filter{tag:'general'}</span></div>
+                            <div class="catalog-item"><code>apply_status</code><span>Aplica status a targets. Parámetros: status, target, value?, duration?, filter?. Los modos (defense/evasion/prayer) reemplazan al modo previo</span></div>
                             <div class="catalog-item"><code>heal</code><span>Cura HP a targets</span></div>
+                            <div class="catalog-item"><code>heal_player</code><span>Cura LP a un jugador. Parámetros: target ('self'|'opponent'), amount</span></div>
+                            <div class="catalog-item"><code>modify_stat</code><span>Cambio permanente. Parámetros: stat ('attack'|'defense'|'cosmos'|'health'), amount, target, filter?</span></div>
+                            <div class="catalog-item"><code>restore_cosmos</code><span>Suma CP a targets (amount negativo drena, mínimo 0)</span></div>
+                            <div class="catalog-item"><code>permanent_ar_reduce</code><span>Reduce AR base de forma permanente. Parámetros: target, amount</span></div>
+                            <div class="catalog-item"><code>transform</code><span>Transforma a otra forma. Parámetros: target, into{card_code_origen:{code,ce,ar,health,cosmos}}</span></div>
+                            <div class="catalog-item"><code>discard_opponent_random</code><span>El rival descarta N cartas al azar al yomotsu. Parámetros: amount</span></div>
                             <div class="catalog-item"><code>apply_damage</code><span>Aplica daño a cartas. Parámetros: target, amount</span></div>
                             <div class="catalog-item"><code>apply_player_damage</code><span>Daño directo a jugador. Parámetros: target ('self'|'opponent'), amount</span></div>
                             <div class="catalog-item"><code>apply_cosmos_damage</code><span>Daño directo al cosmos del jugador. Parámetros: target ('self'|'opponent'), amount</span></div>
                             <div class="catalog-item"><code>kill</code><span>Elimina caballero objetivo (yomotsu). Parámetros: target (default: 'target')</span></div>
-                            <div class="catalog-item"><code>draw_card</code><span>Roba carta del mazo</span></div>
+                            <div class="catalog-item"><code>draw_card</code><span>Roba cartas del mazo. Parámetros: amount, player? ('self'|'opponent')</span></div>
                             <div class="catalog-item"><code>summon_from_zone</code><span>Convoca un caballero. Parámetros: target('self'|'target'|'selected'), zone?('yomotsu'|'deck'|'cositos'), position?</span></div>
                             <div class="catalog-item"><code>coin_flip_then</code><span>Moneda → on_heads[] / on_tails[]</span></div>
-                            <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone, filter{type?,top_n?}, destination, on_select[]</span></div>
-                            <div class="catalog-item"><code>send_to_zone</code><span>Mueve carta a zona. Parámetros: target (normalmente 'selected'), destination: 'hand'|'field'|'cositos'</span></div>
+                            <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone ('field'|'field_opponent'|'field_support_opponent'|'yomotsu'|'deck'|'hand'), filter{type?,code?,tag?,health_max?,status?,top_n?}, destination, on_select[]. Sin opciones válidas → se omite</span></div>
+                            <div class="catalog-item"><code>send_to_zone</code><span>Mueve carta a zona. Parámetros: target (normalmente 'selected'), destination: 'hand'|'field'|'cositos'|'yomotsu'</span></div>
                             <div class="catalog-item"><code>shuffle_deck</code><span>Mezcla el mazo. Parámetros: player: 'self'|'opponent'</span></div>
                         </div>
                     </details>
@@ -324,16 +331,21 @@
                             <div class="catalog-item"><code>burn_immune</code><span>Pasiva: inmune al tick de burn</span></div>
                             <div class="catalog-item"><code>poison_immune</code><span>Pasiva: inmune al tick de poison</span></div>
                             <div class="catalog-item"><code>phoenix_rebirth_cooldown</code><span>Lock técnico: resurrección 1 vez por turno</span></div>
+                            <div class="catalog-item"><code>frozen</code><span>FRZ: no puede atacar ni usar TA. En rivales usar duration 2 para cubrir su próximo turno</span></div>
+                            <div class="catalog-item"><code>paralyzed</code><span>PAR: igual que frozen</span></div>
+                            <div class="catalog-item"><code>ignore_evade_mode</code><span>Próximo BA ignora Modo Evasión</span></div>
+                            <div class="catalog-item"><code>ignore_block_mode</code><span>Próximo BA ignora Modo Defensa</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">
                         <summary>🏹 Targets</summary>
                         <div class="catalog-items">
-                            <div class="catalog-item"><code>self</code><span>El caballero activador</span></div>
+                            <div class="catalog-item"><code>self</code><span>La carta portadora (caballero, técnica, helper, ocasión/objeto o escenario)</span></div>
                             <div class="catalog-item"><code>target</code><span>Elegido por el cliente (targetCardId)</span></div>
-                            <div class="catalog-item"><code>selected</code><span>Carta elegida en una selección interactiva (resolve_selection). Solo válido en on_select[]</span></div>
+                            <div class="catalog-item"><code>selected</code><span>Carta elegida en una selección interactiva (resolve_selection), incluidos objetos y escenario. Solo válido en on_select[]</span></div>
                             <div class="catalog-item"><code>all_allies</code><span>Todos los aliados en campo</span></div>
                             <div class="catalog-item"><code>all_enemies</code><span>Todos los enemigos en campo</span></div>
+                            <div class="catalog-item"><code>all_knights</code><span>Todos los caballeros en campo (ambos jugadores)</span></div>
                             <div class="catalog-item"><code>adjacent_allies</code><span>Aliados adyacentes</span></div>
                             <div class="catalog-item"><code>adjacent_enemies</code><span>Enemigos adyacentes</span></div>
                             <div class="catalog-item"><code>target_and_adjacent_enemies</code><span>Target + adyacentes rivales</span></div>
@@ -362,6 +374,13 @@
                             <div class="catalog-item"><code>event_player_damage_min</code><span>amount:N — payload.damage_to_player ≥ N</span></div>
                             <div class="catalog-item"><code>event_target_health_pct_below</code><span>percent:N — payload.target_health_pct &lt; N</span></div>
                             <div class="catalog-item"><code>event_death_reason_not</code><span>value:'sacrifice'|'damage'|'effect' — excluye causa de muerte</span></div>
+                            <div class="catalog-item"><code>event_target_is_self</code><span>Sin parámetros — event.targetCardId == portador (ej: KNIGHT_DIED de sí mismo)</span></div>
+                            <div class="catalog-item"><code>player_lp_below</code><span>amount:N — LP del jugador ≤ N</span></div>
+                            <div class="catalog-item"><code>field_has_card_code</code><span>code:"code" — un aliado en campo tiene ese código</span></div>
+                            <div class="catalog-item"><code>field_has_tag</code><span>tag:"tag" — un aliado en campo tiene ese tag</span></div>
+                            <div class="catalog-item"><code>hand_has_tag</code><span>tag:"tag" — una carta en mano tiene ese tag</span></div>
+                            <div class="catalog-item"><code>opponent_field_has_any_tag</code><span>tag | tags[] — un caballero rival tiene alguno</span></div>
+                            <div class="catalog-item"><code>target_ce_below</code><span>amount:N — CE de event.targetCardId &lt; N</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">

@@ -13,6 +13,7 @@ import { ProcessedActionsRegistry } from '../../../infrastructure/database/repos
 import { GameState } from '../../../domain/game/GameState';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 import type { GameEvent } from '../../../domain/game/events/GameEvents';
+import { attachCardDefinitions } from './attachCardDefinitions';
 
 export class AttackManager {
   /**
@@ -84,6 +85,7 @@ export class AttackManager {
             transaction,
             lock: transaction.LOCK.UPDATE,
           });
+          await attachCardDefinitions(cardsInPlay, transaction);
           (match as any).cards_in_play = cardsInPlay;
 
           // 3️⃣ MAPEAR A ESTADO PURO
@@ -205,6 +207,7 @@ export class AttackManager {
             transaction,
             lock: transaction.LOCK.UPDATE,
           });
+          await attachCardDefinitions(cardsInPlay, transaction);
           (match as any).cards_in_play = cardsInPlay;
 
           // 3️⃣ MAPEAR

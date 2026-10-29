@@ -1,84 +1,537 @@
 {
-    "_schema": 1,
-    "_note": "Fuente de verdad para el seed. Los stats del seed deben coincidir con este archivo. Campos '_pending' marcan efectos aún no implementados en el motor.",
-    "saga": "Omega",
-    "type": "knight",
-    "rank": "Bronze Saint",
-    "cards": [
+  "_schema": 1,
+  "_note": "Fuente de verdad para el seed. Generales Marinos de Poseidón (dos versiones por general). Campos '_pending' marcan efectos aún no implementados en el motor.",
+  "saga": "Poseidon",
+  "type": "knight",
+  "rank": "Marine General",
+  "cards": [
+    {
+      "code": "kanon_seadragon_v1",
+      "name": "Kanon de Dragón Marino",
+      "rarity": "legendary",
+      "cost": 3,
+      "generate": 3,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/1.webp",
+      "art_prompt": "Kanon, Sea Dragon Marina General of the North Atlantic, golden Sea Dragon Scale with horned helmet, long blue hair, arrogant smile, scheming in the shadows of the Undersea Temple. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General Marino del Atlántico Norte, artífice oculto del despertar de Poseidón.",
+      "tags": ["kanon", "seadragon", "general"],
+      "stats": { "attack": 6, "defense": 5, "health": 10, "cosmos": 12, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
         {
-            "code": "koga_pegasus",
-            "name": "Koga de Pegaso",
-            "rarity": "epic",
-            "cost": 1,
-            "generate": 2,
-            "faction": "Athena",
-            "element": "light",
-            "image_url": "bronzes/11.webp",
-            "description": "Nuevo caballero de Pegaso, portador de la esperanza de Athena en la era Omega.",
-            "stats": {
-                "attack": 4,
-                "defense": 2,
-                "health": 9,
-                "cosmos": 8,
-                "can_defend": true,
-                "defense_reduction": 0.5
-            },
-            "abilities": [
-                {
-                    "name": "Cosmo Omega",
-                    "type": "pasiva",
-                    "description": "Al entrar en juego, Koga potencia su CE con el poder del Cosmo Omega.",
-                    "effects": {
-                        "trigger": "CARD_PLAYED",
-                        "actions": [
-                            {
-                                "type": "apply_status",
-                                "status": "ce_boost",
-                                "target": "self",
-                                "value": 1
-                            }
-                        ]
-                    }
-                },
-                {
-                    "name": "Meteor Punch Omega",
-                    "type": "activa",
-                    "description": "Paga 3 CP; el siguiente BA de Koga ignora la AR del defensor.",
-                    "effects": {
-                        "trigger": "ACTIVE",
-                        "cost": [
-                            {
-                                "type": "cosmos",
-                                "amount": 3
-                            }
-                        ],
-                        "conditions": [
-                            {
-                                "type": "cosmos_min",
-                                "amount": 3
-                            },
-                            {
-                                "type": "no_status",
-                                "status": "ignore_armor"
-                            }
-                        ],
-                        "actions": [
-                            {
-                                "type": "apply_status",
-                                "status": "ignore_armor",
-                                "target": "self"
-                            }
-                        ]
-                    }
-                }
-            ],
-            "max_copies": 3,
-            "unique": true,
-            "playable_zones": [
-                "battlefield"
-            ],
-            "collection_id": "omega",
-            "artist": null
+          "name": "Triángulo Dorado",
+          "type": "activa",
+          "description": "Paga 5 CP; envía un caballero rival al Yomotsu si su LP es 4 o menos.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 5 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 5 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight", "health_max": 4 },
+                "on_select": [{ "type": "kill", "target": "selected" }]
+              }
+            ]
+          }
+        },
+        {
+          "name": "Manipulador del Trono",
+          "type": "pasiva",
+          "description": "Al entrar en juego, roba una carta.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [{ "type": "draw_card", "amount": 1, "target": "self" }]
+          }
         }
-    ]
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "kanon_seadragon_v2",
+      "name": "Kanon de Dragón Marino (Redimido)",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/2.webp",
+      "art_prompt": "Kanon, Sea Dragon Marina General, redeemed, fighting with resolve, battle-damaged Sea Dragon Scale, crashing waves. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Kanon enfrenta sus pecados y lucha por fin del lado correcto.",
+      "tags": ["kanon", "seadragon", "general"],
+      "stats": { "attack": 5, "defense": 5, "health": 11, "cosmos": 10, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Explosión de Galaxias",
+          "type": "activa",
+          "description": "Paga 4 CP; el siguiente BA de Kanon ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 4 }, { "type": "no_status", "status": "ignore_armor" }],
+            "actions": [{ "type": "apply_status", "status": "ignore_armor", "target": "self" }]
+          }
+        },
+        {
+          "name": "Expiación",
+          "type": "pasiva",
+          "description": "Si tu LP es menor a 10, Kanon gana +2 CE.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }, { "type": "player_lp_below", "amount": 10 }],
+            "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "sorrento_siren_v1",
+      "name": "Sorrento de Sirena",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 3,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/3.webp",
+      "art_prompt": "Sorrento, Siren Marina General of the South Atlantic, golden Siren Scale, playing his golden flute, calm elegant expression. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Atlántico Sur, cuya flauta paraliza a sus enemigos.",
+      "tags": ["sorrento", "siren", "general"],
+      "stats": { "attack": 4, "defense": 3, "health": 9, "cosmos": 10, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Sinfonía Mortal",
+          "type": "activa",
+          "description": "Paga 3 CP; congela a un caballero rival: no podrá atacar en su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [{ "type": "apply_status", "status": "frozen", "target": "selected", "duration": 2 }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "sorrento_siren_v2",
+      "name": "Sorrento de Sirena (Clímax)",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/4.webp",
+      "art_prompt": "Sorrento of Siren performing Dead End Climax with his flute, sound waves distorting the air. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Sorrento toca la melodía final que debilita el cosmos rival.",
+      "tags": ["sorrento", "siren", "general"],
+      "stats": { "attack": 3, "defense": 3, "health": 8, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Clímax de la Muerte",
+          "type": "activa",
+          "description": "Paga 4 CP; todos los caballeros rivales pierden 2 LP.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 4 }],
+            "actions": [{ "type": "apply_damage", "amount": 2, "target": "all_enemies" }]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "isaac_kraken_v1",
+      "name": "Isaac de Kraken",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/5.webp",
+      "art_prompt": "Isaac, Kraken Marina General of the Arctic Ocean, golden Kraken Scale, green hair, scarred left eye closed, icy aura. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Océano Ártico, antiguo discípulo de Camus.",
+      "tags": ["isaac", "kraken", "general"],
+      "stats": { "attack": 5, "defense": 4, "health": 9, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Aurora Boreal",
+          "type": "activa",
+          "description": "Paga 3 CP; congela a un caballero rival (no puede atacar el próximo turno).",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [{ "type": "apply_status", "status": "frozen", "target": "selected", "duration": 2 }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "isaac_kraken_v2",
+      "name": "Isaac de Kraken (Rival de Hyoga)",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/6.webp",
+      "art_prompt": "Isaac of Kraken facing his former training partner Hyoga, frozen Siberian memories behind him. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Con un solo ojo, Isaac desafía a su antiguo compañero de entrenamiento.",
+      "tags": ["isaac", "kraken", "general"],
+      "stats": { "attack": 4, "defense": 4, "health": 8, "cosmos": 8, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Cicatriz del Hielo",
+          "type": "pasiva",
+          "description": "Al entrar en juego, si el rival controla un caballero [cygnus], Isaac gana +2 CE permanentemente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }, { "type": "opponent_field_has_any_tag", "tag": "cygnus" }],
+            "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "self", "value": 2 }]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "baian_seahorse_v1",
+      "name": "Baian de Caballo Marino",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "wind",
+      "image_url": "generals/7.webp",
+      "art_prompt": "Baian, Sea Horse Marina General of the North Pacific, golden Sea Horse Scale, broad stance guarding his Mammoth Pillar. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Pacífico Norte, primer muro ante los caballeros de bronce.",
+      "tags": ["baian", "seahorse", "general"],
+      "stats": { "attack": 3, "defense": 5, "health": 9, "cosmos": 8, "can_defend": true, "defense_reduction": 0.6 },
+      "abilities": [
+        {
+          "name": "Muro de Dios",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Baian gana +2 AR.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [{ "type": "modify_stat", "stat": "defense", "amount": 2, "target": "self" }]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "baian_seahorse_v2",
+      "name": "Baian de Caballo Marino (Soplo Divino)",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "wind",
+      "image_url": "generals/8.webp",
+      "art_prompt": "Baian of Sea Horse unleashing God Breath, enemies blown into the air. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El viento de Baian lanza por los aires a quien lo desafía.",
+      "tags": ["baian", "seahorse", "general"],
+      "stats": { "attack": 4, "defense": 4, "health": 8, "cosmos": 8, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Soplo Divino",
+          "type": "activa",
+          "description": "Paga 3 CP; devuelve a la mano de su dueño un caballero rival con 5 LP o menos.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight", "health_max": 5 },
+                "destination": "hand",
+                "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "io_scylla_v1",
+      "name": "Io de Scylla",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "earth",
+      "image_url": "generals/9.webp",
+      "art_prompt": "Io, Scylla Marina General of the South Pacific, golden Scylla Scale, the six beasts (eagle, wolf, serpent, vampire bat, grizzly bear, queen bee) appearing behind him. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Pacífico Sur, domina las seis bestias de Scylla.",
+      "tags": ["io", "scylla", "general"],
+      "stats": { "attack": 5, "defense": 3, "health": 9, "cosmos": 10, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Seis Bestias",
+          "type": "activa",
+          "description": "Paga 4 CP; lanza una moneda: si sale cara, Io ataca con CE doble hasta tu próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 4 }],
+            "actions": [
+              { "type": "coin_flip_then", "on_heads": [{ "type": "apply_status", "status": "ce_double", "target": "self", "duration": 1 }] }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "io_scylla_v2",
+      "name": "Io de Scylla (Gran Tornado)",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "wind",
+      "image_url": "generals/10.webp",
+      "art_prompt": "Io of Scylla launching Big Tornado. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "El tornado de Io arrasa las defensas enemigas.",
+      "tags": ["io", "scylla", "general"],
+      "stats": { "attack": 4, "defense": 3, "health": 8, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Gran Tornado",
+          "type": "activa",
+          "description": "Paga 3 CP; reduce permanentemente 1 AR de un caballero rival.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [{ "type": "permanent_ar_reduce", "target": "selected", "amount": 1 }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "kaysa_lymnades_v1",
+      "name": "Kaysa de Lymnades",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 3,
+      "faction": "Poseidon",
+      "element": "dark",
+      "image_url": "generals/11.webp",
+      "art_prompt": "Kaysa, Lymnades Marina General of the Antarctic Ocean, golden Lymnades Scale, sly expression, taking the form of a loved one as an illusion. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Océano Antártico, capaz de adoptar la forma de los seres queridos.",
+      "tags": ["kaysa", "lymnades", "general"],
+      "stats": { "attack": 4, "defense": 3, "health": 8, "cosmos": 10, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Ilusión Engañosa",
+          "type": "pasiva",
+          "description": "Al entrar en juego, el rival descarta una carta al azar.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [{ "type": "discard_opponent_random", "amount": 1 }]
+          }
+        },
+        {
+          "name": "Salamandra Satánica",
+          "type": "activa",
+          "description": "Paga 3 CP; inflige 3 de daño a un caballero rival.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [{ "type": "apply_damage", "amount": 3, "target": "selected" }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "kaysa_lymnades_v2",
+      "name": "Kaysa de Lymnades (Mil Rostros)",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "dark",
+      "image_url": "generals/12.webp",
+      "art_prompt": "Kaysa of Lymnades shifting between disguised faces, deceptive smile. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Kaysa se oculta tras el rostro de quien más amas.",
+      "tags": ["kaysa", "lymnades", "general"],
+      "stats": { "attack": 3, "defense": 2, "health": 7, "cosmos": 8, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Mil Rostros",
+          "type": "activa",
+          "description": "Paga 2 CP; Kaysa gana Evasión hasta su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 2 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 2 }, { "type": "no_status", "status": "evasion" }],
+            "actions": [{ "type": "apply_status", "status": "evasion", "target": "self", "duration": 1 }]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "krishna_chrysaor_v1",
+      "name": "Krishna de Chrysaor",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "light",
+      "image_url": "generals/13.webp",
+      "art_prompt": "Krishna, Chrysaor Marina General of the Indian Ocean, golden Chrysaor Scale, bald, holding his golden lance, meditative. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "General del Océano Índico, guardián con la lanza dorada.",
+      "tags": ["krishna", "chrysaor", "general"],
+      "stats": { "attack": 5, "defense": 4, "health": 9, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Lanza Dorada",
+          "type": "activa",
+          "description": "Paga 3 CP; el siguiente BA de Krishna ignora la Evasión del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 3 }, { "type": "no_status", "status": "ignore_evade_mode" }],
+            "actions": [{ "type": "apply_status", "status": "ignore_evade_mode", "target": "self" }]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "krishna_chrysaor_v2",
+      "name": "Krishna de Chrysaor (Maha Roshini)",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "light",
+      "image_url": "generals/14.webp",
+      "art_prompt": "Krishna of Chrysaor performing Maha Roshini, blinding light from his Kundalini. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "La Kundalini de Krishna ciega a quien se le enfrenta.",
+      "tags": ["krishna", "chrysaor", "general"],
+      "stats": { "attack": 4, "defense": 4, "health": 8, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "abilities": [
+        {
+          "name": "Maha Roshini",
+          "type": "activa",
+          "description": "Paga 4 CP; ciega a un caballero rival: pierde 3 CE hasta el final de su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "conditions": [{ "type": "cosmos_min", "amount": 4 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [{ "type": "apply_status", "status": "ce_boost", "target": "selected", "value": -3, "duration": 2 }]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "poseidon",
+      "artist": null
+    }
+  ]
 }

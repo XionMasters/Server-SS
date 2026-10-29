@@ -1,0 +1,98 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'helper' (asistentes) de la saga Poseidón. Se juegan en field_helper; no combaten. Su pasiva CARD_PLAYED (con event_source_is_self) se resuelve al entrar en juego.",
+  "saga": "Poseidon",
+  "type": "helper",
+  "cards": [
+    {
+      "code": "helper_julian_butler", "name": "Mayordomo de los Solo", "rarity": "common", "cost": 1, "generate": 1, "faction": "Poseidon", "element": "light",
+      "image_url": "helpers/julian_butler.webp",
+      "art_prompt": "The Solo family butler. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, roba una carta.",
+      "abilities": [{ "name": "Servicio", "type": "pasiva", "description": "Roba 1 carta.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "draw_card", "amount": 1 }] } }],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_saori_kido", "name": "Saori Kido", "rarity": "epic", "cost": 2, "generate": 2, "faction": "Athena", "element": "light",
+      "image_url": "helpers/saori_kido.webp",
+      "art_prompt": "Saori Kido (Athena) with her golden Nike staff. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, cura 2 LP a todos tus caballeros y te cura 2 LP.",
+      "abilities": [{ "name": "Cosmos de Athena", "type": "pasiva", "description": "Cura 2 a aliados y al jugador.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "heal", "amount": 2, "target": "all_allies" }, { "type": "heal_player", "amount": 2, "target": "self" }] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_tatsumi", "name": "Tatsumi", "rarity": "common", "cost": 1, "generate": 1, "faction": "Athena", "element": "steel",
+      "image_url": "helpers/tatsumi.webp",
+      "art_prompt": "Tatsumi, Saori's bald bodyguard and butler. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, un caballero aliado gana +1 AR permanentemente.",
+      "abilities": [{ "name": "Guardaespaldas", "type": "pasiva", "description": "+1 AR a un aliado.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "defense", "amount": 1, "target": "selected" }] }] } }],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_kiki", "name": "Kiki", "rarity": "rare", "cost": 1, "generate": 1, "faction": "Athena", "element": "light",
+      "image_url": "helpers/kiki.webp",
+      "art_prompt": "Kiki, Mu's young apprentice, using telekinesis. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, repara la armadura de un caballero aliado: gana +2 AR permanentemente.",
+      "abilities": [{ "name": "Reparación de Armaduras", "type": "pasiva", "description": "+2 AR a un aliado.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "modify_stat", "stat": "defense", "amount": 2, "target": "selected" }] }] } }],
+      "max_copies": 2, "unique": true, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_dohko_old", "name": "Viejo Maestro de Rozan", "rarity": "epic", "cost": 2, "generate": 2, "faction": "Athena", "element": "earth",
+      "image_url": "helpers/dohko_old.webp",
+      "art_prompt": "Old Master Dohko (Roshi) sitting at the Rozan waterfall. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, roba dos cartas.",
+      "abilities": [{ "name": "Sabiduría", "type": "pasiva", "description": "Roba 2 cartas.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "draw_card", "amount": 2 }] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_shunrei", "name": "Shunrei", "rarity": "rare", "cost": 1, "generate": 1, "faction": "Athena", "element": "water",
+      "image_url": "helpers/shunrei.webp",
+      "art_prompt": "Shunrei praying at the Rozan waterfall. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, cura 4 LP a un caballero [dragon] aliado.",
+      "abilities": [{ "name": "Plegaria", "type": "pasiva", "description": "Cura 4 a un [dragon].",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }, { "type": "field_has_tag", "tag": "dragon" }], "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight", "tag": "dragon" }, "on_select": [{ "type": "heal", "amount": 4, "target": "selected" }] }] } }],
+      "max_copies": 2, "unique": true, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_pirate_crew", "name": "Tripulación del Barco Solo", "rarity": "common", "cost": 1, "generate": 1, "faction": "Poseidon", "element": "water",
+      "image_url": "helpers/pirate_crew.webp",
+      "art_prompt": "The crew of Julian Solo's ship. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, un caballero aliado recupera 2 CP.",
+      "abilities": [{ "name": "Abastecimiento", "type": "pasiva", "description": "+2 CP a un aliado.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "restore_cosmos", "amount": 2, "target": "selected" }] }] } }],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_temple_oracle", "name": "Oráculo del Templo", "rarity": "common", "cost": 1, "generate": 1, "faction": "Poseidon", "element": "dark",
+      "image_url": "helpers/temple_oracle.webp",
+      "art_prompt": "An oracle of the Undersea Temple. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, el rival descarta una carta al azar.",
+      "abilities": [{ "name": "Profecía", "type": "pasiva", "description": "El rival descarta 1 al azar.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "discard_opponent_random", "amount": 1 }] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_sea_dolphin", "name": "Delfín Guía", "rarity": "common", "cost": 1, "generate": 1, "faction": "Neutral", "element": "water",
+      "image_url": "helpers/sea_dolphin.webp",
+      "art_prompt": "A dolphin swimming near the Undersea Sanctuary. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, devuelve un caballero de tu Yomotsu a tu mano.",
+      "abilities": [{ "name": "Guía Marina", "type": "pasiva", "description": "Recupera un caballero del Yomotsu a la mano.",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "request_selection", "zone": "yomotsu", "filter": { "type": "knight" }, "destination": "hand", "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" }] }] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "helper_poseidon_herald", "name": "Heraldo de Poseidón", "rarity": "rare", "cost": 2, "generate": 1, "faction": "Poseidon", "element": "water",
+      "image_url": "helpers/poseidon_herald.webp",
+      "art_prompt": "A herald of Poseidon at the Undersea Temple. Character portrait faithful to the anime design. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Al entrar en juego, tus caballeros [general] recuperan 2 CP.",
+      "abilities": [{ "name": "Proclama", "type": "pasiva", "description": "+2 CP a tus [general].",
+        "effects": { "trigger": "CARD_PLAYED", "conditions": [{ "type": "event_source_is_self" }], "actions": [{ "type": "restore_cosmos", "amount": 2, "target": "all_allies", "filter": { "tag": "general" } }] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_helper"], "collection_id": "poseidon", "artist": null
+    }
+  ]
+}

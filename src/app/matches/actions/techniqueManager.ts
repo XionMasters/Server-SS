@@ -1,7 +1,6 @@
 import { sequelize } from '../../../config/database';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
-import Card from '../../../infrastructure/database/models/Card';
-import CardTechnique from '../../../infrastructure/database/models/CardTechnique';
+import { attachCardDefinitions } from './attachCardDefinitions';
 import { GameState } from '../../../domain/game/GameState';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../../../infrastructure/database/repositories/MatchRepository';
@@ -70,14 +69,11 @@ export class TechniqueManager {
 
         const cardsInPlay = await CardInPlay.findAll({
           where: { match_id: match.id },
-          include: [{
-            model: Card,
-            as: 'card',
-            include: [{ model: CardTechnique, as: 'card_technique' }],
-          }],
           transaction,
           lock: transaction.LOCK.UPDATE,
         });
+        // Incluye card_technique (stats de la TA) y habilidades para las pasivas
+        await attachCardDefinitions(cardsInPlay, transaction);
         (match as any).cards_in_play = cardsInPlay;
 
         // 3️⃣ MAPEAR A ESTADO PURO

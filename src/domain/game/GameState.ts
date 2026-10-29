@@ -11,10 +11,12 @@
  */
 
 // ─── Zona origen para selecciones interactivas ─────────────────────────────
-export type ZoneSelectSource = 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique' | 'field';
+export type ZoneSelectSource =
+  | 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique' | 'field'
+  | 'field_opponent' | 'field_support_opponent';
 
 // ─── Zona destino para envío de cartas ──────────────────────────────────────
-export type ZoneDestination = 'hand' | 'field' | 'cositos';
+export type ZoneDestination = 'hand' | 'field' | 'cositos' | 'yomotsu';
 
 export interface SelectionFilter {
   /** Filtrar por tipo de carta (knight, technique, object, etc.). */
@@ -23,8 +25,12 @@ export interface SelectionFilter {
   top_n?: number;
   /** Filtrar por card_code exacto (ej: 'shun_andromeda_v1'). */
   code?: string;
-  /** Filtrar por tag (ej: 'shun'). Más genérico que code: selecciona cualquier carta con ese tag. */
-  tag?: string;
+  /** Filtrar por tag (ej: 'shun'). Acepta varios: basta con que la carta tenga uno. */
+  tag?: string | string[];
+  /** Solo cartas con current_health <= health_max. */
+  health_max?: number;
+  /** Filtrar por status activo en la carta. */
+  status?: string;
 }
 
 /**
@@ -199,6 +205,13 @@ export interface GameState {
    * que el jugador indicado envíe `resolve_selection`.
    */
   pending_selection: PendingSelection | null;
+
+  /**
+   * Robos pendientes generados por acciones `draw_card` dentro del motor puro.
+   * El motor solo descuenta deck_count; MatchRepository.applyState mueve las cartas
+   * del mazo a la mano en BD y limpia este campo. No se persiste.
+   */
+  pending_draws?: { 1: number; 2: number };
 
   // Metadata
   created_at: number; // timestamp

@@ -1,0 +1,168 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'technique' de la saga Poseidón. Se juegan en field_technique. 'technique_stats' declara el TA; 'ta_effects' aplica estados al defensor cuando el TA conecta (turns cuenta los inicios de turno del defensor).",
+  "saga": "Poseidon",
+  "type": "technique",
+  "cards": [
+    {
+      "code": "golden_triangle", "name": "Triángulo Dorado", "rarity": "legendary", "cost": 3, "generate": 0, "faction": "Poseidon", "element": "dark",
+      "image_url": "techniques/golden_triangle.webp",
+      "art_prompt": "Kanon performing Golden Triangle. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [seadragon]. TA: Gasta 9 CP. Golpea 1 vez con CE 6 ignorando AR; el defensor queda atrapado y no puede atacar en su próximo turno.",
+      "tags": ["seadragon", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 6, "ta_cost": 9, "compatible_tags": ["seadragon"], "ignore_ar": true, "ta_effects": [{ "type": "frozen", "turns": 2 }] },
+      "abilities": [{ "name": "Triángulo Dorado", "type": "campo", "ability_key": "golden_triangle_ta", "description": "TA para [seadragon]: CE 6 ignorando AR + congelar.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "galaxian_explosion_kanon", "name": "Explosión de Galaxias (Kanon)", "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "light",
+      "image_url": "techniques/galaxian_explosion_kanon.webp",
+      "art_prompt": "Kanon performing Galaxian Explosion. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [kanon]. TA: Gasta 7 CP. Golpea 1 vez con CE 8.",
+      "tags": ["kanon", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 8, "ta_cost": 7, "compatible_tags": ["kanon"] },
+      "abilities": [{ "name": "Explosión de Galaxias", "type": "campo", "ability_key": "galaxian_explosion_kanon_ta", "description": "1 golpe CE 8.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "dead_end_symphony", "name": "Sinfonía de la Muerte", "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/dead_end_symphony.webp",
+      "art_prompt": "Sorrento performing Dead End Symphony. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [siren]. TA: Gasta 5 CP. Golpea 2 veces con CE 3 e ignora AR.",
+      "tags": ["siren", "technique"],
+      "technique_stats": { "hit_count": 2, "hit_ce": 3, "ta_cost": 5, "compatible_tags": ["siren"], "ignore_ar": true },
+      "abilities": [{ "name": "Sinfonía de la Muerte", "type": "campo", "ability_key": "dead_end_symphony_ta", "description": "2 golpes CE 3, ignora AR.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "dead_end_climax", "name": "Clímax Final", "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/dead_end_climax.webp",
+      "art_prompt": "Sorrento performing Dead End Climax. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [siren]. TA: Gasta 6 CP. Golpea 1 vez con CE 6; el defensor no puede atacar en su próximo turno.",
+      "tags": ["siren", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 6, "ta_cost": 6, "compatible_tags": ["siren"], "ta_effects": [{ "type": "frozen", "turns": 2 }] },
+      "abilities": [{ "name": "Clímax Final", "type": "campo", "ability_key": "dead_end_climax_ta", "description": "CE 6 + congelar.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "aurora_borealis", "name": "Aurora Boreal", "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/aurora_borealis.webp",
+      "art_prompt": "Isaac performing Aurora Borealis. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [kraken]. TA: Gasta 5 CP. Golpea 1 vez con CE 5 y congela al defensor durante su próximo turno.",
+      "tags": ["kraken", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 5, "ta_cost": 5, "compatible_tags": ["kraken"], "ta_effects": [{ "type": "frozen", "turns": 2 }] },
+      "abilities": [{ "name": "Aurora Boreal", "type": "campo", "ability_key": "aurora_borealis_ta", "description": "CE 5 + congelar.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "rising_billows", "name": "Oleaje Ascendente", "rarity": "rare", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "wind",
+      "image_url": "techniques/rising_billows.webp",
+      "art_prompt": "Baian performing Rising Billows. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [seahorse]. TA: Gasta 4 CP. Golpea 2 veces con CE 2.",
+      "tags": ["seahorse", "technique"],
+      "technique_stats": { "hit_count": 2, "hit_ce": 2, "ta_cost": 4, "compatible_tags": ["seahorse"] },
+      "abilities": [{ "name": "Oleaje Ascendente", "type": "campo", "ability_key": "rising_billows_ta", "description": "2 golpes CE 2.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "god_breath", "name": "Soplo Divino", "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "wind",
+      "image_url": "techniques/god_breath.webp",
+      "art_prompt": "Baian performing God Breath. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [seahorse]. TA: Gasta 6 CP. Golpea 1 vez con CE 6 (los TA ya ignoran el Modo Evasión).",
+      "tags": ["seahorse", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 6, "ta_cost": 6, "compatible_tags": ["seahorse"] },
+      "abilities": [{ "name": "Soplo Divino", "type": "campo", "ability_key": "god_breath_ta", "description": "CE 6.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "big_tornado", "name": "Gran Tornado", "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "wind",
+      "image_url": "techniques/big_tornado.webp",
+      "art_prompt": "Io performing Big Tornado. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [scylla]. TA: Gasta 6 CP. Golpea 1 vez con CE 7.",
+      "tags": ["scylla", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 7, "ta_cost": 6, "compatible_tags": ["scylla"] },
+      "abilities": [{ "name": "Gran Tornado", "type": "campo", "ability_key": "big_tornado_ta", "description": "CE 7.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "six_beasts", "name": "Seis Bestias de Scylla", "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "earth",
+      "image_url": "techniques/six_beasts.webp",
+      "art_prompt": "Io unleashing the six Scylla beast attacks (Eagle Clutch, Wolf Fang, Serpent Strangler, Vampire Inhale, Grizzly Slap, Queen Bee's Gonfalon). The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [scylla]. TA: Gasta 8 CP. Golpea 6 veces con CE 1 (águila, lobo, serpiente, murciélago, oso y abeja); la abeja envenena al defensor.",
+      "tags": ["scylla", "technique"],
+      "technique_stats": { "hit_count": 6, "hit_ce": 1, "ta_cost": 8, "compatible_tags": ["scylla"], "ta_effects": [{ "type": "poison", "value": 1, "turns": 3 }] },
+      "abilities": [{ "name": "Seis Bestias", "type": "campo", "ability_key": "six_beasts_ta", "description": "6 golpes CE 1 + veneno.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "satanic_salamander", "name": "Salamandra Satánica", "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "fire",
+      "image_url": "techniques/satanic_salamander.webp",
+      "art_prompt": "Kaysa performing Satanic Salamander. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [lymnades]. TA: Gasta 5 CP. Golpea 1 vez con CE 5 y quema al defensor (2 LP por turno durante 3 turnos).",
+      "tags": ["lymnades", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 5, "ta_cost": 5, "compatible_tags": ["lymnades"], "ta_effects": [{ "type": "burn", "value": 2, "turns": 3 }] },
+      "abilities": [{ "name": "Salamandra Satánica", "type": "campo", "ability_key": "satanic_salamander_ta", "description": "CE 5 + quemadura.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "flashing_lancer", "name": "Lanza Relampagueante", "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "light",
+      "image_url": "techniques/flashing_lancer.webp",
+      "art_prompt": "Krishna performing Flashing Lancer. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [chrysaor]. TA: Gasta 5 CP. Golpea 1 vez con CE 6 e ignora AR.",
+      "tags": ["chrysaor", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 6, "ta_cost": 5, "compatible_tags": ["chrysaor"], "ignore_ar": true },
+      "abilities": [{ "name": "Lanza Relampagueante", "type": "campo", "ability_key": "flashing_lancer_ta", "description": "CE 6, ignora AR.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "maha_roshini", "name": "Maha Roshini", "rarity": "epic", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "light",
+      "image_url": "techniques/maha_roshini.webp",
+      "art_prompt": "Krishna performing Maha Roshini. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [chrysaor]. TA: Gasta 7 CP. Golpea 3 veces con CE 3 y ciega al defensor (-3 CE durante su próximo turno).",
+      "tags": ["chrysaor", "technique"],
+      "technique_stats": { "hit_count": 3, "hit_ce": 3, "ta_cost": 7, "compatible_tags": ["chrysaor"], "ta_effects": [{ "type": "ce_boost", "value": -3, "turns": 2 }] },
+      "abilities": [{ "name": "Maha Roshini", "type": "campo", "ability_key": "maha_roshini_ta", "description": "3 golpes CE 3 + ceguera.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "poseidon_wrath", "name": "Furia de Poseidón", "rarity": "legendary", "cost": 4, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/poseidon_wrath.webp",
+      "art_prompt": "Poseidon unleashing his divine wrath with his trident. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [poseidon]. TA: Gasta 10 CP. Golpea 1 vez con CE 12 ignorando AR y Modo Defensa.",
+      "tags": ["poseidon", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 12, "ta_cost": 10, "compatible_tags": ["poseidon"], "ignore_ar": true },
+      "abilities": [{ "name": "Furia de Poseidón", "type": "campo", "ability_key": "poseidon_wrath_ta", "description": "CE 12, ignora AR y Modo Defensa.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 1, "unique": true, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "coral_snare", "name": "Trampa de Coral", "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/coral_snare.webp",
+      "art_prompt": "Thetis trapping an enemy with coral. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [thetis]. TA: Gasta 3 CP. Golpea 1 vez con CE 3; el defensor no puede atacar en su próximo turno.",
+      "tags": ["thetis", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 3, "ta_cost": 3, "compatible_tags": ["thetis"], "ta_effects": [{ "type": "frozen", "turns": 2 }] },
+      "abilities": [{ "name": "Trampa de Coral", "type": "campo", "ability_key": "coral_snare_ta", "description": "CE 3 + congelar.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 2, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "mariner_volley", "name": "Andanada Marina", "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/mariner_volley.webp",
+      "art_prompt": "Marina soldiers launching a volley of spears. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [mariner]. TA: Gasta 3 CP. Golpea 2 veces con CE 1.",
+      "tags": ["mariner", "technique"],
+      "technique_stats": { "hit_count": 2, "hit_ce": 1, "ta_cost": 3, "compatible_tags": ["mariner"] },
+      "abilities": [{ "name": "Andanada Marina", "type": "campo", "ability_key": "mariner_volley_ta", "description": "2 golpes CE 1.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    },
+    {
+      "code": "abyssal_pressure_wave", "name": "Onda de Presión Abisal", "rarity": "common", "cost": 1, "generate": 0, "faction": "Poseidon", "element": "water",
+      "image_url": "techniques/abyssal_pressure_wave.webp",
+      "art_prompt": "A Marina General releasing a shockwave of cosmo. The special technique exactly as animated in the anime, signature attack effects, attacker visible in the background. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "description": "Compatible con [general]. TA: Gasta 4 CP. Golpea 1 vez con CE 4.",
+      "tags": ["general", "technique"],
+      "technique_stats": { "hit_count": 1, "hit_ce": 4, "ta_cost": 4, "compatible_tags": ["general"] },
+      "abilities": [{ "name": "Onda de Presión Abisal", "type": "campo", "ability_key": "abyssal_pressure_wave_ta", "description": "CE 4.", "effects": { "trigger": "NONE", "actions": [] } }],
+      "max_copies": 3, "unique": false, "playable_zones": ["field_technique"], "collection_id": "poseidon", "artist": null
+    }
+  ]
+}
