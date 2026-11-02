@@ -1,0 +1,198 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'helper' (ayudantes) del Santuario. Se juegan en field_helper; no combaten. Su pasiva CARD_PLAYED (con event_source_is_self) se resuelve al entrar en juego.",
+  "saga": "Santuario",
+  "type": "helper",
+  "cards": [
+    {
+      "code": "helper_miho",
+      "name": "Miho del Orfanato",
+      "art_tags": "1girl, short brown hair, apron, orphanage, children, gentle smile",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Al entrar en juego, recuperas 2 LP.",
+      "abilities": [
+        {
+          "type": "pasiva",
+          "name": "Fe en Seiya",
+          "description": "Al entrar en juego, recuperas 2 LP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "heal_player",
+                "target": "self",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_helper"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "helper_cassios",
+      "name": "Cassios",
+      "art_tags": "1boy, giant, bald, scarred face, training clothes, sanctuary ruins",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Al entrar en juego, cura 3 LP a un caballero aliado.",
+      "abilities": [
+        {
+          "type": "pasiva",
+          "name": "Devoción por Shaina",
+          "description": "Al entrar en juego, cura 3 LP a un caballero aliado.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "heal",
+                    "target": "selected",
+                    "amount": 3
+                  }
+                ]
+              }
+            ],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_helper"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "helper_mitsumasa_kido",
+      "name": "Mitsumasa Kido",
+      "art_tags": "1man, old man, bald, white mustache, black suit, cane, mansion study",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Al entrar en juego, roba 1 carta y un caballero aliado recupera 2 CP.",
+      "abilities": [
+        {
+          "type": "pasiva",
+          "name": "Legado de la Fundación",
+          "description": "Al entrar en juego, roba 1 carta y un caballero aliado recupera 2 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1
+              },
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "restore_cosmos",
+                    "target": "selected",
+                    "amount": 2
+                  }
+                ]
+              }
+            ],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_helper"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "helper_esmeralda",
+      "name": "Esmeralda",
+      "art_tags": "1girl, long blonde hair, freckles, ragged dress, volcanic island, sad smile",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Al entrar en juego, tus caballeros [phoenix] ganan +2 CE de forma permanente.",
+      "abilities": [
+        {
+          "type": "pasiva",
+          "name": "Recuerdo de Esmeralda",
+          "description": "Al entrar en juego, tus caballeros [phoenix] ganan +2 CE de forma permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "field_has_tag",
+                "tag": "phoenix"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "phoenix"
+                },
+                "value": 2
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_helper"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    }
+  ]
+}

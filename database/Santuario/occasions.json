@@ -160,6 +160,473 @@
       ],
       "collection_id": "santuario",
       "artist": null
+    },
+    {
+      "code": "galaxian_wars",
+      "name": "Torneo Galáctico",
+      "art_tags": "no humans, colosseum arena at night, spotlights, crowd, giant screen",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Tus caballeros [bronze] ganan +1 CE hasta tu próximo turno. Roba 1 carta.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "galaxian_wars",
+          "name": "Que Comience el Torneo",
+          "description": "Tus caballeros [bronze] ganan +1 CE hasta tu próximo turno. Roba 1 carta.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "bronze"
+                },
+                "value": 1,
+                "duration": 1
+              },
+              {
+                "type": "draw_card",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "burning_cosmos",
+      "name": "Cosmos Ardiente",
+      "art_tags": "no humans, burning golden cosmos aura, constellation, stars",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Un caballero aliado recupera 2 CP y 2 LP.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "burning_cosmos",
+          "name": "Cosmos Ardiente",
+          "description": "Un caballero aliado elegido recupera 2 CP y 2 LP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "restore_cosmos",
+                    "target": "selected",
+                    "amount": 2
+                  },
+                  {
+                    "type": "heal",
+                    "target": "selected",
+                    "amount": 2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "spartan_training",
+      "name": "Entrenamiento Espartano",
+      "art_tags": "no humans, training grounds, broken boulders, sanctuary ruins, sunrise",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Roba 1 carta. Un caballero aliado gana +1 AR permanente.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "spartan_training",
+          "name": "Entrenamiento Espartano",
+          "description": "Roba 1 carta. Un caballero aliado elegido gana +1 AR permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1
+              },
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "modify_stat",
+                    "stat": "defense",
+                    "amount": 1,
+                    "target": "selected"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "tactical_retreat",
+      "name": "Retirada Táctica",
+      "art_tags": "no humans, footprints in sand, dust cloud, sanctuary stairs",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Devuelve un caballero aliado a tu mano.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "tactical_retreat",
+          "name": "Retirada Táctica",
+          "description": "Devuelve un caballero aliado elegido a tu mano.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "destination": "hand",
+                "on_select": [
+                  {
+                    "type": "send_to_zone",
+                    "target": "selected",
+                    "destination": "hand"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "silver_assault",
+      "name": "Asalto de Plata",
+      "art_tags": "no humans, silver cloths silhouettes, full moon, sanctuary banners",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Tus caballeros [silver] ganan +2 CE hasta tu próximo turno.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "silver_assault",
+          "name": "Por Orden del Santuario",
+          "description": "Tus caballeros [silver] ganan +2 CE hasta tu próximo turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "silver"
+                },
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "saint_blood",
+      "name": "Sangre de Caballero",
+      "art_tags": "no humans, cracked armor, drops of blood, glowing repair, hammer and chisel",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Paga 2 PLP; un caballero aliado gana +2 AR permanente y recupera 3 LP.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "saint_blood",
+          "name": "Reparación con Sangre",
+          "description": "Paga 2 PLP; un caballero aliado elegido gana +2 AR permanente y recupera 3 LP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "cost": [
+              {
+                "type": "life",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "modify_stat",
+                    "stat": "defense",
+                    "amount": 2,
+                    "target": "selected"
+                  },
+                  {
+                    "type": "heal",
+                    "target": "selected",
+                    "amount": 3
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "athena_wounded",
+      "name": "La Flecha de Athena",
+      "art_tags": "1girl, long purple hair, white dress, golden arrow in chest, fainting, sanctuary stairs",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Pierdes 2 LP. Todos tus caballeros recuperan 3 CP.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "athena_wounded",
+          "name": "Salvar a Athena",
+          "description": "Pierdes 2 LP. Todos tus caballeros recuperan 3 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_player_damage",
+                "target": "self",
+                "amount": 2
+              },
+              {
+                "type": "restore_cosmos",
+                "target": "all_allies",
+                "amount": 3
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "pope_decree",
+      "name": "Orden del Patriarca",
+      "art_tags": "1boy, pope robes, golden mask, throne room, scroll, dark aura",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "El rival descarta 1 carta aleatoria de su mano. Roba 1 carta.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "pope_decree",
+          "name": "Orden del Patriarca",
+          "description": "El rival descarta 1 carta aleatoria de su mano. Roba 1 carta.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "discard_opponent_random",
+                "amount": 1
+              },
+              {
+                "type": "draw_card",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "golden_oath",
+      "name": "Juramento Dorado",
+      "art_tags": "no humans, twelve golden cloths in a circle, zodiac, golden light",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Tus caballeros [gold] ganan +2 AR durante 2 turnos.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "golden_oath",
+          "name": "Juramento Dorado",
+          "description": "Tus caballeros [gold] ganan +2 AR durante 2 turnos.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "gold"
+                },
+                "value": 2,
+                "duration": 2
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "seventh_sense",
+      "name": "Despertar del Séptimo Sentido",
+      "art_tags": "1boy, bronze saint, battered, standing up, exploding golden cosmos, galaxy background",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Solo si tienes 12 LP o menos. Un caballero aliado gana +2 CE permanente y recupera 3 CP.",
+      "abilities": [
+        {
+          "type": "activa",
+          "ability_key": "seventh_sense",
+          "name": "Séptimo Sentido",
+          "description": "Requiere 12 LP o menos. Un caballero aliado elegido gana +2 CE permanente y recupera 3 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "player_lp_below",
+                "amount": 12
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "modify_stat",
+                    "stat": "attack",
+                    "amount": 2,
+                    "target": "selected"
+                  },
+                  {
+                    "type": "restore_cosmos",
+                    "target": "selected",
+                    "amount": 3
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": false,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

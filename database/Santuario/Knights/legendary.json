@@ -782,6 +782,7 @@
               {
                 "type": "permanent_ar_reduce",
                 "target": "all_enemies",
+                "filter": { "status": "frozen" },
                 "amount": 4
               }
             ]
@@ -967,7 +968,7 @@
       },
       "abilities": [
         {
-          "name": "Phoenix Wings",
+          "name": "Lobo Solitario",
           "type": "activa",
           "description": "Descarta 1 carta para: descartar una carta aleatoria del oponente; causar condición BRN en un soldado objetivo.",
           "effects": {
@@ -1057,7 +1058,7 @@
       },
       "abilities": [
         {
-          "name": "Dragon's Rage",
+          "name": "Voluntad de Rozan",
           "description": "Descarta 1 carta de tu mano; el próximo BA de Shiryu también daña a los soldados adyacentes al objetivo.",
           "type": "activa",
           "effects": {

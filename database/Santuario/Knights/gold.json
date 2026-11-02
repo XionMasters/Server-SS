@@ -17,6 +17,7 @@
           "element": "light",
           "image_url": "golds/21.webp",
           "description": "Caballero de Oro de Leo, conocido por su velocidad y poderosos ataques basados en rayos de luz.",
+          "tags": ["aiolia", "leo", "gold"],
           "stats": {
             "attack": 10,
             "defense": 7,
@@ -79,6 +80,7 @@
       "element": "light",
       "image_url": "golds/17.webp",
       "description": "Caballero de Oro de Aries, conocido por su habilidad para reparar armaduras y su técnica de telequinesis.",
+      "tags": ["mu", "aries", "gold"],
       "stats": {
         "attack": 7,
         "defense": 8,
@@ -89,7 +91,7 @@
       },
       "abilities": [
         {
-          "name": "Star Dust",
+          "name": "Reparador de Armaduras",
           "type": "activa",
           "description": "Selecciona un aliado y restaura sus puntos de AR originales. Ese aliado también gana un incremento permanente de AR +1.",
           "_pending": "Restaurar la AR original requiere guardar la AR base de la carta en el GameState. Hoy solo aplica el +1 permanente.",
@@ -140,6 +142,7 @@
       "element": "earth",
       "image_url": "golds/6.webp",
       "description": "Caballero de Oro de Tauro, conocido por su fuerza bruta y su técnica de ataque 'Great Horn'.",
+      "tags": ["aldebaran", "taurus", "gold"],
       "stats": {
         "attack": 8,
         "defense": 6,
@@ -206,7 +209,7 @@
       },
       "abilities": [
         {
-          "name": "Flecha Dorada",
+          "name": "Alas Doradas",
           "type": "pasiva",
           "description": "Los BA de Aioros ignoran el Modo Evasión del defensor.",
           "effects": {
@@ -292,6 +295,540 @@
       "max_copies": 1,
       "unique": true,
       "playable_zones": ["battlefield"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "saga_gemini",
+      "name": "Saga de Géminis",
+      "art_tags": "1boy, male focus, long blue hair, gold armor, gemini gold cloth, two-faced helmet, dark aura",
+      "rarity": "legendary",
+      "cost": 8,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Caballero de Oro de Géminis. Bondadoso y cruel a la vez, gobernó el Santuario durante trece años oculto tras la máscara del Patriarca.",
+      "tags": [
+        "saga",
+        "gemini",
+        "gold"
+      ],
+      "stats": {
+        "attack": 10,
+        "defense": 7,
+        "health": 12,
+        "cosmos": 14,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Dos Almas",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, lanza una moneda. Cara (alma maligna): Saga gana +3 CE hasta tu próximo turno. Cruz (alma bondadosa): cura 2 LP a todos tus caballeros.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  {
+                    "type": "apply_status",
+                    "status": "ce_boost",
+                    "target": "self",
+                    "value": 3,
+                    "duration": 1
+                  }
+                ],
+                "on_fail": [
+                  {
+                    "type": "heal",
+                    "target": "all_allies",
+                    "amount": 2
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "Decreto del Patriarca",
+          "type": "activa",
+          "description": "Paga 4 CP; un caballero rival elegido pierde 2 CE de forma permanente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 4
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "modify_stat",
+                    "stat": "attack",
+                    "amount": -2,
+                    "target": "selected"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "shaka_virgo",
+      "name": "Shaka de Virgo",
+      "art_tags": "1boy, male focus, very long blonde hair, closed eyes, gold armor, virgo gold cloth, meditating, lotus",
+      "rarity": "legendary",
+      "cost": 8,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Caballero de Oro de Virgo, «el hombre más cercano a Dios». Mantiene los ojos cerrados para acumular su cosmos.",
+      "tags": [
+        "shaka",
+        "virgo",
+        "gold"
+      ],
+      "stats": {
+        "attack": 8,
+        "defense": 8,
+        "health": 12,
+        "cosmos": 16,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Ojos Cerrados",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, Shaka recupera 2 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "target": "self",
+                "amount": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "Abrir los Ojos",
+          "type": "activa",
+          "description": "Paga 6 CP; hasta tu próximo turno los BA de Shaka tienen CE doble, y el siguiente ignora la AR del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 6
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 6
+              },
+              {
+                "type": "no_status",
+                "status": "ce_double"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_double",
+                "target": "self",
+                "duration": 1
+              },
+              {
+                "type": "apply_status",
+                "status": "ignore_armor",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "milo_scorpio",
+      "name": "Milo de Escorpio",
+      "art_tags": "1boy, male focus, long wavy blue hair, gold armor, scorpio gold cloth, scorpion tail, red fingernail",
+      "rarity": "legendary",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Caballero de Oro de Escorpio, orgulloso y apasionado. Concede a sus rivales la piedad de rendirse antes del golpe final.",
+      "tags": [
+        "milo",
+        "scorpio",
+        "gold"
+      ],
+      "stats": {
+        "attack": 9,
+        "defense": 6,
+        "health": 12,
+        "cosmos": 11,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Orgullo del Escorpión",
+          "type": "pasiva",
+          "description": "Cada vez que Milo derrota a un caballero, gana +1 CE permanente.",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "modify_stat",
+                "stat": "attack",
+                "amount": 1,
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Piedad del Escorpión",
+          "type": "activa",
+          "description": "Paga 3 CP; un caballero rival Envenenado queda Paralizado (PAR) durante su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "enemy_has_status",
+                "status": "poison"
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight",
+                  "status": "poison"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_status",
+                    "status": "paralyzed",
+                    "target": "selected",
+                    "duration": 2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "shura_capricorn",
+      "name": "Shura de Capricornio",
+      "art_tags": "1boy, male focus, short black hair, gold armor, capricorn gold cloth, goat horns helmet, glowing arm blade",
+      "rarity": "legendary",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Caballero de Oro de Capricornio, el más leal a Athena. Sus brazos y piernas cortan como espadas sagradas.",
+      "tags": [
+        "shura",
+        "capricorn",
+        "gold"
+      ],
+      "stats": {
+        "attack": 9,
+        "defense": 7,
+        "health": 12,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Lealtad Inquebrantable",
+          "type": "pasiva",
+          "description": "Cuando muere un caballero aliado, Shura gana +2 CE hasta el final de tu próximo turno.",
+          "effects": {
+            "trigger": "ALLY_DIED",
+            "conditions": [
+              {
+                "type": "self_in_zone",
+                "zone": "field_knight"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "Juramento Leal",
+          "type": "activa",
+          "description": "Paga 2 PLP; el próximo BA de Shura ignora el Modo Defensa del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "life",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "no_status",
+                "status": "ignore_block_mode"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ignore_block_mode",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "camus_aquarius",
+      "name": "Camus de Acuario",
+      "art_tags": "1boy, male focus, long dark red hair, calm expression, gold armor, aquarius gold cloth, ice crystals",
+      "rarity": "legendary",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Caballero de Oro de Acuario y maestro de Hyoga. Frío y sereno, domina el cero absoluto.",
+      "tags": [
+        "camus",
+        "aquarius",
+        "gold"
+      ],
+      "stats": {
+        "attack": 8,
+        "defense": 7,
+        "health": 12,
+        "cosmos": 12,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Maestro de los Hielos",
+          "type": "pasiva",
+          "description": "Al entrar en juego, tus caballeros [cygnus] recuperan 3 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "field_has_tag",
+                "tag": "cygnus"
+              }
+            ],
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "cygnus"
+                },
+                "amount": 3
+              }
+            ]
+          }
+        },
+        {
+          "name": "Cero Absoluto",
+          "type": "activa",
+          "description": "Paga 4 CP; todos los caballeros rivales tienen −2 CE durante su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 4
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_enemies",
+                "value": -2,
+                "duration": 2
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "aphrodite_pisces",
+      "name": "Afrodita de Piscis",
+      "art_tags": "1boy, male focus, androgynous, long light blue hair, beauty mark, gold armor, pisces gold cloth, red roses",
+      "rarity": "legendary",
+      "cost": 7,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Caballero de Oro de Piscis, guardián de la última casa. Su belleza es tan letal como las rosas que la rodean.",
+      "tags": [
+        "aphrodite",
+        "pisces",
+        "gold"
+      ],
+      "stats": {
+        "attack": 8,
+        "defense": 6,
+        "health": 12,
+        "cosmos": 12,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Sangre Venenosa",
+          "type": "pasiva",
+          "description": "Cuando Afrodita recibe un BA, el atacante queda Envenenado (1 daño por turno, 3 turnos).",
+          "effects": {
+            "trigger": "BA_RECEIVED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "poison",
+                "target": "target",
+                "value": 1,
+                "duration": 3
+              }
+            ]
+          }
+        },
+        {
+          "name": "Escalinata de Rosas",
+          "type": "activa",
+          "description": "Paga 3 CP; todos los caballeros rivales reciben 1 LP de daño.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_damage",
+                "target": "all_enemies",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "santuario",
       "artist": null
     }

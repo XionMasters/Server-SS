@@ -16,6 +16,7 @@
       "element": "steel",
       "image_url": "bronzes/6.webp",
       "description": "Caballero de bronce leal con un cuerno perforador capaz de atravesar cualquier defensa.",
+      "tags": ["jabu", "unicorn", "bronze"],
       "stats": {
         "attack": 2,
         "defense": 2,
@@ -100,6 +101,7 @@
       "element": "steel",
       "image_url": "bronzes/18.webp",
       "description": "Caballero de bronce ágil e instintivo. Cada golpe directo al rival desencadena el poder de la manada.",
+      "tags": ["nachi", "wolf", "bronze"],
       "stats": {
         "attack": 2,
         "defense": 1,
@@ -188,6 +190,7 @@
       "element": "earth",
       "image_url": "bronzes/12.webp",
       "description": "Caballero de gran fuerza física que domina el combate cuerpo a cuerpo.",
+      "tags": ["geki", "bear", "bronze"],
       "_note_stats": "",
       "stats": {
         "attack": 2,
@@ -260,6 +263,7 @@
       "element": "wind",
       "image_url": "bronzes/13.webp",
       "description": "Caballero ágil con garras afiladas.",
+      "tags": ["ban", "lionet", "bronze"],
       "_note_stats": "",
       "stats": {
         "attack": 2,
@@ -271,7 +275,7 @@
       },
       "abilities": [
         {
-          "name": "Fast Bomber",
+          "name": "Arranque Feroz",
           "type": "pasiva",
           "description": "Cuando entra al campo de batalla, recibe +3 Ce de bonus hasta el proximo turno del jugador",
           "effects": {
@@ -336,6 +340,7 @@
       "element": "dark",
       "image_url": "bronzes/17.webp",
       "description": "Caballero de bronce cuyos ataques pueden envenenar al enemigo.",
+      "tags": ["ichi", "hydra", "bronze"],
       "_note_stats": "",
       "stats": {
         "attack": 2,
@@ -415,6 +420,7 @@
       "element": "light",
       "image_url": "bronzes/16.webp",
       "description": "Caballero de bronce con la habilidad de curar a sus aliados al entrar en el campo de batalla.",
+      "tags": ["june", "chameleon", "bronze"],
       "_note_stats": "",
       "stats": {
         "attack": 1,

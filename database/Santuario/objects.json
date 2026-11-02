@@ -65,6 +65,171 @@
       ],
       "collection_id": "santuario",
       "artist": "Will Tox"
+    },
+    {
+      "code": "medusa_shield",
+      "name": "Escudo de Medusa",
+      "art_tags": "no humans, round silver shield, medusa face with snake hair, glowing eyes",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Al entrar en juego, un caballero rival elegido queda Congelado (FRZ, petrificado) durante sus próximos 2 turnos.",
+      "abilities": [
+        {
+          "type": "equipamiento",
+          "name": "Mirada de la Gorgona",
+          "ability_key": "medusa_shield_gaze",
+          "description": "Al entrar en juego, un caballero rival elegido queda Congelado (FRZ) durante sus próximos 2 turnos.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_status",
+                    "status": "frozen",
+                    "target": "selected",
+                    "duration": 3
+                  }
+                ]
+              }
+            ],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "sagittarius_cloth",
+      "name": "Armadura de Sagitario",
+      "art_tags": "no humans, golden armor, sagittarius gold cloth, golden wings, golden bow, cloth box, glowing",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Al entrar en juego, un caballero [bronze] aliado viste la Armadura de Sagitario: gana +2 CE y +2 AR permanentes, y sus BA ignoran el Modo Evasión.",
+      "abilities": [
+        {
+          "type": "equipamiento",
+          "name": "Alas de Oro",
+          "ability_key": "sagittarius_cloth_wings",
+          "description": "Elige un caballero [bronze] aliado: gana +2 CE y +2 AR permanentes y sus BA ignoran el Modo Evasión.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "field_has_tag",
+                "tag": "bronze"
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight",
+                  "tag": "bronze"
+                },
+                "on_select": [
+                  {
+                    "type": "modify_stat",
+                    "stat": "attack",
+                    "amount": 2,
+                    "target": "selected"
+                  },
+                  {
+                    "type": "modify_stat",
+                    "stat": "defense",
+                    "amount": 2,
+                    "target": "selected"
+                  },
+                  {
+                    "type": "apply_status",
+                    "status": "pierce_evasion",
+                    "target": "selected"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "athena_shield",
+      "name": "Escudo de Athena",
+      "art_tags": "no humans, golden round shield, statue of athena, divine light dispelling darkness",
+      "rarity": "legendary",
+      "cost": 4,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Al entrar en juego, tus caballeros quedan inmunes a condiciones negativas durante 2 turnos y recuperan 2 LP.",
+      "abilities": [
+        {
+          "type": "equipamiento",
+          "name": "Luz que Disipa el Mal",
+          "ability_key": "athena_shield_light",
+          "description": "Tus caballeros quedan inmunes a condiciones negativas (PAR, FRZ, BRN, veneno) durante 2 turnos y recuperan 2 LP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "immune_negative",
+                "target": "all_allies",
+                "duration": 2
+              },
+              {
+                "type": "heal",
+                "target": "all_allies",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }

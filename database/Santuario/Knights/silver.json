@@ -16,6 +16,7 @@
       "element": "wind",
       "image_url": "silvers/1.webp",
       "description": "Caballera de Plata, maestra de Seiya y combatiente veloz del Santuario.",
+      "tags": ["marin", "aquila", "silver"],
       "stats": {
         "attack": 4,
         "defense": 3,
@@ -51,10 +52,14 @@
           "name": "Tutoring",
           "type": "pasiva",
           "description": "Cuando entra al campo de batalla, roba una carta.",
-          "_pending": "El motor actual no soporta robar cartas desde habilidades declarativas. Placeholder hasta Fase 2.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "actions": []
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1
+              }
+            ]
           }
         }
       ],
@@ -114,6 +119,702 @@
               {
                 "type": "draw_card",
                 "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "misty_lizard",
+      "name": "Misty de Lagarto",
+      "art_tags": "1boy, male focus, long wavy blonde hair, narcissistic smile, silver armor, lizard silver cloth",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Caballero de Plata de Lagarto, vanidoso hasta el extremo. Presume de que nadie ha manchado jamás su piel.",
+      "tags": [
+        "misty",
+        "lizard",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 7,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Piel Inmaculada",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Misty adopta Modo Evasión hasta el final de tu próximo turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "evasion",
+                "target": "self",
+                "duration": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "Desdén",
+          "type": "activa",
+          "description": "Paga 2 CP; un caballero rival elegido tiene −2 CE durante su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_status",
+                    "status": "ce_boost",
+                    "target": "selected",
+                    "value": -2,
+                    "duration": 2
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "asterion_hunting_dogs",
+      "name": "Asterion de Perros de Caza",
+      "art_tags": "1boy, male focus, short dark hair, intense eyes, silver armor, hunting dogs silver cloth",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Caballero de Plata de Perros de Caza. Lee la mente de sus rivales y anticipa cada uno de sus movimientos.",
+      "tags": [
+        "asterion",
+        "hunting_dogs",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 7,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Lectura Mental",
+          "type": "pasiva",
+          "description": "Los BA de Asterion ignoran el Modo Evasión del defensor.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "pierce_evasion",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Conocer al Rival",
+          "type": "activa",
+          "description": "Paga 3 CP; roba 1 carta.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "algol_perseus",
+      "name": "Algol de Perseo",
+      "art_tags": "1boy, male focus, short dark hair, arrogant, silver armor, perseus silver cloth, round shield with medusa face",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Caballero de Plata de Perseo, portador del Escudo de Medusa, cuya mirada convierte en piedra a quien la contempla.",
+      "tags": [
+        "algol",
+        "perseus",
+        "silver"
+      ],
+      "stats": {
+        "attack": 4,
+        "defense": 4,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Égida Maldita",
+          "type": "pasiva",
+          "description": "Cuando juegas un objeto u ocasión, Algol gana +2 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "OBJECT_EQUIPPED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Mirada Petrificante",
+          "type": "activa",
+          "description": "Paga 4 CP; elige un caballero rival y lanza una moneda: si sale cara, queda Congelado (FRZ) durante su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 4
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "coin_flip_then",
+                    "on_heads": [
+                      {
+                        "type": "apply_status",
+                        "status": "frozen",
+                        "target": "selected",
+                        "duration": 2
+                      }
+                    ],
+                    "on_fail": []
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "jamian_crow",
+      "name": "Jamian de Cuervo",
+      "art_tags": "1boy, male focus, messy black hair, silver armor, crow silver cloth, black feathers, flock of crows",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Caballero de Plata del Cuervo. Una bandada de cuervos obedece cada una de sus órdenes.",
+      "tags": [
+        "jamian",
+        "crow",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Bandada",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, sus cuervos causan 1 LP de daño a un caballero rival al azar.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_damage",
+                "target": "random_enemy",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Rapiña",
+          "type": "activa",
+          "description": "Paga 3 CP; el rival descarta 1 carta aleatoria de su mano.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "discard_opponent_random",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "moses_whale",
+      "name": "Moses de Ballena",
+      "art_tags": "1boy, male focus, huge, muscular, bald, silver armor, whale silver cloth",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Caballero de Plata de Ballena, un coloso de fuerza descomunal.",
+      "tags": [
+        "moses",
+        "whale",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Corpulencia",
+          "type": "pasiva",
+          "description": "Al entrar en juego, Moses gana +1 AR permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "modify_stat",
+                "stat": "defense",
+                "amount": 1,
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Aplastar",
+          "type": "activa",
+          "description": "Paga 3 CP; un caballero rival elegido pierde 1 AR permanentemente.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "permanent_ar_reduce",
+                    "target": "selected",
+                    "amount": 1
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "babel_centaurus",
+      "name": "Babel de Centauro",
+      "art_tags": "1boy, male focus, turban, silver armor, centaurus silver cloth, flames",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Caballero de Plata de Centauro, hechicero del fuego enviado a castigar a los rebeldes.",
+      "tags": [
+        "babel",
+        "centaurus",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 8,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Cuerpo Ígneo",
+          "type": "pasiva",
+          "description": "Babel es inmune a Quemadura (BRN).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "burn_immune",
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Avivar las Llamas",
+          "type": "activa",
+          "description": "Paga 2 CP; cada caballero rival con BRN recibe 2 LP de daño.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              },
+              {
+                "type": "enemy_has_status",
+                "status": "burn"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_damage",
+                "target": "all_enemies",
+                "filter": {
+                  "status": "burn"
+                },
+                "amount": 2
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "capella_auriga",
+      "name": "Capella de Auriga",
+      "art_tags": "1boy, male focus, long blonde hair, silver armor, auriga silver cloth, spinning saucer discs",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Caballero de Plata de Auriga, que combate con discos de filo cortante.",
+      "tags": [
+        "capella",
+        "auriga",
+        "silver"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 7,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Ojo del Cochero",
+          "type": "pasiva",
+          "description": "Cuando Capella conecta un BA, lanza una moneda; si sale cara, el defensor pierde 1 AR permanentemente.",
+          "effects": {
+            "trigger": "BA_DEALT",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "coin_flip_then",
+                "on_heads": [
+                  {
+                    "type": "permanent_ar_reduce",
+                    "target": "target",
+                    "amount": 1
+                  }
+                ],
+                "on_fail": []
+              }
+            ]
+          }
+        },
+        {
+          "name": "Guardia de Discos",
+          "type": "activa",
+          "description": "Paga 2 CP; Capella gana +2 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "dante_cerberus",
+      "name": "Dante de Cerbero",
+      "art_tags": "1boy, male focus, muscular, savage grin, silver armor, cerberus silver cloth, spiked iron balls on chains",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 2,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Caballero de Plata de Cerbero, brutal guardián que no deja escapar a su presa.",
+      "tags": [
+        "dante",
+        "cerberus",
+        "silver"
+      ],
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Instinto del Guardián",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, si Dante tiene 4 LP o menos, gana +2 CE hasta tu próximo turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [
+              {
+                "type": "hp_below",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Rematar",
+          "type": "activa",
+          "description": "Paga 2 CP; causa 2 LP de daño a un caballero rival con 3 LP o menos.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight",
+                  "health_max": 3
+                },
+                "on_select": [
+                  {
+                    "type": "apply_damage",
+                    "target": "selected",
+                    "amount": 2
+                  }
+                ]
               }
             ]
           }

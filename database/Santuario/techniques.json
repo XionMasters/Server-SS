@@ -85,15 +85,15 @@
       "cost": 1,
       "generate": 0,
       "faction": "Athena",
-      "element": "fire",
+      "element": "light",
       "image_url": "techniques/stardust_revolution.webp",
-      "description": "Compatible con caballeros [dragon]. TA: Gasta 3 CP del caballero. Golpea con CE 4. El objetivo recibe BRN (2 DIP/turno) por 3 turnos.",
-      "tags": ["dragon", "technique"],
+      "description": "Compatible con caballeros [aries]. TA: Gasta 3 CP del caballero. Golpea con CE 4. El objetivo recibe BRN (2 DIP/turno) por 3 turnos.",
+      "tags": ["aries", "technique"],
       "technique_stats": {
         "hit_count": 1,
         "hit_ce": 4,
         "ta_cost": 3,
-        "compatible_tags": ["dragon"],
+        "compatible_tags": ["aries"],
         "ta_effects": [
           { "type": "burn", "value": 2, "turns": 3 }
         ]
@@ -103,7 +103,7 @@
           "name": "Stardust Revolution",
           "type": "campo",
           "ability_key": "stardust_revolution_ta",
-          "description": "TA habilitado para caballeros [dragon]. Costo: 3 CP. Efecto: 1 golpe CE 4. BRN en el objetivo por 3 turnos (2 DIP/turno).",
+          "description": "TA habilitado para caballeros [aries]. Costo: 3 CP. Efecto: 1 golpe CE 4. BRN en el objetivo por 3 turnos (2 DIP/turno).",
           "effects": {
             "trigger": "NONE",
             "actions": []
@@ -150,6 +150,1165 @@
       "max_copies": 2,
       "unique": false,
       "playable_zones": ["field_technique"],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "galaxian_explosion",
+      "name": "Explosión de Galaxias",
+      "art_tags": "1boy, gold armor, gemini gold cloth, arms raised, colliding planets, galaxy explosion",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Compatible con caballeros [gemini]. TA: gasta 8 CP del caballero. 1 golpe de CE 9.",
+      "tags": [
+        "gemini",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 9,
+        "ta_cost": 8,
+        "compatible_tags": [
+          "gemini"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Explosión de Galaxias",
+          "type": "campo",
+          "ability_key": "galaxian_explosion_ta",
+          "description": "TA habilitado para caballeros [gemini]. Costo: 8 CP. Efecto: 1 golpe de CE 9.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "genro_mao_ken",
+      "name": "Satán Imperial",
+      "art_tags": "1boy, pope robes, pointing finger, ray of light to forehead, mind control, dark aura",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Compatible con caballeros [gemini]. TA: gasta 5 CP del caballero. 1 golpe de CE 3. El objetivo queda Paralizado (PAR) durante su próximo turno.",
+      "tags": [
+        "gemini",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 3,
+        "ta_cost": 5,
+        "compatible_tags": [
+          "gemini"
+        ],
+        "ta_effects": [
+          {
+            "type": "paralyzed",
+            "turns": 2
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Satán Imperial",
+          "type": "campo",
+          "ability_key": "genro_mao_ken_ta",
+          "description": "TA habilitado para caballeros [gemini]. Costo: 5 CP. Efecto: 1 golpe de CE 3. El objetivo queda Paralizado (PAR) durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "tenbu_horin",
+      "name": "Tesoro del Cielo",
+      "art_tags": "1boy, gold armor, virgo gold cloth, lotus position, giant sala trees, buddhist mandala, golden light",
+      "rarity": "legendary",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Compatible con caballeros [virgo]. TA: gasta 10 CP del caballero. 1 golpe de CE 6. El objetivo pierde los sentidos: queda Paralizado (PAR) y con −3 CE durante su próximo turno.",
+      "tags": [
+        "virgo",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 6,
+        "ta_cost": 10,
+        "compatible_tags": [
+          "virgo"
+        ],
+        "ta_effects": [
+          {
+            "type": "paralyzed",
+            "turns": 2
+          },
+          {
+            "type": "ce_boost",
+            "value": -3,
+            "turns": 2
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Tesoro del Cielo",
+          "type": "campo",
+          "ability_key": "tenbu_horin_ta",
+          "description": "TA habilitado para caballeros [virgo]. Costo: 10 CP. Efecto: 1 golpe de CE 6. El objetivo pierde los sentidos: queda Paralizado (PAR) y con −3 CE durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "scarlet_needle",
+      "name": "Aguja Escarlata",
+      "art_tags": "1boy, gold armor, scorpio gold cloth, pointing red fingernail, crimson needle beams, scorpion constellation",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Compatible con caballeros [scorpio]. TA: gasta 5 CP del caballero. 3 golpes de CE 2. El objetivo queda Envenenado (1 daño por turno, 3 turnos).",
+      "tags": [
+        "scorpio",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 3,
+        "hit_ce": 2,
+        "ta_cost": 5,
+        "compatible_tags": [
+          "scorpio"
+        ],
+        "ta_effects": [
+          {
+            "type": "poison",
+            "value": 1,
+            "turns": 3
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Aguja Escarlata",
+          "type": "campo",
+          "ability_key": "scarlet_needle_ta",
+          "description": "TA habilitado para caballeros [scorpio]. Costo: 5 CP. Efecto: 3 golpes de CE 2. El objetivo queda Envenenado (1 daño por turno, 3 turnos).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "excalibur",
+      "name": "Excalibur",
+      "art_tags": "1boy, gold armor, capricorn gold cloth, arm swing, glowing blade of light, ground split in two",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Compatible con caballeros [capricorn]. TA: gasta 7 CP del caballero. 1 golpe de CE 7. Ignora AR y Modo Defensa.",
+      "tags": [
+        "capricorn",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 7,
+        "ta_cost": 7,
+        "compatible_tags": [
+          "capricorn"
+        ],
+        "ignore_ar": true
+      },
+      "abilities": [
+        {
+          "name": "Excalibur",
+          "type": "campo",
+          "ability_key": "excalibur_ta",
+          "description": "TA habilitado para caballeros [capricorn]. Costo: 7 CP. Efecto: 1 golpe de CE 7. Ignora AR y Modo Defensa.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "aurora_execution",
+      "name": "Ejecución Aurora",
+      "art_tags": "1boy, gold armor, aquarius gold cloth, hands joined above head, water vase shape, freezing aurora beam",
+      "rarity": "legendary",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Compatible con caballeros [aquarius]. TA: gasta 9 CP del caballero. 1 golpe de CE 9. El objetivo queda Congelado (FRZ) durante su próximo turno.",
+      "tags": [
+        "aquarius",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 9,
+        "ta_cost": 9,
+        "compatible_tags": [
+          "aquarius"
+        ],
+        "ta_effects": [
+          {
+            "type": "frozen",
+            "turns": 2
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ejecución Aurora",
+          "type": "campo",
+          "ability_key": "aurora_execution_ta",
+          "description": "TA habilitado para caballeros [aquarius]. Costo: 9 CP. Efecto: 1 golpe de CE 9. El objetivo queda Congelado (FRZ) durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "royal_demon_rose",
+      "name": "Rosas Diabólicas Reales",
+      "art_tags": "1boy, gold armor, pisces gold cloth, storm of red roses, falling petals",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Compatible con caballeros [pisces]. TA: gasta 6 CP del caballero. 2 golpes de CE 3. El objetivo queda Envenenado (2 daño por turno, 3 turnos).",
+      "tags": [
+        "pisces",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 3,
+        "ta_cost": 6,
+        "compatible_tags": [
+          "pisces"
+        ],
+        "ta_effects": [
+          {
+            "type": "poison",
+            "value": 2,
+            "turns": 3
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Rosas Diabólicas Reales",
+          "type": "campo",
+          "ability_key": "royal_demon_rose_ta",
+          "description": "TA habilitado para caballeros [pisces]. Costo: 6 CP. Efecto: 2 golpes de CE 3. El objetivo queda Envenenado (2 daño por turno, 3 turnos).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "lightning_plasma",
+      "name": "Plasma Relámpago",
+      "art_tags": "1boy, gold armor, leo gold cloth, punching, web of lightning beams, lion aura",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Compatible con caballeros [leo]. TA: gasta 7 CP del caballero. 4 golpes de CE 3.",
+      "tags": [
+        "leo",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 4,
+        "hit_ce": 3,
+        "ta_cost": 7,
+        "compatible_tags": [
+          "leo"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Plasma Relámpago",
+          "type": "campo",
+          "ability_key": "lightning_plasma_ta",
+          "description": "TA habilitado para caballeros [leo]. Costo: 7 CP. Efecto: 4 golpes de CE 3.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "great_horn",
+      "name": "Gran Cuerno",
+      "art_tags": "1boy, giant, gold armor, taurus gold cloth, arms crossed, charging bull aura, shockwave",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Compatible con caballeros [taurus]. TA: gasta 7 CP del caballero. 1 golpe de CE 8.",
+      "tags": [
+        "taurus",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 8,
+        "ta_cost": 7,
+        "compatible_tags": [
+          "taurus"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Gran Cuerno",
+          "type": "campo",
+          "ability_key": "great_horn_ta",
+          "description": "TA habilitado para caballeros [taurus]. Costo: 7 CP. Efecto: 1 golpe de CE 8.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "rozan_sho_ryu_ha",
+      "name": "Cólera del Dragón",
+      "art_tags": "1boy, long black hair, green dragon armor, uppercut, rising water dragon, rozan waterfall",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Compatible con caballeros [dragon]. TA: gasta 6 CP del caballero. 1 golpe de CE 6.",
+      "tags": [
+        "dragon",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 6,
+        "ta_cost": 6,
+        "compatible_tags": [
+          "dragon"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Cólera del Dragón",
+          "type": "campo",
+          "ability_key": "rozan_sho_ryu_ha_ta",
+          "description": "TA habilitado para caballeros [dragon]. Costo: 6 CP. Efecto: 1 golpe de CE 6.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "diamond_dust",
+      "name": "Polvo de Diamantes",
+      "art_tags": "1boy, blonde hair, white swan armor, swan dance pose, ice crystals, diamond dust",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Compatible con caballeros [cygnus] o [aquarius]. TA: gasta 4 CP del caballero. 1 golpe de CE 4. El objetivo queda Congelado (FRZ) durante su próximo turno.",
+      "tags": [
+        "cygnus",
+        "aquarius",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "cygnus",
+          "aquarius"
+        ],
+        "ta_effects": [
+          {
+            "type": "frozen",
+            "turns": 2
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Polvo de Diamantes",
+          "type": "campo",
+          "ability_key": "diamond_dust_ta",
+          "description": "TA habilitado para caballeros [cygnus] o [aquarius]. Costo: 4 CP. Efecto: 1 golpe de CE 4. El objetivo queda Congelado (FRZ) durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "nebula_chain",
+      "name": "Cadena Nebular",
+      "art_tags": "1boy, green hair, pink andromeda armor, chains spiraling, nebula, triangle chain head",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Compatible con caballeros [andromeda]. TA: gasta 4 CP del caballero. 2 golpes de CE 3.",
+      "tags": [
+        "andromeda",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 3,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "andromeda"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Cadena Nebular",
+          "type": "campo",
+          "ability_key": "nebula_chain_ta",
+          "description": "TA habilitado para caballeros [andromeda]. Costo: 4 CP. Efecto: 2 golpes de CE 3.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "hoyoku_tensho",
+      "name": "Ave Fénix",
+      "art_tags": "1boy, spiky dark blue hair, phoenix armor, flaming phoenix wings, fire bird rising",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Compatible con caballeros [phoenix]. TA: gasta 7 CP del caballero. 1 golpe de CE 7. El objetivo sufre Quemadura (BRN, 2 daño por turno, 3 turnos).",
+      "tags": [
+        "phoenix",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 7,
+        "ta_cost": 7,
+        "compatible_tags": [
+          "phoenix"
+        ],
+        "ta_effects": [
+          {
+            "type": "burn",
+            "value": 2,
+            "turns": 3
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ave Fénix",
+          "type": "campo",
+          "ability_key": "hoyoku_tensho_ta",
+          "description": "TA habilitado para caballeros [phoenix]. Costo: 7 CP. Efecto: 1 golpe de CE 7. El objetivo sufre Quemadura (BRN, 2 daño por turno, 3 turnos).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "unicorn_gallop",
+      "name": "Galope del Unicornio",
+      "art_tags": "1boy, white unicorn armor, flying kick, galloping unicorn aura",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Compatible con caballeros [unicorn]. TA: gasta 4 CP del caballero. 1 golpe de CE 4.",
+      "tags": [
+        "unicorn",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "unicorn"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Galope del Unicornio",
+          "type": "campo",
+          "ability_key": "unicorn_gallop_ta",
+          "description": "TA habilitado para caballeros [unicorn]. Costo: 4 CP. Efecto: 1 golpe de CE 4.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "dead_howling",
+      "name": "Aullido Mortal",
+      "art_tags": "1boy, white wolf armor, claw slash, howling wolf aura, moon",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Compatible con caballeros [wolf]. TA: gasta 3 CP del caballero. 2 golpes de CE 2.",
+      "tags": [
+        "wolf",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 2,
+        "ta_cost": 3,
+        "compatible_tags": [
+          "wolf"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Aullido Mortal",
+          "type": "campo",
+          "ability_key": "dead_howling_ta",
+          "description": "TA habilitado para caballeros [wolf]. Costo: 3 CP. Efecto: 2 golpes de CE 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "hanging_bear",
+      "name": "Abrazo del Oso",
+      "art_tags": "1boy, muscular, brown bear armor, bear hug, lifting opponent",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "earth",
+      "description": "Compatible con caballeros [bear]. TA: gasta 4 CP del caballero. 1 golpe de CE 4. El objetivo tiene −1 CE durante su próximo turno.",
+      "tags": [
+        "bear",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "bear"
+        ],
+        "ta_effects": [
+          {
+            "type": "ce_boost",
+            "value": -1,
+            "turns": 2
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Abrazo del Oso",
+          "type": "campo",
+          "ability_key": "hanging_bear_ta",
+          "description": "TA habilitado para caballeros [bear]. Costo: 4 CP. Efecto: 1 golpe de CE 4. El objetivo tiene −1 CE durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "lionet_bomber",
+      "name": "Bombardero del León Menor",
+      "art_tags": "1boy, stocky, orange lion cub armor, diving punch, lion cub aura",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Compatible con caballeros [lionet]. TA: gasta 3 CP del caballero. 1 golpe de CE 3.",
+      "tags": [
+        "lionet",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 3,
+        "ta_cost": 3,
+        "compatible_tags": [
+          "lionet"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Bombardero del León Menor",
+          "type": "campo",
+          "ability_key": "lionet_bomber_ta",
+          "description": "TA habilitado para caballeros [lionet]. Costo: 3 CP. Efecto: 1 golpe de CE 3.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "eagle_toe_flash",
+      "name": "Destello del Águila",
+      "art_tags": "1girl, short red hair, silver mask, silver eagle armor, high kick, eagle of light",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Compatible con caballeros [aquila]. TA: gasta 4 CP del caballero. 1 golpe de CE 5.",
+      "tags": [
+        "aquila",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 5,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "aquila"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Destello del Águila",
+          "type": "campo",
+          "ability_key": "eagle_toe_flash_ta",
+          "description": "TA habilitado para caballeros [aquila]. Costo: 4 CP. Efecto: 1 golpe de CE 5.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "thunder_claw",
+      "name": "Garra del Trueno",
+      "art_tags": "1girl, green hair, silver mask, silver cobra armor, claw strike, lightning",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Compatible con caballeros [ophiuchus]. TA: gasta 4 CP del caballero. 2 golpes de CE 3.",
+      "tags": [
+        "ophiuchus",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 3,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "ophiuchus"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Garra del Trueno",
+          "type": "campo",
+          "ability_key": "thunder_claw_ta",
+          "description": "TA habilitado para caballeros [ophiuchus]. Costo: 4 CP. Efecto: 2 golpes de CE 3.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "marble_tripper",
+      "name": "Marble Tripper",
+      "art_tags": "1boy, long wavy blonde hair, silver lizard armor, whirlwind, opponent thrown into the air",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Compatible con caballeros [lizard]. TA: gasta 4 CP del caballero. 1 golpe de CE 4.",
+      "tags": [
+        "lizard",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "lizard"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Marble Tripper",
+          "type": "campo",
+          "ability_key": "marble_tripper_ta",
+          "description": "TA habilitado para caballeros [lizard]. Costo: 4 CP. Efecto: 1 golpe de CE 4.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "million_ghost_attack",
+      "name": "Ataque del Millón de Fantasmas",
+      "art_tags": "1boy, silver hunting dogs armor, countless afterimages, ghostly fists",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Compatible con caballeros [hunting_dogs]. TA: gasta 4 CP del caballero. 4 golpes de CE 1.",
+      "tags": [
+        "hunting_dogs",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 4,
+        "hit_ce": 1,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "hunting_dogs"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ataque del Millón de Fantasmas",
+          "type": "campo",
+          "ability_key": "million_ghost_attack_ta",
+          "description": "TA habilitado para caballeros [hunting_dogs]. Costo: 4 CP. Efecto: 4 golpes de CE 1.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "kaitos_spouting_bomber",
+      "name": "Kaitos Spouting Bomber",
+      "art_tags": "1boy, huge, bald, silver whale armor, throwing opponent upward, water spout",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Compatible con caballeros [whale]. TA: gasta 5 CP del caballero. 1 golpe de CE 5.",
+      "tags": [
+        "whale",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 5,
+        "ta_cost": 5,
+        "compatible_tags": [
+          "whale"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Kaitos Spouting Bomber",
+          "type": "campo",
+          "ability_key": "kaitos_spouting_bomber_ta",
+          "description": "TA habilitado para caballeros [whale]. Costo: 5 CP. Efecto: 1 golpe de CE 5.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "photia_roufihtra",
+      "name": "Torbellino de Fuego",
+      "art_tags": "1boy, turban, silver centaurus armor, spinning vortex of fire",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Compatible con caballeros [centaurus]. TA: gasta 4 CP del caballero. 1 golpe de CE 3. El objetivo sufre Quemadura (BRN, 1 daño por turno, 3 turnos).",
+      "tags": [
+        "centaurus",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 3,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "centaurus"
+        ],
+        "ta_effects": [
+          {
+            "type": "burn",
+            "value": 1,
+            "turns": 3
+          }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Torbellino de Fuego",
+          "type": "campo",
+          "ability_key": "photia_roufihtra_ta",
+          "description": "TA habilitado para caballeros [centaurus]. Costo: 4 CP. Efecto: 1 golpe de CE 3. El objetivo sufre Quemadura (BRN, 1 daño por turno, 3 turnos).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "saucer_attack",
+      "name": "Ataque del Platillo",
+      "art_tags": "1boy, long blonde hair, silver auriga armor, throwing spinning saucer discs",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "steel",
+      "description": "Compatible con caballeros [auriga]. TA: gasta 4 CP del caballero. 2 golpes de CE 2.",
+      "tags": [
+        "auriga",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 2,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "auriga"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ataque del Platillo",
+          "type": "campo",
+          "ability_key": "saucer_attack_ta",
+          "description": "TA habilitado para caballeros [auriga]. Costo: 4 CP. Efecto: 2 golpes de CE 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "cerberus_chain",
+      "name": "Cadenas de Cerbero",
+      "art_tags": "1boy, muscular, silver cerberus armor, swinging spiked iron balls on chains",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "dark",
+      "description": "Compatible con caballeros [cerberus]. TA: gasta 3 CP del caballero. 3 golpes de CE 1.",
+      "tags": [
+        "cerberus",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 3,
+        "hit_ce": 1,
+        "ta_cost": 3,
+        "compatible_tags": [
+          "cerberus"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Cadenas de Cerbero",
+          "type": "campo",
+          "ability_key": "cerberus_chain_ta",
+          "description": "TA habilitado para caballeros [cerberus]. Costo: 3 CP. Efecto: 3 golpes de CE 1.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "black_wing_shaft",
+      "name": "Ala Negra",
+      "art_tags": "1boy, silver crow armor, swarm of black crows diving, black feathers",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "wind",
+      "description": "Compatible con caballeros [crow]. TA: gasta 4 CP del caballero. 2 golpes de CE 2.",
+      "tags": [
+        "crow",
+        "technique"
+      ],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 2,
+        "ta_cost": 4,
+        "compatible_tags": [
+          "crow"
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ala Negra",
+          "type": "campo",
+          "ability_key": "black_wing_shaft_ta",
+          "description": "TA habilitado para caballeros [crow]. Costo: 4 CP. Efecto: 2 golpes de CE 2.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": [
+        "field_technique"
+      ],
       "collection_id": "santuario",
       "artist": null
     }

@@ -44,6 +44,205 @@
       "playable_zones": ["field_occasion"],
       "collection_id": "santuario",
       "artist": null
+    },
+    {
+      "code": "twelve_houses",
+      "name": "Las Doce Casas",
+      "art_tags": "no humans, scenery, greek temples on mountain stairs, twelve zodiac houses, sanctuary, sunset",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "light",
+      "description": "Mientras este escenario esté activo, tus caballeros [gold] tienen +1 AR (se renueva al inicio de tu turno).",
+      "abilities": [
+        {
+          "type": "campo",
+          "name": "Guardianes Dorados",
+          "ability_key": "twelve_houses_guardians",
+          "description": "Al entrar en juego, tus caballeros [gold] ganan +1 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "gold"
+                },
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "campo",
+          "name": "Guardianes Dorados (turno)",
+          "ability_key": "twelve_houses_guardians_turn",
+          "description": "Al inicio de tu turno, tus caballeros [gold] ganan +1 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "gold"
+                },
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "fire_clock",
+      "name": "Reloj de Fuego",
+      "art_tags": "no humans, giant clock of twelve flames, zodiac symbols, night sky, sanctuary",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "fire",
+      "description": "Mientras este escenario esté activo, tus caballeros [bronze] tienen +1 CE (se renueva al inicio de tu turno).",
+      "abilities": [
+        {
+          "type": "campo",
+          "name": "Contra el Tiempo",
+          "ability_key": "fire_clock_rush",
+          "description": "Al entrar en juego, tus caballeros [bronze] ganan +1 CE hasta tu próximo turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "bronze"
+                },
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "type": "campo",
+          "name": "Contra el Tiempo (turno)",
+          "ability_key": "fire_clock_rush_turn",
+          "description": "Al inicio de tu turno, tus caballeros [bronze] ganan +1 CE hasta tu próximo turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "bronze"
+                },
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "rozan_five_peaks",
+      "name": "Cinco Picos de Rozan",
+      "art_tags": "no humans, scenery, chinese mountains, giant waterfall, mist, five peaks",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Al inicio de tu turno, todos tus caballeros recuperan 1 CP.",
+      "abilities": [
+        {
+          "type": "campo",
+          "name": "Meditación en la Cascada",
+          "ability_key": "rozan_meditation",
+          "description": "Al inicio de tu turno, todos tus caballeros recuperan 1 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "target": "all_allies",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
+    },
+    {
+      "code": "east_siberia",
+      "name": "Siberia Oriental",
+      "art_tags": "no humans, scenery, frozen tundra, ice field, blizzard, sunken ship under the ice",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
+      "description": "Al inicio de tu turno, cada caballero rival Congelado (FRZ) recibe 1 LP de daño.",
+      "abilities": [
+        {
+          "type": "campo",
+          "name": "Hielo Eterno",
+          "ability_key": "east_siberia_eternal_ice",
+          "description": "Al inicio de tu turno, cada caballero rival con FRZ recibe 1 LP de daño.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_damage",
+                "target": "all_enemies",
+                "filter": {
+                  "status": "frozen"
+                },
+                "amount": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "santuario",
+      "artist": null
     }
   ]
 }
