@@ -8,6 +8,7 @@
     {
       "code": "jabu_unicorn",
       "name": "Jabu de Unicornio",
+      "art_tags": "1boy, male focus, short brown hair, white unicorn armor, horned helmet",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -91,6 +92,7 @@
     {
       "code": "nachi_wolf",
       "name": "Nachi de Lobo",
+      "art_tags": "1boy, male focus, short dark hair, white wolf armor",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -178,6 +180,7 @@
     {
       "code": "geki_bear",
       "name": "Geki de Oso",
+      "art_tags": "1boy, male focus, muscular, large build, short black hair, brown bear armor",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -200,16 +203,11 @@
           "type": "pasiva",
           "description": "Cuando este caballero realiza BA contra un enemigo, su CE se duplica.",
           "effects": {
-            "trigger": "DAMAGE_DEALT",
-            "conditions": [
-              {
-                "type": "target_is_enemy"
-              }
-            ],
+            "trigger": "CARD_PLAYED",
             "actions": [
               {
-                "type": "modify_attack",
-                "multiplier": 2,
+                "type": "apply_status",
+                "status": "ce_double",
                 "target": "self"
               }
             ]
@@ -217,7 +215,7 @@
         },
         {
           "name": "Match 1",
-          "type": "active",
+          "type": "activa",
           "description": "Consume 3 CP; el próximo BA ignora armadura.",
           "effects": {
             "trigger": "ACTIVE",
@@ -236,7 +234,7 @@
             "actions": [
               {
                 "type": "apply_status",
-                "status": "ignore_armor_next_attack",
+                "status": "ignore_armor",
                 "target": "self"
               }
             ]
@@ -254,6 +252,7 @@
     {
       "code": "lionet_ban",
       "name": "Ban de León Menor",
+      "art_tags": "1boy, male focus, stocky, short black hair, orange lion cub armor, claws",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -292,7 +291,7 @@
         },
         {
           "name": "Match 1",
-          "type": "active",
+          "type": "activa",
           "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura.",
           "effects": {
             "trigger": "ACTIVE",
@@ -311,7 +310,7 @@
             "actions": [
               {
                 "type": "apply_status",
-                "status": "ignore_armor_next_attack",
+                "status": "ignore_armor",
                 "target": "self"
               }
             ]
@@ -329,6 +328,7 @@
     {
       "code": "ichi_hydra",
       "name": "Ichi de Hidra",
+      "art_tags": "1boy, male focus, thin, ugly, pale, green hydra armor, claws",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -351,7 +351,12 @@
           "type": "pasiva",
           "description": "Los ataques BA aplican condición de veneno.",
           "effects": {
-            "trigger": "DAMAGE_DEALT",
+            "trigger": "BA_DEALT",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
             "actions": [
               {
                 "type": "apply_status",
@@ -365,7 +370,7 @@
         },
         {
           "name": "Match 1",
-          "type": "active",
+          "type": "activa",
           "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura.",
           "effects": {
             "trigger": "ACTIVE",
@@ -384,7 +389,7 @@
             "actions": [
               {
                 "type": "apply_status",
-                "status": "ignore_armor_next_attack",
+                "status": "ignore_armor",
                 "target": "self"
               }
             ]
@@ -402,6 +407,7 @@
     {
       "code": "june_chameleon",
       "name": "June de Camaleón",
+      "art_tags": "1girl, long blonde hair, mask, pink chameleon armor, whip",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -424,19 +430,19 @@
           "type": "pasiva",
           "description": "Cuando entra al campo de batalla cura 5 Lp a todos los aliados.",
           "effects": {
-            "trigger": "ENTER_BATTLEFIELD",
+            "trigger": "CARD_PLAYED",
             "actions": [
               {
                 "type": "heal",
                 "target": "all_allies",
-                "value": 5
+                "amount": 5
               }
             ]
           }
         },
         {
           "name": "Match 1",
-          "type": "active",
+          "type": "activa",
           "description": "Consume 3 CP; el próximo BA de este caballero ignora la armadura.",
           "effects": {
             "trigger": "ACTIVE",
@@ -455,7 +461,7 @@
             "actions": [
               {
                 "type": "apply_status",
-                "status": "ignore_armor_next_attack",
+                "status": "ignore_armor",
                 "target": "self"
               }
             ]

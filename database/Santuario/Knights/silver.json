@@ -8,6 +8,7 @@
     {
       "code": "marin_aquila",
       "name": "Aquila Marin",
+      "art_tags": "1girl, short red hair, silver mask, silver eagle armor",
       "rarity": "rare",
       "cost": 2,
       "generate": 3,
@@ -68,6 +69,7 @@
     {
       "code": "shaina_ophiuchus_v1",
       "name": "Shaina de Ofiuco",
+      "art_tags": "1girl, green hair, silver mask, silver cobra armor, lightning claws",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,

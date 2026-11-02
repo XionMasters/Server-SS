@@ -21,9 +21,9 @@ import { CombatModeResolvers } from './combat/CombatResolvers';
 import { CombatContext, findCardInPlayerField } from './combat/CombatTypes';
 import { GameState, CardInGameState, Player, resolveWinCondition } from './GameState';
 import {
-  StatusEffectType,
   deriveModeFromEffects,
   getBasicAttackCeMultiplier,
+  getBasicAttackExtraPlayerDamage,
   isModeEffectType,
   setModeEffect,
   attackerIgnoresBlockMode,
@@ -152,9 +152,8 @@ export class AttackRulesEngine {
     const defender = this._findCardInField(defenderPlayer, defenderCardId)!;
 
     // Determinación Interior: inmunidad total si ya tiene last_stand_active
+    // (applyDamage la aplica; aquí solo se refleja en el daño reportado)
     const hasLastStandActive = (defender.status_effects ?? []).some(e => e.type === 'last_stand_active');
-    // Determinación Interior: sobrevive letal la primera vez con last_stand
-    const hasLastStand = (defender.status_effects ?? []).some(e => e.type === 'last_stand');
 
     const combatCtx: CombatContext = {
       state: engineCtx.state,
@@ -178,45 +177,25 @@ export class AttackRulesEngine {
     const result = resolver(combatCtx, rng);
     engineCtx.state.rng_seed = rng.getSeed();
 
-    damageToCard = result.damageToCard;
     evaded       = result.evaded;
+    damageToCard = hasLastStandActive ? 0 : result.damageToCard;
 
     if (!evaded && !hasLastStandActive) {
-      const wouldDie = defender.current_health - damageToCard <= 0;
+      // applyDamage emite DAMAGE_DEALT → DAMAGE_LETHAL → killKnight si HP <= 0
+      // (y resuelve Determinación Interior si el defensor tiene last_stand)
+      applyDamage(engineCtx, defenderCardId, damageToCard, attackerCardId);
 
-      if (wouldDie && hasLastStand) {
-        // ── Determinación Interior ──────────────────────────────────────────
-        // El caballero absorbe el golpe letal pero sobrevive con 1 HP.
-        // Gana inmunidad total (last_stand_active) por 1 turno.
-        // Emite DAMAGE_DEALT pero NO letal ni muerte.
-        defender.current_health = 1;
-        defender.status_effects = [
-          ...(defender.status_effects ?? []).filter(e => e.type !== 'last_stand'),
-          { type: 'last_stand_active' as StatusEffectType, remaining_turns: 1 },
-        ];
-        engineCtx.bus.emit(
-          createEvent({
-            type: 'DAMAGE_DEALT',
-            playerNumber: defender.player_number,
-            sourceCardId: attackerCardId,
-            targetCardId: defenderCardId,
-            origin: 'player',
-            payload: { amount: damageToCard, instanceId: defenderCardId },
-          }),
-        );
-        // No hay DIP por last_stand
-      } else {
-        // ── Camino normal ───────────────────────────────────────────────────
-        // applyDamage emite DAMAGE_DEALT → DAMAGE_LETHAL → killKnight si HP <= 0
-        applyDamage(engineCtx, defenderCardId, damageToCard, attackerCardId);
-
-        // Si la carta murió (no está en campo), genera 1 DIP al jugador
-        const defenderStillAlive = this._findCardInField(defenderPlayer, defenderCardId);
-        if (!defenderStillAlive) {
-          damageToPlayer = 1;
-        }
+      // Si la carta murió (no está en campo), genera 1 DIP al jugador
+      const defenderStillAlive = this._findCardInField(defenderPlayer, defenderCardId);
+      if (!defenderStillAlive) {
+        damageToPlayer = 1;
       }
     }
+  }
+
+  // unicorn_horn: cada BA que conecta causa DIP adicional
+  if (!evaded) {
+    damageToPlayer += getBasicAttackExtraPlayerDamage(attacker.status_effects ?? []);
   }
 
   // Evento de ataque conectado: distinto de DAMAGE_DEALT.

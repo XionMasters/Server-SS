@@ -8,6 +8,7 @@
     {
       "code": "seiya_pegasus_v1",
       "name": "Seiya de Pegaso",
+      "art_tags": "1boy, male focus, short brown hair, white pegasus armor, red details, tiara",
       "rarity": "epic",
       "cost": 0,
       "generate": 2,
@@ -78,6 +79,7 @@
     {
       "code": "shiryu_dragon_v1",
       "name": "Shiryu de Dragón",
+      "art_tags": "1boy, male focus, long black hair, green dragon armor, round dragon shield",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -99,6 +101,7 @@
           "name": "Dragon Shield",
           "type": "pasiva",
           "description": "Cuando entra en Modo Defensa, gana inmunidad a Técnicas de Nivel 1.",
+          "_pending": "Las técnicas no tienen nivel en card_techniques: el marker dragon_shield aún no tiene efecto.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
@@ -149,6 +152,7 @@
     {
       "code": "hyoga_cygnus_v1",
       "name": "Hyoga de Cisne",
+      "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, ice",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -172,6 +176,7 @@
           "description": "Cuando este caballero recibe un BA, lanza una moneda. Si cara, el atacante queda con condición FRZ.",
           "effects": {
             "trigger": "BA_RECEIVED",
+            "conditions": [{ "type": "event_source_is_self" }],
             "actions": [
               {
                 "type": "coin_flip_then",
@@ -180,7 +185,7 @@
                     "type": "apply_status",
                     "status": "frozen",
                     "target": "target",
-                    "duration": 1
+                    "duration": 2
                   }
                 ],
                 "on_fail": []
@@ -224,6 +229,7 @@
     {
       "code": "shun_andromeda_v1",
       "name": "Shun de Andrómeda",
+      "art_tags": "1boy, male focus, green hair, gentle expression, pink andromeda armor, chains",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -249,13 +255,15 @@
             "trigger": "ACTIVE",
             "cost": [{ "type": "cosmos", "amount": 2 }],
             "conditions": [{ "type": "cosmos_min", "amount": 2 }],
-            "selection": { "zone": "field_opponent", "amount": 1 },
             "actions": [
               {
-                "type": "apply_status",
-                "status": "frozen",
-                "target": "selected",
-                "duration": 1
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "destination": "field",
+                "on_select": [
+                  { "type": "apply_status", "status": "frozen", "target": "selected", "duration": 2 }
+                ]
               }
             ]
           }
@@ -266,7 +274,7 @@
           "type": "pasiva",
           "effects": {
             "trigger": "BA_RECEIVED",
-            "conditions": [{ "type": "target_ce_below", "amount": 7 }],
+            "conditions": [{ "type": "event_source_is_self" }, { "type": "target_ce_below", "amount": 7 }],
             "actions": [
               {
                 "type": "apply_damage",
@@ -286,6 +294,7 @@
     {
       "code": "shun_andromeda_v2",
       "name": "Shun de Andrómeda",
+      "art_tags": "1boy, male focus, green hair, pink andromeda armor, chains, nebula chain defense",
       "rarity": "epic",
       "cost": 0,
       "generate": 2,
@@ -311,13 +320,15 @@
             "trigger": "ACTIVE",
             "cost": [{ "type": "cosmos", "amount": 4 }],
             "conditions": [{ "type": "cosmos_min", "amount": 4 }],
-            "selection": { "zone": "field_opponent", "amount": 1 },
             "actions": [
               {
-                "type": "apply_status",
-                "status": "paralyzed",
-                "target": "selected",
-                "duration": 1
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "destination": "field",
+                "on_select": [
+                  { "type": "apply_status", "status": "paralyzed", "target": "selected", "duration": 2 }
+                ]
               }
             ]
           }
@@ -347,6 +358,7 @@
     {
       "code": "shun_andromeda_v3",
       "name": "Shun de Andrómeda",
+      "art_tags": "1boy, male focus, green hair, pink andromeda armor, chains, nebula storm, golden aura",
       "rarity": "legendary",
       "cost": 0,
       "generate": 2,
@@ -412,6 +424,7 @@
     {
       "code": "ikki_phoenix_v1",
       "name": "Ikki de Fénix",
+      "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, flames",
       "rarity": "epic",
       "cost": 0,
       "generate": 0,
@@ -492,6 +505,7 @@
     {
       "code": "seiya_pegasus_v2",
       "name": "Seiya de Pegaso",
+      "art_tags": "1boy, male focus, short brown hair, white pegasus armor, blue details, shoulder pads",
       "rarity": "epic",
       "cost": 0,
       "generate": 2,
@@ -565,6 +579,7 @@
     {
       "code": "seiya_pegasus_v3",
       "name": "Seiya de Pegaso",
+      "art_tags": "1boy, male focus, short brown hair, white pegasus armor, golden glowing aura, seventh sense",
       "rarity": "legendary",
       "cost": 0,
       "generate": 2,
@@ -642,6 +657,7 @@
     {
       "code": "shiryu_dragon_v2",
       "name": "Shiryu de Dragón",
+      "art_tags": "1boy, male focus, long black hair, green dragon armor, dragon shield, fighting stance",
       "rarity": "epic",
       "cost": 0,
       "generate": 2,
@@ -663,6 +679,7 @@
           "name": "Dragon Shield",
           "type": "pasiva",
           "description": "Cuando entra en Modo Defensa, gana inmunidad a Técnicas de Nivel 1.",
+          "_pending": "Las técnicas no tienen nivel en card_techniques: el marker dragon_shield aún no tiene efecto.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "actions": [
@@ -710,6 +727,7 @@
     {
       "code": "hyoga_cygnus_v2",
       "name": "Hyoga de Cisne",
+      "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, ice crystals",
       "rarity": "epic",
       "cost": 0,
       "generate": 2,
@@ -733,6 +751,7 @@
           "description": "Cuando este caballero produce un BA, lanza una moneda. Si cara, el objetivo queda con condición FRZ.",
           "effects": {
             "trigger": "BA_DEALT",
+            "conditions": [{ "type": "event_source_is_self" }],
             "actions": [
               {
                 "type": "coin_flip_then",
@@ -741,7 +760,7 @@
                     "type": "apply_status",
                     "status": "frozen",
                     "target": "target",
-                    "duration": 1
+                    "duration": 2
                   }
                 ],
                 "on_fail": []
@@ -778,6 +797,7 @@
     {
       "code": "hyoga_cygnus_v3",
       "name": "Hyoga de Cisne",
+      "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, absolute zero, golden aura",
       "rarity": "legendary",
       "cost": 0,
       "generate": 2,
@@ -859,6 +879,7 @@
     {
       "code": "ikki_phoenix_v2",
       "name": "Ikki de Fénix",
+      "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, phoenix feather",
       "rarity": "epic",
       "cost": 0,
       "generate": 0,
@@ -927,6 +948,7 @@
     {
       "code": "ikki_phoenix_v3",
       "name": "Ikki de Fénix",
+      "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, phoenix wings of fire",
       "rarity": "legendary",
       "cost": 0,
       "generate": 0,
@@ -1016,6 +1038,7 @@
     {
       "code": "shiryu_dragon_v3",
       "name": "Shiryu de Dragón",
+      "art_tags": "1boy, male focus, long black hair, shirtless, dragon tattoo on back, green dragon armor, furious",
       "rarity": "legendary",
       "cost": 0,
       "generate": 2,

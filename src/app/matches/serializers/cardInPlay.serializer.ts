@@ -61,6 +61,17 @@ export function serializeCardInPlay(cardInPlay: any) {
     };
   }
 
+  // Habilidades (si se cargaron): ActionResolver las evalúa para ofrecer las activas
+  if (Array.isArray(card?.card_abilities)) {
+    cardData.abilities = card.card_abilities.map((a: any) => ({
+      name: a.name,
+      ability_key: a.ability_key ?? null,
+      type: a.type,
+      description: a.description ?? '',
+      effects: a.effects,
+    }));
+  }
+
   if (technique) {
     cardData.card_technique = {
       hit_count: technique.hit_count || 1,

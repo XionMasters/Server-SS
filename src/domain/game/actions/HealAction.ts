@@ -5,8 +5,7 @@
  *
  * Emite: HEAL_RECEIVED
  *
- * Nota: no hay límite de HP máximo implementado aún.
- * Cuando se añada base_health a CardInGameState, agregar el cap aquí.
+ * La curación no supera el HP máximo (max_health + hp_boost activos).
  *
  * 100% puro: sin await, sin BD.
  */
@@ -14,6 +13,7 @@
 import type { EngineContext } from '../EngineContext';
 import type { CardInGameState } from '../GameState';
 import { createEvent } from '../events/GameEvents';
+import { computeHpBonus } from '../StatusEffects';
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -51,7 +51,10 @@ export function heal(
     throw new Error(`[heal] Carta "${targetCardId}" no encontrada en campo`);
   }
 
-  const actualHeal = Math.max(0, amount);
+  const maxHealth = typeof card.max_health === 'number'
+    ? card.max_health + computeHpBonus(card.status_effects ?? [])
+    : Infinity;
+  const actualHeal = Math.max(0, Math.min(amount, maxHealth - card.current_health));
   card.current_health += actualHeal;
 
   ctx.bus.emit(

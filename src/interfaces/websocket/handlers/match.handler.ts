@@ -18,9 +18,13 @@ export function createMatchHandlers(
   const refreshAdminStats = () => broadcastAdminStats(presenceService.getPrimarySocketsMap());
 
   // Cada jugador recibe su propia perspectiva: la mano del rival va oculta
-  const broadcastMatchUpdate = async (matchId: string, lastAction: Record<string, any> | null = null): Promise<void> => {
+  const broadcastMatchUpdate = async (
+    matchId: string,
+    lastAction: Record<string, any> | null = null,
+    engineEvents: any[] = [],
+  ): Promise<void> => {
     try {
-      const events = await matchesCoordinator.buildMatchUpdateEvents(matchId, lastAction);
+      const events = await matchesCoordinator.buildMatchUpdateEvents(matchId, lastAction, engineEvents);
       if (events.length === 0) {
         console.error('❌ Error construyendo estado para broadcast:', matchId);
         return;
@@ -139,7 +143,11 @@ export function createMatchHandlers(
         return;
       }
 
-      await broadcastMatchUpdate(match_id, { type: 'resolve_selection', selection_id, chosen_card_id });
+      await broadcastMatchUpdate(
+        match_id,
+        { type: 'resolve_selection', selection_id, chosen_card_id },
+        result.events ?? [],
+      );
     } catch (error: any) {
       console.error('Error en resolve_selection:', error);
       presenceService.sendToSocket(ws, 'error', {

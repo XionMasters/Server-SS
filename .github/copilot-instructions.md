@@ -308,13 +308,12 @@ npm start         # Producción desde dist/server.js
 Scripts de datos frecuentes:
 
 ```bash
-npm run generate:cards
+npm run seed:cards       # carga database/**/*.json (fuente única de cartas)
+npm run seed:cards:dry   # valida sin escribir
 npm run generate:packs
-npm run generate:all
 ```
 
-El script principal de cartas es
-[`src/scripts/generateAllCards.ts`](../src/scripts/generateAllCards.ts).
+Las cartas solo se definen en `database/**/*.json`.
 Revisar variables `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST` y `DB_PORT`
 antes de ejecutar scripts que escriban en PostgreSQL.
 

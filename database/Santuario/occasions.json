@@ -5,6 +5,7 @@
     {
       "code": "athena_blessing",
       "name": "Bendición de Athena",
+      "art_tags": "1girl, long purple hair, white dress, golden staff, healing light",
       "rarity": "rare",
       "cost": 2,
       "faction": "Athena",
@@ -39,6 +40,7 @@
     {
       "code": "resurrection_call",
       "name": "Llamada de la Resurrección",
+      "art_tags": "no humans, scenery, hill of the dead, souls rising, purple sky",
       "rarity": "epic",
       "cost": 3,
       "faction": "Athena",
@@ -80,6 +82,7 @@
     {
       "code": "cosmic_offering",
       "name": "Ofrenda Cósmica",
+      "art_tags": "no humans, glowing cosmic energy, stars, open hands of light",
       "rarity": "rare",
       "cost": 1,
       "faction": "Athena",
@@ -122,6 +125,7 @@
     {
       "code": "blood_price",
       "name": "Precio de Sangre",
+      "art_tags": "no humans, blood drops, red aura, dark",
       "rarity": "common",
       "cost": 0,
       "generate": 0,

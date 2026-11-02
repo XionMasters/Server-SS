@@ -7,6 +7,7 @@
     {
       "code": "pegasus_meteor_fist",
       "name": "Meteoros de Pegaso",
+      "art_tags": "1boy, male focus, short brown hair, white pegasus armor, punching, meteors of light",
       "rarity": "rare",
       "cost": 1,
       "generate": 0,
@@ -42,6 +43,7 @@
     {
       "code": "sagittarius_arrow",
       "name": "Sagittarius Arrow",
+      "art_tags": "1boy, male focus, gold armor, sagittarius gold cloth, golden bow, shooting golden arrow",
       "rarity": "epic",
       "cost": 2,
       "generate": 0,
@@ -78,6 +80,7 @@
     {
       "code": "stardust_revolution",
       "name": "Stardust Revolution",
+      "art_tags": "1boy, male focus, long purple hair, gold armor, aries gold cloth, stardust, shining stars",
       "rarity": "rare",
       "cost": 1,
       "generate": 0,
@@ -116,6 +119,7 @@
     {
       "code": "seki_shiki_meikai_ha",
       "name": "Seki Shiki Meikai Ha",
+      "art_tags": "1boy, male focus, short spiky blue hair, evil grin, gold armor, cancer gold cloth, souls, underworld portal",
       "rarity": "rare",
       "cost": 3,
       "generate": 0,

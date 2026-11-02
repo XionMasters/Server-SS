@@ -20,7 +20,7 @@
  *     → reemplaza el PASSIVE_EFFECT_MAP anterior
  */
 
-import type { GameState, PendingSelection } from '../GameState';
+import { resolveWinCondition, type GameState, type PendingSelection } from '../GameState';
 import type { GameEvent } from '../events/GameEvents';
 import type { AbilityDefinition, CostDefinition } from './AbilityDefinition';
 import { ConditionRegistry, type ConditionContext } from '../conditions/ConditionRegistry';
@@ -100,17 +100,29 @@ function buildConditionContext(
         player: {
             hand: (player as any).hand ?? [],
             field_knights: player.field_knights,
+            graveyard: (player as any).graveyard ?? [],
             life: (player as any).life,
             cosmos: (player as any).cosmos,
         },
         opponent: {
             hand: (opponent as any).hand ?? [],
             field_knights: opponent.field_knights,
+            graveyard: (opponent as any).graveyard ?? [],
             life: (opponent as any).life,
             cosmos: (opponent as any).cosmos,
         },
+        playerNumber,
         event,
     };
+}
+
+/**
+ * Un coste de descarte se paga directamente si el cliente indicó una carta de su mano;
+ * si no (o si el objetivo indicado es otra carta, p. ej. un caballero), se pide selección.
+ */
+function directDiscardCardId(hand: any[], event: GameEvent): string | null {
+    const id = event.targetCardId;
+    return id && hand.some((c: any) => c.instance_id === id) ? id : null;
 }
 
 function validateCosts(
@@ -136,19 +148,10 @@ function validateCosts(
                     return { valid: false, error: `PCP insuficiente. Requiere ${required} de cosmos del jugador` };
                 }
             }
-        if (cost.type === 'discard') {
-            if (event.targetCardId) {
-                // Camino directo: el cliente ya indicó la carta — verificar que está en mano
-                const inHand = (ctx.player.hand ?? []).some((c: any) => c.instance_id === event.targetCardId);
-                if (!inHand) {
-                    return { valid: false, error: 'La carta a descartar no está en tu mano' };
-                }
-            } else {
-                // Camino interactivo: se pedirá selección — solo verificar que haya cartas en mano
-                if ((ctx.player.hand ?? []).length === 0) {
-                    return { valid: false, error: 'Necesitas al menos una carta en mano para descartar' };
-                }
-            }
+        // Descarte: en el camino directo la carta ya está validada (está en la mano);
+        // en el interactivo se pedirá selección, así que basta con tener cartas en mano.
+        if (cost.type === 'discard' && (ctx.player.hand ?? []).length === 0) {
+            return { valid: false, error: 'Necesitas al menos una carta en mano para descartar' };
         }
     }
     return { valid: true };
@@ -181,8 +184,7 @@ function applyCosts(
 
     for (const cost of (def.cost ?? [])) {
         if (cost.type === 'cosmos') {
-            const card = player.field_knights.find(c => c.instance_id === sourceCardId)
-                      ?? (player.passive_watchers ?? []).find((c: any) => c.instance_id === sourceCardId);
+            const card = findSourceCard(state, player, sourceCardId);
             if (!card) {
                 throw new Error(
                     `[AbilityEngine] Carta fuente "${sourceCardId}" no encontrada al aplicar costo de cosmo`,
@@ -191,25 +193,28 @@ function applyCosts(
             (card as any).current_cosmos -= (cost.amount ?? 0);
         }
         if (cost.type === 'discard') {
-            if (event.targetCardId) {
-                // Camino directo: descartar la carta indicada
-                (player as any).hand = ((player as any).hand ?? []).filter(
-                    (c: any) => c.instance_id !== event.targetCardId,
-                );
-                costExtras.discard_card_id = event.targetCardId;
+            const discardId = directDiscardCardId(player.hand ?? [], event);
+            if (discardId) {
+                // Camino directo: la carta indicada va a los cositos (igual que en el interactivo)
+                const idx = player.hand.findIndex((c: any) => c.instance_id === discardId);
+                player.hand.splice(idx, 1);
+                player.hand.forEach((c: any, i: number) => { c.position = i; });
+                player.costos_count += 1;
+                costExtras.discard_card_id = discardId;
             } else {
                 // Camino interactivo: señalizar que se necesita selección del jugador
                 costExtras.needs_discard_selection = true;
             }
         }
-            if (cost.type === 'life') {
-                const amount = Math.max(0, cost.amount ?? 0);
-                player.life = Math.max(0, player.life - amount);
-            }
-            if (cost.type === 'player_cosmos') {
-                const amount = Math.max(0, cost.amount ?? 0);
-                player.cosmos = Math.max(0, player.cosmos - amount);
-            }
+        if (cost.type === 'life') {
+            const amount = Math.max(0, cost.amount ?? 0);
+            player.life = Math.max(0, player.life - amount);
+            resolveWinCondition(state);
+        }
+        if (cost.type === 'player_cosmos') {
+            const amount = Math.max(0, cost.amount ?? 0);
+            player.cosmos = Math.max(0, player.cosmos - amount);
+        }
     }
     return { costExtras };
 }
@@ -306,6 +311,8 @@ export const AbilityEngine = {
                 ],
                 source_card_id: sourceCardId,
                 source_player: playerNumber,
+                // Conservar el objetivo elegido para las acciones con target 'target'
+                ...(event.targetCardId ? { target_card_id: event.targetCardId } : {}),
                 created_at: Date.now(),
             };
             ctx.state.pending_selection = pendingSelection;

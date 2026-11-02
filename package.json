@@ -8,9 +8,8 @@
     "start": "node dist/server.js",
     "test": "jest",
     "audit:user-cards": "ts-node scripts/audit-user-cards.ts",
-    "generate:cards": "ts-node src/scripts/generateAllCards.ts",
-    "import:black": "ts-node src/scripts/import-black-cards.ts",
-    "import:legendary": "ts-node src/scripts/import-legendary-cards.ts",
+    "seed:cards": "ts-node scripts/loadFromJson.ts",
+    "seed:cards:dry": "ts-node scripts/loadFromJson.ts --dry-run",
     "generate:packs": "ts-node src/scripts/generatePacks.ts",
     "generate:images": "ts-node src/scripts/generateCardsWithAI.ts",
     "generate:images:no-ai": "ts-node src/scripts/generateCardsWithAI.ts --no-ai",
@@ -22,8 +21,7 @@
     "seed:santuario:omega-tags": "ts-node scripts/loadFromJson.ts --file database/Omega/Knight/bronze.json",
     "seed:ta:all": "npm run db:migrate:card-techniques ; npm run seed:santuario:techniques ; npm run seed:santuario:golds ; npm run seed:santuario:omega-tags",
     "migrate:status-sources": "ts-node scripts/migrateStatusEffectSources.ts",
-    "migrate:status-sources:dry": "ts-node scripts/migrateStatusEffectSources.ts --dry-run",
-    "generate:all": "npm run generate:cards && npm run generate:packs && npm run generate:images"
+    "migrate:status-sources:dry": "ts-node scripts/migrateStatusEffectSources.ts --dry-run"
   },
   "keywords": [],
   "author": "",

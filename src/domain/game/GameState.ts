@@ -64,6 +64,11 @@ export interface PendingSelection {
   source_card_id: string;
   /** Jugador que jugó la carta que generó la selección. */
   source_player: 1 | 2;
+  /**
+   * Objetivo indicado por el cliente al activar la habilidad (event.targetCardId).
+   * Se restaura al ejecutar on_select para que el target 'target' siga resolviendo.
+   */
+  target_card_id?: string;
   /** Timestamp de creación. */
   created_at: number;
   /**

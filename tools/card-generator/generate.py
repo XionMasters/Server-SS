@@ -47,6 +47,9 @@ DATABASE_DIR = BASE_DIR.parents[1] / "database"   # Server-SS/database/
 # ─────────────────────────────────────────────────────────────────────────────
 SAGA_RARITY_ICON_PREFIX = {
     "Santuario": "santuary",
+    "Omega":     "santuary",
+    "Poseidon":  "trident",
+    "BlackSaints": "hades",
     # Agregar más sagas aquí
 }
 RARITY_ICON_SUFFIX = {

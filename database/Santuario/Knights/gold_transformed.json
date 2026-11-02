@@ -8,6 +8,7 @@
     {
       "code": "virgo_shun_v1",
       "name": "Virgo Shun",
+      "art_tags": "1boy, male focus, green hair, gentle expression, gold armor, virgo gold cloth, chains",
       "rarity": "legendary",
       "cost": 0,
       "generate": 0,
@@ -58,7 +59,8 @@
           "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
           "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic basada en AR enemiga máxima. No implementado. Trigger ficticio para no dispararse.",
           "effects": {
-            "trigger": "NONE"
+            "trigger": "NONE",
+            "actions": []
           }
         }
       ],
@@ -71,6 +73,7 @@
     {
       "code": "virgo_shun_v2",
       "name": "Virgo Shun",
+      "art_tags": "1boy, male focus, green hair, determined expression, gold armor, virgo gold cloth, chains, barrier",
       "rarity": "legendary",
       "cost": 0,
       "generate": 0,
@@ -120,7 +123,8 @@
           "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
           "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic. No implementado.",
           "effects": {
-            "trigger": "NONE"
+            "trigger": "NONE",
+            "actions": []
           }
         }
       ],
@@ -133,6 +137,7 @@
     {
       "code": "virgo_shun_v3",
       "name": "Virgo Shun",
+      "art_tags": "1boy, male focus, green hair, serene expression, gold armor, virgo gold cloth, chains, lotus, golden aura",
       "rarity": "legendary",
       "cost": 0,
       "generate": 0,
@@ -182,7 +187,8 @@
           "description": "Cuando el portador tiene menos de 5 PV, aumenta su CE tanto como la AR del rival con mayor armadura en el campo.",
           "_pending": "Requiere trigger HP_THRESHOLD + acción ce_boost_dynamic. No implementado.",
           "effects": {
-            "trigger": "NONE"
+            "trigger": "NONE",
+            "actions": []
           }
         }
       ],

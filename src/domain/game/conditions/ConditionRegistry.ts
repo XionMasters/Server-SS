@@ -22,6 +22,8 @@
  *   event_player_damage_min → valida payload.damage_to_player >= amount
  *   event_target_health_pct_below → valida payload.target_health_pct < percent
  *   event_death_reason_not → verdadero si payload.death_reason !== value
+ *   event_player_is_self → el evento es del jugador dueño de la carta (ej: TURN_END propio)
+ *   yomotsu_not_empty → el jugador tiene al menos 1 carta en su yomotsu
  *
  * Para añadir una nueva condición:
  *   ConditionRegistry.register('nombre', fn);
@@ -55,6 +57,8 @@ export interface CardRef {
 export interface PlayerRef {
   hand: CardRef[];
   field_knights: CardRef[];
+  /** Yomotsu del jugador. Ausente en contextos simplificados. */
+  graveyard?: CardRef[];
   life?: number;
   cosmos?: number;
 }
@@ -68,6 +72,8 @@ export interface ConditionContext {
   opponent?: PlayerRef;
   /** Carta objetivo ya resuelta. Disponible cuando el cliente envió un targetId. */
   targetCard?: CardRef;
+  /** Jugador dueño de la carta fuente. */
+  playerNumber?: 1 | 2;
   event: GameEvent;
 }
 
@@ -159,6 +165,17 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
     if (!Number.isFinite(targetPct) || !Number.isFinite(threshold)) return false;
     return targetPct < threshold;
   },
+
+  /**
+   * Verdadero si el evento pertenece al dueño de la carta.
+   * Ej: TURN_END reacciona al final de ambos turnos; con esta condición, solo al del dueño.
+   */
+  event_player_is_self: (_cond, ctx) =>
+    ctx.playerNumber !== undefined && ctx.event.playerNumber === ctx.playerNumber,
+
+  /** Verdadero si el yomotsu del jugador tiene al menos una carta. */
+  yomotsu_not_empty: (_cond, ctx) =>
+    (ctx.player.graveyard?.length ?? 0) > 0,
 
   /** Excluye una causa de muerte del evento (ej: 'sacrifice'). */
   event_death_reason_not: (cond, ctx) => {
@@ -299,5 +316,9 @@ export const ConditionRegistry = {
 
   register(name: string, fn: ConditionFn): void {
     CONDITION_REGISTRY[name] = fn;
+  },
+
+  has(name: string): boolean {
+    return name in CONDITION_REGISTRY;
   },
 };

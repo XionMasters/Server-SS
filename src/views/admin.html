@@ -325,7 +325,11 @@
                             <div class="catalog-item"><code>ar_boost</code><span>AR +value (acumulable)</span></div>
                             <div class="catalog-item"><code>hp_boost</code><span>HP máx +value</span></div>
                             <div class="catalog-item"><code>ignore_armor</code><span>Próximo BA ignora AR</span></div>
-                            <div class="catalog-item"><code>ce_double</code><span>Próximo BA duplica CE</span></div>
+                            <div class="catalog-item"><code>ce_double</code><span>Los BA duplican CE mientras dure (no se consume)</span></div>
+                            <div class="catalog-item"><code>unicorn_horn</code><span>Pasiva: cada BA que conecta causa 1 DIP extra</span></div>
+                            <div class="catalog-item"><code>pierce_evasion</code><span>Pasiva: todos los BA ignoran Modo Evasión</span></div>
+                            <div class="catalog-item"><code>immune_negative</code><span>Inmune a burn, poison, frozen y paralyzed (y los limpia)</span></div>
+                            <div class="catalog-item"><code>divine_frenzy_form</code><span>Marker de forma transformada (para no_status)</span></div>
                             <div class="catalog-item"><code>burn</code><span>BRN: daño/turno con countdown</span></div>
                             <div class="catalog-item"><code>poison</code><span>Veneno: daño/turno permanente</span></div>
                             <div class="catalog-item"><code>burn_immune</code><span>Pasiva: inmune al tick de burn</span></div>
@@ -375,6 +379,8 @@
                             <div class="catalog-item"><code>event_target_health_pct_below</code><span>percent:N — payload.target_health_pct &lt; N</span></div>
                             <div class="catalog-item"><code>event_death_reason_not</code><span>value:'sacrifice'|'damage'|'effect' — excluye causa de muerte</span></div>
                             <div class="catalog-item"><code>event_target_is_self</code><span>Sin parámetros — event.targetCardId == portador (ej: KNIGHT_DIED de sí mismo)</span></div>
+                            <div class="catalog-item"><code>event_player_is_self</code><span>Sin parámetros — el evento es del dueño (ej: TURN_END solo del turno propio)</span></div>
+                            <div class="catalog-item"><code>yomotsu_not_empty</code><span>Sin parámetros — el jugador tiene cartas en su yomotsu</span></div>
                             <div class="catalog-item"><code>player_lp_below</code><span>amount:N — LP del jugador ≤ N</span></div>
                             <div class="catalog-item"><code>field_has_card_code</code><span>code:"code" — un aliado en campo tiene ese código</span></div>
                             <div class="catalog-item"><code>field_has_tag</code><span>tag:"tag" — un aliado en campo tiene ese tag</span></div>

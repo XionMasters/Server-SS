@@ -192,4 +192,8 @@ export const TargetResolver = {
   register(name: string, fn: TargetFn): void {
     TARGET_REGISTRY[name] = fn;
   },
+
+  has(name: string): boolean {
+    return name in TARGET_REGISTRY;
+  },
 };

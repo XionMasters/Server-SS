@@ -8,16 +8,27 @@
     {
       "code": "thetis_mermaid",
       "name": "Thetis de Sirena",
+      "art_tags": "1girl, long blonde hair, golden scale armor, loyal expression",
       "rarity": "epic",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/1.webp",
-      "art_prompt": "Thetis, Mermaid Marina, golden Mermaid Scale, blonde hair, loyal to Poseidon. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "Thetis, the Mermaid Marina, a graceful young woman with long flowing blonde hair and blue eyes, wearing her distinctive Mermaid Scale: fitted rose-red and pink segmented aquatic armor with the unmistakable mermaid-inspired helmet and fin-like details, not a generic gold armor. She stands poised as Poseidon's loyal messenger in the grand Undersea Temple, one hand raised as if summoning coral restraints, elegant but battle-ready, blue underwater light and drifting bubbles. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Marina leal a Poseidón, salvada de la muerte por Julian Solo.",
-      "tags": ["thetis", "mariner"],
-      "stats": { "attack": 3, "defense": 3, "health": 8, "cosmos": 8, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "thetis",
+        "mariner"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Trampa de Coral",
@@ -25,10 +36,34 @@
           "description": "Paga 3 CP; inmoviliza a un caballero rival: no podrá atacar en su próximo turno.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "cosmos", "amount": 3 }],
-            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
             "actions": [
-              { "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "frozen", "target": "selected", "duration": 2 }] }
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_status",
+                    "status": "frozen",
+                    "target": "selected",
+                    "duration": 2
+                  }
+                ]
+              }
             ]
           }
         },
@@ -38,50 +73,90 @@
           "description": "Al entrar en juego, si controlas un caballero [julian] o [poseidon], cura 2 LP a todos tus aliados.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }, { "type": "field_has_tag", "tag": "poseidon" }],
-            "actions": [{ "type": "heal", "amount": 2, "target": "all_allies" }]
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "field_has_tag",
+                "tag": "poseidon"
+              }
+            ],
+            "actions": [
+              {
+                "type": "heal",
+                "amount": 2,
+                "target": "all_allies"
+              }
+            ]
           }
         }
       ],
       "max_copies": 2,
       "unique": true,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_soldier",
       "name": "Soldado Marino",
+      "art_tags": "1boy, male focus, soldier, scale armor, helmet, holding trident",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/2.webp",
-      "art_prompt": "A Marina foot soldier of the Undersea Temple in the generic soldier armor from the anime. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous rank-and-file Marina soldier of Poseidon's army, not a named General. A sturdy male foot soldier in the simple, standardized low-ranking Mariner Scale seen in the anime: compact blue-toned segmented armor, basic helmet, modest shoulder and chest protection, clearly less elaborate than a General's Scale. He stands guard in a corridor of the Undersea Temple, holding a short marine weapon, disciplined and alert. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Infantería del Templo Submarino.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 2, "defense": 2, "health": 5, "cosmos": 4, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 5,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_spearman",
       "name": "Lancero Marino",
+      "art_tags": "1boy, male focus, soldier, scale armor, helmet, charging with spear",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/3.webp",
-      "art_prompt": "A Marina soldier charging with a spear, generic Undersea Temple soldier armor. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male foot soldier of Poseidon's Marina army, wearing the same simple standardized low-ranking blue Mariner Scale and basic helmet as the other ordinary soldiers, not an ornate General Scale. He lunges forward with a long coral-tipped spear, water rushing around his legs in the Undersea Temple passage. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Soldado armado con lanza de coral.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 3, "defense": 1, "health": 4, "cosmos": 4, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 1,
+        "health": 4,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Embestida",
@@ -89,50 +164,88 @@
           "description": "Al entrar en juego, gana +1 CE hasta tu próximo turno.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }],
-            "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "self", "value": 1, "duration": 1 }]
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 1,
+                "duration": 1
+              }
+            ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_shieldbearer",
       "name": "Escudero del Abismo",
+      "art_tags": "1boy, male focus, soldier, scale armor, helmet, large shield",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "earth",
       "image_url": "mariners/4.webp",
-      "art_prompt": "A Marina soldier with a large shield guarding a temple gate. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male Marina foot soldier wearing the modest standardized low-ranking blue Scale armor and simple helmet of Poseidon's ordinary troops, not a General's ornate armor. He braces behind a broad oval nacre-like shield at the entrance to an underwater temple gate, defensive stance, streams of bubbles and blue stone architecture. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Protege las puertas de los pilares con su escudo de nácar.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 1, "defense": 4, "health": 6, "cosmos": 3, "can_defend": true, "defense_reduction": 0.6 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 1,
+        "defense": 4,
+        "health": 6,
+        "cosmos": 3,
+        "can_defend": true,
+        "defense_reduction": 0.6
+      },
       "abilities": [],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_scout",
       "name": "Explorador de las Corrientes",
+      "art_tags": "1boy, male focus, soldier, light scale armor, crouching, looking around",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "wind",
       "image_url": "mariners/5.webp",
-      "art_prompt": "A Marina soldier scouting the underwater sanctuary corridors. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous agile Marina scout, a lean male soldier in the ordinary low-ranking blue Mariner Scale with a simple helmet and lighter-looking segmented plates, not a unique General Scale. He crouches on a submerged stone ledge, scanning the temple corridors and currents, one hand near his weapon, alert posture, shafts of blue light through the water. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Vigía veloz que recorre las corrientes submarinas.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 2, "defense": 1, "health": 4, "cosmos": 4, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 4,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Reconocimiento",
@@ -140,30 +253,54 @@
           "description": "Al entrar en juego, roba una carta.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }],
-            "actions": [{ "type": "draw_card", "amount": 1, "target": "self" }]
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 1,
+                "target": "self"
+              }
+            ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_captain",
       "name": "Capitán de la Guardia Marina",
+      "art_tags": "1boy, male focus, soldier, scale armor, cape, commanding pose",
       "rarity": "common",
       "cost": 2,
       "generate": 1,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/6.webp",
-      "art_prompt": "A Marina soldier captain commanding troops at the Undersea Temple. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "A senior officer among Poseidon's ordinary Marina soldiers, still wearing the standardized low-ranking blue Mariner Scale and simple helmet rather than a General's unique Scale. He has a commanding stance and a short dark-blue mantle over the basic armor, directing a formation of soldiers in the Undersea Temple courtyard, authoritative expression. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Dirige a los soldados que custodian el Templo.",
-      "tags": ["mariner", "soldier", "captain"],
-      "stats": { "attack": 3, "defense": 3, "health": 7, "cosmos": 6, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier",
+        "captain"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 7,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Formación",
@@ -171,30 +308,56 @@
           "description": "Al entrar en juego, tus caballeros [soldier] ganan +1 CE.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }],
-            "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "soldier" }, "value": 1 }]
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "soldier"
+                },
+                "value": 1
+              }
+            ]
           }
         }
       ],
       "max_copies": 2,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_healer",
       "name": "Sanadora de las Mareas",
+      "art_tags": "1girl, white robe, healing light, kneeling",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/7.webp",
-      "art_prompt": "A female attendant of the Undersea Temple tending wounded soldiers. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "A female civilian attendant and healer serving in Poseidon's Undersea Temple, not a Marina warrior and not wearing a Scale. She wears a modest flowing white robe with pale aqua-blue trim, long sleeves and a simple sash, kneeling beside an injured Marina soldier and tending his wounds with a gentle blue healing glow, quiet temple infirmary setting. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Sus cantos cierran las heridas de los guerreros del mar.",
-      "tags": ["mariner"],
-      "stats": { "attack": 1, "defense": 2, "health": 5, "cosmos": 6, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner"
+      ],
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 5,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Marea Curativa",
@@ -202,33 +365,69 @@
           "description": "Paga 2 CP; cura 3 LP a un caballero aliado.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "cosmos", "amount": 2 }],
-            "conditions": [{ "type": "cosmos_min", "amount": 2 }],
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
+            ],
             "actions": [
-              { "type": "request_selection", "zone": "field", "filter": { "type": "knight" }, "on_select": [{ "type": "heal", "amount": 3, "target": "selected" }] }
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "heal",
+                    "amount": 3,
+                    "target": "selected"
+                  }
+                ]
+              }
             ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_harpooner",
       "name": "Arponero de Atlantis",
+      "art_tags": "1boy, male focus, soldier, scale armor, holding harpoon, ruins",
       "rarity": "common",
       "cost": 2,
       "generate": 1,
       "faction": "Poseidon",
       "element": "steel",
       "image_url": "mariners/8.webp",
-      "art_prompt": "A Marina soldier with a harpoon among Atlantis-style ruins. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male Marina foot soldier wearing the standardized simple blue low-ranking Mariner Scale and basic helmet, not an ornate General Scale. He grips a heavy barbed harpoon with both hands among the weathered submerged ruins of Atlantis, ready to strike, bubbles and drifting seaweed around the stone columns. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Sus arpones alcanzan a enemigos que se creen fuera de alcance.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 4, "defense": 2, "health": 5, "cosmos": 5, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 5,
+        "cosmos": 5,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Arpón",
@@ -236,33 +435,70 @@
           "description": "Paga 2 CP; inflige 2 de daño a un caballero rival.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "cosmos", "amount": 2 }],
-            "conditions": [{ "type": "cosmos_min", "amount": 2 }],
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 2
+              }
+            ],
             "actions": [
-              { "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_damage", "amount": 2, "target": "selected" }] }
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_damage",
+                    "amount": 2,
+                    "target": "selected"
+                  }
+                ]
+              }
             ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_pillar_guard",
       "name": "Guardián del Pilar",
+      "art_tags": "1boy, male focus, soldier, scale armor, helmet, standing guard, giant pillar",
       "rarity": "common",
       "cost": 2,
       "generate": 1,
       "faction": "Poseidon",
       "element": "earth",
       "image_url": "mariners/9.webp",
-      "art_prompt": "A Marina soldier standing guard before one of the seven Ocean Pillars. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male Marina foot soldier in the ordinary standardized blue Mariner Scale and simple helmet, not one of the seven Generals. He stands rigidly at the base of one immense Ocean Pillar, holding his weapon across his body while guarding the sacred structure, monumental underwater architecture towering behind him. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Juró defender un pilar oceánico con su vida.",
-      "tags": ["mariner", "soldier", "pillar"],
-      "stats": { "attack": 2, "defense": 5, "health": 8, "cosmos": 5, "can_defend": true, "defense_reduction": 0.6 },
+      "tags": [
+        "mariner",
+        "soldier",
+        "pillar"
+      ],
+      "stats": {
+        "attack": 2,
+        "defense": 5,
+        "health": 8,
+        "cosmos": 5,
+        "can_defend": true,
+        "defense_reduction": 0.6
+      },
       "abilities": [
         {
           "name": "Último Bastión",
@@ -270,30 +506,57 @@
           "description": "Si tu LP es menor a 8, gana +2 AR.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }, { "type": "player_lp_below", "amount": 8 }],
-            "actions": [{ "type": "modify_stat", "stat": "defense", "amount": 2, "target": "self" }]
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "player_lp_below",
+                "amount": 8
+              }
+            ],
+            "actions": [
+              {
+                "type": "modify_stat",
+                "stat": "defense",
+                "amount": 2,
+                "target": "self"
+              }
+            ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_diver",
       "name": "Buceador de las Profundidades",
+      "art_tags": "1boy, male focus, soldier, scale armor, underwater, holding relic",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/10.webp",
-      "art_prompt": "A Marina soldier recovering a relic from the sea floor of the Undersea Sanctuary. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous Marina soldier in the simple low-ranking blue Mariner Scale and basic helmet, swimming close to the seabed of the Undersea Sanctuary. He reaches toward a small ancient relic half-buried in sand beside broken columns, bubbles rising around him, dynamic underwater pose, no diving suit or modern scuba equipment. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Recupera reliquias perdidas en el fondo marino.",
-      "tags": ["mariner"],
-      "stats": { "attack": 2, "defense": 1, "health": 4, "cosmos": 4, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner"
+      ],
+      "stats": {
+        "attack": 2,
+        "defense": 1,
+        "health": 4,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Rescate",
@@ -301,52 +564,97 @@
           "description": "Al entrar en juego, devuelve un caballero [soldier] de tu Yomotsu a tu mano.",
           "effects": {
             "trigger": "CARD_PLAYED",
-            "conditions": [{ "type": "event_source_is_self" }],
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              }
+            ],
             "actions": [
-              { "type": "request_selection", "zone": "yomotsu", "filter": { "type": "knight", "tag": "soldier" }, "destination": "hand", "on_select": [{ "type": "send_to_zone", "target": "selected", "destination": "hand" }] }
+              {
+                "type": "request_selection",
+                "zone": "yomotsu",
+                "filter": {
+                  "type": "knight",
+                  "tag": "soldier"
+                },
+                "destination": "hand",
+                "on_select": [
+                  {
+                    "type": "send_to_zone",
+                    "target": "selected",
+                    "destination": "hand"
+                  }
+                ]
+              }
             ]
           }
         }
       ],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_berserker",
       "name": "Berserker de la Tormenta",
+      "art_tags": "1boy, male focus, soldier, scale armor, furious, screaming, storm",
       "rarity": "common",
       "cost": 2,
       "generate": 1,
       "faction": "Poseidon",
       "element": "fire",
       "image_url": "mariners/11.webp",
-      "art_prompt": "A furious Marina soldier attacking, generic soldier armor. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "A fierce anonymous male Marina foot soldier wearing the ordinary standardized blue low-ranking Scale armor and simple helmet, not a unique General armor. He charges violently through a violent underwater current with clenched fists and an enraged battle cry, armor catching flashes of cold blue light, turbulent water and debris behind him. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Lucha sin miedo, enloquecido por el rugir de las olas.",
-      "tags": ["mariner", "soldier"],
-      "stats": { "attack": 5, "defense": 1, "health": 5, "cosmos": 5, "can_defend": false, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "soldier"
+      ],
+      "stats": {
+        "attack": 5,
+        "defense": 1,
+        "health": 5,
+        "cosmos": 5,
+        "can_defend": false,
+        "defense_reduction": 0.5
+      },
       "abilities": [],
       "max_copies": 3,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_priestess",
       "name": "Sacerdotisa del Templo",
+      "art_tags": "1girl, priestess, white and blue robe, ritual, candles",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "light",
       "image_url": "mariners/12.webp",
-      "art_prompt": "A priestess of Poseidon performing a ritual in the Undersea Temple. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "A female priestess of Poseidon serving in the Undersea Temple, not a Marina fighter and not wearing a Scale. She wears a long ceremonial white robe with deep sea-blue and turquoise accents, a modest ornate headpiece and gold ritual ornaments. She performs a solemn rite before Poseidon's sacred altar and sealed amphora, surrounded by sea-blue lamps and flowing water motifs. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Custodia los rituales que mantienen el ánfora sellada.",
-      "tags": ["mariner", "priestess"],
-      "stats": { "attack": 1, "defense": 2, "health": 6, "cosmos": 9, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner",
+        "priestess"
+      ],
+      "stats": {
+        "attack": 1,
+        "defense": 2,
+        "health": 6,
+        "cosmos": 9,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Ofrenda",
@@ -354,31 +662,58 @@
           "description": "Descarta una carta; roba dos cartas.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "discard", "amount": 1 }],
-            "conditions": [{ "type": "hand_not_empty" }],
-            "actions": [{ "type": "draw_card", "amount": 2, "target": "self" }]
+            "cost": [
+              {
+                "type": "discard",
+                "amount": 1
+              }
+            ],
+            "conditions": [
+              {
+                "type": "hand_not_empty"
+              }
+            ],
+            "actions": [
+              {
+                "type": "draw_card",
+                "amount": 2,
+                "target": "self"
+              }
+            ]
           }
         }
       ],
       "max_copies": 2,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_sea_serpent_tamer",
       "name": "Domador de Serpientes Marinas",
+      "art_tags": "1boy, male focus, soldier, scale armor, sea serpents coiled around arms",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "dark",
       "image_url": "mariners/13.webp",
-      "art_prompt": "A Marina soldier with sea serpents coiled around his arms. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male Marina soldier in the standard simple blue low-ranking Scale armor and basic helmet, not a General. He commands several long, elegant sea serpents that coil around his forearms and rise beside him, their bodies moving through the water like living whips, dramatic underwater temple background. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Sus bestias envenenan a quienes osan cruzar el océano.",
-      "tags": ["mariner"],
-      "stats": { "attack": 3, "defense": 2, "health": 6, "cosmos": 7, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 2,
+        "health": 6,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Mordida Venenosa",
@@ -386,33 +721,70 @@
           "description": "Paga 3 CP; envenena a un caballero rival (pierde 1 LP al inicio de cada turno durante 3 turnos).",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "cosmos", "amount": 3 }],
-            "conditions": [{ "type": "cosmos_min", "amount": 3 }],
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              }
+            ],
             "actions": [
-              { "type": "request_selection", "zone": "field_opponent", "filter": { "type": "knight" }, "on_select": [{ "type": "apply_status", "status": "poison", "target": "selected", "value": 1, "duration": 3 }] }
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": {
+                  "type": "knight"
+                },
+                "on_select": [
+                  {
+                    "type": "apply_status",
+                    "status": "poison",
+                    "target": "selected",
+                    "value": 1,
+                    "duration": 3
+                  }
+                ]
+              }
             ]
           }
         }
       ],
       "max_copies": 2,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     },
     {
       "code": "mariner_whirlpool_mage",
       "name": "Invocador del Remolino",
+      "art_tags": "1boy, male focus, soldier, scale armor, summoning whirlpool, water magic",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "wind",
       "image_url": "mariners/14.webp",
-      "art_prompt": "A Marina soldier summoning a whirlpool. Full-body shot wearing the canonical Scale (Marina armor) exactly as in the anime, accurate colors and helmet design, iconic battle pose from the Poseidon arc. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An anonymous male Marina soldier in the standardized modest blue low-ranking Scale armor and simple helmet, not a General's unique Scale. He extends both arms and generates a powerful spiraling whirlpool in the water before him, cloakless practical armor, swirling bubbles and debris forming a vortex in the Undersea Temple. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Abre remolinos que arrastran a los enemigos al abismo.",
-      "tags": ["mariner"],
-      "stats": { "attack": 2, "defense": 2, "health": 6, "cosmos": 8, "can_defend": true, "defense_reduction": 0.5 },
+      "tags": [
+        "mariner"
+      ],
+      "stats": {
+        "attack": 2,
+        "defense": 2,
+        "health": 6,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
       "abilities": [
         {
           "name": "Remolino",
@@ -420,15 +792,33 @@
           "description": "Paga 4 CP; reduce permanentemente 1 AR a todos los caballeros rivales.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "cosmos", "amount": 4 }],
-            "conditions": [{ "type": "cosmos_min", "amount": 4 }],
-            "actions": [{ "type": "permanent_ar_reduce", "target": "all_enemies", "amount": 1 }]
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 4
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "permanent_ar_reduce",
+                "target": "all_enemies",
+                "amount": 1
+              }
+            ]
           }
         }
       ],
       "max_copies": 2,
       "unique": false,
-      "playable_zones": ["battlefield"],
+      "playable_zones": [
+        "battlefield"
+      ],
       "collection_id": "poseidon",
       "artist": null
     }

@@ -3,11 +3,16 @@ make_frames.py  —  Genera las variantes de marco a partir de un marco base
 ==========================================================================
 1. Convierte la ventana de arte (verde #00FF00) en transparente.
 2. Retinta el metal dorado a otros metales (bronce, plata, negro...).
-   El fondo pizarra y el pergamino no se tocan.
+3. Retinta los paneles pizarra con el color del tipo de carta (paleta marina).
+   El pergamino y el borde negro no se tocan, así la geometría de layout.json
+   sigue valiendo para todos los marcos.
+
+Salida: frame-{metal}.png (paneles originales) y frame-{tipo}-{metal}.png.
 
 Uso:
     python make_frames.py                       # usa Designer.png → frames/v2/
     python make_frames.py --base otro.png --out frames/v3
+    python make_frames.py --base Designer-object.png --only-type object   # marco propio de objetos
 """
 
 from __future__ import annotations
@@ -30,6 +35,23 @@ METALS = {
     "bronze": {"hue": 24,   "sat_mul": 0.85, "val_mul": 0.80},
     "silver": {"hue": 215,  "sat_mul": 0.10, "val_mul": 0.95},
     "black":  {"hue": 275,  "sat_mul": 0.45, "val_mul": 0.45},
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# COLOR DE PANELES POR TIPO DE CARTA
+# hue destino en grados; sat = saturación media buscada; val_mul escala el brillo.
+# La textura original se conserva (solo se desplaza tono y se escala s/v).
+# ─────────────────────────────────────────────────────────────────────────────
+PANEL_HUE_ORIGINAL = 205   # azul pizarra de Designer.png
+PANEL_SAT_ORIGINAL = 0.37
+
+TYPES = {
+    "knight":    {"hue": 222, "sat": 0.80, "val_mul": 1.70},  # azul marino
+    "technique": {"hue": 182, "sat": 0.85, "val_mul": 2.20},  # turquesa
+    "occasion":  {"hue": 150, "sat": 0.75, "val_mul": 1.90},  # verde mar
+    "object":    {"hue": 8,   "sat": 0.70, "val_mul": 1.90},  # coral
+    "stage":     {"hue": 268, "sat": 0.65, "val_mul": 1.60},  # abisal violeta
+    "helper":    {"hue": 198, "sat": 0.55, "val_mul": 3.00},  # celeste
 }
 
 
@@ -84,6 +106,26 @@ def metal_weight(hsv: np.ndarray) -> np.ndarray:
     return hue_ok * sat_ok * val_ok
 
 
+def panel_weight(hsv: np.ndarray, metal_w: np.ndarray) -> np.ndarray:
+    """Peso 0..1 de 'cuánto es panel pizarra' (azul apagado y oscuro, no metal ni pergamino)."""
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    hue_ok = np.clip(1 - np.abs(h - PANEL_HUE_ORIGINAL) / 45, 0, 1)
+    sat_ok = np.clip((s - 0.08) / 0.10, 0, 1) * np.clip((0.75 - s) / 0.15, 0, 1)
+    val_ok = np.clip((v - 0.04) / 0.04, 0, 1) * np.clip((0.55 - v) / 0.10, 0, 1)
+    return hue_ok * sat_ok * val_ok * (1 - metal_w)
+
+
+def tint_panels(rgb: np.ndarray, hsv: np.ndarray, weight: np.ndarray, cfg: dict) -> np.ndarray:
+    new = hsv.copy()
+    new[..., 0] = cfg["hue"] + (hsv[..., 0] - PANEL_HUE_ORIGINAL) * 0.5
+    new[..., 0] %= 360
+    new[..., 1] = np.clip(hsv[..., 1] * cfg["sat"] / PANEL_SAT_ORIGINAL, 0, 1)
+    new[..., 2] = np.clip(hsv[..., 2] * cfg["val_mul"], 0, 1)
+    tinted = hsv_to_rgb(new)
+    w = weight[..., None]
+    return rgb * (1 - w) + tinted * w
+
+
 def make_variant(rgb: np.ndarray, hsv: np.ndarray, weight: np.ndarray, cfg: dict) -> np.ndarray:
     new = hsv.copy()
     if cfg["hue"] is not None:
@@ -100,6 +142,9 @@ def main():
     parser = argparse.ArgumentParser(description="Genera variantes de marco")
     parser.add_argument("--base", default=str(BASE_DIR / "Designer.png"))
     parser.add_argument("--out",  default=str(BASE_DIR / "frames" / "v2"))
+    parser.add_argument("--only-type", default=None, choices=list(TYPES),
+                        help="Base exclusiva de un tipo: genera solo frame-{tipo}-{metal}.png "
+                             "(usar con su layout-{tipo}.json)")
     args = parser.parse_args()
 
     out_dir = Path(args.out)
@@ -120,13 +165,23 @@ def main():
 
     weight = metal_weight(hsv)
     weight[alpha == 0] = 0
+    p_weight = panel_weight(hsv, weight)
+    p_weight[alpha == 0] = 0
 
-    for name, cfg in METALS.items():
-        out_rgb = make_variant(rgb, hsv, weight, cfg)
+    def save(out_rgb: np.ndarray, filename: str) -> None:
         rgba = np.dstack([(out_rgb * 255).round().astype(np.uint8), alpha.astype(np.uint8)])
-        path = out_dir / f"frame-{name}.png"
+        path = out_dir / filename
         Image.fromarray(rgba, "RGBA").save(path)
         print(f"  ✓ {path}")
+
+    types = {args.only_type: TYPES[args.only_type]} if args.only_type else TYPES
+    for name, cfg in METALS.items():
+        metal_rgb = make_variant(rgb, hsv, weight, cfg)
+        if not args.only_type:
+            save(metal_rgb, f"frame-{name}.png")
+        for type_name, type_cfg in types.items():
+            # Los pesos de panel se calculan sobre el original: el metal no los altera
+            save(tint_panels(metal_rgb, hsv, p_weight, type_cfg), f"frame-{type_name}-{name}.png")
 
 
 if __name__ == "__main__":

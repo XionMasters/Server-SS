@@ -7,117 +7,402 @@
     {
       "code": "underwater_temple",
       "name": "Templo Submarino",
-      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Poseidon", "element": "water",
+      "art_tags": "no humans, scenery, underwater temple, ocean sky, greek architecture",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
       "image_url": "stages/underwater_temple.webp",
-      "art_prompt": "Poseidon's Undersea Temple beneath the ocean sky. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "Wide establishing shot of Poseidon's Undersea Temple from Saint Seiya: an immense ancient Greek sanctuary beneath the ocean, monumental marble stairs and colonnades, a grand central palace and the vast blue ocean visible above as if the sky. Sunbeams pierce the water, fish drift between columns, mythic and majestic atmosphere. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Mientras esté activo, tus caballeros tienen +1 AR (se renueva al inicio de cada uno de tus turnos).",
       "abilities": [
-        { "name": "Dominio de Poseidón", "type": "campo", "ability_key": "underwater_temple_ar_play", "description": "Al entrar, tus caballeros +1 AR.",
-          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "apply_status", "status": "ar_boost", "target": "all_allies", "value": 1, "duration": 1 }] } },
-        { "name": "Dominio de Poseidón (turno)", "type": "campo", "ability_key": "underwater_temple_ar_turn", "description": "Inicio de tu turno: tus caballeros +1 AR.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "apply_status", "status": "ar_boost", "target": "all_allies", "value": 1, "duration": 1 }] } }
+        {
+          "name": "Dominio de Poseidón",
+          "type": "campo",
+          "ability_key": "underwater_temple_ar_play",
+          "description": "Al entrar, tus caballeros +1 AR.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Dominio de Poseidón (turno)",
+          "type": "campo",
+          "ability_key": "underwater_temple_ar_turn",
+          "description": "Inicio de tu turno: tus caballeros +1 AR.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "all_allies",
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "main_breadwinner",
       "name": "Soporte Principal",
-      "rarity": "legendary", "cost": 4, "generate": 0, "faction": "Poseidon", "element": "earth",
+      "art_tags": "no humans, scenery, giant pillar, underwater temple",
+      "rarity": "legendary",
+      "cost": 4,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "earth",
       "image_url": "stages/main_breadwinner.webp",
-      "art_prompt": "The Main Breadwinner, the central pillar of the Undersea Sanctuary. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "The Main Breadwinner, the gigantic central pillar of Poseidon's Undersea Sanctuary, rising through the submerged temple architecture. Its immense cylindrical marble shaft dominates the composition, with the sacred inner chamber implied and the ocean's blue light filtering around it. Show its monumental scale and the weight of the flood it holds back. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al inicio de tu turno, cura 1 LP a todos tus caballeros y los caballeros rivales pierden 1 CE hasta tu siguiente turno.",
       "abilities": [
-        { "name": "Corazón del Océano", "type": "campo", "ability_key": "main_breadwinner_heal", "description": "Inicio de tu turno: cura 1 LP a tus caballeros.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "heal", "amount": 1, "target": "all_allies" }] } },
-        { "name": "Peso del Océano", "type": "campo", "ability_key": "main_breadwinner_debuff", "description": "Inicio de tu turno: caballeros rivales -1 CE.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_enemies", "value": -1, "duration": 2 }] } }
+        {
+          "name": "Corazón del Océano",
+          "type": "campo",
+          "ability_key": "main_breadwinner_heal",
+          "description": "Inicio de tu turno: cura 1 LP a tus caballeros.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "heal",
+                "amount": 1,
+                "target": "all_allies"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Peso del Océano",
+          "type": "campo",
+          "ability_key": "main_breadwinner_debuff",
+          "description": "Inicio de tu turno: caballeros rivales -1 CE.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_enemies",
+                "value": -1,
+                "duration": 2
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "north_atlantic_pillar",
       "name": "Pilar del Atlántico Norte",
-      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "art_tags": "no humans, scenery, giant pillar, underwater, ocean sky",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
       "image_url": "stages/north_atlantic_pillar.webp",
-      "art_prompt": "The North Atlantic Pillar guarded by Kanon. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "The North Atlantic Pillar in Saint Seiya's Poseidon arc, a monumental ancient Greek column standing in a vast underwater chamber. Its base and capital carry distinctive sea-dragon motifs, with a cold blue-green glow and the North Atlantic ocean's deep currents surrounding it. A subtle Sea Dragon emblem may appear in the architecture; no characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Tus caballeros [seadragon] tienen +2 CE mientras esté activo.",
       "abilities": [
-        { "name": "Guardia de Kanon", "type": "campo", "ability_key": "na_pillar_boost_play", "description": "Al entrar: [seadragon] +2 CE.",
-          "effects": { "trigger": "CARD_PLAYED", "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "seadragon" }, "value": 2, "duration": 1 }] } },
-        { "name": "Guardia de Kanon (turno)", "type": "campo", "ability_key": "na_pillar_boost_turn", "description": "Inicio de tu turno: [seadragon] +2 CE.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "seadragon" }, "value": 2, "duration": 1 }] } }
+        {
+          "name": "Guardia de Kanon",
+          "type": "campo",
+          "ability_key": "na_pillar_boost_play",
+          "description": "Al entrar: [seadragon] +2 CE.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "seadragon"
+                },
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Guardia de Kanon (turno)",
+          "type": "campo",
+          "ability_key": "na_pillar_boost_turn",
+          "description": "Inicio de tu turno: [seadragon] +2 CE.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "seadragon"
+                },
+                "value": 2,
+                "duration": 1
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "south_atlantic_pillar",
       "name": "Pilar del Atlántico Sur",
-      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "art_tags": "no humans, scenery, giant pillar, underwater, ocean sky",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
       "image_url": "stages/south_atlantic_pillar.webp",
-      "art_prompt": "The South Atlantic Pillar guarded by Sorrento. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "The South Atlantic Pillar, Sorrento's domain in the Undersea Sanctuary. A majestic marble column stands within an elegant submerged hall decorated with flowing curves and subtle siren motifs. Soft turquoise light and delicate ripples suggest music moving through the water; the atmosphere is graceful and haunting. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al inicio de tu turno, tus caballeros [siren] recuperan 2 CP.",
       "abilities": [
-        { "name": "Eco Musical", "type": "campo", "ability_key": "sa_pillar_cosmos", "description": "Inicio de tu turno: [siren] +2 CP.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "restore_cosmos", "amount": 2, "target": "all_allies", "filter": { "tag": "siren" } }] } }
+        {
+          "name": "Eco Musical",
+          "type": "campo",
+          "ability_key": "sa_pillar_cosmos",
+          "description": "Inicio de tu turno: [siren] +2 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "amount": 2,
+                "target": "all_allies",
+                "filter": {
+                  "tag": "siren"
+                }
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "arctic_pillar",
       "name": "Pilar del Océano Ártico",
-      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "water",
+      "art_tags": "no humans, scenery, giant pillar, ice, underwater",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
       "image_url": "stages/arctic_pillar.webp",
-      "art_prompt": "The Arctic Ocean Pillar guarded by Isaac. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "The Arctic Ocean Pillar, Isaac of Kraken's domain, standing in a vast frozen underwater chamber. Towering ice formations, frost-covered Greek marble, pale blue glacial light and drifting snow-like particles surround the immense pillar. The architecture feels ancient and mythological, with subtle Kraken motifs. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al inicio de tu turno, los caballeros rivales pierden 1 CP por el frío eterno.",
       "abilities": [
-        { "name": "Frío Eterno", "type": "campo", "ability_key": "arctic_pillar_drain", "description": "Inicio de tu turno: rivales -1 CP.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "restore_cosmos", "amount": -1, "target": "all_enemies" }] } }
+        {
+          "name": "Frío Eterno",
+          "type": "campo",
+          "ability_key": "arctic_pillar_drain",
+          "description": "Inicio de tu turno: rivales -1 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "amount": -1,
+                "target": "all_enemies"
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "indian_ocean_pillar",
       "name": "Pilar del Océano Índico",
-      "rarity": "rare", "cost": 2, "generate": 0, "faction": "Poseidon", "element": "light",
+      "art_tags": "no humans, scenery, giant pillar, golden light, underwater",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "light",
       "image_url": "stages/indian_ocean_pillar.webp",
-      "art_prompt": "The Indian Ocean Pillar guarded by Krishna. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "The Indian Ocean Pillar, Krishna of Chrysaor's domain, rising from an immense underwater temple hall. Warm golden light and intricate ancient Indian-inspired ornamental details contrast with the cool blue sea; subtle spear and sun motifs decorate the marble base. Grand, sacred and symmetrical composition. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al inicio de tu turno, un caballero aliado al azar entra en Modo Evasión hasta tu siguiente turno.",
       "abilities": [
-        { "name": "Bruma Índica", "type": "campo", "ability_key": "indian_pillar_evasion", "description": "Inicio de tu turno: un aliado al azar gana Modo Evasión.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "apply_status", "status": "evasion", "target": "random_ally", "duration": 1 }] } }
+        {
+          "name": "Bruma Índica",
+          "type": "campo",
+          "ability_key": "indian_pillar_evasion",
+          "description": "Inicio de tu turno: un aliado al azar gana Modo Evasión.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "evasion",
+                "target": "random_ally",
+                "duration": 1
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "cape_sounion",
       "name": "Cabo Sunion",
-      "rarity": "epic", "cost": 3, "generate": 0, "faction": "Athena", "element": "water",
+      "art_tags": "no humans, scenery, sea cliff, greek temple ruins, ocean",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Athena",
+      "element": "water",
       "image_url": "stages/cape_sounion.webp",
-      "art_prompt": "Cape Sounion with its ancient temple and the flooded prison cell beneath it. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "Cape Sounion as depicted in Saint Seiya: a lonely rocky headland on the Greek coast, with the weathered ruins of an ancient temple above a dark, restless sea. The cliff drops steeply toward the water, evoking the underwater prison where Kanon was confined. Dramatic overcast sky, ominous waves, no characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al final de cada turno, todos los caballeros con 3 LP o menos van al Yomotsu.",
       "abilities": [
-        { "name": "Prisión de la Marea", "type": "campo", "ability_key": "sounion_tide", "description": "Fin de turno: caballeros con LP ≤ 3 al Yomotsu.",
-          "effects": { "trigger": "TURN_END", "actions": [{ "type": "kill", "target": "all_knights", "filter": { "health_max": 3 } }] } }
+        {
+          "name": "Prisión de la Marea",
+          "type": "campo",
+          "ability_key": "sounion_tide",
+          "description": "Fin de turno: caballeros con LP ≤ 3 al Yomotsu.",
+          "effects": {
+            "trigger": "TURN_END",
+            "actions": [
+              {
+                "type": "kill",
+                "target": "all_knights",
+                "filter": {
+                  "health_max": 3
+                }
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     },
     {
       "code": "drowned_world",
       "name": "Mundo Inundado",
-      "rarity": "legendary", "cost": 5, "generate": 0, "faction": "Poseidon", "element": "water",
+      "art_tags": "no humans, scenery, flooded city, heavy rain, dark sky",
+      "rarity": "legendary",
+      "cost": 5,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "water",
       "image_url": "stages/drowned_world.webp",
-      "art_prompt": "The world flooded by Poseidon's endless rain. Location from the Poseidon arc as drawn in the anime, wide establishing shot. Official Saint Seiya artwork style, 1986-1989 Toei Animation anime, Shingo Araki and Michi Himeno character designs, faithful to Masami Kurumada original manga, 80s cel-shaded anime look, hand-painted background, dramatic cosmo aura, vertical 3:4 composition, no text, no letters, no frame, no border, no watermark.",
+      "art_prompt": "An apocalyptic view of a city overwhelmed by Poseidon's Great Flood. Rooftops and classical buildings barely emerge above the rising sea, torrential rain falls beneath dense charcoal clouds, and distant waves consume the horizon. The scene should feel like the world-ending threat from Saint Seiya's Poseidon arc, with no characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
       "description": "Al inicio de tu turno, ambos jugadores pierden 1 LP y tus caballeros [mariner] ganan +1 CE hasta tu siguiente turno.",
       "abilities": [
-        { "name": "Diluvio Eterno", "type": "campo", "ability_key": "drowned_world_drain", "description": "Inicio de tu turno: -1 LP a ambos jugadores.",
-          "effects": { "trigger": "TURN_START", "actions": [
-            { "type": "apply_player_damage", "target": "self", "amount": 1 },
-            { "type": "apply_player_damage", "target": "opponent", "amount": 1 }
-          ] } },
-        { "name": "Hijos del Mar", "type": "campo", "ability_key": "drowned_world_mariners", "description": "Inicio de tu turno: [mariner] +1 CE.",
-          "effects": { "trigger": "TURN_START", "actions": [{ "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "mariner" }, "value": 1, "duration": 1 }] } }
+        {
+          "name": "Diluvio Eterno",
+          "type": "campo",
+          "ability_key": "drowned_world_drain",
+          "description": "Inicio de tu turno: -1 LP a ambos jugadores.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_player_damage",
+                "target": "self",
+                "amount": 1
+              },
+              {
+                "type": "apply_player_damage",
+                "target": "opponent",
+                "amount": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Hijos del Mar",
+          "type": "campo",
+          "ability_key": "drowned_world_mariners",
+          "description": "Inicio de tu turno: [mariner] +1 CE.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "mariner"
+                },
+                "value": 1,
+                "duration": 1
+              }
+            ]
+          }
+        }
       ],
-      "max_copies": 1, "unique": true, "playable_zones": ["field_occasion"], "collection_id": "poseidon", "artist": null
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
     }
   ]
 }

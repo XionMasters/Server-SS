@@ -205,7 +205,8 @@ export class TurnManager {
             transaction
           );
 
-          return { finalState: ctx.state, events: [...ctx.bus.events], isRetry: false };
+          // Eventos de DOT del inicio de turno primero, luego TURN_END/TURN_START y el robo
+          return { finalState: ctx.state, events: [...execution.events, ...ctx.bus.events], isRetry: false };
         }
       );
 

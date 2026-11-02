@@ -95,7 +95,8 @@ describe('AttackEffectRegistry', () => {
       const defenderInState = ctx.state.player2.field_knights.find(c => c.instance_id === 'defender')!;
       const paralyzed = defenderInState.status_effects.find(e => e.type === 'paralyzed');
       expect(paralyzed).toBeDefined();
-      expect(paralyzed?.remaining_turns).toBe(1);
+      // 2: sobrevive al tick del inicio del turno del defensor y lo bloquea ese turno
+      expect(paralyzed?.remaining_turns).toBe(2);
     });
 
     test('NO aplica paralysis si el ataque fue evadido', () => {

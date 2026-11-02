@@ -25,7 +25,9 @@ import { GameState, CardInGameState, Player, resolveWinCondition } from './GameS
 import {
   StatusEffect,
   StatusEffectType,
+  IMMOBILIZE_DEFAULT_TURNS,
   isImmobilized,
+  isStatusBlocked,
   addOrRefreshEffect,
   attackerTaIgnoresBlockMode,
   consumeTechniqueAttackEffects,
@@ -113,9 +115,11 @@ export class TechniqueRulesEngine {
     sourceCardId: string,
     playerNumber: 1 | 2,
   ): void {
+    if (isStatusBlocked(target.status_effects ?? [], statusType)) return;
     // Valores por defecto para efectos negativos de TA.
     const defaults: Partial<Record<StatusEffectType, { turns: number; value?: number }>> = {
-      paralyzed: { turns: 1 },
+      paralyzed: { turns: IMMOBILIZE_DEFAULT_TURNS },
+      frozen:    { turns: IMMOBILIZE_DEFAULT_TURNS },
       poison:    { turns: 3, value: 1 },
       burn:      { turns: 3, value: 2 },
     };
@@ -362,11 +366,13 @@ export class TechniqueRulesEngine {
         .find(c => c.instance_id === defenderCardId) ?? null;
       if (defenderForTaEffects) {
         for (const eff of stats.ta_effects) {
+          if (isStatusBlocked(defenderForTaEffects.status_effects ?? [], eff.type)) continue;
+          const immobilizes = eff.type === 'frozen' || eff.type === 'paralyzed';
           defenderForTaEffects.status_effects = addOrRefreshEffect(
             defenderForTaEffects.status_effects ?? [],
             {
               type: eff.type as StatusEffectType,
-              remaining_turns: eff.turns ?? 1,
+              remaining_turns: eff.turns ?? (immobilizes ? IMMOBILIZE_DEFAULT_TURNS : 1),
               ...(eff.value !== undefined ? { value: eff.value } : {}),
               source: { card_instance_id: knightCardId, player: playerNumber, type: 'technique' },
             },

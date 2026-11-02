@@ -28,23 +28,22 @@
 import { resolveWinCondition, type GameState } from '../GameState';
 
 /**
- * Interacciones declarativas entre efectos de estado.
- * - blockedBy: si la carta ya tiene alguno de estos efectos, la aplicación se cancela.
- * - removes:   al aplicar este efecto, remueve los efectos listados de la carta objetivo.
+ * Efectos que, al aplicarse, limpian otros de la carta objetivo.
+ * Las inmunidades (qué bloquea a qué) viven en StatusEffects.isStatusBlocked.
  *
  * Para añadir una relación nueva basta con editar este mapa — sin tocar código del engine.
  */
-const STATUS_INTERACTIONS: Record<string, { blockedBy?: string[]; removes?: string[] }> = {
-  burn:          { blockedBy: ['burn_immune'] },
-  poison:        { blockedBy: ['poison_immune'] },
-  burn_immune:   { removes: ['burn'] },
-  poison_immune: { removes: ['poison'] },
+const STATUS_REMOVES: Record<string, string[]> = {
+  burn_immune:     ['burn'],
+  poison_immune:   ['poison'],
+  dot_immune:      ['burn', 'poison'],
+  immune_negative: ['burn', 'poison', 'paralyzed', 'frozen'],
 };
 import type { ActionDefinition, ApplyStatusAction, CoinFlipAction, KillAction } from '../abilities/AbilityDefinition';
 import { normalizeCardType } from '../CardTypes';
 import {
   addOrRefreshEffect, removeEffect, computeCeBonus, computeArBonus, deriveModeFromEffects,
-  isModeEffectType, type StatusEffectType,
+  isModeEffectType, isStatusBlocked, type StatusEffectType,
 } from '../StatusEffects';
 import { createEvent, type GameEvent } from '../events/GameEvents';
 import type { GameEventBus } from '../events/GameEventBus';
@@ -256,16 +255,15 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
         card.status_effects = statusEffects;
       }
 
-      const interaction = STATUS_INTERACTIONS[action.status];
-
-      // Si la carta ya tiene uno de los efectos bloqueadores → ignorar la aplicación.
-      if (interaction?.blockedBy?.some((blocker) => statusEffects.some((s: any) => s.type === blocker))) {
+      // Si la carta es inmune a este efecto → ignorar la aplicación.
+      if (isStatusBlocked(statusEffects, action.status)) {
         continue;
       }
 
       // Remover efectos que este status cancela (ej: burn_immune quita burn).
-      if (interaction?.removes) {
-        for (const toRemove of interaction.removes) {
+      const removes = STATUS_REMOVES[action.status];
+      if (removes) {
+        for (const toRemove of removes) {
           statusEffects = removeEffect(statusEffects as any, toRemove as StatusEffectType) as any[];
         }
         card.status_effects = statusEffects;
@@ -690,8 +688,9 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       card.max_health     = mapping.health;
       card.current_cosmos = mapping.cosmos;
       (card as any).card_code = mapping.code;
-      // Limpiar status effects de la forma anterior
+      // Limpiar status effects de la forma anterior (y con ellos el modo de combate)
       card.status_effects = [];
+      card.mode = deriveModeFromEffects(card.status_effects);
 
       // Registrar para que el servicio actualice el card_id en BD
       if (!Array.isArray(result.extras.transforms)) result.extras.transforms = [];
@@ -883,5 +882,9 @@ export const ActionRegistry = {
 
   register(name: string, fn: ActionFn): void {
     ACTION_REGISTRY[name] = fn;
+  },
+
+  has(name: string): boolean {
+    return name in ACTION_REGISTRY;
   },
 };

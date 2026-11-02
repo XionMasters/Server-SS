@@ -49,10 +49,15 @@ export class MatchesCoordinator {
 
   /**
    * Construye los match_update por jugador (con visibilidad de mano aplicada)
-   * para un estado de partida ya persistido.
+   * para un estado de partida ya persistido. `engineEvents` viaja filtrado por jugador
+   * como engine_events (animaciones del cliente).
    */
-  async buildMatchUpdateEvents(matchId: string, lastAction: Record<string, any> | null = null): Promise<any[]> {
-    const result = await this._buildMatchUpdateResult({ success: true, events: [] }, matchId, '', lastAction);
+  async buildMatchUpdateEvents(
+    matchId: string,
+    lastAction: Record<string, any> | null = null,
+    engineEvents: any[] = [],
+  ): Promise<any[]> {
+    const result = await this._buildMatchUpdateResult({ success: true, events: engineEvents }, matchId, '', lastAction);
     return result?.events ?? [];
   }
 

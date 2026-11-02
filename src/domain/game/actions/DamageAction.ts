@@ -10,6 +10,7 @@
  *   - Técnicas de daño directo
  *
  * Secuencia:
+ *   0. last_stand_active anula el daño; last_stand convierte un golpe letal en 1 HP.
  *   1. Reducir current_health de la carta.
  *   2. Emitir DAMAGE_DEALT.
  *   3. Si current_health <= 0 → emitir DAMAGE_LETHAL → llamar killKnight().
@@ -63,8 +64,22 @@ export function applyDamage(
     throw new Error(`[applyDamage] Carta "${targetCardId}" no encontrada en campo`);
   }
 
+  const effects = card.status_effects ?? [];
+  // Determinación Interior: inmune a todo daño mientras dure last_stand_active
+  if (effects.some(e => e.type === 'last_stand_active')) return;
+
   const actualDamage = Math.max(0, amount);
-  card.current_health -= actualDamage;
+  // Determinación Interior: sobrevive al primer golpe letal con 1 HP y gana inmunidad 1 turno
+  const lastStandSaves = card.current_health - actualDamage <= 0 && effects.some(e => e.type === 'last_stand');
+  if (lastStandSaves) {
+    card.current_health = 1;
+    card.status_effects = [
+      ...effects.filter(e => e.type !== 'last_stand'),
+      { type: 'last_stand_active', remaining_turns: 1 },
+    ];
+  } else {
+    card.current_health -= actualDamage;
+  }
   const maxHealth = card.max_health ?? null;
   const healthPct = (typeof maxHealth === 'number' && maxHealth > 0)
     ? (card.current_health / maxHealth) * 100

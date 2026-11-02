@@ -2,6 +2,7 @@ import Match from '../../../infrastructure/database/models/Match';
 import Card from '../../../infrastructure/database/models/Card';
 import CardKnight from '../../../infrastructure/database/models/CardKnight';
 import CardTechnique from '../../../infrastructure/database/models/CardTechnique';
+import CardAbility from '../../../infrastructure/database/models/CardAbility';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 import User from '../../../infrastructure/database/models/User';
 import { GameStateBuilder } from '../actions/GameStateBuilder';
@@ -59,6 +60,12 @@ export class MatchStateService {
             include: [
               { model: CardKnight, as: 'card_knight' },
               { model: CardTechnique, as: 'card_technique' },
+              // ActionResolver necesita las habilidades para ofrecer las activas
+              {
+                model: CardAbility,
+                as: 'card_abilities',
+                attributes: ['name', 'ability_key', 'type', 'description', 'effects'],
+              },
             ]
           }
         ]

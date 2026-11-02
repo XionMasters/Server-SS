@@ -208,7 +208,8 @@ describe('WebSocket match event contracts', () => {
   });
 
   test('resolve_selection forwards the authenticated user and sends per-player updates', async () => {
-    (SelectionService.resolveSelection as jest.Mock).mockResolvedValue({ success: true });
+    const engineEvents = [{ type: 'KNIGHT_SUMMONED', playerNumber: 1 }];
+    (SelectionService.resolveSelection as jest.Mock).mockResolvedValue({ success: true, events: engineEvents });
     (matchesCoordinator.buildMatchUpdateEvents as jest.Mock).mockResolvedValue([
       { type: 'match_update', payload: { perspective_player: 1 }, recipients: { type: 'users', userIds: ['user-1'] } },
       { type: 'match_update', payload: { perspective_player: 2 }, recipients: { type: 'users', userIds: ['user-2'] } },
@@ -228,9 +229,10 @@ describe('WebSocket match event contracts', () => {
       chosen_card_id: 'card-1',
       action_id: 'action-3',
     });
+    // Los eventos del motor de la selección viajan como engine_events (animaciones)
     expect(matchesCoordinator.buildMatchUpdateEvents).toHaveBeenCalledWith('match-1', expect.objectContaining({
       type: 'resolve_selection',
-    }));
+    }), engineEvents);
     expect(presence.sendToUsers).toHaveBeenCalledWith(['user-1'], 'match_update', { perspective_player: 1 });
     expect(presence.sendToUsers).toHaveBeenCalledWith(['user-2'], 'match_update', { perspective_player: 2 });
     expect(presence.broadcastToUsers).not.toHaveBeenCalledWith(

@@ -75,17 +75,19 @@ const NON_EVENT_TRIGGERS = new Set(['ACTIVE', 'NONE']);
 
 /**
  * Decide si una habilidad reacciona al evento.
+ *   - CARD_PLAYED es siempre "al entrar en juego": solo reacciona la carta jugada.
  *   - 'pasiva' de cualquier carta: reacciona a cualquier evento de su trigger.
  *   - Habilidades de cartas no-caballero ('activa' de ocasión, 'equipamiento' de objeto,
- *     'campo' de escenario, etc.): son el efecto de la propia carta. Con CARD_PLAYED
- *     solo se resuelven cuando la carta jugada es ella misma.
+ *     'campo' de escenario, etc.): son el efecto de la propia carta.
  */
 function isReactiveAbility(card: CardInGameState, abilityType: string, trigger: string, event: GameEvent): boolean {
   if (NON_EVENT_TRIGGERS.has(trigger) || trigger !== event.type) return false;
+  if (trigger === GameEventType.CARD_PLAYED) {
+    if (event.sourceCardId !== card.instance_id) return false;
+    return abilityType === 'pasiva' || card.card_type !== 'knight';
+  }
   if (abilityType === 'pasiva') return true;
-  if (card.card_type === 'knight') return false;
-  if (trigger === GameEventType.CARD_PLAYED) return event.sourceCardId === card.instance_id;
-  return true;
+  return card.card_type !== 'knight';
 }
 
 function getAllPassiveWatchers(state: GameState): CardInGameState[] {

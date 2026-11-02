@@ -1,0 +1,39 @@
+{
+  "_comment": "Layout del marco propio de objetos (Designer-object.png → frame-object-{metal}.png), 1024x1536. Sin gemas de stats ni medallón inferior; ventana de arte ampliada.",
+
+  "art_window": { "x": 54, "y": 147, "w": 920, "h": 684, "bleed": 6 },
+
+  "name": {
+    "x": 240, "y": 42, "w": 600, "h": 78,
+    "font_size": 58, "min_font_size": 34,
+    "fill": [246, 214, 130], "stroke": [40, 24, 8], "stroke_width": 3
+  },
+
+  "faction_icon": { "cx": 132, "cy": 149, "r": 68 },
+
+  "cost": {
+    "cx": 909, "cy": 125, "r": 44,
+    "font_size": 60,
+    "fill": [255, 255, 255], "stroke": [20, 20, 30], "stroke_width": 4,
+    "gem": [210, 170, 60]
+  },
+
+  "stats": { "font_size": 64, "label_size": 22, "r": 60, "items": [] },
+
+  "rank_label": {
+    "x": 170, "y": 856, "w": 690, "h": 62,
+    "font_size": 44, "min_font_size": 28,
+    "fill": [246, 214, 130], "stroke": [30, 18, 6], "stroke_width": 2
+  },
+
+  "element_socket": { "cx": 100, "cy": 888, "r": 30 },
+  "type_socket":    { "cx": 927, "cy": 888, "r": 30 },
+
+  "abilities": {
+    "x": 105, "y": 975, "w": 815, "h": 420,
+    "font_size_name": 32, "font_size_desc": 28, "min_font_size_desc": 20,
+    "line_spacing": 6, "gap": 14,
+    "name_color": [110, 45, 15], "desc_color": [35, 25, 15],
+    "divider_color": [176, 128, 60]
+  }
+}

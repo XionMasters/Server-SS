@@ -8,6 +8,7 @@
     {
       "code": "koga_pegasus",
       "name": "Koga de Pegaso",
+      "art_tags": "1boy, male focus, teenage boy, short spiky brown hair, white and red pegasus armor, sleek armor, light aura",
       "rarity": "epic",
       "cost": 1,
       "generate": 2,
@@ -83,6 +84,7 @@
     {
       "code": "yuna_eagle",
       "name": "Yuna de Águila",
+      "art_tags": "1girl, blonde hair, braid, white and blue eagle armor, sleek armor, wind aura",
       "rarity": "rare",
       "cost": 1,
       "generate": 2,
@@ -157,6 +159,7 @@
     {
       "code": "souma_lion",
       "name": "Souma de León",
+      "art_tags": "1boy, male focus, teenage boy, spiky orange hair, red lion cub armor, sleek armor, fire aura",
       "rarity": "rare",
       "cost": 1,
       "generate": 2,
@@ -237,6 +240,7 @@
     {
       "code": "haruto_wolf",
       "name": "Haruto de Lobo",
+      "art_tags": "1boy, male focus, black hair, ponytail, ninja, grey wolf armor, sleek armor",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -311,6 +315,7 @@
     {
       "code": "junkers_wolf",
       "name": "Wolf Junkers",
+      "art_tags": "1boy, male focus, grey wolf armor, sleek armor, aggressive stance",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -388,6 +393,7 @@
     {
       "code": "curtis_hydra",
       "name": "Hydra Curtis",
+      "art_tags": "1boy, male focus, green hydra armor, sleek armor, calm expression",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -457,6 +463,7 @@
     {
       "code": "belriot_lionet",
       "name": "Lionet Belriot",
+      "art_tags": "1boy, male focus, orange lion cub armor, sleek armor, defensive stance",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -508,14 +515,14 @@
           "name": "Morale Up",
           "type": "pasiva",
           "description": "Al final del turno propio, los aliados adyacentes entran en Modo Defensa.",
-          "_pending": "El motor no soporta adyacencia; temporalmente aplica Modo Defensa a todos los aliados durante 1 turno.",
           "effects": {
             "trigger": "TURN_END",
+            "conditions": [{ "type": "event_player_is_self" }],
             "actions": [
               {
                 "type": "apply_status",
                 "status": "defense",
-                "target": "all_allies",
+                "target": "adjacent_allies",
                 "duration": 1
               }
             ]
@@ -533,6 +540,7 @@
     {
       "code": "paradise_apus",
       "name": "Apus Paradise",
+      "art_tags": "1boy, male focus, colorful bird of paradise armor, sleek armor, graceful pose",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -608,6 +616,7 @@
     {
       "code": "guney_delphinus",
       "name": "Delphinus Guney",
+      "art_tags": "1boy, male focus, blue dolphin armor, sleek armor, water aura",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -684,6 +693,7 @@
     {
       "code": "dali_corona_borealis",
       "name": "Corona Borealis Dali",
+      "art_tags": "1boy, male focus, crown helmet, purple armor, sleek armor, mysterious smile",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -735,9 +745,9 @@
           "name": "Whirlwind",
           "type": "pasiva",
           "description": "Cuando recibe BA, lanza una moneda; si sale cara, el atacante vuelve a la mano de su dueño.",
-          "_pending": "El motor actual no soporta trigger directo de BA recibido ni acción de regresar cartas a la mano. Placeholder hasta Fase 2.",
+          "_pending": "Devolver el atacante a la mano en mitad de un BA requiere que AttackRulesEngine tolere que el atacante salga del campo. Placeholder.",
           "effects": {
-            "trigger": "DAMAGE_DEALT",
+            "trigger": "NONE",
             "actions": []
           }
         }
@@ -753,6 +763,7 @@
     {
       "code": "hooke_compass",
       "name": "Compass Hooke",
+      "art_tags": "1boy, male focus, bronze armor with compass motif, sleek armor, earth aura",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -822,6 +833,7 @@
     {
       "code": "spear_dorado",
       "name": "Dorado Spear",
+      "art_tags": "1boy, male focus, golden fish armor, sleek armor, holding spear",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -898,6 +910,7 @@
     {
       "code": "mirapolos_lynx",
       "name": "Lynx Mirapolos",
+      "art_tags": "1boy, male focus, lynx armor, sleek armor, cat-like eyes",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -967,6 +980,7 @@
     {
       "code": "yoshiomi_wolf",
       "name": "Wolf Yoshiomi",
+      "art_tags": "1boy, male focus, older man, black hair, ninja, grey wolf armor, sleek armor",
       "rarity": "rare",
       "cost": 4,
       "generate": 0,
@@ -1036,6 +1050,7 @@
     {
       "code": "kitalpha_equuleus",
       "name": "Equuleus Kitalpha",
+      "art_tags": "1boy, male focus, little horse armor, sleek armor, steel grey armor, defensive stance",
       "rarity": "rare",
       "cost": 4,
       "generate": 3,
@@ -1105,6 +1120,7 @@
     {
       "code": "celeris_equuleus",
       "name": "Equuleus Celeris",
+      "art_tags": "1boy, male focus, little horse armor, sleek armor, sturdy build",
       "rarity": "rare",
       "cost": 4,
       "generate": 3,
@@ -1174,6 +1190,7 @@
     {
       "code": "subaru_equuleus",
       "name": "Equuleus Subaru",
+      "art_tags": "1boy, male focus, teenage boy, short light brown hair, white little horse armor, sleek armor, glowing aura",
       "rarity": "epic",
       "cost": 5,
       "generate": 0,
@@ -1258,6 +1275,7 @@
     {
       "code": "douglas_bear",
       "name": "Bear Douglas",
+      "art_tags": "1boy, male focus, muscular, large build, brown bear armor, sleek armor",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -1334,6 +1352,7 @@
     {
       "code": "rusk_pyxis",
       "name": "Pyxis Rusk",
+      "art_tags": "1boy, male focus, bronze armor with compass motif, sleek armor, commanding pose",
       "rarity": "common",
       "cost": 0,
       "generate": 2,
@@ -1403,6 +1422,7 @@
     {
       "code": "ryuho_dragon",
       "name": "Ryuho de Dragón",
+      "art_tags": "1boy, male focus, teenage boy, long black hair, green dragon armor, round dragon shield, sleek armor",
       "rarity": "rare",
       "cost": 1,
       "generate": 2,
@@ -1479,6 +1499,7 @@
     {
       "code": "eden_andromeda",
       "name": "Eden de Andrómeda",
+      "art_tags": "1boy, male focus, light brown hair, cold expression, purple andromeda armor, sleek armor, lightning",
       "rarity": "rare",
       "cost": 1,
       "generate": 2,
@@ -1551,6 +1572,7 @@
     {
       "code": "subaru_sagittarius",
       "name": "Subaru de Sagitario",
+      "art_tags": "1boy, male focus, teenage boy, short light brown hair, gold armor, sagittarius gold cloth, golden wings, golden bow",
       "rarity": "epic",
       "cost": 2,
       "generate": 2,
@@ -1634,6 +1656,7 @@
     {
       "code": "aria_cosmo",
       "name": "Aria",
+      "art_tags": "1girl, long purple hair, white dress, holding golden staff, gentle expression, healing light",
       "rarity": "epic",
       "cost": 0,
       "generate": 0,
@@ -1680,6 +1703,7 @@
     {
       "code": "sonia_pavo_real",
       "name": "Sonia de Pavo Real",
+      "art_tags": "1girl, short red hair, dark red armor, sleek armor, peacock feathers, cruel expression",
       "rarity": "rare",
       "cost": 2,
       "generate": 1,
@@ -1759,6 +1783,7 @@
     {
       "code": "miguel_angel",
       "name": "Miguel de Ángel",
+      "art_tags": "1boy, male focus, long blonde hair, white and gold armor, angel wings, divine aura",
       "rarity": "epic",
       "cost": 2,
       "generate": 1,
@@ -1834,6 +1859,7 @@
     {
       "code": "integra_shield",
       "name": "Integra de Escudo",
+      "art_tags": "1girl, long hair, determined expression, silver armor, large round shield",
       "rarity": "common",
       "cost": 1,
       "generate": 1,
@@ -1878,6 +1904,7 @@
     {
       "code": "geki_bear_omega",
       "name": "Geki de Oso (Omega)",
+      "art_tags": "1boy, male focus, muscular, large build, short dark hair, brown bear armor, sleek armor",
       "rarity": "common",
       "cost": 1,
       "generate": 1,

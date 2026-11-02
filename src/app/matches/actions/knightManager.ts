@@ -302,9 +302,10 @@ export class KnightManager {
         // Cargar definicion de habilidad (con cache)
         const abilityRecords = await getAbilities(casterRecord.card_id, tx);
 
-        // Preferir ability_key si estÃ¡ disponible; fallback a normalizaciÃ³n de nombre
+        // ActionResolver envía ability_key; se acepta también el nombre normalizado
+        // (clientes antiguos) para no romper habilidades con tildes o apóstrofos.
         const abilityRecord = abilityRecords.find((a: any) =>
-          (a.ability_key ?? a.name.toLowerCase().replace(/\s+/g, '_')) === abilityName,
+          a.ability_key === abilityName || a.name.toLowerCase().replace(/\s+/g, '_') === abilityName,
         );
         if (!abilityRecord)
           throw new Error(`Habilidad "${abilityName}" no encontrada en la carta`);
@@ -314,10 +315,13 @@ export class KnightManager {
           throw new Error(`Definicion invalida para la habilidad "${abilityName}"`);
 
         // â”€â”€ Validar objetivo si se provee â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Con coste de descarte, el objetivo puede ser la carta de la propia mano a descartar.
         if (targetId) {
           const targetRecord = cardMap.get(targetId);
-          if (!targetRecord || targetRecord.zone !== 'field_knight')
-            throw new Error('Carta objetivo no vÃ¡lida o no estÃ¡ en el campo (field_knight)');
+          const hasDiscardCost = (abilityDef.cost ?? []).some(c => c.type === 'discard');
+          const isOwnHandCard = targetRecord?.zone === 'hand' && targetRecord.player_number === playerNumber;
+          if (!targetRecord || (targetRecord.zone !== 'field_knight' && !(hasDiscardCost && isOwnHandCard)))
+            throw new Error('Carta objetivo no válida o no está en el campo (field_knight)');
         }
 
         // â”€â”€ Construir evento â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -369,8 +373,9 @@ export class KnightManager {
         // pre-cargada (ej: filtrada desde mano).
         const discardCardId: string | undefined = execution.extras?.discard_card_id;
         if (discardCardId) {
+          // Mismo destino que el descarte interactivo (send_to_zone → cositos)
           await CardInPlay.update(
-            { zone: 'yomotsu' },
+            { zone: 'cositos' },
             { where: { id: discardCardId, match_id: match.id }, transaction: tx },
           );
         }

@@ -267,10 +267,12 @@ const CLIENT_TARGET_TYPES = new Set<TargetType>([
   'opponent_technique',
 ]);
 
-/** Determina si la habilidad requiere que el cliente envíe un targetId. */
+/**
+ * Determina si la habilidad requiere que el cliente envíe un targetId.
+ * Un coste de descarte no lo requiere: sin carta indicada se pide por selección interactiva.
+ */
 export function requiresClientTarget(def: AbilityDefinition): boolean {
-  const costNeedsTarget = (def.cost ?? []).some(c => c.type === 'discard');
-  return costNeedsTarget || _actionsNeedTarget(def.actions);
+  return _actionsNeedTarget(def.actions);
 }
 
 function _actionsNeedTarget(actions: ActionDefinition[]): boolean {

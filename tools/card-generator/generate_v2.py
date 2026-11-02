@@ -4,8 +4,16 @@ generate_v2.py  —  Generador de cartas con los marcos v2 (frames/v2/)
 Usa el mismo JSON de cartas que generate.py, pero con el layout nuevo:
 facción con aro de rareza, coste en el hexágono, gemas de stats, rango en la
 banda, elemento en la ranura y habilidades con separadores y coste.
+Las técnicas muestran GOL/CP/CE en las gemas; el resto de tipos no lleva gemas,
+muestra su tipo en la banda y toma el metal del marco de su rareza.
+El marco es frame-{tipo}-{metal}.png (color de paneles por tipo, ver make_frames.py);
+si no existe se usa frame-{metal}.png.
+
+Salida por defecto: src/assets/cards/{code}.webp (servido en /assets/cards/).
+El arte se toma de art/{code}.* (generate_art.py lo genera con IA).
 
 Uso:
+    python generate_v2.py --all                    # todas las cartas de database/
     python generate_v2.py seiya_pegasus_v1
     python generate_v2.py seiya_pegasus_v1 --art seiya-v1.png --metal bronze
     python generate_v2.py --all --json ../../database/Santuario/Knights/legendary.json
@@ -26,30 +34,52 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter
 
 from generate import (
+    DATABASE_DIR,
     ICONS_DIR,
-    OUTPUT_DIR,
     SAGA_RARITY_ICON_PREFIX,
     find_art,
-    find_card_data,
     get_font,
-    load_all_cards,
 )
+from generate_art import iter_cards
 
 V2_DIR = Path(__file__).parent / "frames" / "v2"
+SERVER_CARDS_DIR = DATABASE_DIR.parent / "src" / "assets" / "cards"
 
 RANK_METAL = {
-    "Bronze Saint": "bronze",
-    "Silver Saint": "silver",
-    "Gold Saint":   "gold",
-    "Black Saint":  "black",
+    "Bronze Saint":   "bronze",
+    "Silver Saint":   "silver",
+    "Gold Saint":     "gold",
+    "Black Saint":    "black",
+    "Mariner":        "bronze",
+    "Marine General": "gold",
+    "God":            "gold",
 }
 
 RANK_LABEL_ES = {
-    "Bronze Saint": "Santo de Bronce",
-    "Silver Saint": "Santo de Plata",
-    "Gold Saint":   "Santo de Oro",
-    "Black Saint":  "Santo Negro",
+    "Bronze Saint":   "Santo de Bronce",
+    "Silver Saint":   "Santo de Plata",
+    "Gold Saint":     "Santo de Oro",
+    "Black Saint":    "Santo Negro",
+    "Mariner":        "Marina",
+    "Marine General": "General Marina",
+    "God":            "Dios",
 }
+
+# Cartas que no son caballero: el metal sale de la rareza y la banda muestra el tipo
+RARITY_METAL = {
+    "common": "bronze", "rare": "silver", "epic": "gold", "legendary": "gold", "divine": "black",
+}
+
+TYPE_LABEL_ES = {
+    "technique": "Técnica",
+    "object":    "Objeto",
+    "stage":     "Escenario",
+    "helper":    "Ayudante",
+    "occasion":  "Ocasión",
+}
+
+# Gemas de una técnica: (slot del layout, etiqueta, campo de technique_stats)
+TECHNIQUE_GEMS = [("health", "GOL", "hit_count"), ("cosmos", "CP", "ta_cost"), ("attack", "CE", "hit_ce")]
 
 ABILITY_TYPE_ES = {
     "pasiva": "PASIVA", "activa": "ACTIVA",
@@ -81,8 +111,17 @@ ELEMENT_GEMS = {
 }
 
 
-def load_layout() -> dict:
-    with open(V2_DIR / "layout.json", encoding="utf-8") as f:
+def frame_path(card_type: str, metal: str) -> Path:
+    """Marco del tipo y metal (frame-{tipo}-{metal}.png); si no existe, el genérico del metal.
+    Los marcos se generan con make_frames.py y comparten la geometría de layout.json."""
+    typed = V2_DIR / f"frame-{card_type}-{metal}.png"
+    return typed if typed.exists() else V2_DIR / f"frame-{metal}.png"
+
+
+def load_layout(card_type: str) -> dict:
+    """layout-{tipo}.json si el tipo tiene marco propio; si no, el layout.json común."""
+    typed = V2_DIR / f"layout-{card_type}.json"
+    with open(typed if typed.exists() else V2_DIR / "layout.json", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -254,13 +293,27 @@ def faction_icon(card: dict) -> Image.Image | None:
 # COMPOSICIÓN
 # ─────────────────────────────────────────────────────────────────────────────
 
+def card_gems(card: dict, layout_stats: dict) -> list[tuple[dict, str, object]]:
+    """(slot del layout, etiqueta, valor) de las gemas a pintar según el tipo de carta."""
+    slots = {item["key"]: item for item in layout_stats["items"]}
+    if card.get("_type", "knight") == "knight":
+        stats = card.get("stats", {})
+        return [(item, item["label"], stats.get(item["key"], 0)) for item in layout_stats["items"]]
+    if card.get("_type") == "technique":
+        ts = card.get("technique_stats", {})
+        return [(slots[slot], label, ts.get(field, 0)) for slot, label, field in TECHNIQUE_GEMS]
+    return []
+
+
 def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out_dir: Path) -> Path:
-    L = load_layout()
+    L = load_layout(card.get("_type", "knight"))
     code = card["code"]
     rank = card.get("_rank", "")
-    metal = metal or card.get("frame_metal") or RANK_METAL.get(rank, "gold")
+    is_knight = card.get("_type", "knight") == "knight"
+    default_metal = RANK_METAL.get(rank, "gold") if is_knight else RARITY_METAL.get(card.get("rarity", ""), "bronze")
+    metal = metal or card.get("frame_metal") or default_metal
 
-    frame = Image.open(V2_DIR / f"frame-{metal}.png").convert("RGBA")
+    frame = Image.open(frame_path(card.get("_type", "knight"), metal)).convert("RGBA")
     canvas = Image.new("RGBA", frame.size, (0, 0, 0, 0))
 
     # Arte (detrás del marco)
@@ -292,10 +345,10 @@ def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out
         icon = icon.resize((round(icon.width * k), round(icon.height * k)), Image.LANCZOS)
         canvas.alpha_composite(icon, dest=(fi["cx"] - icon.width // 2, fi["cy"] - icon.height // 2))
 
-    # Constelación / signo / emblema en el medallón inferior
-    bm = L["bottom_medallion"]
+    # Constelación / signo / emblema en el medallón inferior (no todos los marcos lo tienen)
+    bm = L.get("bottom_medallion")
     constellation = card.get("constellation")
-    if constellation:
+    if bm and constellation:
         c_icon = CONSTELLATIONS_DIR / f"{constellation}.png"
         if c_icon.exists():
             paste_icon(canvas, c_icon, bm["cx"], bm["cy"], bm["r"])
@@ -307,21 +360,21 @@ def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out
     draw_text_center(draw, str(card.get("cost", 0)), c["cx"], c["cy"],
                      get_font(c["font_size"]), c["fill"], c["stroke"], c["stroke_width"])
 
-    # Stats
+    # Stats (caballeros) o stats de ataque (técnicas); el resto no lleva gemas
     st = L["stats"]
-    stats = card.get("stats", {})
-    for item in st["items"]:
+    gems = card_gems(card, st)
+    for item, _, _ in gems:
         paint_gem(canvas, item["cx"], item["cy"], st["r"] - 4, item["gem"])
     draw = ImageDraw.Draw(canvas)
-    for item in st["items"]:
-        draw_text_center(draw, item["label"], item["cx"], item["cy"] - st["r"] * 0.55,
+    for item, label, value in gems:
+        draw_text_center(draw, label, item["cx"], item["cy"] - st["r"] * 0.55,
                          get_font(st["label_size"]), (255, 240, 210), (20, 10, 5), 2)
-        draw_text_center(draw, str(stats.get(item["key"], 0)), item["cx"], item["cy"] + 8,
+        draw_text_center(draw, str(value), item["cx"], item["cy"] + 8,
                          get_font(st["font_size"]), (255, 255, 255), (20, 10, 5), 4)
 
-    # Rango
+    # Rango (caballeros) o tipo de carta
     rl = L["rank_label"]
-    rank_txt = RANK_LABEL_ES.get(rank, rank)
+    rank_txt = RANK_LABEL_ES.get(rank, rank) if is_knight else TYPE_LABEL_ES.get(card.get("_type", ""), "")
     if rank_txt:
         font = fit_font(rank_txt, rl["w"], rl["font_size"], rl["min_font_size"])
         draw_text_center(draw, rank_txt, rl["x"] + rl["w"] / 2, rl["y"] + rl["h"] / 2,
@@ -351,29 +404,35 @@ def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out
 def main():
     parser = argparse.ArgumentParser(description="Generador de cartas v2")
     parser.add_argument("code", nargs="?")
-    parser.add_argument("--json", default=None)
+    parser.add_argument("--json", default=None, help="Limitar a un JSON (por defecto: todo database/)")
     parser.add_argument("--art", default=None)
     parser.add_argument("--metal", default=None, choices=["gold", "bronze", "silver", "black"])
-    parser.add_argument("--out", default=str(OUTPUT_DIR / "v2"))
+    # Por defecto se escribe donde el servidor sirve las cartas: /assets/cards/{code}.webp
+    parser.add_argument("--out", default=str(SERVER_CARDS_DIR))
     parser.add_argument("--all", action="store_true")
+    parser.add_argument("--only-with-art", action="store_true",
+                        help="Con --all, componer solo las cartas que ya tienen arte en art/")
     args = parser.parse_args()
     out_dir = Path(args.out)
 
+    cards = list(iter_cards(args.json))
     if args.all:
-        if not args.json:
-            print("Error: --all requiere --json <path>")
-            sys.exit(1)
-        for card in load_all_cards(args.json):
+        if args.only_with_art:
+            cards = [c for c in cards if find_art(c)]
+        failed = []
+        for card in cards:
             try:
                 compose_card_v2(card, args.metal, None, out_dir)
             except Exception as e:
-                print(f"  ✗ Error en {card.get('code', '?')}: {e}")
+                failed.append(card["code"])
+                print(f"  ✗ Error en {card['code']}: {e}")
+        print(f"\nCompuestas: {len(cards) - len(failed)}  Fallidas: {len(failed)}")
         return
 
     if not args.code:
         parser.print_help()
         sys.exit(1)
-    card = find_card_data(args.code, args.json)
+    card = next((c for c in cards if c["code"] == args.code), None)
     if not card:
         print(f"Error: carta '{args.code}' no encontrada.")
         sys.exit(1)

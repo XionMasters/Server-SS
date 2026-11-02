@@ -22,17 +22,19 @@ import { deriveModeFromEffects, computeCeBonus, computeArBonus, computeHpBonus, 
 import { BASE_MATCH_RULES } from './rules/base.rules';
 import { createEngineContext, type EngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
+import type { GameEvent } from './events/GameEvents';
 
-function _recomputeDerivedStatsWithHpClamp(card: any, effectsBeforeTick: any[]): void {
-  const prevHpBonus = computeHpBonus(effectsBeforeTick ?? []);
-  const baseMaxHp = Math.max(0, (card.max_health ?? card.current_health ?? 0) - prevHpBonus);
-  const nextHpBonus = computeHpBonus(card.status_effects ?? []);
-  card.max_health = baseMaxHp + nextHpBonus;
-  card.current_health = Math.min(card.current_health ?? 0, card.max_health);
+function _recomputeDerivedStats(card: any): void {
+  // max_health es el HP máximo base (el mapper lo toma de la carta, sin boosts);
+  // los hp_boost vigentes se suman al vuelo. Si uno caduca, el HP se ajusta al nuevo tope.
+  if (typeof card.max_health === 'number') {
+    const effectiveMaxHp = card.max_health + computeHpBonus(card.status_effects ?? []);
+    card.current_health = Math.min(card.current_health ?? 0, effectiveMaxHp);
+  }
 
   card.mode = deriveModeFromEffects(card.status_effects);
   card.ce   = card.base_ce + computeCeBonus(card.status_effects);
-  card.ar   = card.base_ar + computeArBonus(card.status_effects);
+  card.ar   = Math.max(0, card.base_ar + computeArBonus(card.status_effects));
 }
 
 function _findCardInOwnedField(player: any, cardId: string): any | null {
@@ -141,7 +143,7 @@ export class TurnRulesEngine {
   static endTurn(
     state: GameState,
     playerNumber: 1 | 2
-  ): { newState: GameState } {
+  ): { newState: GameState; events: GameEvent[] } {
     // 🔒 INMUTABILIDAD: Clonar estado (NO mutamos el original)
     // structuredClone es más seguro que JSON.parse(JSON.stringify(...))
     const newState = structuredClone(state);
@@ -191,17 +193,15 @@ export class TurnRulesEngine {
       const cardAfterDot = _findCardInOwnedField(nextPlayerObjInCtx, cardId);
       if (!cardAfterDot) continue;
 
-      const effectsBeforeTick = [...(cardAfterDot.status_effects ?? [])];
       cardAfterDot.status_effects = tickStatusEffects(cardAfterDot.status_effects ?? []);
-      _recomputeDerivedStatsWithHpClamp(cardAfterDot, effectsBeforeTick);
+      _recomputeDerivedStats(cardAfterDot);
     }
 
     // También tickear passive_watchers (cartas en yomotsu/mazo con pasivas reactivas)
     // para soportar cooldowns "una vez por turno" fuera del campo.
     for (const watcher of nextPlayerObjInCtx.passive_watchers ?? []) {
-      const effectsBeforeTick = [...(watcher.status_effects ?? [])];
       watcher.status_effects = tickStatusEffects(watcher.status_effects ?? []);
-      _recomputeDerivedStatsWithHpClamp(watcher, effectsBeforeTick);
+      _recomputeDerivedStats(watcher);
     }
 
     // Resetear flags de exhaust del siguiente jugador (puede volver a atacar)
@@ -224,7 +224,8 @@ export class TurnRulesEngine {
     // Actualizar timestamp
     dotCtx.state.updated_at = Date.now();
 
-    return { newState: dotCtx.state };
+    // Eventos de DOT (daño, muertes y pasivas encadenadas) para que el cliente los anime
+    return { newState: dotCtx.state, events: [...dotCtx.bus.events] };
   }
 
   /**

@@ -2,11 +2,12 @@ import type { EngineContext } from '../EngineContext';
 import type { CardInGameState } from '../GameState';
 import { findCardInPlayerField } from '../combat/CombatTypes';
 import {
-  StatusEffectType,
+  IMMOBILIZE_DEFAULT_TURNS,
   addOrRefreshEffect,
   attackerHasDragonRage,
   attackerHasElectricCharge,
   consumeBasicAttackEffects,
+  isStatusBlocked,
 } from '../StatusEffects';
 import { applyDamage } from '../actions/DamageAction';
 
@@ -28,10 +29,10 @@ function findDefender(ctx: BasicAttackEffectContext): CardInGameState | null {
 function applyParalyzeOnHit(ctx: BasicAttackEffectContext): void {
   if (ctx.evaded || !ctx.defenderCardId) return;
   const defender = findDefender(ctx);
-  if (!defender) return;
+  if (!defender || isStatusBlocked(defender.status_effects ?? [], 'paralyzed')) return;
   defender.status_effects = addOrRefreshEffect(defender.status_effects ?? [], {
     type: 'paralyzed',
-    remaining_turns: 1,
+    remaining_turns: IMMOBILIZE_DEFAULT_TURNS,
     source: { card_instance_id: ctx.attackerCardId, player: ctx.playerNumber, type: 'passive' },
   });
 }

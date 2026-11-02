@@ -27,11 +27,9 @@ import { GameState, PendingSelection } from '../../../domain/game/GameState';
 import { normalizeCardType } from '../../../domain/game/CardTypes';
 import { ActionRegistry, ActionContext, ActionResult } from '../../../domain/game/actions/ActionRegistry';
 import { createEngineContext } from '../../../domain/game/EngineContext';
-import { GameEventBus } from '../../../domain/game/events/GameEventBus';
-import { createEvent } from '../../../domain/game/events/GameEvents';
+import { createEvent, type GameEvent } from '../../../domain/game/events/GameEvents';
 import { parseStatusEffects, computeCeBonus, computeArBonus, deriveModeFromEffects } from '../../../domain/game/StatusEffects';
 import { ProcessedActionsRegistry } from '../../../infrastructure/database/repositories/ProcessedActionsRegistry';
-import { SeededRNG } from '../../../domain/game/combat/RNG';
 
 export interface ResolveSelectionInput {
   match_id: string;
@@ -51,6 +49,7 @@ export class SelectionService {
     error?: string;
     code?: string;
     newState?: GameState;
+    events?: GameEvent[];
     isRetry?: boolean;
   }> {
     const { match_id, user_id, selection_id, chosen_card_id, action_id } = input;
@@ -79,7 +78,7 @@ export class SelectionService {
           actionType: 'RESOLVE_SELECTION',
         });
         if (cached) {
-          return { newState: cached.cached_result, isRetry: true };
+          return { newState: cached.cached_result, events: [] as GameEvent[], isRetry: true };
         }
 
         // 3. Cargar cartas en juego (para mapear el GameState completo)
@@ -126,14 +125,20 @@ export class SelectionService {
           if (player.deck_count > 0) player.deck_count -= 1;
         }
 
-        // 7. Ejecutar on_select con selectedCardId
-        const bus = new GameEventBus();
-        const seededRng = new SeededRNG(state.rng_seed);
-        const rng = () => seededRng.next();
+        // 7. Ejecutar on_select con selectedCardId, dentro de un contexto del motor:
+        //    el bus dispara pasivas (muertes, invocaciones…) y el RNG es el mismo para toda la cadena.
+        const engineCtx = createEngineContext(state);
+        const rng = () => {
+          const value = engineCtx.rng.next();
+          engineCtx.state.rng_seed = engineCtx.rng.getSeed();
+          return value;
+        };
         const selectionEvent = createEvent({
           type: 'SELECTION_RESOLVED',
           playerNumber,
           sourceCardId: pending.source_card_id,
+          // Objetivo original de la habilidad (descarte interactivo de una activa con target)
+          ...(pending.target_card_id ? { targetCardId: pending.target_card_id } : {}),
           origin: 'player',
           payload: {
             selection_id,
@@ -148,12 +153,13 @@ export class SelectionService {
           sourceCardId: pending.source_card_id,
           event: selectionEvent,
           rng,
-          bus,
+          bus: engineCtx.bus,
+          engineContext: engineCtx,
           selectedCardId: chosen_card_id,
         };
 
         const actionResult: ActionResult = {
-          state,
+          state: engineCtx.state,
           affectedIds: [],
           extras: {},
         };
@@ -165,8 +171,8 @@ export class SelectionService {
           for (const pNum of actionResult.extras.shuffle_deck_players as number[]) {
             await this._shuffleDeck(match_id, pNum, tx, rng);
           }
-          actionResult.state.rng_seed = seededRng.getSeed();
         }
+        actionResult.state.rng_seed = engineCtx.rng.getSeed();
 
         // 8b. Los robos de draw_card quedan en state.pending_draws y los
         //     ejecuta MatchRepository.applyState (step 10).
@@ -215,10 +221,10 @@ export class SelectionService {
           action_id, match_id, playerNumber, actionResult.state, 'RESOLVE_SELECTION', tx
         );
 
-        return { newState: actionResult.state, isRetry: false };
+        return { newState: actionResult.state, events: [...engineCtx.bus.events], isRetry: false };
       });
 
-      return { success: true, newState: result.newState, isRetry: result.isRetry };
+      return { success: true, newState: result.newState, events: result.events, isRetry: result.isRetry };
     } catch (error: any) {
       return { success: false, error: error?.message || 'Error resolviendo selección', code: 'SELECTION_ERROR' };
     }

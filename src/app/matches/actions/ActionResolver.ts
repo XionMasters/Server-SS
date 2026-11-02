@@ -15,7 +15,8 @@
  */
 import { AbilityEngine } from '../../../domain/game/abilities/AbilityEngine';
 import { parseAbilityDef, getCosmosCost, requiresClientTarget } from '../../../domain/game/abilities/AbilityDefinition';
-import { type ConditionContext } from '../../../domain/game/conditions/ConditionRegistry';
+import { type ConditionContext, type PlayerRef } from '../../../domain/game/conditions/ConditionRegistry';
+import { parseStatusEffects } from '../../../domain/game/StatusEffects';
 import { GameEventType, type GameEvent } from '../../../domain/game/events/GameEvents';
 import { ZoneMapper } from '../../../domain/game/ZoneMapper';
 // ─────────────────────────────────────────────────────────────────────────────
@@ -175,7 +176,7 @@ export class ActionResolver {
 
     // ── Habilidades activas ─────────────────────────────────────────────
     // Delegado al AbilityRegistry; este método no crece al agregar cartas nuevas.
-    const activeAbilities = this._resolveAbilities(knight, matchState, opponentKnights);
+    const activeAbilities = this._resolveAbilities(knight, matchState, cardsInPlay);
     const canUseAbility = activeAbilities.length > 0;
 
     return {
@@ -242,47 +243,39 @@ export class ActionResolver {
   private static _resolveAbilities(
     knight: any,
     matchState: any,
-    _opponentKnights: any[]
+    cardsInPlay: any[]
   ): ResolvedAbility[] {
     const result: ResolvedAbility[] = [];
-    const abilities: any[] = knight.card?.card_abilities ?? [];
+    const abilities: any[] = this._getCardPayload(knight)?.abilities ?? knight.card?.card_abilities ?? [];
+    const playerNumber = knight.player_number as 1 | 2;
 
     for (const raw of abilities) {
       if (raw.type !== 'activa') continue;
 
       const def = parseAbilityDef(raw.effects);
-      if (!def) continue;
-
-      const statusEffects = (() => {
-        try { return JSON.parse(knight.status_effects ?? '[]'); }
-        catch { return []; }
-      })();
-
-      const hand: any[] = matchState[`player${knight.player_number}_hand`] ?? [];
+      if (!def || def.trigger !== GameEventType.ACTIVE) continue;
 
       const event: GameEvent = {
         type: GameEventType.ACTIVE,
-        playerNumber: knight.player_number as 1 | 2,
+        playerNumber,
         sourceCardId: knight.id,
       };
 
+      // Mismo contexto que construye AbilityEngine con el GameState completo,
+      // para que lo ofrecido aquí coincida con lo que el servidor acepta después.
       const ctx: ConditionContext = {
-        sourceCard: {
-          status_effects: statusEffects,
-          current_cosmos: knight.current_cosmos ?? 0,
-          zone: knight.zone,
-        },
-        player: {
-          hand,
-          field_knights: [],
-        },
+        sourceCard: this._toCardRef(knight),
+        player: this._toPlayerRef(cardsInPlay, matchState, playerNumber),
+        opponent: this._toPlayerRef(cardsInPlay, matchState, playerNumber === 1 ? 2 : 1),
+        playerNumber,
         event,
       };
 
       const check = AbilityEngine.canActivateFromContext(def, ctx, event);
       if (check.valid) {
         result.push({
-          ability_name: (raw.name as string).toLowerCase().replace(/\s+/g, '_'),
+          // knightManager.useAbility busca por ability_key (fallback: nombre normalizado)
+          ability_name: raw.ability_key ?? (raw.name as string).toLowerCase().replace(/\s+/g, '_'),
           cosmos_cost: getCosmosCost(def),
           ...(requiresClientTarget(def) ? { requires_target: true } : {}),
         });
@@ -290,6 +283,34 @@ export class ActionResolver {
     }
 
     return result;
+  }
+
+  /** Carta serializada → referencia que entienden las condiciones (como CardInGameState). */
+  private static _toCardRef(card: any): any {
+    const payload = this._getCardPayload(card);
+    return {
+      instance_id: card.id,
+      zone: card.zone,
+      current_cosmos: card.current_cosmos ?? 0,
+      current_health: card.current_health,
+      status_effects: parseStatusEffects(card.status_effects),
+      ce: card.current_attack,
+      card_code: payload?.code,
+      card_type: payload?.type,
+      tags: payload?.tags ?? [],
+    };
+  }
+
+  private static _toPlayerRef(cardsInPlay: any[], matchState: any, playerNumber: 1 | 2): PlayerRef {
+    const own = cardsInPlay.filter(c => c.player_number === playerNumber);
+    const inZone = (zone: string) => own.filter(c => c.zone === zone).map(c => this._toCardRef(c));
+    return {
+      hand: inZone('hand'),
+      field_knights: inZone('field_knight'),
+      graveyard: inZone('yomotsu'),
+      life: matchState[`player${playerNumber}_life`],
+      cosmos: matchState[`player${playerNumber}_cosmos`],
+    };
   }
 
 

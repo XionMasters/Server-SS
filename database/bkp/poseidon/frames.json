@@ -1,0 +1,55 @@
+{
+  "_schema": 1,
+  "_note": "Prompts para generar los marcos de carta de la saga Poseidón (uno por tipo). No son cartas: loadFromJson no lo carga porque no tiene 'cards'. El centro se pide en magenta plano (#FF00FF) para recortarlo como transparencia y superponer el arte. La rareza se indica con la gema superior, que se cambia en una variante por rareza.",
+  "saga": "Poseidon",
+  "type": "frame",
+  "size": { "width": 768, "height": 1024 },
+  "art_window": "Zona interior para el arte: aprox. 84% del ancho y 58% del alto, centrada en la mitad superior",
+  "base_prompt": "Empty trading card frame template, front view, perfectly symmetrical, vertical 3:4, ornate border inspired by the deep sea: carved mother-of-pearl, coral filigree, golden trident and wave motifs, small pearls embedded, subtle water caustics on the metal. The large central art window and the lower text box are completely filled with flat solid magenta (#FF00FF), no gradients inside them. Small empty round gem socket at the top center, empty circular slots at the top-left (cost) and top-right (generation). No text, no letters, no numbers, no character, no watermark. Clean high-resolution game UI asset, crisp edges.",
+  "frames": [
+    {
+      "card_type": "knight",
+      "file": "frames/knight.webp",
+      "palette": ["#0B2A4A", "#1E6FA8", "#D4AF37"],
+      "prompt": "Knight card frame: deep navy blue and royal ocean blue enamel with polished gold trim, heroic armored scale texture on the border, three small stat plaques at the bottom edge (attack, armor, health), majestic and solid."
+    },
+    {
+      "card_type": "technique",
+      "file": "frames/technique.webp",
+      "palette": ["#00B3C7", "#7FFFD4", "#E8F7FF"],
+      "prompt": "Technique card frame: bright turquoise and aquamarine with glowing cyan energy veins flowing through the border, dynamic swirling wave shapes, a crackling energy feel."
+    },
+    {
+      "card_type": "occasion",
+      "file": "frames/occasion.webp",
+      "palette": ["#0E7C7B", "#3FC1C9", "#F5F5F5"],
+      "prompt": "Occasion card frame: sea green and teal with white sea-foam edges, crashing wave crests curling around the corners, sense of a single sudden event."
+    },
+    {
+      "card_type": "object",
+      "file": "frames/object.webp",
+      "palette": ["#C9A227", "#F3E5AB", "#2B4C6F"],
+      "prompt": "Object card frame: antique sunken-treasure gold and brass with barnacles and verdigris accents, rivets and chest-like metalwork, pearl inlays."
+    },
+    {
+      "card_type": "stage",
+      "file": "frames/stage.webp",
+      "palette": ["#06142E", "#3E2C6B", "#9FB7D9"],
+      "prompt": "Stage card frame: abyssal midnight blue fading to deep violet, carved marble columns of an underwater temple on both sides, bioluminescent dots, wide and monumental."
+    },
+    {
+      "card_type": "helper",
+      "file": "frames/helper.webp",
+      "palette": ["#7EC8E3", "#F7E7CE", "#E8B4B8"],
+      "prompt": "Helper card frame: soft sky-blue and pearl white with light coral pink accents, shells and starfish ornaments, friendly and gentle look."
+    }
+  ],
+  "rarity_gems": {
+    "_note": "Variante por rareza: regenerar o recolorear solo la gema superior.",
+    "common":    "small polished white pearl in the top gem socket",
+    "rare":      "bright blue sapphire in the top gem socket",
+    "epic":      "glowing purple amethyst in the top gem socket",
+    "legendary": "radiant golden topaz with light rays in the top gem socket",
+    "divine":    "iridescent rainbow opal with a divine halo in the top gem socket"
+  }
+}

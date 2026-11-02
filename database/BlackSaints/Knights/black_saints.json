@@ -8,6 +8,7 @@
     {
       "code": "black_altar_avido",
       "name": "Black Altar Avido",
+      "art_tags": "1girl, long black hair, black armor, dark cape, sinister smile, purple dark aura",
       "rarity": "epic",
       "cost": 6,
       "generate": 0,
@@ -61,6 +62,7 @@
     {
       "code": "black_andromeda",
       "name": "Black Andromeda",
+      "art_tags": "1boy, male focus, black andromeda armor, black chains, sinister expression",
       "rarity": "rare",
       "cost": 0,
       "generate": 1,
@@ -112,6 +114,7 @@
     {
       "code": "black_aquila",
       "name": "Black Aquila",
+      "art_tags": "1boy, male focus, black eagle armor, eagle helmet, dark wings motif",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -163,6 +166,7 @@
     {
       "code": "black_crow",
       "name": "Black Crow",
+      "art_tags": "1boy, male focus, black crow armor, black feathers, crows flying",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -214,6 +218,7 @@
     {
       "code": "black_cygnus",
       "name": "Black Cygnus",
+      "art_tags": "1boy, male focus, black swan armor, dark ice, cold expression",
       "rarity": "rare",
       "cost": 0,
       "generate": 1,
@@ -265,6 +270,7 @@
     {
       "code": "black_dragon",
       "name": "Black Dragon",
+      "art_tags": "1boy, male focus, long black hair, black dragon armor, black dragon shield",
       "rarity": "rare",
       "cost": 0,
       "generate": 0,
@@ -316,6 +322,7 @@
     {
       "code": "black_hound_yudo",
       "name": "Black Hound Yudo",
+      "art_tags": "1boy, male focus, black hound armor, dog helmet, feral expression",
       "rarity": "rare",
       "cost": 3,
       "generate": 1,
@@ -367,6 +374,7 @@
     {
       "code": "black_hound",
       "name": "Black Hound",
+      "art_tags": "1boy, male focus, black hound armor, dog helmet, glowing red eyes",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -418,6 +426,7 @@
     {
       "code": "black_lacerta",
       "name": "Black Lacerta",
+      "art_tags": "1boy, male focus, black lizard armor, crouching, sharp claws",
       "rarity": "rare",
       "cost": 3,
       "generate": 0,
@@ -469,6 +478,7 @@
     {
       "code": "black_ophiuchus",
       "name": "Black Ophiuchus",
+      "art_tags": "1boy, male focus, black ophiuchus armor, black snakes, menacing",
       "rarity": "rare",
       "cost": 3,
       "generate": 2,
@@ -520,6 +530,7 @@
     {
       "code": "black_pegasus",
       "name": "Black Pegasus",
+      "art_tags": "1boy, male focus, black pegasus armor, dark purple poison aura, evil grin",
       "rarity": "rare",
       "cost": 0,
       "generate": 2,
@@ -571,6 +582,7 @@
     {
       "code": "black_phoenix",
       "name": "Black Phoenix",
+      "art_tags": "1boy, male focus, black phoenix armor, black flames, dark wings motif",
       "rarity": "rare",
       "cost": 0,
       "generate": 1,
@@ -622,6 +634,7 @@
     {
       "code": "black_whale_alegre",
       "name": "Black Whale Alegre",
+      "art_tags": "1boy, male focus, muscular, large build, black whale armor, laughing",
       "rarity": "rare",
       "cost": 3,
       "generate": 1,

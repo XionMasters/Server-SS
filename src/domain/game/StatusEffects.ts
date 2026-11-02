@@ -86,7 +86,9 @@ export type StatusEffectType =
   | 'hp_boost'      // Aumenta HP máximo en `value` puntos (si expira, current_health se clamp al nuevo máximo)
 /** category: special ──────────────────────────────────────────────────────── */
   | 'ignore_armor'  // Próximo AB del portador ignora la AR del defensor (se consume al atacar)
-  | 'ce_double'     // Próximo BA del portador tiene CE duplicada (se consume al atacar)
+  | 'ce_double'     // Los BA del portador tienen CE duplicada mientras dure el efecto (no se consume)
+  | 'unicorn_horn'  // Pasiva permanente: cada BA que conecta causa 1 DIP adicional al jugador rival
+  | 'divine_frenzy_form' // Marker permanente de forma transformada (Subaru); impide reactivarla
 /** category: trigger ──────────────────────────────────────────────────────── */
   | 'burn'             // BRN: causa `value` daño al caballero al inicio de su turno (remaining_turns cuenta regresiva)
   | 'poison'          // Veneno: causa `value` daño al caballero al inicio de su turno (sin countdown, permanente hasta cura)
@@ -103,6 +105,7 @@ export type StatusEffectType =
 /** category: special (one-shot BA modifiers) ──────────────────────────────── */
   | 'ignore_block_mode'   // Próximo BA ignora Modo Defensa del defensor (se consume al atacar)
   | 'ignore_evade_mode'   // Próximo BA ignora Modo Evasión del defensor (se consume al atacar)
+  | 'pierce_evasion'      // Pasiva permanente: todos los BA del portador ignoran Modo Evasión (no se consume)
 /** category: special (permanent markers) ──────────────────────────────────── */
   | 'dragon_shield'       // Inmune a Técnicas de Nivel 1 mientras esté en Modo Defensa
   | 'electric_charge'     // Próximo BA del portador aplica PAR al objetivo (se consume al atacar)
@@ -152,6 +155,8 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
   // special
   ignore_armor:  'special',
   ce_double:     'special',
+  unicorn_horn:  'special',
+  divine_frenzy_form: 'special',
   // trigger
   burn:            'trigger',
   poison:          'trigger',
@@ -167,6 +172,7 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
   // special (one-shot BA modifiers)
   ignore_block_mode:  'special',
   ignore_evade_mode:  'special',
+  pierce_evasion:     'special',
   // special (permanent markers)
   dragon_shield:      'special',
   electric_charge:    'special',
@@ -321,6 +327,7 @@ interface BasicAttackIgnoreRule {
 const BASIC_ATTACK_IGNORE_RULES: Partial<Record<StatusEffectType, BasicAttackIgnoreRule>> = {
   ignore_block_mode: { ignoreBlockMode:  true },
   ignore_evade_mode: { ignoreEvadeMode:  true },
+  pierce_evasion:    { ignoreEvadeMode:  true }, // sin regla de consumo: persiste
   electric_charge:   { applyParalyzedOnHit: true },
 };
 
@@ -368,6 +375,32 @@ export function attackerHasElectricCharge(effects: StatusEffect[]): boolean {
 /** True si el atacante tiene Dragon Rage (BA con cleave a adyacentes). */
 export function attackerHasDragonRage(effects: StatusEffect[]): boolean {
   return effects.some(e => e.type === 'dragon_rage');
+}
+
+/** DIP adicional que causa cada BA conectado del portador (unicorn_horn). */
+export function getBasicAttackExtraPlayerDamage(effects: StatusEffect[]): number {
+  return effects.some(e => e.type === 'unicorn_horn') ? 1 : 0;
+}
+
+/**
+ * Duración por defecto de las condiciones que inmovilizan aplicadas a un rival.
+ * remaining_turns se descuenta al INICIO del turno del afectado, así que con 1 el
+ * efecto caducaría antes de que pudiera bloquear nada: 2 = "durante su próximo turno".
+ */
+export const IMMOBILIZE_DEFAULT_TURNS = 2;
+
+/** Inmunidades: un efecto no se aplica si la carta tiene alguno de sus bloqueadores. */
+const STATUS_BLOCKERS: Partial<Record<StatusEffectType, StatusEffectType[]>> = {
+  burn:      ['burn_immune', 'dot_immune', 'immune_negative'],
+  poison:    ['poison_immune', 'dot_immune', 'immune_negative'],
+  paralyzed: ['immune_negative'],
+  frozen:    ['immune_negative'],
+};
+
+/** True si la carta es inmune al efecto que se le intenta aplicar. */
+export function isStatusBlocked(effects: StatusEffect[], type: string): boolean {
+  const blockers = STATUS_BLOCKERS[type as StatusEffectType];
+  return !!blockers && effects.some(e => blockers.includes(e.type));
 }
 
 /** True si la carta está inmovilizada (frozen o paralyzed) y no puede actuar. */

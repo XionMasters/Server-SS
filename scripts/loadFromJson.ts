@@ -102,6 +102,16 @@ function toAbilityKey(name: string): string {
     .replace(/^_+|_+$/g, '');
 }
 
+/** Cartas compuestas por tools/card-generator/generate_v2.py (servidas en /assets/cards/). */
+const GENERATED_CARDS_DIR = path.join(__dirname, '..', 'src', 'assets', 'cards');
+
+/** La carta generada tiene prioridad; si aún no existe, se usa el image_url del JSON. */
+function resolveImageUrl(card: CardEntry): string {
+  const generated = `${card.code}.webp`;
+  if (fs.existsSync(path.join(GENERATED_CARDS_DIR, generated))) return `cards/${generated}`;
+  return card.image_url ?? '';
+}
+
 function stripMeta(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(obj).filter(([k]) => !k.startsWith('_'))
@@ -166,7 +176,7 @@ async function upsertCard(
           cost:        card.cost ?? 0,
           generate:    card.generate ?? 0,
           description: card.description ?? '',
-          image_url:   card.image_url ?? '',
+          image_url:   resolveImageUrl(card),
           faction:     card.faction ?? '',
           element:     card.element ?? '',
           max_copies:  card.max_copies ?? 3,

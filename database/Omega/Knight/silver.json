@@ -8,6 +8,7 @@
     {
       "code": "lacaille_puppis",
       "name": "Puppis Lacaille",
+      "art_tags": "1boy, male focus, silver armor, sleek armor, ship stern motif, instructor",
       "rarity": "rare",
       "cost": 2,
       "generate": 3,
@@ -68,6 +69,7 @@
     {
       "code": "tsubaki_vela",
       "name": "Vela Tsubaki",
+      "art_tags": "1girl, silver armor, sleek armor, sail motif, instructor",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,

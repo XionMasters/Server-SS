@@ -5,15 +5,12 @@
   "type": "knight",
   "rank": "Gold Saint",
   "cards": [
-    {
-      "saga": "Santuario",
-      "type": "knight",
-      "rank": "Gold",
-      "cards": [
         {
           "code": "aiolia_leo",
           "name": "Aiolia de Leo",
-          "rarity": "gold",
+          "art_tags": "1boy, male focus, short brown hair, gold armor, leo gold cloth, lion helmet, lightning",
+          "art_negative": "long hair, blonde hair, mane, cape",
+          "rarity": "legendary",
           "cost": 8,
           "generate": 0,
           "faction": "Athena",
@@ -31,30 +28,31 @@
           "abilities": [
             {
               "name": "Slayer Fist",
-              "type": "active",
+              "type": "activa",
               "description": "Paga 3 DIP; el proximo BA de Aiolia de Leo ignora AR del enemigo.",
               "effects": {
                 "trigger": "ACTIVE",
+                "cost": [{ "type": "life", "amount": 3 }],
+                "conditions": [{ "type": "no_status", "status": "ignore_armor" }],
                 "actions": [
                   {
                     "type": "apply_status",
-                    "status": "ignore_ar",
-                    "target": "self",
-                    "value": 1,
-                    "duration": 1
+                    "status": "ignore_armor",
+                    "target": "self"
                   }
                 ]
               }
             },
             {
               "name": "Lightspeed",
-              "type": "passive",
+              "type": "pasiva",
               "description": "Los BA del usuario ignoran evasion del enemigo.",
               "effects": {
-                "trigger": "PASSIVE",
+                "trigger": "CARD_PLAYED",
                 "actions": [
                   {
-                    "type": "ignore_evasion",
+                    "type": "apply_status",
+                    "status": "pierce_evasion",
                     "target": "self"
                   }
                 ]
@@ -68,13 +66,13 @@
           ],
           "collection_id": "santuario",
           "artist": null
-        }
-      ]
-    },
+        },
     {
       "code": "mu_aries",
       "name": "Mu de Aries",
-      "rarity": "gold",
+      "art_tags": "ar13smucdz, 1boy, male focus, long purple hair, aries gold cloth",
+      "art_loras": { "ar13smucdz": 0.8 },
+      "rarity": "legendary",
       "cost": 7,
       "generate": 0,
       "faction": "Athena",
@@ -92,32 +90,34 @@
       "abilities": [
         {
           "name": "Star Dust",
-          "type": "active",
+          "type": "activa",
           "description": "Selecciona un aliado y restaura sus puntos de AR originales. Ese aliado también gana un incremento permanente de AR +1.",
+          "_pending": "Restaurar la AR original requiere guardar la AR base de la carta en el GameState. Hoy solo aplica el +1 permanente.",
           "effects": {
             "trigger": "ACTIVE",
             "actions": [
               {
-                "type": "restore_ar",
-                "target": "ally"
-              },
-              {
-                "type": "modify_stat",
-                "stat": "ar",
-                "target": "ally",
-                "value": 1,
-                "duration": "permanent"
+                "type": "request_selection",
+                "zone": "field",
+                "filter": { "type": "knight" },
+                "destination": "field",
+                "on_select": [
+                  { "type": "modify_stat", "stat": "defense", "target": "selected", "amount": 1 }
+                ]
               }
             ]
           }
         },
         {
           "name": "Muvian Aura",
-          "type": "passive",
+          "type": "pasiva",
           "description": "El usuario y sus aliados son inmunes a condiciones negativas.",
+          "_pending": "Solo protege a los aliados en campo cuando Mu entra; los que entren después no la reciben.",
           "effects": {
-            "trigger": "PASSIVE",
-            "actions": []
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "immune_negative", "target": "all_allies" }
+            ]
           }
         }
       ],
@@ -132,7 +132,8 @@
     {
       "code": "aldebaran_taurus",
       "name": "Aldebaran de Tauro",
-      "rarity": "gold",
+      "art_tags": "1boy, male focus, muscular, giant, dark skin, gold armor, taurus gold cloth, bull horns helmet",
+      "rarity": "legendary",
       "cost": 7,
       "generate": 0,
       "faction": "Athena",
@@ -150,36 +151,28 @@
       "abilities": [
         {
           "name": "Cosmic Wrap",
-          "type": "active",
+          "type": "activa",
           "description": "El proximo BA del usuario causa PAR al soldado oponente.",
           "effects": {
             "trigger": "ACTIVE",
+            "conditions": [{ "type": "no_status", "status": "electric_charge" }],
             "actions": [
               {
                 "type": "apply_status",
-                "status": "paralyzed",
-                "target": "enemy",
-                "value": 1,
-                "duration": 1
+                "status": "electric_charge",
+                "target": "self"
               }
             ]
           }
         },
         {
           "name": "Posture",
-          "type": "passive",
+          "type": "pasiva",
           "description": "Pasar a modo defensa no consume el turno del usuario.",
+          "_pending": "El motor siempre marca exhausto al cambiar de modo (AttackRulesEngine.changeDefensiveMode).",
           "effects": {
-            "trigger": "PASSIVE",
-            "actions": [
-              {
-                "type": "modify_stat",
-                "stat": "defending",
-                "target": "self",
-                "value": 1,
-                "duration": "permanent"
-              }
-            ]
+            "trigger": "NONE",
+            "actions": []
           }
         }
       ],
@@ -194,7 +187,8 @@
     {
       "code": "aioros_sagittarius",
       "name": "Aioros de Sagitario",
-      "rarity": "gold",
+      "art_tags": "1boy, male focus, short brown hair, gold armor, sagittarius gold cloth, golden wings, golden bow",
+      "rarity": "legendary",
       "cost": 7,
       "generate": 0,
       "faction": "Athena",
@@ -220,7 +214,7 @@
             "actions": [
               {
                 "type": "apply_status",
-                "status": "ignore_evade_mode",
+                "status": "pierce_evasion",
                 "target": "self"
               }
             ]
@@ -252,7 +246,8 @@
     {
       "code": "deathmask_cancer",
       "name": "Deathmask de Cancer",
-      "rarity": "gold",
+      "art_tags": "1boy, male focus, short spiky blue hair, evil grin, gold armor, cancer gold cloth, ghosts, dead faces",
+      "rarity": "legendary",
       "cost": 7,
       "generate": 0,
       "faction": "Hades",
