@@ -87,6 +87,8 @@ export interface EventPayloadMap {
   SELECTION_RESOLVED: {
     selection_id: string;
     chosen_card_id: string;
+    /** Solo en selecciones de posición (zone 'field_slot'); chosen_card_id es el caballero movido. */
+    chosen_slot?: number;
     source_card_id: string;
     zone: string;  // zona desde la que se eligió
   };

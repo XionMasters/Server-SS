@@ -93,6 +93,8 @@ export class TechniqueManager {
           ta_cost: Number(ts.ta_cost ?? 0),
           compatible_tags: Array.isArray(ts.compatible_tags) ? ts.compatible_tags : [],
           ignore_ar: ts.ignore_ar === true,
+          ignore_defense_mode: ts.ignore_defense_mode === true,
+          target_all: ts.target_all === true,
           ta_effects: Array.isArray(ts.ta_effects) ? ts.ta_effects : [],
         };
 

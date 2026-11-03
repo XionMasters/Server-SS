@@ -28,12 +28,14 @@ export function serializeCardInPlay(cardInPlay: any) {
   const effective_ce = base_ce + computeCeBonus(effects);
   const effective_ar = base_ar + computeArBonus(effects);
 
-  // Para partidas antiguas donde los stats se guardaron como 0,
-  // hacer fallback a los valores base del CardKnight
-  const effective_ce_final = effective_ce > 0 ? effective_ce : (knight?.attack ?? 0);
-  const effective_ar_final = effective_ar > 0 ? effective_ar : (knight?.defense ?? 0);
+  // Fuera del campo (mano, mazo, yomotsu) los stats se guardan como 0: se muestran los base
+  // del CardKnight. En el campo 0 es un valor real (cosmos gastado, AR reducida) y se respeta.
+  const onField = cardInPlay.zone === 'field_knight';
+  const orBase = (value: number, base: number | undefined) => (onField || value > 0 ? value : (base ?? 0));
+  const effective_ce_final = orBase(effective_ce, knight?.attack);
+  const effective_ar_final = orBase(effective_ar, knight?.defense);
   const current_health     = cardInPlay.current_health > 0 ? cardInPlay.current_health : (knight?.health ?? 0);
-  const current_cosmos     = cardInPlay.current_cosmos > 0 ? cardInPlay.current_cosmos : (knight?.cosmos ?? 0);
+  const current_cosmos     = orBase(cardInPlay.current_cosmos ?? 0, knight?.cosmos);
 
   const cardData: any = {
     id: card?.id,
@@ -48,6 +50,8 @@ export function serializeCardInPlay(cardInPlay: any) {
     faction: card?.faction || '',
     element: card?.element || '',
     tags: card?.tags || [],
+    character: card?.character ?? null,
+    unique: card?.unique === true,
   };
 
   if (knight) {
@@ -78,6 +82,8 @@ export function serializeCardInPlay(cardInPlay: any) {
       hit_ce: technique.hit_ce || 0,
       ta_cost: technique.ta_cost || 0,
       compatible_tags: technique.compatible_tags || [],
+      // Si true, golpea a todos los caballeros rivales: el cliente no pide objetivo
+      target_all: technique.target_all === true,
     };
   }
 

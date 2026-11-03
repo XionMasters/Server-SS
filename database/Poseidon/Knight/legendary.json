@@ -8,6 +8,7 @@
     {
       "code": "julian_solo",
       "name": "Julian Solo",
+      "character": "julian",
       "art_tags": "1boy, male focus, long blue hair, white suit, elegant, ship deck",
       "rarity": "epic",
       "cost": 2,
@@ -97,6 +98,7 @@
     {
       "code": "poseidon_emperor",
       "name": "Poseidón, Emperador de los Mares",
+      "character": "poseidon",
       "art_tags": "1boy, male focus, long blue hair, golden scale armor, holding golden trident, throne, divine aura",
       "rarity": "legendary",
       "cost": 5,
@@ -182,6 +184,7 @@
     {
       "code": "poseidon_spirit",
       "name": "Espíritu de Poseidón",
+      "character": "poseidon",
       "art_tags": "1boy, male focus, giant, ghost, translucent, glowing eyes, long blue hair, ocean",
       "rarity": "legendary",
       "cost": 4,

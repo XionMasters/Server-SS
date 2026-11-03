@@ -658,7 +658,7 @@ function resetCardForm() {
 
     setVal('f-code', ''); setVal('f-type', 'knight'); setVal('f-rarity', 'common');
     setVal('f-cost', '0'); setVal('f-generate', '0'); setVal('f-max-copies', '3');
-    setChk('f-unique', false);
+    setChk('f-unique', false); setVal('f-character', '');
     setVal('f-faction', ''); setVal('f-element', ''); setVal('f-collection', ''); setVal('f-image-url', '');
     ['es','en','pt'].forEach(l => { setVal(`f-name-${l}`, ''); setVal(`f-desc-${l}`, ''); });
     setVal('f-attack', '0'); setVal('f-defense', '0'); setVal('f-health', '6'); setVal('f-cosmos', '6');
@@ -679,6 +679,7 @@ function populateCardForm(card) {
     setVal('f-generate', card.generate ?? 0);
     setVal('f-max-copies', card.max_copies ?? 3);
     setChk('f-unique', card.unique);
+    setVal('f-character', card.character);
     setVal('f-faction', card.faction);
     setVal('f-element', card.element);
     setVal('f-collection', card.collection_id);
@@ -893,6 +894,7 @@ async function saveCard() {
         generate:     parseInt(document.getElementById('f-generate').value) || 0,
         max_copies:   parseInt(document.getElementById('f-max-copies').value) || 3,
         unique:       document.getElementById('f-unique').checked,
+        character:    document.getElementById('f-character').value.trim() || null,
         faction:      document.getElementById('f-faction').value.trim() || null,
         element:      document.getElementById('f-element').value || null,
         collection_id: document.getElementById('f-collection').value.trim() || null,

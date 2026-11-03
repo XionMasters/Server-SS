@@ -24,7 +24,7 @@ import { resolveWinCondition, type GameState, type PendingSelection } from '../G
 import type { GameEvent } from '../events/GameEvents';
 import type { AbilityDefinition, CostDefinition } from './AbilityDefinition';
 import { ConditionRegistry, type ConditionContext } from '../conditions/ConditionRegistry';
-import { ActionRegistry, type ActionContext, type ActionResult } from '../actions/ActionRegistry';
+import { ActionRegistry, matchesCardFilter, type ActionContext, type ActionResult } from '../actions/ActionRegistry';
 import type { EngineContext } from '../EngineContext';
 import { randomUUID } from 'crypto';
 
@@ -75,6 +75,11 @@ function findSourceCard(state: GameState, player: any, sourceCardId: string): an
     );
 }
 
+/** Escenario que controla el jugador: el compartido (state.scenario) si es suyo. */
+function ownStage(state: GameState, playerNumber: 1 | 2): any {
+    return state.scenario?.player_number === playerNumber ? state.scenario : null;
+}
+
 function buildConditionContext(
     state: GameState,
     playerNumber: 1 | 2,
@@ -101,6 +106,7 @@ function buildConditionContext(
             hand: (player as any).hand ?? [],
             field_knights: player.field_knights,
             graveyard: (player as any).graveyard ?? [],
+            stage: ownStage(state, playerNumber),
             life: (player as any).life,
             cosmos: (player as any).cosmos,
         },
@@ -108,6 +114,7 @@ function buildConditionContext(
             hand: (opponent as any).hand ?? [],
             field_knights: opponent.field_knights,
             graveyard: (opponent as any).graveyard ?? [],
+            stage: ownStage(state, playerNumber === 1 ? 2 : 1),
             life: (opponent as any).life,
             cosmos: (opponent as any).cosmos,
         },
@@ -120,6 +127,11 @@ function buildConditionContext(
  * Un coste de descarte se paga directamente si el cliente indicó una carta de su mano;
  * si no (o si el objetivo indicado es otra carta, p. ej. un caballero), se pide selección.
  */
+/** Cartas de la mano que se pueden pagar como descarte (todas, salvo que el coste declare `filter`). */
+function discardableCards(hand: any[], cost: CostDefinition): any[] {
+    return cost.filter ? hand.filter((c: any) => matchesCardFilter(c, cost.filter)) : hand;
+}
+
 function directDiscardCardId(hand: any[], event: GameEvent): string | null {
     const id = event.targetCardId;
     return id && hand.some((c: any) => c.instance_id === id) ? id : null;
@@ -150,8 +162,13 @@ function validateCosts(
             }
         // Descarte: en el camino directo la carta ya está validada (está en la mano);
         // en el interactivo se pedirá selección, así que basta con tener cartas en mano.
-        if (cost.type === 'discard' && (ctx.player.hand ?? []).length === 0) {
-            return { valid: false, error: 'Necesitas al menos una carta en mano para descartar' };
+        if (cost.type === 'discard' && discardableCards(ctx.player.hand ?? [], cost).length === 0) {
+            return {
+                valid: false,
+                error: cost.filter
+                    ? 'No tienes en mano ninguna carta que cumpla el requisito de descarte'
+                    : 'Necesitas al menos una carta en mano para descartar',
+            };
         }
     }
     return { valid: true };
@@ -193,7 +210,7 @@ function applyCosts(
             (card as any).current_cosmos -= (cost.amount ?? 0);
         }
         if (cost.type === 'discard') {
-            const discardId = directDiscardCardId(player.hand ?? [], event);
+            const discardId = directDiscardCardId(discardableCards(player.hand ?? [], cost), event);
             if (discardId) {
                 // Camino directo: la carta indicada va a los cositos (igual que en el interactivo)
                 const idx = player.hand.findIndex((c: any) => c.instance_id === discardId);
@@ -204,6 +221,9 @@ function applyCosts(
             } else {
                 // Camino interactivo: señalizar que se necesita selección del jugador
                 costExtras.needs_discard_selection = true;
+                costExtras.discard_filter = cost.filter;
+                // Siempre la lista explícita: el cliente muestra estas opciones sin calcular reglas
+                costExtras.discard_options = discardableCards(player.hand ?? [], cost).map((c: any) => c.instance_id);
             }
         }
         if (cost.type === 'life') {
@@ -301,7 +321,7 @@ export const AbilityEngine = {
                 id: selectionId,
                 player_number: playerNumber,
                 zone: 'hand',
-                filter: undefined,
+                filter: costExtras.discard_filter,
                 destination: 'cositos',
                 on_select: [
                     // Primero descartar la carta elegida
@@ -314,6 +334,8 @@ export const AbilityEngine = {
                 // Conservar el objetivo elegido para las acciones con target 'target'
                 ...(event.targetCardId ? { target_card_id: event.targetCardId } : {}),
                 created_at: Date.now(),
+                // SelectionService solo acepta las cartas de esta lista
+                visible_card_ids: costExtras.discard_options,
             };
             ctx.state.pending_selection = pendingSelection;
             return {

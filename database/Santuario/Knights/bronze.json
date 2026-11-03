@@ -8,6 +8,7 @@
     {
       "code": "jabu_unicorn",
       "name": "Jabu de Unicornio",
+      "character": "jabu",
       "art_tags": "1boy, male focus, short brown hair, white unicorn armor, horned helmet",
       "rarity": "rare",
       "cost": 2,
@@ -93,6 +94,7 @@
     {
       "code": "nachi_wolf",
       "name": "Nachi de Lobo",
+      "character": "nachi",
       "art_tags": "1boy, male focus, short dark hair, white wolf armor",
       "rarity": "common",
       "cost": 0,
@@ -182,6 +184,7 @@
     {
       "code": "geki_bear",
       "name": "Geki de Oso",
+      "character": "geki",
       "art_tags": "1boy, male focus, muscular, large build, short black hair, brown bear armor",
       "rarity": "common",
       "cost": 0,
@@ -255,6 +258,7 @@
     {
       "code": "lionet_ban",
       "name": "Ban de León Menor",
+      "character": "ban",
       "art_tags": "1boy, male focus, stocky, short black hair, orange lion cub armor, claws",
       "rarity": "common",
       "cost": 0,
@@ -332,6 +336,7 @@
     {
       "code": "ichi_hydra",
       "name": "Ichi de Hidra",
+      "character": "ichi",
       "art_tags": "1boy, male focus, thin, ugly, pale, green hydra armor, claws",
       "rarity": "common",
       "cost": 0,
@@ -412,6 +417,7 @@
     {
       "code": "june_chameleon",
       "name": "June de Camaleón",
+      "character": "june",
       "art_tags": "1girl, long blonde hair, mask, pink chameleon armor, whip",
       "rarity": "common",
       "cost": 0,

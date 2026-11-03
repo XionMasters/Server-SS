@@ -23,7 +23,7 @@ No hay linter configurado; `npm run build` sirve como comprobación de tipos.
 
 Requiere `.env` (ver `.env.example`): `DB_*`, `JWT_SECRET`, `ADMIN_PASSWORD`, `CORS_ORIGIN` y `SMTP_*`. `validateSecurityConfiguration()` hace que el arranque falle si falta la configuración de seguridad.
 
-**Fuente única de cartas: `database/<Saga>/**/*.json`** (Santuario, Poseidon, Omega, BlackSaints). No hay otras fuentes: `seed.sql` solo trae packs, avatares y dorsos. Se cargan con `npm run seed:cards` (`scripts/loadFromJson.ts`, upsert por `code`; `seed:cards:dry` valida sin escribir; `--file <json>` para uno solo). `tests/cards/card-data-integrity.test.ts` exige `code` único, rareza válida y habilidades que el motor entienda.
+**Fuente única de cartas: `database/<Saga>/**/*.json`** (Santuario, Poseidon, Omega, BlackSaints); `database/bkp/` son copias antiguas que el cargador y los tests ignoran. No hay otras fuentes: `seed.sql` solo trae packs, avatares y dorsos. Se cargan con `npm run seed:cards` (`scripts/loadFromJson.ts`, upsert por `code`; `seed:cards:dry` valida sin escribir; `--file <json>` para uno solo). `tests/cards/card-data-integrity.test.ts` exige `code` único, rareza válida y habilidades que el motor entienda.
 
 Imágenes de carta: `tools/card-generator/` (Python + Pillow). `generate_art.py` genera el arte con IA en `art/{code}.jpg` (usa `art_prompt` de la carta o lo construye); `generate_v2.py --all` compone la carta completa en `src/assets/cards/{code}.webp`. `loadFromJson` usa ese archivo como `image_url` si existe y, si no, el `image_url` del JSON. El cliente muestra `image_url` tal cual (sin marco propio).
 
@@ -31,7 +31,7 @@ Otros scripts de datos (escriben en la base de datos de `.env`): `generate:packs
 
 ## Esquema y migraciones
 
-- `database/schema.sql` es el esquema base; `database/seed.sql`, los datos que no son cartas.
+- `database/schema.sql` es el esquema base; `database/seed.sql`, los datos que no son cartas. BD local nueva: crear la BD de `.env`, aplicar `schema.sql` y `seed.sql`, y luego `npm run seed:cards` (el registro de usuarios necesita las cartas del mazo inicial). Una BD creada con un `schema.sql` anterior se pone al día con `011_card_types_ranks_and_techniques.sql`.
 - `src/migrations/sql/NNN_*.sql` contiene migraciones SQL numeradas que se aplican a mano.
 - Con `NODE_ENV=development`, `src/config/database.ts` ejecuta `sequelize.sync()` y además **migraciones defensivas** que añaden columnas si faltan (`rng_seed`, `pending_selection`, `ability_key`, `code`, `rank`…). Si añades una columna nueva que debe existir en local, crea el SQL numerado y su comprobación en ese archivo.
 - Las tablas usan PK UUID y columnas `snake_case`. Las asociaciones están en `src/infrastructure/database/models/associations.ts`.
@@ -56,6 +56,7 @@ src/config          → BD, reglas de mazo y mazo inicial
 
 ## Flujo de una partida
 
+0. **Emparejamiento**: al encontrar rival, la partida queda directamente en `playerN_turn` (no hace falta `start_first_turn`, que solo usa TEST). Se envía `match_found` (tablero inicial, sin `valid_actions`) y a continuación un `match_update` completo.
 1. **Conexión WS** en `/ws` (`infrastructure/websocket/server.ts`). Se autentica con JWT, aplica límite de frecuencia por socket, payload máximo de 64 KB y heartbeat cada 30 s. Al conectar se llama a `matchesCoordinator.recoverOnSocketConnect` y, si hay partida activa, se emite `match_resumed`. Al desconectar se borran las partidas del jugador en estado `waiting`.
 2. **Enrutado**: los mensajes llegan como `{ event, data }` y `WebSocketRouter` los envía a los handlers de `interfaces/websocket/handlers/`. Los eventos de partida pasan por `withVerifiedEmail` y los de administración por `withAdmin`. El matchmaking por HTTP está deshabilitado (ver `tests/matches/matchmaking-http-disabled.test.ts`): se busca partida por WS.
 3. **Coordinación**: `app/matches/coordinators/matchesCoordinator.ts` es un orquestador ligero que delega en `lifecycle/*` (search, start, setup, abandon, state) y en `actions/*Manager` (turn, knight, card, attack, technique, selection).
@@ -72,6 +73,12 @@ Las acciones originadas por HTTP (por ejemplo, abandonar) notifican por WS media
 - `CARD_PLAYED` solo dispara habilidades de la carta jugada. `TURN_END` y `KNIGHT_DIED` disparan para ambos jugadores (usar `event_player_is_self` si es "turno propio"). Las pasivas de caballero con `BA_DEALT`/`BA_RECEIVED`/`TA_*`/`DAMAGE_DEALT` necesitan `event_source_is_self` o reaccionan a cualquier carta.
 - Todo daño pasa por `applyDamage` (aplica `last_stand`); las inmunidades a estados, por `isStatusBlocked`.
 - `ActionResolver` envía `ability_key` como `ability_name`; `knightManager.useAbility` acepta la clave o el nombre normalizado.
+- `max_copies` limita las copias en el mazo; `unique` limita el **campo**: un jugador no puede tener dos caballeros del mismo `character` (ej: `kanon` para Kanon v1 y v2) si alguno es único (`domain/game/rules/unique.rules.ts`, aplicado al jugar desde la mano y en `summonKnight`). Todo caballero único debe declarar `character` (lo exige el test de integridad).
+- La Provocación (estado `taunt`) obliga a los BA rivales a ir contra el portador mientras no esté inmovilizado; las TA no están obligadas. `armor_unbreakable` anula el `ignore_armor` de los BA contra el portador (las TA con `ignore_ar` siguen ignorando la AR).
+- Los bonos de escenario se aplican con `duration: 1` al entrar y en cada `TURN_START` del dueño (el descuento de efectos ocurre antes, así que cubren el turno rival). Un caballero que entra después no los recibe hasta el siguiente turno, salvo que tenga su propia pasiva de entrada con `stage_has_card_code` (ej: Baian con el Pilar del Pacífico Norte).
+- Una selección puede encadenar otra: `request_slot_selection` en el `on_select` pide una posición (zona `field_slot`, el cliente responde `chosen_slot`) y `move_to_slot` mueve/intercambia.
+- Cada habilidad activa se usa **una vez por turno y caballero** (marker `ability_used`, que `KnightRulesEngine` añade y `ActionResolver` respeta). Toda `pending_selection` debe llevar `visible_card_ids` (o `visible_slots`): el cliente solo muestra esas opciones.
+- Cada tipo de carta tiene su zona (`PLAY_ZONE_BY_TYPE` en `domain/game/CardTypes.ts`): el escenario va a `field_scenario` (`state.scenario`, con `player_number` del dueño) y `valid_actions.play_zone` le dice al cliente a dónde va cada carta de la mano.
 
 ## Otros
 
@@ -79,5 +86,5 @@ Las acciones originadas por HTTP (por ejemplo, abandonar) notifican por WS media
 - Panel de administración: es HTML/JS estático en `src/views/`, se sirve en `/admin` con su propia CSP y su API está en `/api/admin`.
 - Las imágenes se sirven estáticamente desde `src/assets` en `/assets`.
 - `tools/card-generator/` no forma parte del build (ver "Imágenes de carta" arriba).
-- `src/config/starter-deck.config.ts` aún referencia UUID de cartas antiguas; solo lo usa el script manual `assignStarterCards.ts`.
+- `src/config/starter-deck.config.ts` define el mazo inicial por `card_code`; `assignStarterCards` lo asigna **en el registro** (si faltan las cartas, el registro falla: cargar antes con `seed:cards`).
 - `tests/phase8/` incluye, además de los tests de Jest, documentación de pruebas manuales (Postman, SQL).

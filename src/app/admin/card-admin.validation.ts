@@ -21,6 +21,7 @@ const CARD_FIELDS: Record<string, { kind: FieldKind; max?: number; nullable?: bo
   element: { kind: 'string', values: CARD_ELEMENTS, nullable: true },
   max_copies: { kind: 'int' },
   unique: { kind: 'bool' },
+  character: { kind: 'string', max: 64, nullable: true },
   playable_zones: { kind: 'stringArray', nullable: true },
   collection_id: { kind: 'string', max: 50, nullable: true },
   artist: { kind: 'string', max: 100, nullable: true },

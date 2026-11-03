@@ -183,6 +183,91 @@
       "artist": null
     },
     {
+      "code": "north_pacific_pillar",
+      "name": "Pilar del Pacífico Norte",
+      "art_tags": "no humans, scenery, giant pillar, underwater, ocean sky",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Poseidon",
+      "element": "wind",
+      "image_url": "stages/north_pacific_pillar.webp",
+      "art_prompt": "The North Pacific Pillar, Baian of Sea Horse's domain in the Undersea Sanctuary. A colossal ancient Greek column rises from a vast submerged hall, its base carved with sea-horse motifs; swirling currents and a faint shimmering wall of compressed air surround it like an invisible barrier. Deep Pacific blue light, sturdy and defensive atmosphere. No characters. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
+      "description": "Al inicio de tu turno, tus caballeros [general], [mariner] y [poseidon] recuperan 1 LP. Mientras esté activo, la armadura de tus [seahorse] no puede ser ignorada por los BA.",
+      "abilities": [
+        {
+          "name": "Aliento del Pacífico",
+          "type": "campo",
+          "ability_key": "np_pillar_heal",
+          "description": "Inicio de tu turno: [general], [mariner] y [poseidon] recuperan 1 LP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "heal",
+                "amount": 1,
+                "target": "all_allies",
+                "filter": {
+                  "tag": [
+                    "general",
+                    "mariner",
+                    "poseidon"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Muralla de Baian",
+          "type": "campo",
+          "ability_key": "np_pillar_armor_play",
+          "description": "Al entrar: la armadura de tus [seahorse] no puede ser ignorada por los BA.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "seahorse"
+                },
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Muralla de Baian (turno)",
+          "type": "campo",
+          "ability_key": "np_pillar_armor_turn",
+          "description": "Inicio de tu turno: la armadura de tus [seahorse] no puede ser ignorada por los BA.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "all_allies",
+                "filter": {
+                  "tag": "seahorse"
+                },
+                "duration": 1
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": [
+        "field_occasion"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
       "code": "south_atlantic_pillar",
       "name": "Pilar del Atlántico Sur",
       "art_tags": "no humans, scenery, giant pillar, underwater, ocean sky",

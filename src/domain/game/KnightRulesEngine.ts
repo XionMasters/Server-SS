@@ -19,6 +19,7 @@ import { BASE_MATCH_RULES } from './rules/base.rules';
 import { AbilityEngine } from './abilities/AbilityEngine';
 import type { AbilityDefinition } from './abilities/AbilityDefinition';
 import type { GameEvent } from './events/GameEvents';
+import { isAbilityUsedThisTurn, markAbilityUsed } from './StatusEffects';
 
 // Las habilidades activas ahora viven como AbilityDefinition en card_abilities.effects (JSONB).
 // Ver AbilityEngine para la lógica de ejecución. No hay handlers por carta aquí.
@@ -157,13 +158,19 @@ export class KnightRulesEngine {
     cardId: string,
     abilityDef: AbilityDefinition,
     event: GameEvent,
+    abilityKey?: string,
   ): ValidationResult {
     const turnCheck = this.validateTurn(state, playerNumber);
     if (!turnCheck.valid) return turnCheck;
 
     const player = playerNumber === 1 ? state.player1 : state.player2;
-    if (!player.field_knights.some(c => c.instance_id === cardId))
+    const caster = player.field_knights.find(c => c.instance_id === cardId);
+    if (!caster)
       return { valid: false, error: 'Caballero no encontrado en campo' };
+
+    // Cada habilidad activa se puede usar una vez por turno y caballero
+    if (abilityKey && isAbilityUsedThisTurn(caster.status_effects ?? [], abilityKey))
+      return { valid: false, error: 'Esta habilidad ya se usó este turno' };
 
     return AbilityEngine.canActivate(abilityDef, state, playerNumber, cardId, event);
   }
@@ -183,8 +190,14 @@ export class KnightRulesEngine {
     cardId: string,
     abilityDef: AbilityDefinition,
     event: GameEvent,
+    abilityKey?: string,
   ): { newState: GameState; affectedIds: string[]; extras?: Record<string, any>; events: GameEvent[] } {
     const result = AbilityEngine.execute(abilityDef, state, playerNumber, cardId, event);
+    if (abilityKey) {
+      const player = playerNumber === 1 ? result.newState.player1 : result.newState.player2;
+      const caster = player.field_knights.find(c => c.instance_id === cardId);
+      if (caster) caster.status_effects = markAbilityUsed(caster.status_effects ?? [], abilityKey);
+    }
     // Garantizar que el caster siempre figure en affectedIds aunque la habilidad
     // no lo modifique directamente (ej: coin flip que falla).
     const affectedIds = Array.from(new Set([cardId, ...result.affectedIds]));

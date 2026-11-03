@@ -1,6 +1,6 @@
 {
   "_schema": 1,
-  "_note": "Black Saints series. Las habilidades 'Dark Effect' aplican modificadores one-shot que se consumen en el próximo Technique Attack (ta_* status). El motor de TA las consumirá cuando esté implementado. La pasiva 'Black Saint' (+3 Ce/Ar vs Bronze/Silver) se aplica al inicio del turno del portador.",
+  "_note": "Black Saints series. Origen: Black Pegasus/Dragon/Cygnus/Andromeda/Phoenix, Jango, Guilty y Fukuryū son del manga original; Ávido, Rusé, Alegre, Yudo y Laimargos forman la organización Nero de The Lost Canvas Gaiden (Cáncer, cap. 29); Aquila, Ophiuchus y Lacerta vienen del juego Saint Seiya Senki. Las habilidades 'Dark Effect' aplican modificadores one-shot (ta_* status) que TechniqueRulesEngine consume en el próximo Technique Attack del portador, con cualquier técnica compatible. Los Black Saints comparten tag con su contraparte (pegasus, dragon, lizard…) y pueden usar sus técnicas; los tags black_<constelación> habilitan además sus técnicas exclusivas (BlackSaints/techniques.json). La pasiva 'Black Saint' (+3 Ce/Ar vs Bronze/Silver) se aplica al inicio del turno del portador.",
   "saga": "Black Saint Series",
   "type": "knight",
   "rank": "Black Saint",
@@ -8,15 +8,16 @@
     {
       "code": "black_altar_avido",
       "name": "Black Altar Avido",
-      "art_tags": "1girl, long black hair, black armor, dark cape, sinister smile, purple dark aura",
+      "character": "avido",
+      "art_tags": "1boy, male focus, adult man, long black hair, black altar armor, dark cape, sinister smile, burning souls, purple dark aura",
       "rarity": "epic",
       "cost": 6,
       "generate": 0,
       "faction": "Black Saints",
       "element": "dark",
       "image_url": "black/Black_Altar.webp",
-      "description": "La líder de los Black Saints. Sus técnicas oscuras permiten reciclar aliados caídos para mantener una ventaja de cartas implacable.",
-      "tags": ["black_saint", "altar", "avido"],
+      "description": "El don de Nero, antiguo discípulo de Hakurei, encarna la avaricia. Domina las técnicas Sekishiki y da forma sólida a las almas que captura.",
+      "tags": ["black_saint", "altar", "avido", "nero"],
       "stats": {
         "attack": 6,
         "defense": 4,
@@ -29,11 +30,13 @@
         {
           "name": "Black Alchemy",
           "type": "activa",
-          "description": "Descarta 1 Black Saint de tu mano; roba 2 cartas.",
+          "description": "Paga 2 CP y descarta 1 Black Saint de tu mano; roba 2 cartas.",
           "effects": {
             "trigger": "ACTIVE",
-            "cost": [{ "type": "discard", "amount": 1 }],
-            "conditions": [{ "type": "hand_has_tag", "tag": "black_saint" }],
+            "cost": [
+              { "type": "cosmos", "amount": 2 },
+              { "type": "discard", "amount": 1, "filter": { "tag": "black_saint" } }
+            ],
             "actions": [
               { "type": "draw_card", "amount": 2 }
             ]
@@ -62,6 +65,7 @@
     {
       "code": "black_andromeda",
       "name": "Black Andromeda",
+      "character": "black_andromeda",
       "art_tags": "1boy, male focus, black andromeda armor, black chains, sinister expression",
       "rarity": "rare",
       "cost": 0,
@@ -70,7 +74,7 @@
       "element": "dark",
       "image_url": "black/Black_Andromeda.webp",
       "description": "La contraparte oscura de Shun. Sus cadenas corrompidas paralizan y envenenan.",
-      "tags": ["black_saint", "andromeda"],
+      "tags": ["black_saint", "andromeda", "black_andromeda"],
       "stats": {
         "attack": 1,
         "defense": 2,
@@ -114,6 +118,7 @@
     {
       "code": "black_aquila",
       "name": "Black Aquila",
+      "character": "black_aquila",
       "art_tags": "1boy, male focus, black eagle armor, eagle helmet, dark wings motif",
       "rarity": "rare",
       "cost": 0,
@@ -165,16 +170,17 @@
     },
     {
       "code": "black_crow",
-      "name": "Black Crow",
-      "art_tags": "1boy, male focus, black crow armor, black feathers, crows flying",
+      "name": "Black Crow Rusé",
+      "character": "ruse",
+      "art_tags": "1boy, male focus, handsome, vain expression, long hair, black crow armor, black feathers swirling, crows flying",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Black Saints",
       "element": "dark",
       "image_url": "black/Black_Crow.webp",
-      "description": "El Cuervo Negro invoca secuaces oscuros para fortalecer su posición.",
-      "tags": ["black_saint", "crow"],
+      "description": "Rusé, el Cuervo Negro de Nero, encarna el orgullo. Vanidoso hasta el extremo, cree que la belleza es lo más importante y detesta la fealdad. Sus plumas negras le sirven tanto de arma como de escudo.",
+      "tags": ["black_saint", "crow", "ruse", "nero"],
       "stats": {
         "attack": 1,
         "defense": 2,
@@ -192,6 +198,20 @@
             "trigger": "ACTIVE",
             "actions": [
               { "type": "apply_status", "status": "ta_summon_crow_token", "target": "self" }
+            ]
+          }
+        },
+        {
+          "name": "Defensa de Plumas Negras",
+          "type": "activa",
+          "ability_key": "ruse_black_feather_defense",
+          "description": "Paga 2 CP: Rusé entra en Modo Defensa y gana +2 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 2 }],
+            "actions": [
+              { "type": "apply_status", "status": "defense", "target": "self", "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 2, "duration": 1 }
             ]
           }
         },
@@ -218,6 +238,7 @@
     {
       "code": "black_cygnus",
       "name": "Black Cygnus",
+      "character": "black_cygnus",
       "art_tags": "1boy, male focus, black swan armor, dark ice, cold expression",
       "rarity": "rare",
       "cost": 0,
@@ -226,7 +247,7 @@
       "element": "dark",
       "image_url": "black/Black_Cygnus.webp",
       "description": "El Cisne Negro. Sus técnicas drenadas dejan al enemigo sin cosmos para actuar.",
-      "tags": ["black_saint", "cygnus"],
+      "tags": ["black_saint", "cygnus", "black_cygnus"],
       "stats": {
         "attack": 2,
         "defense": 2,
@@ -270,6 +291,7 @@
     {
       "code": "black_dragon",
       "name": "Black Dragon",
+      "character": "black_dragon",
       "art_tags": "1boy, male focus, long black hair, black dragon armor, black dragon shield",
       "rarity": "rare",
       "cost": 0,
@@ -278,7 +300,7 @@
       "element": "dark",
       "image_url": "black/Black_Dragon.webp",
       "description": "El Dragón Negro. Sus técnicas corroen la armadura del enemigo.",
-      "tags": ["black_saint", "dragon"],
+      "tags": ["black_saint", "dragon", "black_dragon"],
       "stats": {
         "attack": 2,
         "defense": 3,
@@ -322,6 +344,7 @@
     {
       "code": "black_hound_yudo",
       "name": "Black Hound Yudo",
+      "character": "yudo",
       "art_tags": "1boy, male focus, black hound armor, dog helmet, feral expression",
       "rarity": "rare",
       "cost": 3,
@@ -329,8 +352,8 @@
       "faction": "Black Saints",
       "element": "dark",
       "image_url": "black/Black_Hound_Yudo.webp",
-      "description": "El Lebrel Negro Yudo. Sus técnicas oscuras otorgan una momentánea invulnerabilidad a las condiciones negativas.",
-      "tags": ["black_saint", "hound", "yudo"],
+      "description": "Yudo, el Lebrel Negro de Nero, encarna la lujuria y siempre está rodeado de mujeres. Sus técnicas oscuras le otorgan una momentánea invulnerabilidad a las condiciones negativas.",
+      "tags": ["black_saint", "hound", "hunting_dogs", "yudo", "nero"],
       "stats": {
         "attack": 3,
         "defense": 2,
@@ -374,6 +397,7 @@
     {
       "code": "black_hound",
       "name": "Black Hound",
+      "character": "black_hound",
       "art_tags": "1boy, male focus, black hound armor, dog helmet, glowing red eyes",
       "rarity": "rare",
       "cost": 2,
@@ -382,7 +406,7 @@
       "element": "dark",
       "image_url": "black/Black_Hound.webp",
       "description": "El Lebrel Negro. Sus técnicas revelan los secretos del oponente.",
-      "tags": ["black_saint", "hound"],
+      "tags": ["black_saint", "hound", "hunting_dogs"],
       "stats": {
         "attack": 2,
         "defense": 2,
@@ -426,6 +450,7 @@
     {
       "code": "black_lacerta",
       "name": "Black Lacerta",
+      "character": "black_lacerta",
       "art_tags": "1boy, male focus, black lizard armor, crouching, sharp claws",
       "rarity": "rare",
       "cost": 3,
@@ -434,7 +459,7 @@
       "element": "dark",
       "image_url": "black/Black_Lacerta.webp",
       "description": "La Lacerta Negra. Sus técnicas amplifican el daño directo.",
-      "tags": ["black_saint", "lacerta"],
+      "tags": ["black_saint", "lacerta", "lizard"],
       "stats": {
         "attack": 3,
         "defense": 1,
@@ -478,6 +503,7 @@
     {
       "code": "black_ophiuchus",
       "name": "Black Ophiuchus",
+      "character": "black_ophiuchus",
       "art_tags": "1boy, male focus, black ophiuchus armor, black snakes, menacing",
       "rarity": "rare",
       "cost": 3,
@@ -530,6 +556,7 @@
     {
       "code": "black_pegasus",
       "name": "Black Pegasus",
+      "character": "black_pegasus",
       "art_tags": "1boy, male focus, black pegasus armor, dark purple poison aura, evil grin",
       "rarity": "rare",
       "cost": 0,
@@ -538,7 +565,7 @@
       "element": "dark",
       "image_url": "black/Black_Pegasus.webp",
       "description": "El Pegaso Negro. Sus técnicas envenenan lentamente al enemigo.",
-      "tags": ["black_saint", "pegasus"],
+      "tags": ["black_saint", "pegasus", "black_pegasus"],
       "stats": {
         "attack": 2,
         "defense": 1,
@@ -582,6 +609,7 @@
     {
       "code": "black_phoenix",
       "name": "Black Phoenix",
+      "character": "black_phoenix",
       "art_tags": "1boy, male focus, black phoenix armor, black flames, dark wings motif",
       "rarity": "rare",
       "cost": 0,
@@ -590,7 +618,7 @@
       "element": "dark",
       "image_url": "black/Black_Phoenix.webp",
       "description": "El Fénix Negro. Sus técnicas drenan el cosmos del rival.",
-      "tags": ["black_saint", "phoenix"],
+      "tags": ["black_saint", "phoenix", "black_phoenix"],
       "stats": {
         "attack": 3,
         "defense": 1,
@@ -634,6 +662,7 @@
     {
       "code": "black_whale_alegre",
       "name": "Black Whale Alegre",
+      "character": "alegre",
       "art_tags": "1boy, male focus, muscular, large build, black whale armor, laughing",
       "rarity": "rare",
       "cost": 3,
@@ -641,8 +670,8 @@
       "faction": "Black Saints",
       "element": "dark",
       "image_url": "black/Black_Whale_Alegre.webp",
-      "description": "La Ballena Negra Alegre. Sus técnicas atraviesan la defensa más sólida.",
-      "tags": ["black_saint", "whale", "alegre"],
+      "description": "Alegre, la Ballena Negra de Nero, encarna la ira. Su brutalidad atraviesa la defensa más sólida.",
+      "tags": ["black_saint", "whale", "alegre", "nero"],
       "stats": {
         "attack": 3,
         "defense": 3,
@@ -682,6 +711,388 @@
       "playable_zones": ["battlefield"],
       "collection_id": "black_saints",
       "artist": "Willytox"
+    },
+    {
+      "code": "ikki_black_saint_leader",
+      "name": "Ikki, Líder de los Caballeros Negros",
+      "character": "ikki",
+      "art_tags": "1boy, male focus, spiky dark blue hair, scar between eyes, phoenix bronze armor, dark cape, black saints behind him, volcanic island",
+      "rarity": "epic",
+      "cost": 5,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Ikki_Black_Leader.webp",
+      "description": "Ikki regresa de la Isla de la Reina Muerte al frente de los Black Saints. Su presencia endurece a sus seguidores y su Puño Fantasma quiebra la mente del enemigo.",
+      "tags": ["black_saint", "ikki", "phoenix", "bronze", "ikki_black"],
+      "stats": {
+        "attack": 5,
+        "defense": 3,
+        "health": 10,
+        "cosmos": 10,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Señor de los Caballeros Negros",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, tus caballeros [black_saint] ganan +1 CE durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "black_saint" }, "value": 1, "duration": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Puño Fantasma del Fénix",
+          "type": "activa",
+          "ability_key": "ikki_black_genma_ken",
+          "description": "Paga 4 CP: elige un caballero rival; queda paralizado (PAR) durante su próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 4 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_opponent",
+                "filter": { "type": "knight" },
+                "on_select": [
+                  { "type": "apply_status", "status": "paralyzed", "target": "selected", "duration": 2 }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "guilty_death_queen",
+      "name": "Guilty de la Isla de la Reina Muerte",
+      "character": "guilty",
+      "art_tags": "1boy, male focus, muscular, tall, expressionless iron mask, dark cloak, volcanic island, red sky",
+      "rarity": "epic",
+      "cost": 4,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Guilty.webp",
+      "description": "El maestro de Ikki, que entrenaba a sus discípulos con odio. Su muerte despierta el verdadero poder del Fénix.",
+      "tags": ["black_saint", "guilty", "death_queen"],
+      "stats": {
+        "attack": 5,
+        "defense": 4,
+        "health": 10,
+        "cosmos": 8,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Enseñanza del Odio",
+          "type": "activa",
+          "ability_key": "guilty_hatred_teaching",
+          "description": "Paga 2 CP: elige un caballero aliado; gana +3 CE durante este turno y recibe 1 de daño.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 2 }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": { "type": "knight" },
+                "on_select": [
+                  { "type": "apply_status", "status": "ce_boost", "target": "selected", "value": 3, "duration": 1 },
+                  { "type": "apply_damage", "target": "selected", "amount": 1 }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "Legado del Odio",
+          "type": "pasiva",
+          "description": "Cuando Guilty muere, tus caballeros [ikki] en campo ganan +2 CE de forma permanente.",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "conditions": [{ "type": "event_target_is_self" }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "ikki" }, "value": 2 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "jango_death_queen",
+      "name": "Jango de la Isla de la Reina Muerte",
+      "character": "jango",
+      "art_tags": "1boy, male focus, muscular, wild dark hair, sinister grin, black armor, volcanic island, black saints kneeling",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Jango.webp",
+      "description": "El tirano de la Isla de la Reina Muerte, que tenía bajo su mando a los Black Saints antes de la llegada de Ikki.",
+      "tags": ["black_saint", "jango", "death_queen"],
+      "stats": {
+        "attack": 4,
+        "defense": 2,
+        "health": 9,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Amo de la Isla",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, tus caballeros [black_saint] recuperan 1 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "restore_cosmos", "target": "all_allies", "filter": { "tag": "black_saint" }, "amount": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_saint_soldier",
+      "name": "Caballero Negro Raso",
+      "art_tags": "1boy, male focus, black armor, black helmet hiding face, dark aura, many identical soldiers",
+      "rarity": "common",
+      "cost": 0,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Saint_Soldier.webp",
+      "description": "Uno de los incontables Black Saints anónimos de la Isla de la Reina Muerte.",
+      "tags": ["black_saint"],
+      "stats": {
+        "attack": 1,
+        "defense": 1,
+        "health": 6,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_hercules_laimargos",
+      "name": "Black Hercules Laimargos",
+      "character": "laimargos",
+      "art_tags": "1boy, male focus, huge muscular build, obese, black hercules armor, eating greedily, feast table, sinister grin",
+      "rarity": "rare",
+      "cost": 3,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Hercules_Laimargos.webp",
+      "description": "Laimargos, el Hércules Negro de Nero, encarna la gula. Nunca se le vio combatir, pero su apetito parece no tener fondo.",
+      "tags": ["black_saint", "hercules", "black_hercules", "laimargos", "nero"],
+      "stats": {
+        "attack": 4,
+        "defense": 3,
+        "health": 11,
+        "cosmos": 7,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Hambre Insaciable",
+          "type": "activa",
+          "ability_key": "laimargos_insatiable_hunger",
+          "description": "Paga 3 CP: Laimargos recupera 3 LP y gana +1 AR hasta tu próximo turno.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [{ "type": "cosmos", "amount": 3 }],
+            "actions": [
+              { "type": "heal", "target": "self", "amount": 3 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 1, "duration": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_dragon_fukuryu",
+      "name": "Fukuryū, el Dragón Negro Ciego",
+      "character": "fukuryu",
+      "art_tags": "1boy, male focus, long black hair, closed eyes, blind, black dragon armor, calm expression, mist",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Black_Dragon_Fukuryu.webp",
+      "description": "El hermano gemelo ciego de Black Dragon. Juntos combaten como un solo dragón: uno ataca mientras el otro protege.",
+      "tags": ["black_saint", "dragon", "black_dragon", "fukuryu"],
+      "stats": {
+        "attack": 2,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 6,
+        "can_defend": true,
+        "defense_reduction": 0.4
+      },
+      "abilities": [
+        {
+          "name": "Dúo de Dragones",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, si Black Dragon está en tu campo, tus caballeros [black_dragon] ganan +2 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "field_has_card_code", "code": "black_dragon" }],
+            "actions": [
+              { "type": "apply_status", "status": "ar_boost", "target": "all_allies", "filter": { "tag": "black_dragon" }, "value": 2, "duration": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Black Saint",
+          "type": "pasiva",
+          "description": "Al inicio del turno, si el oponente tiene un soldado Bronze o Silver en campo, gana +3 CE y +3 AR durante este turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [{ "type": "opponent_field_has_any_tag", "tags": ["bronze", "silver"] }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "self", "value": 3, "duration": 1 },
+              { "type": "apply_status", "status": "ar_boost", "target": "self", "value": 3, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "phoenix_shadow",
+      "name": "Sombra del Fénix",
+      "art_tags": "1boy, male focus, black phoenix armor, black mask hiding face, dark silhouette, several identical figures, black flames",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "black/Phoenix_Shadow.webp",
+      "description": "Las sombras de Ikki: Black Phoenix sin rostro que actúan como una sola. Cuando una aparece, las demás la siguen.",
+      "tags": ["black_saint", "phoenix", "black_phoenix", "phoenix_shadow"],
+      "stats": {
+        "attack": 1,
+        "defense": 1,
+        "health": 5,
+        "cosmos": 4,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Las Sombras del Fénix",
+          "type": "pasiva",
+          "ability_key": "phoenix_shadow_summon",
+          "description": "Al jugar una Sombra del Fénix, las demás copias de tu mazo entran al campo (hasta llenar los espacios libres).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "event_source_is_self" }],
+            "actions": [
+              { "type": "summon_from_zone", "target": "copies_in_deck", "zone": "deck" }
+            ]
+          }
+        },
+        {
+          "name": "Cenizas para Ikki",
+          "type": "pasiva",
+          "ability_key": "phoenix_shadow_ashes",
+          "description": "Cuando esta Sombra muere, tus caballeros [ikki] recuperan 1 CP. (Esta pasiva también permite que las copias del mazo respondan al llamado.)",
+          "effects": {
+            "trigger": "KNIGHT_DIED",
+            "conditions": [{ "type": "event_target_is_self" }],
+            "actions": [
+              { "type": "restore_cosmos", "target": "all_allies", "filter": { "tag": "ikki" }, "amount": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Regreso al Fénix",
+          "type": "activa",
+          "ability_key": "phoenix_shadow_return",
+          "description": "La Sombra se disuelve y devuelve su poder a Ikki: tus caballeros [ikki] ganan +2 CE durante este turno y recuperan 2 LP.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "conditions": [{ "type": "field_has_tag", "tag": "ikki" }],
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "ikki" }, "value": 2, "duration": 1 },
+              { "type": "heal", "target": "all_allies", "filter": { "tag": "ikki" }, "amount": 2 },
+              { "type": "kill", "target": "self" }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
     }
   ]
 }

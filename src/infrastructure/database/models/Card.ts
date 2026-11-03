@@ -16,6 +16,7 @@ class Card extends Model {
   public element!: 'steel' | 'fire' | 'water' | 'earth' | 'wind' | 'light' | 'dark' | null;
   public max_copies!: number;
   public unique!: boolean;
+  public character!: string | null;
   public playable_zones!: string[] | null;
   public collection_id!: string | null;
   public artist!: string | null;
@@ -88,6 +89,11 @@ Card.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
+    },
+    // Personaje (ej: 'kanon'): con unique, uno solo por campo aunque haya varias versiones
+    character: {
+      type: DataTypes.STRING(64),
+      allowNull: true,
     },
     playable_zones: {
       type: DataTypes.ARRAY(DataTypes.STRING),

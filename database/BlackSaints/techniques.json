@@ -1,0 +1,273 @@
+{
+  "_schema": 1,
+  "_note": "Técnicas de los Black Saints. Cada Black Saint comparte tag con su contraparte (pegasus, dragon…) y puede usar también la técnica original; las de este archivo exigen el tag black_<constelación> y tienen un perfil propio. El Dark Effect del caballero se suma a cualquiera de ellas.",
+  "saga": "Black Saint Series",
+  "type": "technique",
+  "cards": [
+    {
+      "code": "black_meteor_fist",
+      "name": "Meteoros Negros",
+      "art_tags": "1boy, male focus, black pegasus armor, punching, black meteors, purple dark aura",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/black_meteor_fist.webp",
+      "description": "Compatible con caballeros [black_pegasus]. TA: Gasta 3 CP del caballero. Golpea 4 veces con CE 1 por golpe: cada golpe hace al menos 1 de daño, sea cual sea la AR del objetivo.",
+      "tags": ["black_pegasus", "technique"],
+      "technique_stats": {
+        "hit_count": 4,
+        "hit_ce": 1,
+        "ta_cost": 3,
+        "compatible_tags": ["black_pegasus"]
+      },
+      "abilities": [
+        {
+          "name": "Meteoros Negros",
+          "type": "campo",
+          "ability_key": "black_meteor_fist_ta",
+          "description": "TA habilitado para caballeros [black_pegasus]. Costo: 3 CP. Efecto: 4 golpes de CE 1 (mínimo 1 de daño por golpe).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_dragon_rising",
+      "name": "Dragón Negro Naciente",
+      "art_tags": "1boy, male focus, long black hair, black dragon armor, uppercut, black dragon aura rising",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/black_dragon_rising.webp",
+      "description": "Compatible con caballeros [black_dragon]. TA: Gasta 5 CP del caballero. Causa 5 LP de daño directo a un soldado rival (ignora AR y Modo Defensa).",
+      "tags": ["black_dragon", "technique"],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 5,
+        "ta_cost": 5,
+        "compatible_tags": ["black_dragon"],
+        "ignore_ar": true
+      },
+      "abilities": [
+        {
+          "name": "Dragón Negro Naciente",
+          "type": "campo",
+          "ability_key": "black_dragon_rising_ta",
+          "description": "TA habilitado para caballeros [black_dragon]. Costo: 5 CP. Efecto: 5 LP de daño directo al objetivo (ignora AR y Modo Defensa).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_blizzard",
+      "name": "Ventisca Negra",
+      "art_tags": "1boy, male focus, black swan armor, dark ice storm, black snowflakes, cold expression",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/black_blizzard.webp",
+      "description": "Compatible con caballeros [black_cygnus]. TA: Gasta 4 CP del caballero. Golpea 2 veces con CE 2. El objetivo queda congelado (FRZ) durante su próximo turno.",
+      "tags": ["black_cygnus", "technique"],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 2,
+        "ta_cost": 4,
+        "compatible_tags": ["black_cygnus"],
+        "ta_effects": [
+          { "type": "frozen", "turns": 2 }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Ventisca Negra",
+          "type": "campo",
+          "ability_key": "black_blizzard_ta",
+          "description": "TA habilitado para caballeros [black_cygnus]. Costo: 4 CP. Efecto: 2 golpes de CE 2. FRZ en el objetivo durante su próximo turno.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_chain",
+      "name": "Cadena Negra",
+      "art_tags": "1boy, male focus, black andromeda armor, black chains wrapping enemy, sinister expression",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/black_chain.webp",
+      "description": "Compatible con caballeros [black_andromeda]. TA: Gasta 3 CP del caballero. Golpea 2 veces con CE 2. La cadena sujeta al objetivo: -2 CE durante 2 turnos.",
+      "tags": ["black_andromeda", "technique"],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 2,
+        "ta_cost": 3,
+        "compatible_tags": ["black_andromeda"],
+        "ta_effects": [
+          { "type": "ce_boost", "value": -2, "turns": 2 }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Cadena Negra",
+          "type": "campo",
+          "ability_key": "black_chain_ta",
+          "description": "TA habilitado para caballeros [black_andromeda]. Costo: 3 CP. Efecto: 2 golpes de CE 2. El objetivo tiene -2 CE durante 2 turnos.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_phoenix_wings",
+      "name": "Alas Negras del Fénix",
+      "art_tags": "1boy, male focus, black phoenix armor, black flames, giant dark phoenix wings",
+      "rarity": "rare",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/black_phoenix_wings.webp",
+      "description": "Compatible con caballeros [black_phoenix]. TA: Gasta 4 CP del caballero. Golpea con CE 4. El objetivo recibe BRN (1 DIP/turno) durante 3 turnos.",
+      "tags": ["black_phoenix", "technique"],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 4,
+        "ta_cost": 4,
+        "compatible_tags": ["black_phoenix"],
+        "ta_effects": [
+          { "type": "burn", "value": 1, "turns": 3 }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Alas Negras del Fénix",
+          "type": "campo",
+          "ability_key": "black_phoenix_wings_ta",
+          "description": "TA habilitado para caballeros [black_phoenix]. Costo: 4 CP. Efecto: 1 golpe de CE 4. BRN en el objetivo durante 3 turnos (1 DIP/turno).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "sekishiki_kisoen",
+      "name": "Sekishiki Kisōen",
+      "art_tags": "1boy, male focus, long black hair, black altar armor, ghostly blue soul flames surrounding enemy, sinister smile",
+      "rarity": "epic",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/sekishiki_kisoen.webp",
+      "description": "Compatible con caballeros [altar]. La técnica Sekishiki que Ávido aprendió de Hakurei: las almas de los muertos arden alrededor del rival hasta consumirlo. TA: Gasta 6 CP del caballero. Golpea 2 veces con CE 3. El objetivo recibe BRN (2 DIP/turno) durante 3 turnos.",
+      "tags": ["altar", "technique"],
+      "technique_stats": {
+        "hit_count": 2,
+        "hit_ce": 3,
+        "ta_cost": 6,
+        "compatible_tags": ["altar"],
+        "ta_effects": [
+          { "type": "burn", "value": 2, "turns": 3 }
+        ]
+      },
+      "abilities": [
+        {
+          "name": "Sekishiki Kisōen",
+          "type": "campo",
+          "ability_key": "sekishiki_kisoen_ta",
+          "description": "TA habilitado para caballeros [altar]. Costo: 6 CP. Efecto: 2 golpes de CE 3. BRN en el objetivo durante 3 turnos (2 DIP/turno).",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "dark_cosmos_strike",
+      "name": "Golpe de Cosmos Negro",
+      "art_tags": "1boy, male focus, black armor, dark cosmos aura, punching, black energy blast",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "techniques/dark_cosmos_strike.webp",
+      "description": "Compatible con caballeros [black_saint]. TA: Gasta 3 CP del caballero. Golpea con CE 3. Permite a cualquier Black Saint desatar su Dark Effect.",
+      "tags": ["black_saint", "technique"],
+      "technique_stats": {
+        "hit_count": 1,
+        "hit_ce": 3,
+        "ta_cost": 3,
+        "compatible_tags": ["black_saint"]
+      },
+      "abilities": [
+        {
+          "name": "Golpe de Cosmos Negro",
+          "type": "campo",
+          "ability_key": "dark_cosmos_strike_ta",
+          "description": "TA habilitado para caballeros [black_saint]. Costo: 3 CP. Efecto: 1 golpe de CE 3.",
+          "effects": {
+            "trigger": "NONE",
+            "actions": []
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["field_technique"],
+      "collection_id": "black_saints",
+      "artist": null
+    }
+  ]
+}

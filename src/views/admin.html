@@ -182,6 +182,7 @@
                             <div class="form-group sm"><label>Genera</label><input type="number" id="f-generate" value="0" min="0" max="10"></div>
                             <div class="form-group sm"><label>Max copias</label><input type="number" id="f-max-copies" value="3" min="1" max="4"></div>
                             <div class="form-group sm"><label>Única</label><input type="checkbox" id="f-unique"></div>
+                            <div class="form-group sm"><label>Personaje</label><input type="text" id="f-character" maxlength="64" placeholder="kanon" title="Con Única: un solo caballero de este personaje en el campo, aunque tenga varias versiones"></div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
@@ -310,7 +311,9 @@
                             <div class="catalog-item"><code>draw_card</code><span>Roba cartas del mazo. Parámetros: amount, player? ('self'|'opponent')</span></div>
                             <div class="catalog-item"><code>summon_from_zone</code><span>Convoca un caballero. Parámetros: target('self'|'target'|'selected'), zone?('yomotsu'|'deck'|'cositos'), position?</span></div>
                             <div class="catalog-item"><code>coin_flip_then</code><span>Moneda → on_heads[] / on_tails[]</span></div>
-                            <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone ('field'|'field_opponent'|'field_support_opponent'|'yomotsu'|'deck'|'hand'), filter{type?,code?,tag?,health_max?,status?,top_n?}, destination, on_select[]. Sin opciones válidas → se omite</span></div>
+                            <div class="catalog-item"><code>request_selection</code><span>Pide al jugador elegir carta. Parámetros: zone ('field'|'field_opponent'|'field_any' (ambos campos)|'field_support_opponent'|'yomotsu'|'deck'|'hand'), filter{type?,code?,tag?,health_max?,status?,top_n?}, destination, on_select[]. Sin opciones válidas → se omite</span></div>
+                            <div class="catalog-item"><code>request_slot_selection</code><span>Segundo paso tras elegir un caballero: pide una posición (0–4) del campo de su dueño. Parámetros: target (normalmente 'selected'), on_select[] (se ejecuta con 'selected' = ese caballero)</span></div>
+                            <div class="catalog-item"><code>move_to_slot</code><span>Mueve el caballero ('selected') a la posición elegida en request_slot_selection; si está ocupada, intercambia los dos. Nunca cambia de dueño</span></div>
                             <div class="catalog-item"><code>send_to_zone</code><span>Mueve carta a zona. Parámetros: target (normalmente 'selected'), destination: 'hand'|'field'|'cositos'|'yomotsu'</span></div>
                             <div class="catalog-item"><code>shuffle_deck</code><span>Mezcla el mazo. Parámetros: player: 'self'|'opponent'</span></div>
                         </div>
@@ -328,6 +331,8 @@
                             <div class="catalog-item"><code>ce_double</code><span>Los BA duplican CE mientras dure (no se consume)</span></div>
                             <div class="catalog-item"><code>unicorn_horn</code><span>Pasiva: cada BA que conecta causa 1 DIP extra</span></div>
                             <div class="catalog-item"><code>pierce_evasion</code><span>Pasiva: todos los BA ignoran Modo Evasión</span></div>
+                            <div class="catalog-item"><code>taunt</code><span>Provocación: los BA rivales solo pueden dirigirse al portador mientras no esté congelado ni paralizado (las TA no)</span></div>
+                            <div class="catalog-item"><code>armor_unbreakable</code><span>Los BA con ignore_armor no ignoran la AR del portador (las TA con ignore_ar sí)</span></div>
                             <div class="catalog-item"><code>immune_negative</code><span>Inmune a burn, poison, frozen y paralyzed (y los limpia)</span></div>
                             <div class="catalog-item"><code>divine_frenzy_form</code><span>Marker de forma transformada (para no_status)</span></div>
                             <div class="catalog-item"><code>burn</code><span>BRN: daño/turno con countdown</span></div>
@@ -359,6 +364,7 @@
                             <div class="catalog-item"><code>random_ally</code><span>Aliado aleatorio</span></div>
                             <div class="catalog-item"><code>other_allies</code><span>Todos los aliados excepto self</span></div>
                             <div class="catalog-item"><code>lowest_health_enemy</code><span>Enemigo con menos HP</span></div>
+                            <div class="catalog-item"><code>copies_in_deck</code><span>Otras copias de esta carta que siguen en el mazo propio (requieren una pasiva reactiva para estar visibles). Uso típico: summon_from_zone con zone "deck"</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">
@@ -383,6 +389,7 @@
                             <div class="catalog-item"><code>yomotsu_not_empty</code><span>Sin parámetros — el jugador tiene cartas en su yomotsu</span></div>
                             <div class="catalog-item"><code>player_lp_below</code><span>amount:N — LP del jugador ≤ N</span></div>
                             <div class="catalog-item"><code>field_has_card_code</code><span>code:"code" — un aliado en campo tiene ese código</span></div>
+                            <div class="catalog-item"><code>stage_has_card_code</code><span>code:"code" — tu escenario en juego tiene ese código</span></div>
                             <div class="catalog-item"><code>field_has_tag</code><span>tag:"tag" — un aliado en campo tiene ese tag</span></div>
                             <div class="catalog-item"><code>hand_has_tag</code><span>tag:"tag" — una carta en mano tiene ese tag</span></div>
                             <div class="catalog-item"><code>opponent_field_has_any_tag</code><span>tag | tags[] — un caballero rival tiene alguno</span></div>
@@ -395,7 +402,16 @@
                             <div class="catalog-item"><code>cosmos</code><span>CP del caballero que activa (amount)</span></div>
                             <div class="catalog-item"><code>player_cosmos</code><span>PCP del jugador que activa (amount)</span></div>
                             <div class="catalog-item"><code>life</code><span>PLP del jugador que activa (amount)</span></div>
-                            <div class="catalog-item"><code>discard</code><span>Descartar desde mano propia</span></div>
+                            <div class="catalog-item"><code>discard</code><span>Descartar desde mano propia. Opcional: filter (ej: { "tag": "black_saint" }) limita qué cartas se pueden descartar</span></div>
+                        </div>
+                    </details>
+                    <details class="catalog-section">
+                        <summary>🌀 technique_stats (JSON de técnicas)</summary>
+                        <div class="catalog-items">
+                            <div class="catalog-item"><code>ignore_ar</code><span>Daño = hit_ce: ignora AR y Modo Defensa</span></div>
+                            <div class="catalog-item"><code>ignore_defense_mode</code><span>El Modo Defensa no reduce el daño (la AR sí cuenta)</span></div>
+                            <div class="catalog-item"><code>target_all</code><span>Golpea a todos los caballeros rivales (golpes y ta_effects en cada uno)</span></div>
+                            <div class="catalog-item"><code>ta_effects</code><span>Estados aplicados a cada objetivo golpeado: [{type, value?, turns?}]. type 'remove_mode' le quita el Modo Defensa/Evasión</span></div>
                         </div>
                     </details>
                     <details class="catalog-section">

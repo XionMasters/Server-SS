@@ -257,6 +257,8 @@ export class MatchStateMapper {
       card_code: card.card?.code ?? '',
       // Tags propagados desde Card.tags — permiten condiciones/filtros por grupo de personaje
       tags: (card.card as any)?.tags ?? [],
+      character: (card.card as any)?.character ?? null,
+      unique: (card.card as any)?.unique === true,
       raw_abilities,
 
       // Stats con boosts aplicados

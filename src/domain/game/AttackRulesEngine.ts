@@ -29,6 +29,7 @@ import {
   attackerIgnoresBlockMode,
   attackerIgnoresEvadeMode,
   isImmobilized,
+  getTauntingKnights,
 } from './StatusEffects';
 import { createEngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
@@ -103,6 +104,12 @@ export class AttackRulesEngine {
       if (!defender) {
         return { valid: false, error: 'Carta defensora no encontrada en campo' };
       }
+    }
+
+    // Provocación: si un rival la tiene, el BA debe ir contra él
+    const taunting = getTauntingKnights(defenderPlayer.field_knights);
+    if (taunting.length > 0 && !taunting.some(k => k.instance_id === defenderCardId)) {
+      return { valid: false, error: 'Un caballero rival con Provocación obliga a atacarlo a él' };
     }
 
     return { valid: true };

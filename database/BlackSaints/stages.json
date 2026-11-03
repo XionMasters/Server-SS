@@ -1,0 +1,108 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'stage' de los Black Saints. Efectos globales mientras están activas.",
+  "saga": "Black Saint Series",
+  "type": "stage",
+  "cards": [
+    {
+      "code": "death_queen_island",
+      "name": "Isla de la Reina Muerte",
+      "art_tags": "no humans, scenery, volcanic island, lava rivers, red sky, black smoke, ruins",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "fire",
+      "image_url": "stages/death_queen_island.webp",
+      "description": "Al activarse y al inicio de tu turno, tus caballeros [black_saint] ganan +1 CE durante ese turno. Al inicio de tu turno, los caballeros rivales con BRN reciben 1 de daño adicional.",
+      "tags": ["death_queen"],
+      "abilities": [
+        {
+          "name": "Infierno en la Tierra",
+          "type": "campo",
+          "ability_key": "death_queen_island_ce",
+          "description": "Al activarse y al inicio de tu turno, tus caballeros [black_saint] ganan +1 CE durante ese turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "black_saint" }, "value": 1, "duration": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Infierno en la Tierra",
+          "type": "campo",
+          "ability_key": "death_queen_island_ce_turn",
+          "description": "Al inicio de tu turno, tus caballeros [black_saint] ganan +1 CE durante ese turno.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "black_saint" }, "value": 1, "duration": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Lava Ardiente",
+          "type": "campo",
+          "ability_key": "death_queen_island_lava",
+          "description": "Al inicio de tu turno, los caballeros rivales con BRN reciben 1 de daño.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "apply_damage", "target": "all_enemies", "filter": { "status": "burn" }, "amount": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "soul_fortress",
+      "name": "Fortaleza de Almas",
+      "art_tags": "no humans, scenery, dark gothic mansion made of ghostly souls, venice canals at night, blue soul flames, fog",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "stages/soul_fortress.webp",
+      "description": "La mansión que Ávido levantó dando forma sólida a las almas que captura, base de Nero. Al inicio de tu turno, tus caballeros [nero] recuperan 1 LP y 1 CP.",
+      "tags": ["nero"],
+      "abilities": [
+        {
+          "name": "Almas Cautivas",
+          "type": "campo",
+          "ability_key": "soul_fortress_heal",
+          "description": "Al inicio de tu turno, tus caballeros [nero] recuperan 1 LP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "heal", "target": "all_allies", "filter": { "tag": "nero" }, "amount": 1 }
+            ]
+          }
+        },
+        {
+          "name": "Cosmos Robado",
+          "type": "campo",
+          "ability_key": "soul_fortress_cosmos",
+          "description": "Al inicio de tu turno, tus caballeros [nero] recuperan 1 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "actions": [
+              { "type": "restore_cosmos", "target": "all_allies", "filter": { "tag": "nero" }, "amount": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "black_saints",
+      "artist": null
+    }
+  ]
+}

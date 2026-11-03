@@ -8,6 +8,7 @@
     {
       "code": "seiya_pegasus_v1",
       "name": "Seiya de Pegaso",
+      "character": "seiya",
       "art_tags": "1boy, male focus, short brown hair, white pegasus armor, red details, tiara",
       "rarity": "epic",
       "cost": 0,
@@ -79,6 +80,7 @@
     {
       "code": "shiryu_dragon_v1",
       "name": "Shiryu de Dragón",
+      "character": "shiryu",
       "art_tags": "1boy, male focus, long black hair, green dragon armor, round dragon shield",
       "rarity": "rare",
       "cost": 0,
@@ -152,6 +154,7 @@
     {
       "code": "hyoga_cygnus_v1",
       "name": "Hyoga de Cisne",
+      "character": "hyoga",
       "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, ice",
       "rarity": "rare",
       "cost": 0,
@@ -229,6 +232,7 @@
     {
       "code": "shun_andromeda_v1",
       "name": "Shun de Andrómeda",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, gentle expression, pink andromeda armor, chains",
       "rarity": "rare",
       "cost": 0,
@@ -294,6 +298,7 @@
     {
       "code": "shun_andromeda_v2",
       "name": "Shun de Andrómeda",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, pink andromeda armor, chains, nebula chain defense",
       "rarity": "epic",
       "cost": 0,
@@ -358,6 +363,7 @@
     {
       "code": "shun_andromeda_v3",
       "name": "Shun de Andrómeda",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, pink andromeda armor, chains, nebula storm, golden aura",
       "rarity": "legendary",
       "cost": 0,
@@ -424,6 +430,7 @@
     {
       "code": "ikki_phoenix_v1",
       "name": "Ikki de Fénix",
+      "character": "ikki",
       "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, flames",
       "rarity": "epic",
       "cost": 0,
@@ -505,6 +512,7 @@
     {
       "code": "seiya_pegasus_v2",
       "name": "Seiya de Pegaso",
+      "character": "seiya",
       "art_tags": "1boy, male focus, short brown hair, white pegasus armor, blue details, shoulder pads",
       "rarity": "epic",
       "cost": 0,
@@ -579,6 +587,7 @@
     {
       "code": "seiya_pegasus_v3",
       "name": "Seiya de Pegaso",
+      "character": "seiya",
       "art_tags": "1boy, male focus, short brown hair, white pegasus armor, golden glowing aura, seventh sense",
       "rarity": "legendary",
       "cost": 0,
@@ -657,6 +666,7 @@
     {
       "code": "shiryu_dragon_v2",
       "name": "Shiryu de Dragón",
+      "character": "shiryu",
       "art_tags": "1boy, male focus, long black hair, green dragon armor, dragon shield, fighting stance",
       "rarity": "epic",
       "cost": 0,
@@ -727,6 +737,7 @@
     {
       "code": "hyoga_cygnus_v2",
       "name": "Hyoga de Cisne",
+      "character": "hyoga",
       "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, ice crystals",
       "rarity": "epic",
       "cost": 0,
@@ -798,6 +809,7 @@
     {
       "code": "hyoga_cygnus_v3",
       "name": "Hyoga de Cisne",
+      "character": "hyoga",
       "art_tags": "1boy, male focus, short blonde hair, blue eyes, white swan armor, absolute zero, golden aura",
       "rarity": "legendary",
       "cost": 0,
@@ -880,6 +892,7 @@
     {
       "code": "ikki_phoenix_v2",
       "name": "Ikki de Fénix",
+      "character": "ikki",
       "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, phoenix feather",
       "rarity": "epic",
       "cost": 0,
@@ -949,6 +962,7 @@
     {
       "code": "ikki_phoenix_v3",
       "name": "Ikki de Fénix",
+      "character": "ikki",
       "art_tags": "1boy, male focus, short spiky dark blue hair, scar on forehead, phoenix armor, phoenix wings of fire",
       "rarity": "legendary",
       "cost": 0,
@@ -1039,6 +1053,7 @@
     {
       "code": "shiryu_dragon_v3",
       "name": "Shiryu de Dragón",
+      "character": "shiryu",
       "art_tags": "1boy, male focus, long black hair, shirtless, dragon tattoo on back, green dragon armor, furious",
       "rarity": "legendary",
       "cost": 0,

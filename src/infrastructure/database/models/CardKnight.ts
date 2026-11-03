@@ -9,7 +9,10 @@ export type KnightRank =
   | 'Gold Saint'
   | 'Sonata Saint'
   | 'Sapuris Saint'
-  | 'Black Saint';
+  | 'Black Saint'
+  | 'Marine General'
+  | 'Mariner'
+  | 'God';
 
 class CardKnight extends Model {
   public card_id!: string;
@@ -64,7 +67,10 @@ CardKnight.init(
         'Gold Saint',
         'Sonata Saint',
         'Sapuris Saint',
-        'Black Saint'
+        'Black Saint',
+        'Marine General',
+        'Mariner',
+        'God'
       ),
       allowNull: true,
     }

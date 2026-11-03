@@ -8,6 +8,7 @@
 import { TechniqueRulesEngine, TechniqueStats } from '../../src/domain/game/TechniqueRulesEngine';
 import { createEmptyGameState, type CardInGameState } from '../../src/domain/game/GameState';
 import type { StatusEffect } from '../../src/domain/game/StatusEffects';
+import { AbilityEngine } from '../../src/domain/game/abilities/AbilityEngine';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -374,5 +375,27 @@ describe('TechniqueRulesEngine — ataque directo al jugador', () => {
     );
     expect(newState.player2.life).toBe(18); // 20 - 2 DIP
     expect(totalDamage).toBe(0); // daño a carta = 0, solo DIP
+  });
+});
+
+// ─── Modificadores TA configurables desde una habilidad ──────────────────────
+
+describe('TechniqueRulesEngine — Dark Effect configurable (apply_status con params)', () => {
+  test('ta_apply_status puesto por una habilidad aplica su estado en la siguiente TA', () => {
+    const { state, stats } = setupTa({});
+
+    const darkEffect: any = {
+      trigger: 'ACTIVE',
+      actions: [{ type: 'apply_status', status: 'ta_apply_status', target: 'self', params: { status_types: ['frozen'] } }],
+    };
+    const activation: any = { type: 'ACTIVE', playerNumber: 1, sourceCardId: 'atk' };
+    const { newState: charged } = AbilityEngine.execute(darkEffect, state, 1, 'atk', activation);
+
+    const { newState } = TechniqueRulesEngine.techniqueAttack(charged, 1, 'atk', 'tech', 'def', stats);
+    const defender = newState.player2.field_knights.find(c => c.instance_id === 'def')!;
+    const attacker = newState.player1.field_knights.find(c => c.instance_id === 'atk')!;
+    expect(defender.status_effects.some(e => e.type === 'frozen')).toBe(true);
+    // El modificador es de un solo uso
+    expect(attacker.status_effects.some(e => e.type === 'ta_apply_status')).toBe(false);
   });
 });

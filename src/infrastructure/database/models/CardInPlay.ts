@@ -7,7 +7,7 @@ interface CardInPlayAttributes {
   match_id: string;
   card_id: string;
   player_number: number; // 1 o 2
-  zone: 'hand' | 'field_knight' | 'field_support' | 'field_helper' | 'yomotsu' | 'cositos' | 'deck';
+  zone: 'hand' | 'field_knight' | 'field_support' | 'field_helper' | 'field_occasion' | 'field_scenario' | 'yomotsu' | 'cositos' | 'deck';
   position: number; // Posición en la zona (0-4 para caballeros)
   is_defensive_mode: 'normal' | 'defense' | 'evasion' | 'prayer';
   current_attack: number;
@@ -76,7 +76,7 @@ CardInPlay.init(
       }
     },
     zone: {
-      type: DataTypes.ENUM('hand', 'field_knight', 'field_support', 'field_helper', 'yomotsu', 'cositos', 'deck'),
+      type: DataTypes.ENUM('hand', 'field_knight', 'field_support', 'field_helper', 'field_occasion', 'field_scenario', 'yomotsu', 'cositos', 'deck'),
       allowNull: false
     },
     position: {

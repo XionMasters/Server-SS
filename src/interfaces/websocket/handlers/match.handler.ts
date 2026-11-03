@@ -71,6 +71,9 @@ export function createMatchHandlers(
           ]);
           presenceService.broadcastToUsers([player1Id], 'match_found', { match_id: result.match_id, game_state: gs1 });
           presenceService.broadcastToUsers([player2Id], 'match_found', { match_id: result.match_id, game_state: gs2 });
+          // match_found trae el tablero inicial sin valid_actions: el estado completo (con las
+          // acciones del jugador que empieza) llega en este match_update, como tras cualquier acción
+          await broadcastMatchUpdate(result.match_id, { type: 'match_start' });
         } else {
           presenceService.broadcastToUsers([player1Id, player2Id].filter(Boolean), 'match_found', matchData);
         }
@@ -117,12 +120,14 @@ export function createMatchHandlers(
 
   const handleResolveSelection = async (ws: AuthenticatedWebSocket, data: any) => {
     try {
-      const { match_id, selection_id, chosen_card_id, action_id } = data ?? {};
+      const { match_id, selection_id, chosen_card_id, chosen_slot, action_id } = data ?? {};
+      // Las selecciones de posición (zone 'field_slot') responden con chosen_slot en vez de una carta
+      const hasChoice = !!chosen_card_id || typeof chosen_slot === 'number';
 
-      if (!match_id || !selection_id || !chosen_card_id || !action_id) {
+      if (!match_id || !selection_id || !hasChoice || !action_id) {
         presenceService.sendToSocket(ws, 'error', {
           code: 'MISSING_FIELDS',
-          message: 'Se requieren match_id, selection_id, chosen_card_id y action_id'
+          message: 'Se requieren match_id, selection_id, chosen_card_id (o chosen_slot) y action_id'
         });
         return;
       }
@@ -132,6 +137,7 @@ export function createMatchHandlers(
         user_id: ws.userId!,
         selection_id,
         chosen_card_id,
+        ...(typeof chosen_slot === 'number' ? { chosen_slot } : {}),
         action_id
       });
 
@@ -145,7 +151,7 @@ export function createMatchHandlers(
 
       await broadcastMatchUpdate(
         match_id,
-        { type: 'resolve_selection', selection_id, chosen_card_id },
+        { type: 'resolve_selection', selection_id, chosen_card_id, ...(typeof chosen_slot === 'number' ? { chosen_slot } : {}) },
         result.events ?? [],
       );
     } catch (error: any) {

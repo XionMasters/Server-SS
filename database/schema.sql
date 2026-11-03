@@ -18,7 +18,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TYPE card_type_enum AS ENUM (
     'knight', 'technique', 'item', 'stage', 'helper', 'event',
     'caballero', 'técnica', 'objeto', 'escenario', 'ayudante', 'ocasión',
-    'tecnica', 'ocasion'
+    'tecnica', 'ocasion', 'object', 'occasion'
+);
+
+CREATE TYPE knight_rank_enum AS ENUM (
+    'Bronze Saint', 'Steel Saint', 'Silver Saint', 'Gold Saint',
+    'Sonata Saint', 'Sapuris Saint', 'Black Saint',
+    'Marine General', 'Mariner', 'God'
 );
 
 CREATE TYPE card_rarity_enum AS ENUM (
@@ -41,7 +47,7 @@ CREATE TYPE match_phase_enum AS ENUM (
 
 CREATE TYPE card_in_play_zone_enum AS ENUM (
     'hand', 'field_knight', 'field_support', 'field_helper',
-    'yomotsu', 'cositos', 'deck'
+    'field_occasion', 'field_scenario', 'yomotsu', 'cositos', 'deck'
 );
 
 CREATE TYPE match_action_type_enum AS ENUM (
@@ -107,6 +113,7 @@ CREATE TABLE users (
     is_email_verified           BOOLEAN      NOT NULL DEFAULT FALSE,
     email_verification_token    VARCHAR(255),
     email_verification_expires  TIMESTAMPTZ,
+    blocked_at                  TIMESTAMPTZ,
     created_at                  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at                  TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
@@ -128,6 +135,7 @@ CREATE TABLE cards (
     element         card_element_enum,
     max_copies      INTEGER             NOT NULL DEFAULT 3,
     "unique"        BOOLEAN             NOT NULL DEFAULT FALSE,
+    character       VARCHAR(64),
     playable_zones  TEXT[]              DEFAULT ARRAY['battlefield'],
     collection_id   VARCHAR(50),
     artist          VARCHAR(100),
@@ -152,7 +160,23 @@ CREATE TABLE card_knights (
     health           INTEGER        NOT NULL,
     cosmos           INTEGER        NOT NULL,
     can_defend       BOOLEAN        NOT NULL DEFAULT TRUE,
-    defense_reduction DECIMAL(3,2)  NOT NULL DEFAULT 0.5
+    defense_reduction DECIMAL(3,2)  NOT NULL DEFAULT 0.5,
+    rank             knight_rank_enum
+);
+
+-- -------------------------------------------------------------
+-- card_techniques
+-- -------------------------------------------------------------
+CREATE TABLE card_techniques (
+    card_id             UUID PRIMARY KEY REFERENCES cards(id) ON DELETE CASCADE,
+    hit_count           INTEGER  NOT NULL DEFAULT 1,
+    hit_ce              INTEGER  NOT NULL DEFAULT 0,
+    ta_cost             INTEGER  NOT NULL DEFAULT 0,
+    compatible_tags     TEXT[]   NOT NULL DEFAULT '{}',
+    ignore_ar           BOOLEAN  NOT NULL DEFAULT FALSE,
+    ignore_defense_mode BOOLEAN  NOT NULL DEFAULT FALSE,
+    target_all          BOOLEAN  NOT NULL DEFAULT FALSE,
+    ta_effects          JSONB    NOT NULL DEFAULT '[]'
 );
 
 -- -------------------------------------------------------------
@@ -162,6 +186,7 @@ CREATE TABLE card_abilities (
     id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     card_id     UUID                    NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
     name        VARCHAR(100)            NOT NULL,
+    ability_key VARCHAR(100),
     type        card_ability_type_enum  NOT NULL,
     description TEXT                    NOT NULL,
     conditions  JSONB                   NOT NULL DEFAULT '{}',
@@ -398,6 +423,7 @@ CREATE TABLE matches (
     player1_deck_index  INTEGER          NOT NULL DEFAULT 0,
     player2_deck_index  INTEGER          NOT NULL DEFAULT 0,
     rng_seed            BIGINT           NOT NULL DEFAULT 0,
+    pending_selection   JSONB,
     started_at          TIMESTAMPTZ,
     finished_at         TIMESTAMPTZ,
     created_at          TIMESTAMPTZ      NOT NULL DEFAULT NOW(),

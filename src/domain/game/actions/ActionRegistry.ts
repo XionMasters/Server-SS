@@ -75,6 +75,8 @@ export interface ActionContext {
    * Resuelve el target especial 'selected' en TargetResolver.
    */
   selectedCardId?: string;
+  /** Posición elegida en una selección de zona 'field_slot' (resolve_selection con chosen_slot). */
+  selectedSlot?: number;
 }
 
 export interface ActionResult {
@@ -278,6 +280,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
           type: action.status as StatusEffectType,
           remaining_turns: action.duration ?? existing.remaining_turns ?? null,
           ...(action.value !== undefined ? { value: action.value } : {}),
+          ...(action.params !== undefined ? { params: action.params } : {}),
           source: {
             card_instance_id: ctx.sourceCardId,
             player: ctx.playerNumber,
@@ -289,6 +292,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
           type: action.status as StatusEffectType,
           remaining_turns: action.duration ?? null,
           ...(action.value !== undefined ? { value: action.value } : {}),
+          ...(action.params !== undefined ? { params: action.params } : {}),
           source: {
             card_instance_id: ctx.sourceCardId,
             player: ctx.playerNumber,
@@ -505,13 +509,16 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     // Zonas que ya están en GameState → poblar visible_card_ids aquí.
     //   field                  → caballeros propios
     //   field_opponent         → caballeros rivales
+    //   field_any              → caballeros de ambos campos
     //   field_support_opponent → objeto/ocasión rival + escenario activo
     //   yomotsu                → yomotsu propio
+    //   hand                   → mano propia
     const player   = ctx.playerNumber === 1 ? result.state.player1 : result.state.player2;
     const opponent = ctx.playerNumber === 1 ? result.state.player2 : result.state.player1;
     let candidates: any[] | null = null;
     if (action.zone === 'field') candidates = player.field_knights;
     if (action.zone === 'field_opponent') candidates = opponent.field_knights;
+    if (action.zone === 'field_any') candidates = [...player.field_knights, ...opponent.field_knights];
     if (action.zone === 'field_support_opponent') {
       candidates = [
         ...(opponent.field_occasion ? [opponent.field_occasion] : []),
@@ -519,6 +526,7 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       ];
     }
     if (action.zone === 'yomotsu') candidates = player.graveyard ?? [];
+    if (action.zone === 'hand') candidates = player.hand ?? [];
 
     if (candidates) {
       const visible = candidates.filter((c: any) => matchesCardFilter(c, action.filter));
@@ -536,6 +544,68 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     result.extras.selection_required = true;
     result.extras.selection_id = selectionId;
     result.extras.stop_chain = true; // Detener ejecución de acciones siguientes
+  },
+
+  /**
+   * Pide al jugador una posición (0–4) del campo del dueño del caballero indicado.
+   * Segundo paso de "mover o intercambiar" (ej: Baian): se usa en el on_select de un
+   * request_selection que eligió el caballero. Detiene la cadena como request_selection.
+   *
+   * Estructura: { type: 'request_slot_selection', target?: 'selected', on_select: ActionDefinition[] }
+   * on_select se ejecuta con 'selected' = el caballero y ctx.selectedSlot = la posición.
+   */
+  request_slot_selection: (action: any, ctx, result) => {
+    const subject = _resolveTargets(action, ctx, result, 'selected')
+      .find((c: any) => c.zone === 'field_knight');
+    if (!subject) {
+      result.extras.selection_skipped = true;
+      result.extras.stop_chain = true;
+      return;
+    }
+
+    const selectionId = `sel_${Date.now()}_${ctx.rng().toString(36).slice(2, 7)}`;
+    result.state.pending_selection = {
+      id: selectionId,
+      player_number: ctx.playerNumber,
+      zone: 'field_slot',
+      destination: 'field',
+      on_select: action.on_select ?? [],
+      source_card_id: ctx.sourceCardId,
+      source_player: ctx.playerNumber,
+      created_at: Date.now(),
+      slot_owner: subject.player_number,
+      visible_slots: [0, 1, 2, 3, 4].filter(p => p !== subject.position),
+      subject_card_id: subject.instance_id,
+    };
+    result.extras.selection_required = true;
+    result.extras.selection_id = selectionId;
+    result.extras.stop_chain = true;
+  },
+
+  /**
+   * Mueve un caballero a ctx.selectedSlot dentro de su propio campo.
+   * Si la posición está ocupada, intercambia los dos caballeros. Nunca cambia de dueño.
+   * Estructura: { type: 'move_to_slot', target?: 'selected' }
+   */
+  move_to_slot: (action: any, ctx, result) => {
+    const slot = ctx.selectedSlot;
+    if (typeof slot !== 'number' || slot < 0 || slot > 4) return;
+
+    for (const knight of _resolveTargets(action, ctx, result, 'selected')) {
+      if (knight.zone !== 'field_knight' || knight.position === slot) continue;
+      const owner = knight.player_number === 1 ? result.state.player1 : result.state.player2;
+      const occupant = owner.field_knights.find((c: any) => c.position === slot);
+      if (occupant) occupant.position = knight.position;
+      knight.position = slot;
+
+      result.affectedIds.push(knight.instance_id, ...(occupant ? [occupant.instance_id] : []));
+      if (!Array.isArray(result.extras.moved_knights)) result.extras.moved_knights = [];
+      (result.extras.moved_knights as any[]).push({
+        card_id: knight.instance_id,
+        position: slot,
+        ...(occupant ? { swapped_with: occupant.instance_id } : {}),
+      });
+    }
   },
 
   /**

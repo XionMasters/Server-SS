@@ -35,7 +35,10 @@ export interface ResolveSelectionInput {
   match_id: string;
   user_id: string;
   selection_id: string;
-  chosen_card_id: string;
+  /** Carta elegida. No se usa en selecciones de posición (zone 'field_slot'). */
+  chosen_card_id?: string;
+  /** Posición elegida (0–4) cuando la selección pendiente es de zone 'field_slot'. */
+  chosen_slot?: number;
   action_id: string;
 }
 
@@ -52,7 +55,7 @@ export class SelectionService {
     events?: GameEvent[];
     isRetry?: boolean;
   }> {
-    const { match_id, user_id, selection_id, chosen_card_id, action_id } = input;
+    const { match_id, user_id, selection_id, chosen_slot, action_id } = input;
 
     try {
       const result = await sequelize.transaction(async (tx) => {
@@ -108,8 +111,16 @@ export class SelectionService {
           throw new Error('No es tu turno de seleccionar');
         }
 
-        // 5. Validar que la carta elegida es una opción válida
-        await this._validateChoice(match_id, state, pending, chosen_card_id, tx);
+        // 5. Validar que la carta (o posición) elegida es una opción válida.
+        //    En una selección de posición, 'selected' es el caballero elegido en el paso anterior.
+        const isSlotSelection = pending.zone === 'field_slot';
+        if (isSlotSelection) {
+          this._validateSlotChoice(state, pending, chosen_slot);
+        } else if (!input.chosen_card_id) {
+          throw new Error('Falta chosen_card_id');
+        }
+        const chosen_card_id = isSlotSelection ? pending.subject_card_id! : input.chosen_card_id!;
+        if (!isSlotSelection) await this._validateChoice(match_id, state, pending, chosen_card_id, tx);
 
         // 6. Para deck search: cargar la carta en passive_watchers del engine state
         if (pending.zone === 'deck') {
@@ -143,6 +154,7 @@ export class SelectionService {
           payload: {
             selection_id,
             chosen_card_id,
+            ...(isSlotSelection ? { chosen_slot } : {}),
             source_card_id: pending.source_card_id,
             zone: pending.zone,
           },
@@ -156,6 +168,7 @@ export class SelectionService {
           bus: engineCtx.bus,
           engineContext: engineCtx,
           selectedCardId: chosen_card_id,
+          ...(isSlotSelection ? { selectedSlot: chosen_slot } : {}),
         };
 
         const actionResult: ActionResult = {
@@ -198,8 +211,9 @@ export class SelectionService {
           }
         }
 
-        // 9. Limpiar pending_selection
-        actionResult.state.pending_selection = null;
+        // 9. Limpiar pending_selection, salvo que on_select haya pedido otra
+        //    (ej: elegir caballero → elegir posición con request_slot_selection)
+        if (!actionResult.extras.selection_required) actionResult.state.pending_selection = null;
 
         // 10. Persistir nuevo estado
         await MatchRepository.applyState(match, actionResult.state, tx);
@@ -333,6 +347,17 @@ export class SelectionService {
     }
   }
 
+  /** Selección de posición: la posición debe estar ofrecida y el caballero seguir en su campo. */
+  private static _validateSlotChoice(state: GameState, pending: PendingSelection, chosenSlot: unknown): void {
+    if (typeof chosenSlot !== 'number' || !(pending.visible_slots ?? []).includes(chosenSlot)) {
+      throw new Error('La posición elegida no está entre las opciones disponibles');
+    }
+    const owner = pending.slot_owner === 1 ? state.player1 : state.player2;
+    if (!owner.field_knights.some(c => c.instance_id === pending.subject_card_id)) {
+      throw new Error('El caballero a mover ya no está en el campo');
+    }
+  }
+
   private static async _shuffleDeck(
     matchId: string,
     playerNumber: number,
@@ -407,6 +432,8 @@ export class SelectionService {
       status_effects: effects,
       card_code: cardData?.code ?? '',
       tags: (cardData as any)?.tags ?? [],
+      character: (cardData as any)?.character ?? null,
+      unique: (cardData as any)?.unique === true,
       raw_abilities,
       base_ce,
       base_ar,

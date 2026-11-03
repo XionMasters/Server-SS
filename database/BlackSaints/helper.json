@@ -1,0 +1,43 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'helper' de los Black Saints. Se juegan en field_helper; no combaten. Su pasiva CARD_PLAYED (con event_source_is_self) se resuelve al entrar en juego.",
+  "saga": "Black Saint Series",
+  "type": "helper",
+  "cards": [
+    {
+      "code": "helper_death_queen_emissary",
+      "name": "Emisario de la Reina Muerte",
+      "art_tags": "1boy, hooded figure, black robes, carrying torch, volcanic island path, ominous",
+      "rarity": "common",
+      "cost": 1,
+      "generate": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "helpers/death_queen_emissary.webp",
+      "description": "Al entrar en juego, tus caballeros [black_saint] recuperan 2 CP.",
+      "tags": ["death_queen"],
+      "abilities": [
+        {
+          "type": "pasiva",
+          "name": "Órdenes de la Isla",
+          "description": "Al entrar en juego, tus caballeros [black_saint] recuperan 2 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" },
+              { "type": "field_has_tag", "tag": "black_saint" }
+            ],
+            "actions": [
+              { "type": "restore_cosmos", "target": "all_allies", "filter": { "tag": "black_saint" }, "amount": 2 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["field_helper"],
+      "collection_id": "black_saints",
+      "artist": null
+    }
+  ]
+}

@@ -8,6 +8,7 @@
     {
       "code": "marin_aquila",
       "name": "Aquila Marin",
+      "character": "marin",
       "art_tags": "1girl, short red hair, silver mask, silver eagle armor",
       "rarity": "rare",
       "cost": 2,
@@ -74,6 +75,7 @@
     {
       "code": "shaina_ophiuchus_v1",
       "name": "Shaina de Ofiuco",
+      "character": "shaina",
       "art_tags": "1girl, green hair, silver mask, silver cobra armor, lightning claws",
       "rarity": "rare",
       "cost": 2,
@@ -135,6 +137,7 @@
     {
       "code": "misty_lizard",
       "name": "Misty de Lagarto",
+      "character": "misty",
       "art_tags": "1boy, male focus, long wavy blonde hair, narcissistic smile, silver armor, lizard silver cloth",
       "rarity": "rare",
       "cost": 2,
@@ -227,6 +230,7 @@
     {
       "code": "asterion_hunting_dogs",
       "name": "Asterion de Perros de Caza",
+      "character": "asterion",
       "art_tags": "1boy, male focus, short dark hair, intense eyes, silver armor, hunting dogs silver cloth",
       "rarity": "rare",
       "cost": 2,
@@ -306,6 +310,7 @@
     {
       "code": "algol_perseus",
       "name": "Algol de Perseo",
+      "character": "algol",
       "art_tags": "1boy, male focus, short dark hair, arrogant, silver armor, perseus silver cloth, round shield with medusa face",
       "rarity": "epic",
       "cost": 2,
@@ -399,6 +404,7 @@
     {
       "code": "jamian_crow",
       "name": "Jamian de Cuervo",
+      "character": "jamian",
       "art_tags": "1boy, male focus, messy black hair, silver armor, crow silver cloth, black feathers, flock of crows",
       "rarity": "rare",
       "cost": 2,
@@ -473,6 +479,7 @@
     {
       "code": "moses_whale",
       "name": "Moses de Ballena",
+      "character": "moses",
       "art_tags": "1boy, male focus, huge, muscular, bald, silver armor, whale silver cloth",
       "rarity": "common",
       "cost": 1,
@@ -563,6 +570,7 @@
     {
       "code": "babel_centaurus",
       "name": "Babel de Centauro",
+      "character": "babel",
       "art_tags": "1boy, male focus, turban, silver armor, centaurus silver cloth, flames",
       "rarity": "common",
       "cost": 1,
@@ -650,6 +658,7 @@
     {
       "code": "capella_auriga",
       "name": "Capella de Auriga",
+      "character": "capella",
       "art_tags": "1boy, male focus, long blonde hair, silver armor, auriga silver cloth, spinning saucer discs",
       "rarity": "common",
       "cost": 1,
@@ -738,6 +747,7 @@
     {
       "code": "dante_cerberus",
       "name": "Dante de Cerbero",
+      "character": "dante",
       "art_tags": "1boy, male focus, muscular, savage grin, silver armor, cerberus silver cloth, spiked iron balls on chains",
       "rarity": "common",
       "cost": 1,

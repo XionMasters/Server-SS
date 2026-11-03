@@ -126,20 +126,20 @@
       "faction": "Hades",
       "element": "dark",
       "image_url": "techniques/seki_shiki_meikai_ha.webp",
-      "description": "Compatible con caballeros [cancer]. TA: Gasta 3 CP del caballero. Busca en tu mazo la carta de escenario 'Yomotsu Hill' y actívala. Si ya está activa, causa X LP de daño directo al jugador rival (siendo X el número de soldados en tu sección Yomotsu).",
+      "description": "Compatible con caballeros [cancer] y [altar]. TA: Gasta 3 CP del caballero. Busca en tu mazo la carta de escenario 'Yomotsu Hill' y actívala. Si ya está activa, causa X LP de daño directo al jugador rival (siendo X el número de soldados en tu sección Yomotsu).",
       "tags": ["cancer", "technique", "yomotsu"],
       "technique_stats": {
         "hit_count": 0,
         "hit_ce": 0,
         "ta_cost": 3,
-        "compatible_tags": ["cancer"]
+        "compatible_tags": ["cancer", "altar"]
       },
       "abilities": [
         {
           "name": "Seki Shiki Meikai Ha",
           "type": "campo",
           "ability_key": "seki_shiki_meikai_ha_ta",
-          "description": "TA habilitado para caballeros [cancer]. Costo: 3 CP. Busca 'Yomotsu Hill' en el mazo y actívalo. Si ya está activo: daño directo al jugador rival igual al número de soldados en tu sección Yomotsu.",
+          "description": "TA habilitado para caballeros [cancer] y [altar]. Costo: 3 CP. Busca 'Yomotsu Hill' en el mazo y actívalo. Si ya está activo: daño directo al jugador rival igual al número de soldados en tu sección Yomotsu.",
           "_pending": "Requiere: search_deck_for_stage_code + activate_stage_to_field_occasion + conditional_count_yomotsu_soldiers + direct_player_damage. Pendiente Fase 2.",
           "effects": {
             "trigger": "NONE",

@@ -8,6 +8,7 @@
     {
       "code": "kanon_seadragon_v1",
       "name": "Kanon de Dragón Marino",
+      "character": "kanon",
       "art_tags": "1boy, male focus, long blue hair, golden scale armor, horned helmet, arrogant smile",
       "rarity": "legendary",
       "cost": 3,
@@ -99,6 +100,7 @@
     {
       "code": "kanon_seadragon_v2",
       "name": "Kanon de Dragón Marino (Redimido)",
+      "character": "kanon",
       "art_tags": "1boy, male focus, long blue hair, golden scale armor, damaged armor, determined expression",
       "rarity": "epic",
       "cost": 3,
@@ -190,6 +192,7 @@
     {
       "code": "sorrento_siren_v1",
       "name": "Sorrento de Sirena",
+      "character": "sorrento",
       "art_tags": "1boy, male focus, short light purple hair, calm expression, golden scale armor, playing flute",
       "rarity": "epic",
       "cost": 2,
@@ -262,6 +265,7 @@
     {
       "code": "sorrento_siren_v2",
       "name": "Sorrento de Sirena (Clímax)",
+      "character": "sorrento",
       "art_tags": "1boy, male focus, short light purple hair, golden scale armor, playing flute, sound waves",
       "rarity": "rare",
       "cost": 2,
@@ -324,6 +328,7 @@
     {
       "code": "isaac_kraken_v1",
       "name": "Isaac de Kraken",
+      "character": "isaac",
       "art_tags": "1boy, male focus, green hair, scar over eye, one eye closed, golden scale armor, ice",
       "rarity": "epic",
       "cost": 2,
@@ -396,6 +401,7 @@
     {
       "code": "isaac_kraken_v2",
       "name": "Isaac de Kraken (Rival de Hyoga)",
+      "character": "isaac",
       "art_tags": "1boy, male focus, green hair, scar over eye, one eye closed, golden scale armor, snow",
       "rarity": "rare",
       "cost": 2,
@@ -456,6 +462,7 @@
     {
       "code": "baian_seahorse_v1",
       "name": "Baian de Caballo Marino",
+      "character": "baian",
       "art_tags": "1boy, male focus, short hair, golden scale armor, confident stance",
       "rarity": "rare",
       "cost": 2,
@@ -472,7 +479,7 @@
       ],
       "stats": {
         "attack": 3,
-        "defense": 5,
+        "defense": 6,
         "health": 9,
         "cosmos": 8,
         "can_defend": true,
@@ -482,7 +489,8 @@
         {
           "name": "Muro de Dios",
           "type": "pasiva",
-          "description": "Al entrar en juego, Baian gana +2 AR.",
+          "ability_key": "baian_god_wall",
+          "description": "Provocación: mientras Baian esté en el campo y no esté congelado ni paralizado, los BA rivales solo pueden dirigirse a él.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "conditions": [
@@ -492,10 +500,72 @@
             ],
             "actions": [
               {
-                "type": "modify_stat",
-                "stat": "defense",
-                "amount": 2,
+                "type": "apply_status",
+                "status": "taunt",
                 "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Guardián del Pilar",
+          "type": "pasiva",
+          "ability_key": "baian_pillar_guardian",
+          "description": "Si entra en juego con tu Pilar del Pacífico Norte activo, su armadura no puede ser ignorada por los BA (el pilar la renueva cada turno).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "stage_has_card_code",
+                "code": "north_pacific_pillar"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "self",
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Corrientes del Pacífico",
+          "type": "activa",
+          "ability_key": "baian_pacific_currents",
+          "description": "Paga 2 CP: elige un caballero (tuyo o rival) y muévelo a otra posición de su campo. Si la posición está ocupada, intercambia los dos caballeros.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_any",
+                "filter": {
+                  "type": "knight"
+                },
+                "destination": "field",
+                "on_select": [
+                  {
+                    "type": "request_slot_selection",
+                    "target": "selected",
+                    "on_select": [
+                      {
+                        "type": "move_to_slot",
+                        "target": "selected"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -512,6 +582,7 @@
     {
       "code": "baian_seahorse_v2",
       "name": "Baian de Caballo Marino (Soplo Divino)",
+      "character": "baian",
       "art_tags": "1boy, male focus, short hair, golden scale armor, wind blast",
       "rarity": "rare",
       "cost": 2,
@@ -536,7 +607,7 @@
       },
       "abilities": [
         {
-          "name": "Soplo Divino",
+          "name": "Ráfaga del Pacífico",
           "type": "activa",
           "description": "Paga 3 CP; devuelve a la mano de su dueño un caballero rival con 5 LP o menos.",
           "effects": {
@@ -572,6 +643,32 @@
               }
             ]
           }
+        },
+        {
+          "name": "Guardián del Pilar",
+          "type": "pasiva",
+          "ability_key": "baian_pillar_guardian",
+          "description": "Si entra en juego con tu Pilar del Pacífico Norte activo, su armadura no puede ser ignorada por los BA (el pilar la renueva cada turno).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "stage_has_card_code",
+                "code": "north_pacific_pillar"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "self",
+                "duration": 1
+              }
+            ]
+          }
         }
       ],
       "max_copies": 3,
@@ -585,6 +682,7 @@
     {
       "code": "io_scylla_v1",
       "name": "Io de Scylla",
+      "character": "io",
       "art_tags": "1boy, male focus, short hair, golden scale armor, beast spirits",
       "rarity": "epic",
       "cost": 2,
@@ -653,6 +751,7 @@
     {
       "code": "io_scylla_v2",
       "name": "Io de Scylla (Gran Tornado)",
+      "character": "io",
       "art_tags": "1boy, male focus, short hair, golden scale armor, tornado",
       "rarity": "rare",
       "cost": 2,
@@ -724,6 +823,7 @@
     {
       "code": "kaysa_lymnades_v1",
       "name": "Kaysa de Lymnades",
+      "character": "kaysa",
       "art_tags": "1boy, male focus, long white hair, sly smile, golden scale armor",
       "rarity": "epic",
       "cost": 2,
@@ -814,6 +914,7 @@
     {
       "code": "kaysa_lymnades_v2",
       "name": "Kaysa de Lymnades (Mil Rostros)",
+      "character": "kaysa",
       "art_tags": "1boy, male focus, long white hair, deceptive smile, golden scale armor, illusion",
       "rarity": "rare",
       "cost": 1,
@@ -881,6 +982,7 @@
     {
       "code": "krishna_chrysaor_v1",
       "name": "Krishna de Chrysaor",
+      "character": "krishna",
       "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, holding golden spear",
       "rarity": "epic",
       "cost": 2,
@@ -947,6 +1049,7 @@
     {
       "code": "krishna_chrysaor_v2",
       "name": "Krishna de Chrysaor (Maha Roshini)",
+      "character": "krishna",
       "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, blinding light",
       "rarity": "rare",
       "cost": 2,

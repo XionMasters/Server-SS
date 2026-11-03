@@ -111,6 +111,9 @@ export type StatusEffectType =
   | 'electric_charge'     // Próximo BA del portador aplica PAR al objetivo (se consume al atacar)
   | 'life_floor_1'        // LP del jugador no puede bajar de 1 mientras la carta esté en campo
   | 'dragon_rage'         // Próximo BA del portador también daña soldados adyacentes al objetivo (se consume al atacar)
+  | 'taunt'               // Provocación: los BA rivales solo pueden dirigirse al portador (salvo que esté inmovilizado)
+  | 'armor_unbreakable'   // Los BA que ignoran AR (ignore_armor) no la ignoran contra el portador; las TA ignore_ar sí
+  | 'ability_used'        // Marker: la habilidad activa params.ability_key ya se usó este turno (expira al inicio del siguiente turno propio)
 /** category: special (one-shot TA modifiers — se consumen al usar Technique Attack) ─────── */
   | 'ta_apply_status'         // aplica estado(s) al objetivo; config en params.status_type/status_types
   | 'ta_modify_target_ce'     // modifica CE/base_ce del objetivo por `value` (negativo = reduce)
@@ -178,6 +181,9 @@ export const EFFECT_CATEGORY: Record<StatusEffectType, StatusEffectCategory> = {
   electric_charge:    'special',
   life_floor_1:       'special',
   dragon_rage:        'special',
+  taunt:              'special',
+  armor_unbreakable:  'special',
+  ability_used:       'special',
   // TA modifiers (one-shot)
   ta_apply_status:           'special',
   ta_modify_target_ce:       'special',
@@ -357,6 +363,23 @@ export function attackerIgnoresArmor(effects: StatusEffect[]): boolean {
   return effects.some(e => BASIC_ATTACK_EFFECT_RULES[e.type]?.ignoreArmor === true);
 }
 
+/** True si la habilidad activa `abilityKey` ya se usó este turno (una vez por turno y caballero). */
+export function isAbilityUsedThisTurn(effects: StatusEffect[], abilityKey: string): boolean {
+  return effects.some(e => e.type === 'ability_used' && e.params?.ability_key === abilityKey);
+}
+
+/** Marca la habilidad como usada hasta el inicio del siguiente turno del dueño. */
+export function markAbilityUsed(effects: StatusEffect[], abilityKey: string): StatusEffect[] {
+  return [...effects, { type: 'ability_used', params: { ability_key: abilityKey }, remaining_turns: 1 }];
+}
+
+/** AR efectiva del defensor ante un BA: 0 si el atacante la ignora, salvo que el defensor tenga armor_unbreakable. */
+export function effectiveArmorAgainstBA(attackerEffects: StatusEffect[], defender: { ar?: number; status_effects?: StatusEffect[] } | null | undefined): number {
+  const ar = defender?.ar ?? 0;
+  if (!attackerIgnoresArmor(attackerEffects)) return ar;
+  return (defender?.status_effects ?? []).some(e => e.type === 'armor_unbreakable') ? ar : 0;
+}
+
 /** True si el atacante puede ignorar Modo Defensa del defensor en su próximo BA. */
 export function attackerIgnoresBlockMode(effects: StatusEffect[]): boolean {
   return effects.some(e => BASIC_ATTACK_IGNORE_RULES[e.type]?.ignoreBlockMode === true);
@@ -406,6 +429,17 @@ export function isStatusBlocked(effects: StatusEffect[], type: string): boolean 
 /** True si la carta está inmovilizada (frozen o paralyzed) y no puede actuar. */
 export function isImmobilized(effects: StatusEffect[]): boolean {
   return effects.some(e => e.type === 'frozen' || e.type === 'paralyzed');
+}
+
+/**
+ * Objetivos obligatorios de un BA según la Provocación (taunt) del campo defensor.
+ * Un caballero inmovilizado no provoca. Vacío = sin restricción.
+ */
+export function getTauntingKnights<T extends { status_effects?: StatusEffect[] }>(defenders: T[]): T[] {
+  return defenders.filter(k => {
+    const effects = k.status_effects ?? [];
+    return effects.some(e => e.type === 'taunt') && !isImmobilized(effects);
+  });
 }
 
 /** Consume efectos de BA marcados como one-shot. */
@@ -496,6 +530,7 @@ export function addOrRefreshEffect(
     ...next[existingIdx],
     ...(incoming.remaining_turns !== undefined ? { remaining_turns: incoming.remaining_turns } : {}),
     ...(incoming.value !== undefined ? { value: incoming.value } : {}),
+    ...(incoming.params !== undefined ? { params: incoming.params } : {}),
     ...(incoming.source ? { source: incoming.source } : {}),
   };
   return next;

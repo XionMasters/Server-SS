@@ -123,6 +123,17 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Columna code agregada y normalizada.');
         }
 
+        const techniqueColumns = await queryInterface.describeTable('card_techniques');
+        if (!cardColumns['character'] || !techniqueColumns['target_all'] || !techniqueColumns['ignore_defense_mode']) {
+          console.log('🔧 Aplicando migración 010 (cards.character, card_techniques.target_all/ignore_defense_mode)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/010_add_character_and_technique_flags.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 010 aplicada.');
+        }
+
         const knightColumns = await queryInterface.describeTable('card_knights');
         if (!knightColumns['rank']) {
           console.log('🔧 Agregando columna rank a tabla card_knights...');
