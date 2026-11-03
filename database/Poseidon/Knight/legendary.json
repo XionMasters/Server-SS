@@ -120,9 +120,9 @@
       },
       "abilities": [
         {
-          "name": "Ira del Tridente",
+          "name": "Gran Diluvio",
           "type": "activa",
-          "description": "Paga 6 CP; inflige 3 de daño a todos los caballeros rivales.",
+          "description": "Paga 6 CP; las aguas cubren la Tierra: inflige 3 de daño a todos los caballeros rivales.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [

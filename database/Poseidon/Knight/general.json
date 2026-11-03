@@ -32,37 +32,32 @@
       },
       "abilities": [
         {
-          "name": "Triángulo Dorado",
+          "name": "Ambición del Dragón Marino",
           "type": "activa",
-          "description": "Paga 5 CP; envía un caballero rival al Yomotsu si su LP es 4 o menos.",
+          "description": "Paga 3 CP; la próxima TA de Kanon inflige 3 LP de daño extra al jugador rival.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
               {
                 "type": "cosmos",
-                "amount": 5
+                "amount": 3
               }
             ],
             "conditions": [
               {
                 "type": "cosmos_min",
-                "amount": 5
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ta_extra_damage_3"
               }
             ],
             "actions": [
               {
-                "type": "request_selection",
-                "zone": "field_opponent",
-                "filter": {
-                  "type": "knight",
-                  "health_max": 4
-                },
-                "on_select": [
-                  {
-                    "type": "kill",
-                    "target": "selected"
-                  }
-                ]
+                "type": "apply_status",
+                "status": "ta_extra_damage_3",
+                "target": "self"
               }
             ]
           }
@@ -123,7 +118,7 @@
       },
       "abilities": [
         {
-          "name": "Explosión de Galaxias",
+          "name": "Sangre de Géminis",
           "type": "activa",
           "description": "Paga 4 CP; el siguiente BA de Kanon ignora la AR del defensor.",
           "effects": {
@@ -156,7 +151,7 @@
         {
           "name": "Expiación",
           "type": "pasiva",
-          "description": "Si tu LP es menor a 10, Kanon gana +2 CE.",
+          "description": "Al entrar en juego, si tu LP es menor a 10, Kanon gana +2 CE permanentemente.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "conditions": [
@@ -214,9 +209,96 @@
       },
       "abilities": [
         {
-          "name": "Sinfonía Mortal",
+          "name": "Melodía Ineludible",
           "type": "activa",
-          "description": "Paga 3 CP; congela a un caballero rival: no podrá atacar en su próximo turno.",
+          "description": "Paga 3 CP; la próxima TA de Sorrento ignora el Modo Defensa del defensor.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 3
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 3
+              },
+              {
+                "type": "no_status",
+                "status": "ta_ignore_block_mode"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "ta_ignore_block_mode",
+                "target": "self"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
+      "code": "sorrento_siren_v2",
+      "name": "Sorrento de Sirena (Fiel a Julian)",
+      "art_tags": "1boy, male focus, short light purple hair, scale armor, holding flute, loyal, calm, seaside",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/4.webp",
+      "art_prompt": "Sorrento, the Siren Marina General, with short lilac-purple hair, pink eyes and warm brown skin, wearing his recognizable winged Siren Scale in purple and lavender tones. After the fall of the Undersea Temple he stands calmly on a sunlit seaside cliff, golden flute held lowered in one hand, gazing toward the horizon with a gentle, loyal expression, resolved to stay at Julian Solo's side; soft sea breeze and calm waves, no attack being performed. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "description": "Tras la caída del Templo Submarino, Sorrento decide acompañar a Julian Solo.",
+      "tags": [
+        "sorrento",
+        "siren",
+        "general"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 9,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Escolta del Heredero",
+          "type": "pasiva",
+          "description": "Al inicio de tu turno, si controlas un caballero [julian], Sorrento recupera 2 CP.",
+          "effects": {
+            "trigger": "TURN_START",
+            "conditions": [
+              {
+                "type": "field_has_tag",
+                "tag": "julian"
+              }
+            ],
+            "actions": [
+              {
+                "type": "restore_cosmos",
+                "amount": 2,
+                "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Melodía Serena",
+          "type": "activa",
+          "description": "Paga 3 CP; un caballero aliado es inmune a estados negativos hasta tu próximo turno.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -234,80 +316,18 @@
             "actions": [
               {
                 "type": "request_selection",
-                "zone": "field_opponent",
+                "zone": "field",
                 "filter": {
                   "type": "knight"
                 },
                 "on_select": [
                   {
                     "type": "apply_status",
-                    "status": "frozen",
+                    "status": "immune_negative",
                     "target": "selected",
-                    "duration": 2
+                    "duration": 1
                   }
                 ]
-              }
-            ]
-          }
-        }
-      ],
-      "max_copies": 2,
-      "unique": true,
-      "playable_zones": [
-        "battlefield"
-      ],
-      "collection_id": "poseidon",
-      "artist": null
-    },
-    {
-      "code": "sorrento_siren_v2",
-      "name": "Sorrento de Sirena (Clímax)",
-      "art_tags": "1boy, male focus, short light purple hair, golden scale armor, playing flute, sound waves",
-      "rarity": "rare",
-      "cost": 2,
-      "generate": 2,
-      "faction": "Poseidon",
-      "element": "water",
-      "image_url": "generals/4.webp",
-      "art_prompt": "Sorrento, the Siren Marina General, with short lilac-purple hair, pink eyes and warm brown skin, wearing his recognizable winged Siren Scale in purple and lavender tones. He performs Dead End Climax, holding his golden flute to his lips as visible concentric sound waves and luminous musical currents expand through the underwater air, serene face contrasting with the devastating attack. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
-      "description": "Sorrento toca la melodía final que debilita el cosmos rival.",
-      "tags": [
-        "sorrento",
-        "siren",
-        "general"
-      ],
-      "stats": {
-        "attack": 3,
-        "defense": 3,
-        "health": 8,
-        "cosmos": 9,
-        "can_defend": true,
-        "defense_reduction": 0.5
-      },
-      "abilities": [
-        {
-          "name": "Clímax de la Muerte",
-          "type": "activa",
-          "description": "Paga 4 CP; todos los caballeros rivales pierden 2 LP.",
-          "effects": {
-            "trigger": "ACTIVE",
-            "cost": [
-              {
-                "type": "cosmos",
-                "amount": 4
-              }
-            ],
-            "conditions": [
-              {
-                "type": "cosmos_min",
-                "amount": 4
-              }
-            ],
-            "actions": [
-              {
-                "type": "apply_damage",
-                "amount": 2,
-                "target": "all_enemies"
               }
             ]
           }
@@ -348,9 +368,9 @@
       },
       "abilities": [
         {
-          "name": "Aurora Boreal",
+          "name": "Frío del Ártico",
           "type": "activa",
-          "description": "Paga 3 CP; congela a un caballero rival (no puede atacar el próximo turno).",
+          "description": "Paga 3 CP; inflige 3 de daño a un caballero rival Congelado.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -363,6 +383,10 @@
               {
                 "type": "cosmos_min",
                 "amount": 3
+              },
+              {
+                "type": "enemy_has_status",
+                "status": "frozen"
               }
             ],
             "actions": [
@@ -370,14 +394,14 @@
                 "type": "request_selection",
                 "zone": "field_opponent",
                 "filter": {
-                  "type": "knight"
+                  "type": "knight",
+                  "status": "frozen"
                 },
                 "on_select": [
                   {
-                    "type": "apply_status",
-                    "status": "frozen",
-                    "target": "selected",
-                    "duration": 2
+                    "type": "apply_damage",
+                    "amount": 3,
+                    "target": "selected"
                   }
                 ]
               }
@@ -511,16 +535,16 @@
     },
     {
       "code": "baian_seahorse_v2",
-      "name": "Baian de Caballo Marino (Soplo Divino)",
-      "art_tags": "1boy, male focus, short hair, golden scale armor, wind blast",
+      "name": "Baian de Caballo Marino (Guardián del Pacífico Norte)",
+      "art_tags": "1boy, male focus, short hair, scale armor, guarding, arms crossed, giant pillar",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "wind",
       "image_url": "generals/8.webp",
-      "art_prompt": "Baian, the Sea Horse Marina General, light brown hair and blue eyes, wearing his distinctive orange-bronze and gold Sea Horse Scale with its seahorse-shaped helmet and broad armored shoulders. He unleashes God Breath, thrusting both arms forward as a massive compressed blast of air and spiraling water sends debris flying, the North Pacific Pillar visible behind him. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
-      "description": "El viento de Baian lanza por los aires a quien lo desafía.",
+      "art_prompt": "Baian, the Sea Horse Marina General, light brown hair and blue eyes, wearing his distinctive orange-bronze and gold Sea Horse Scale with its seahorse-shaped helmet and broad armored shoulders. He stands guard with arms crossed directly in front of the towering North Pacific Pillar, planted like an immovable wall between the pillar and any intruder, proud and vigilant expression, no attack being performed. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "description": "Ningún intruso alcanzará el Pilar del Pacífico Norte mientras Baian siga en pie.",
       "tags": [
         "baian",
         "seahorse",
@@ -536,9 +560,9 @@
       },
       "abilities": [
         {
-          "name": "Soplo Divino",
+          "name": "Primera Línea",
           "type": "activa",
-          "description": "Paga 3 CP; devuelve a la mano de su dueño un caballero rival con 5 LP o menos.",
+          "description": "Paga 3 CP; un caballero aliado gana +2 AR hasta tu próximo turno.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -556,17 +580,17 @@
             "actions": [
               {
                 "type": "request_selection",
-                "zone": "field_opponent",
+                "zone": "field",
                 "filter": {
-                  "type": "knight",
-                  "health_max": 5
+                  "type": "knight"
                 },
-                "destination": "hand",
                 "on_select": [
                   {
-                    "type": "send_to_zone",
+                    "type": "apply_status",
+                    "status": "ar_boost",
                     "target": "selected",
-                    "destination": "hand"
+                    "value": 2,
+                    "duration": 1
                   }
                 ]
               }
@@ -592,7 +616,7 @@
       "faction": "Poseidon",
       "element": "earth",
       "image_url": "generals/9.webp",
-      "art_prompt": "Io, the Scylla Marina General, a youthful, delicate-featured warrior with short pink hair in the 1986 anime palette and intense reddish eyes. He wears the orange-gold Scylla Scale, an elaborate armor with details evoking the six-headed sea monster. Behind him appear six distinct spectral beast manifestations: eagle, wolf, serpent, vampire bat, grizzly bear and queen bee, each clearly recognizable, in the chamber of the South Pacific Pillar. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "art_prompt": "Io, the Scylla Marina General, a youthful, delicate-featured warrior with short pink hair in the 1986 anime palette and intense reddish eyes. He wears the orange-gold Scylla Scale, an elaborate armor with details evoking the six-headed sea monster. He stands confidently in the chamber of the South Pacific Pillar, a proud, versatile warrior ready for battle, no attack being performed. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "General del Pacífico Sur, domina las seis bestias de Scylla.",
       "tags": [
         "io",
@@ -609,34 +633,21 @@
       },
       "abilities": [
         {
-          "name": "Seis Bestias",
-          "type": "activa",
-          "description": "Paga 4 CP; lanza una moneda: si sale cara, Io ataca con CE doble hasta tu próximo turno.",
+          "name": "Arsenal de Scylla",
+          "type": "pasiva",
+          "description": "Cada vez que Io conecta una TA, recupera 2 CP.",
           "effects": {
-            "trigger": "ACTIVE",
-            "cost": [
-              {
-                "type": "cosmos",
-                "amount": 4
-              }
-            ],
+            "trigger": "TA_DEALT",
             "conditions": [
               {
-                "type": "cosmos_min",
-                "amount": 4
+                "type": "event_source_is_self"
               }
             ],
             "actions": [
               {
-                "type": "coin_flip_then",
-                "on_heads": [
-                  {
-                    "type": "apply_status",
-                    "status": "ce_double",
-                    "target": "self",
-                    "duration": 1
-                  }
-                ]
+                "type": "restore_cosmos",
+                "amount": 2,
+                "target": "self"
               }
             ]
           }
@@ -652,16 +663,16 @@
     },
     {
       "code": "io_scylla_v2",
-      "name": "Io de Scylla (Gran Tornado)",
-      "art_tags": "1boy, male focus, short hair, golden scale armor, tornado",
+      "name": "Io de Scylla (Guardián del Pacífico Sur)",
+      "art_tags": "1boy, male focus, short hair, scale armor, fighting stance, battle damage, determined",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "wind",
       "image_url": "generals/10.webp",
-      "art_prompt": "Io of Scylla, with short pink hair and reddish eyes in the classic anime design, wearing his orange-gold Scylla Scale. He launches the Big Tornado, sweeping his arms as a huge spiraling cyclone of water and air tears across the South Pacific Pillar chamber, the vortex dominating the composition while his face and distinctive armor remain clearly visible. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
-      "description": "El tornado de Io arrasa las defensas enemigas.",
+      "art_prompt": "Io of Scylla, with short pink hair and reddish eyes in the classic anime design, wearing his orange-gold Scylla Scale. Battle-worn but defiant, he holds a low fighting stance before the South Pacific Pillar, refusing to yield ground, his face, distinctive armor and fierce determination clearly visible, no attack being performed. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "description": "Io desgasta sin descanso las defensas de quien intenta derribar su pilar.",
       "tags": [
         "io",
         "scylla",
@@ -677,7 +688,7 @@
       },
       "abilities": [
         {
-          "name": "Gran Tornado",
+          "name": "Acoso Implacable",
           "type": "activa",
           "description": "Paga 3 CP; reduce permanentemente 1 AR de un caballero rival.",
           "effects": {
@@ -767,9 +778,9 @@
           }
         },
         {
-          "name": "Salamandra Satánica",
+          "name": "Rostro Querido",
           "type": "activa",
-          "description": "Paga 3 CP; inflige 3 de daño a un caballero rival.",
+          "description": "Paga 3 CP; un caballero rival duda al ver a un ser querido: pierde 2 CE hasta el final de su próximo turno.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -793,9 +804,11 @@
                 },
                 "on_select": [
                   {
-                    "type": "apply_damage",
-                    "amount": 3,
-                    "target": "selected"
+                    "type": "apply_status",
+                    "status": "ce_boost",
+                    "target": "selected",
+                    "value": -2,
+                    "duration": 2
                   }
                 ]
               }
@@ -946,16 +959,16 @@
     },
     {
       "code": "krishna_chrysaor_v2",
-      "name": "Krishna de Chrysaor (Maha Roshini)",
-      "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, blinding light",
+      "name": "Krishna de Chrysaor (Kundalini)",
+      "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, meditation, glowing chakras",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
       "faction": "Poseidon",
       "element": "light",
       "image_url": "generals/14.webp",
-      "art_prompt": "Krishna of Chrysaor, dark-skinned, with his distinctive long white crest-like hair, closely shaved scalp and no visible eyebrows, wearing the orange-gold Chrysaor Scale. He unleashes Maha Roshini as brilliant Kundalini light radiates from his body and chakras, forming a blinding golden-white aura around him; his face, hairstyle, armor and Golden Lance remain recognizable. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
-      "description": "La Kundalini de Krishna ciega a quien se le enfrenta.",
+      "art_prompt": "Krishna of Chrysaor, dark-skinned, with his distinctive long white crest-like hair, closely shaved scalp and no visible eyebrows, wearing the orange-gold Chrysaor Scale. He stands in serene meditation with the Golden Lance planted beside him, eyes half closed, as his seven chakras glow softly one above another along his body, awakening his Kundalini; calm inner power rather than an attack, his face, hairstyle and armor clearly recognizable. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "description": "Krishna despierta sus siete chakras y su fe en Poseidón se vuelve inquebrantable.",
       "tags": [
         "krishna",
         "chrysaor",
@@ -971,9 +984,9 @@
       },
       "abilities": [
         {
-          "name": "Maha Roshini",
+          "name": "Despertar de la Kundalini",
           "type": "activa",
-          "description": "Paga 4 CP; ciega a un caballero rival: pierde 3 CE hasta el final de su próximo turno.",
+          "description": "Paga 4 CP; Krishna gana +2 CE y +2 AR hasta tu próximo turno.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -990,20 +1003,18 @@
             ],
             "actions": [
               {
-                "type": "request_selection",
-                "zone": "field_opponent",
-                "filter": {
-                  "type": "knight"
-                },
-                "on_select": [
-                  {
-                    "type": "apply_status",
-                    "status": "ce_boost",
-                    "target": "selected",
-                    "value": -3,
-                    "duration": 2
-                  }
-                ]
+                "type": "apply_status",
+                "status": "ce_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 1
+              },
+              {
+                "type": "apply_status",
+                "status": "ar_boost",
+                "target": "self",
+                "value": 2,
+                "duration": 1
               }
             ]
           }

@@ -15,7 +15,7 @@
       "faction": "Poseidon",
       "element": "water",
       "image_url": "mariners/1.webp",
-      "art_prompt": "Thetis, the Mermaid Marina, a graceful young woman with long flowing blonde hair and blue eyes, wearing her distinctive Mermaid Scale: fitted rose-red and pink segmented aquatic armor with the unmistakable mermaid-inspired helmet and fin-like details, not a generic gold armor. She stands poised as Poseidon's loyal messenger in the grand Undersea Temple, one hand raised as if summoning coral restraints, elegant but battle-ready, blue underwater light and drifting bubbles. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "art_prompt": "Thetis, the Mermaid Marina, a graceful young woman with long flowing blonde hair and blue eyes, wearing her distinctive Mermaid Scale: fitted rose-red and pink segmented aquatic armor with the unmistakable mermaid-inspired helmet and fin-like details, not a generic gold armor. She stands poised as Poseidon's loyal messenger in the grand Undersea Temple, one hand over her heart in a gesture of devotion, elegant but battle-ready, blue underwater light and drifting bubbles. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
       "description": "Marina leal a Poseidón, salvada de la muerte por Julian Solo.",
       "tags": [
         "thetis",
@@ -31,9 +31,9 @@
       },
       "abilities": [
         {
-          "name": "Trampa de Coral",
+          "name": "Mensajera del Emperador",
           "type": "activa",
-          "description": "Paga 3 CP; inmoviliza a un caballero rival: no podrá atacar en su próximo turno.",
+          "description": "Paga 3 CP; un caballero aliado [general] recupera 4 CP.",
           "effects": {
             "trigger": "ACTIVE",
             "cost": [
@@ -46,21 +46,25 @@
               {
                 "type": "cosmos_min",
                 "amount": 3
+              },
+              {
+                "type": "field_has_tag",
+                "tag": "general"
               }
             ],
             "actions": [
               {
                 "type": "request_selection",
-                "zone": "field_opponent",
+                "zone": "field",
                 "filter": {
-                  "type": "knight"
+                  "type": "knight",
+                  "tag": "general"
                 },
                 "on_select": [
                   {
-                    "type": "apply_status",
-                    "status": "frozen",
-                    "target": "selected",
-                    "duration": 2
+                    "type": "restore_cosmos",
+                    "amount": 4,
+                    "target": "selected"
                   }
                 ]
               }
@@ -503,7 +507,7 @@
         {
           "name": "Último Bastión",
           "type": "pasiva",
-          "description": "Si tu LP es menor a 8, gana +2 AR.",
+          "description": "Al entrar en juego, si tu LP es menor a 8, gana +2 AR permanentemente.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "conditions": [
