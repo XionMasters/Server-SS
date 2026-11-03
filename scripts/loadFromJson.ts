@@ -55,6 +55,8 @@ interface TechniqueStats {
   ta_cost: number;
   compatible_tags?: string[];
   ignore_ar?: boolean;
+  ignore_defense_mode?: boolean;
+  target_all?: boolean;
   ta_effects?: Array<{ type: string; value?: number; turns?: number }>;
 }
 
@@ -70,6 +72,8 @@ interface CardEntry {
   description?: string;
   max_copies?: number;
   unique?: boolean;
+  /** Personaje (ej: 'kanon'): unique impide dos cartas del mismo personaje en el campo. */
+  character?: string | null;
   playable_zones?: string[];
   collection_id?: string | null;
   artist?: string | null;
@@ -140,13 +144,13 @@ async function upsertCard(
       `INSERT INTO cards (
          id, code, name, type, rarity, cost, generate,
          description, image_url, faction, element,
-         max_copies, "unique", playable_zones, collection_id, artist, tags,
+         max_copies, "unique", character, playable_zones, collection_id, artist, tags,
          created_at, updated_at
        )
        VALUES (
          uuid_generate_v4(), :code, :name, :type, :rarity, :cost, :generate,
          :description, :image_url, :faction, :element,
-         :max_copies, :unique, :playable_zones, :collection_id, :artist, :tags,
+         :max_copies, :unique, :character, :playable_zones, :collection_id, :artist, :tags,
          NOW(), NOW()
        )
        ON CONFLICT (code) DO UPDATE SET
@@ -161,6 +165,7 @@ async function upsertCard(
          element     = EXCLUDED.element,
          max_copies  = EXCLUDED.max_copies,
          "unique"   = EXCLUDED."unique",
+         character   = EXCLUDED.character,
          playable_zones = EXCLUDED.playable_zones,
          collection_id  = EXCLUDED.collection_id,
          artist         = EXCLUDED.artist,
@@ -181,6 +186,7 @@ async function upsertCard(
           element:     card.element ?? '',
           max_copies:  card.max_copies ?? 3,
           unique:      card.unique ?? false,
+          character:   card.character ?? null,
           playable_zones: `{${(card.playable_zones ?? ['battlefield']).join(',')}}`,
           collection_id:  card.collection_id ?? '',
           artist:         card.artist ?? '',
@@ -238,10 +244,12 @@ async function upsertCard(
     if (ts) {
       await sequelize.query(
         `INSERT INTO card_techniques (
-           card_id, hit_count, hit_ce, ta_cost, compatible_tags, ignore_ar, ta_effects
+           card_id, hit_count, hit_ce, ta_cost, compatible_tags, ignore_ar,
+           ignore_defense_mode, target_all, ta_effects
          )
          VALUES (
-           :card_id, :hit_count, :hit_ce, :ta_cost, :compatible_tags, :ignore_ar, :ta_effects::jsonb
+           :card_id, :hit_count, :hit_ce, :ta_cost, :compatible_tags, :ignore_ar,
+           :ignore_defense_mode, :target_all, :ta_effects::jsonb
          )
          ON CONFLICT (card_id) DO UPDATE SET
            hit_count       = EXCLUDED.hit_count,
@@ -249,6 +257,8 @@ async function upsertCard(
            ta_cost         = EXCLUDED.ta_cost,
            compatible_tags = EXCLUDED.compatible_tags,
            ignore_ar       = EXCLUDED.ignore_ar,
+           ignore_defense_mode = EXCLUDED.ignore_defense_mode,
+           target_all      = EXCLUDED.target_all,
            ta_effects      = EXCLUDED.ta_effects`,
         {
           replacements: {
@@ -260,6 +270,8 @@ async function upsertCard(
               ? `{${(ts.compatible_tags as string[]).join(',')}}`
               : '{}',
             ignore_ar:       ts.ignore_ar ?? false,
+            ignore_defense_mode: ts.ignore_defense_mode ?? false,
+            target_all:      ts.target_all ?? false,
             ta_effects:      JSON.stringify(ts.ta_effects ?? []),
           },
           type: QueryTypes.INSERT,
@@ -391,7 +403,10 @@ async function main(): Promise<void> {
     files = [abs];
   } else {
     const dbDir = path.resolve(__dirname, '..', 'database');
-    files = await glob(`${dbDir}/**/*.json`);
+    // database/bkp/ guarda copias antiguas: con el orden alfabético se cargaría al final
+    // y pisaría las cartas vigentes (mismos code)
+    files = (await glob(`${dbDir}/**/*.json`))
+      .filter(f => !f.split(/[\\/]/).includes('bkp'));
     files.sort();
   }
 

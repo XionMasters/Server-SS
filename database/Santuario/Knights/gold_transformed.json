@@ -8,6 +8,7 @@
     {
       "code": "virgo_shun_v1",
       "name": "Virgo Shun",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, gentle expression, gold armor, virgo gold cloth, chains",
       "rarity": "legendary",
       "cost": 0,
@@ -73,6 +74,7 @@
     {
       "code": "virgo_shun_v2",
       "name": "Virgo Shun",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, determined expression, gold armor, virgo gold cloth, chains, barrier",
       "rarity": "legendary",
       "cost": 0,
@@ -137,6 +139,7 @@
     {
       "code": "virgo_shun_v3",
       "name": "Virgo Shun",
+      "character": "shun",
       "art_tags": "1boy, male focus, green hair, serene expression, gold armor, virgo gold cloth, chains, lotus, golden aura",
       "rarity": "legendary",
       "cost": 0,

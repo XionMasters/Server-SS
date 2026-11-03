@@ -1,6 +1,6 @@
 import { CombatContext, CombatResult } from "./CombatTypes";
 import { SeededRNG } from "./RNG";
-import { attackerIgnoresArmor } from "../StatusEffects";
+import { effectiveArmorAgainstBA } from "../StatusEffects";
 
 export type CombatResolver = (
   ctx: CombatContext,
@@ -10,7 +10,7 @@ export type CombatResolver = (
 export const CombatModeResolvers: Record<string, CombatResolver> = {
 
   normal: (ctx) => {
-    const effectiveAR = attackerIgnoresArmor(ctx.attacker.status_effects ?? []) ? 0 : (ctx.defender?.ar ?? 0);
+    const effectiveAR = effectiveArmorAgainstBA(ctx.attacker.status_effects ?? [], ctx.defender);
     const raw = ctx.attacker.ce - effectiveAR;
     return { damageToCard: Math.max(1, raw), evaded: false };
   },
@@ -18,14 +18,14 @@ export const CombatModeResolvers: Record<string, CombatResolver> = {
   defense: (ctx) => {
     // En modo defensa, el CE atacante se reduce a la mitad antes de aplicar ignore_armor
     const halfCE = Math.floor(ctx.attacker.ce / 2);
-    const effectiveAR = attackerIgnoresArmor(ctx.attacker.status_effects ?? []) ? 0 : (ctx.defender?.ar ?? 0);
+    const effectiveAR = effectiveArmorAgainstBA(ctx.attacker.status_effects ?? [], ctx.defender);
     const raw = halfCE - effectiveAR;
     return { damageToCard: Math.max(1, raw), evaded: false };
   },
 
   evasion: (ctx, rng) => {
     if (rng.next() < 0.5) {
-      const effectiveAR = attackerIgnoresArmor(ctx.attacker.status_effects ?? []) ? 0 : (ctx.defender?.ar ?? 0);
+      const effectiveAR = effectiveArmorAgainstBA(ctx.attacker.status_effects ?? [], ctx.defender);
       const raw = ctx.attacker.ce - effectiveAR;
       return { damageToCard: Math.max(1, raw), evaded: false };
     }
@@ -34,7 +34,7 @@ export const CombatModeResolvers: Record<string, CombatResolver> = {
 
   // prayer: manejar cuando se diseñe la habilidad Oración Divina
   prayer: (ctx) => {
-    const effectiveAR = attackerIgnoresArmor(ctx.attacker.status_effects ?? []) ? 0 : (ctx.defender?.ar ?? 0);
+    const effectiveAR = effectiveArmorAgainstBA(ctx.attacker.status_effects ?? [], ctx.defender);
     const raw = ctx.attacker.ce - effectiveAR;
     return { damageToCard: Math.max(1, raw), evaded: false };
   },

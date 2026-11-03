@@ -1,0 +1,137 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'object' de los Black Saints. Se juegan en field_occasion. Trigger CARD_PLAYED con event_source_is_self: dispara solo cuando la carta misma es jugada.",
+  "saga": "Black Saint Series",
+  "type": "object",
+  "cards": [
+    {
+      "code": "black_cloth",
+      "name": "Armadura Negra",
+      "art_tags": "no humans, black cloth armor, cloth box, dark aura, volcanic rock",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "objects/black_cloth.webp",
+      "description": "Elige un caballero [black_saint] aliado: gana +1 CE y +1 AR de forma permanente.",
+      "tags": ["black_saint"],
+      "abilities": [
+        {
+          "name": "Forjada en la Reina Muerte",
+          "type": "equipamiento",
+          "description": "Al jugarse, elige un caballero [black_saint] aliado: gana +1 CE y +1 AR de forma permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" },
+              { "type": "field_has_tag", "tag": "black_saint" }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": { "type": "knight", "tag": "black_saint" },
+                "on_select": [
+                  { "type": "modify_stat", "stat": "attack", "amount": 1, "target": "selected" },
+                  { "type": "modify_stat", "stat": "defense", "amount": 1, "target": "selected" }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "stolen_gold_cloth_piece",
+      "name": "Pieza de la Gold Cloth Robada",
+      "art_tags": "no humans, golden sagittarius cloth piece, golden helmet, dark hands grabbing, black aura",
+      "rarity": "epic",
+      "cost": 3,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "objects/stolen_gold_cloth_piece.webp",
+      "description": "Los Black Saints robaron la Gold Cloth de Sagitario durante la Guerra Galáctica. Elige un caballero [black_saint] aliado: gana +2 AR y +2 LP máximos de forma permanente.",
+      "tags": ["black_saint", "sagittarius"],
+      "abilities": [
+        {
+          "name": "Botín Dorado",
+          "type": "equipamiento",
+          "description": "Al jugarse, elige un caballero [black_saint] aliado: gana +2 AR y +2 LP máximos de forma permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" },
+              { "type": "field_has_tag", "tag": "black_saint" }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": { "type": "knight", "tag": "black_saint" },
+                "on_select": [
+                  { "type": "modify_stat", "stat": "defense", "amount": 2, "target": "selected" },
+                  { "type": "modify_stat", "stat": "health", "amount": 2, "target": "selected" }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 1,
+      "unique": true,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "guilty_mask",
+      "name": "Máscara de Guilty",
+      "art_tags": "no humans, expressionless iron mask, cracked, volcanic ash, red light",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 0,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "objects/guilty_mask.webp",
+      "description": "Pierdes 1 LP. Elige un caballero aliado: gana +2 CE de forma permanente.",
+      "tags": ["death_queen"],
+      "abilities": [
+        {
+          "name": "El Odio como Fuerza",
+          "type": "equipamiento",
+          "description": "Al jugarse, pierdes 1 LP y eliges un caballero aliado: gana +2 CE de forma permanente.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              { "type": "event_source_is_self" },
+              { "type": "field_not_empty" }
+            ],
+            "actions": [
+              { "type": "apply_player_damage", "target": "self", "amount": 1 },
+              {
+                "type": "request_selection",
+                "zone": "field",
+                "filter": { "type": "knight" },
+                "on_select": [
+                  { "type": "modify_stat", "stat": "attack", "amount": 2, "target": "selected" }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": false,
+      "playable_zones": ["field_occasion"],
+      "collection_id": "black_saints",
+      "artist": null
+    }
+  ]
+}

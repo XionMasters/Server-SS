@@ -8,6 +8,7 @@
     {
       "code": "koga_pegasus",
       "name": "Koga de Pegaso",
+      "character": "koga",
       "art_tags": "1boy, male focus, teenage boy, short spiky brown hair, white and red pegasus armor, sleek armor, light aura",
       "rarity": "epic",
       "cost": 1,
@@ -84,6 +85,7 @@
     {
       "code": "yuna_eagle",
       "name": "Yuna de Águila",
+      "character": "yuna",
       "art_tags": "1girl, blonde hair, braid, white and blue eagle armor, sleek armor, wind aura",
       "rarity": "rare",
       "cost": 1,
@@ -159,6 +161,7 @@
     {
       "code": "souma_lion",
       "name": "Souma de León",
+      "character": "souma",
       "art_tags": "1boy, male focus, teenage boy, spiky orange hair, red lion cub armor, sleek armor, fire aura",
       "rarity": "rare",
       "cost": 1,
@@ -240,6 +243,7 @@
     {
       "code": "haruto_wolf",
       "name": "Haruto de Lobo",
+      "character": "haruto",
       "art_tags": "1boy, male focus, black hair, ponytail, ninja, grey wolf armor, sleek armor",
       "rarity": "common",
       "cost": 0,
@@ -315,6 +319,7 @@
     {
       "code": "junkers_wolf",
       "name": "Wolf Junkers",
+      "character": "junkers",
       "art_tags": "1boy, male focus, grey wolf armor, sleek armor, aggressive stance",
       "rarity": "rare",
       "cost": 0,
@@ -393,6 +398,7 @@
     {
       "code": "curtis_hydra",
       "name": "Hydra Curtis",
+      "character": "curtis",
       "art_tags": "1boy, male focus, green hydra armor, sleek armor, calm expression",
       "rarity": "common",
       "cost": 0,
@@ -463,6 +469,7 @@
     {
       "code": "belriot_lionet",
       "name": "Lionet Belriot",
+      "character": "belriot",
       "art_tags": "1boy, male focus, orange lion cub armor, sleek armor, defensive stance",
       "rarity": "common",
       "cost": 0,
@@ -540,6 +547,7 @@
     {
       "code": "paradise_apus",
       "name": "Apus Paradise",
+      "character": "paradise",
       "art_tags": "1boy, male focus, colorful bird of paradise armor, sleek armor, graceful pose",
       "rarity": "common",
       "cost": 0,
@@ -616,6 +624,7 @@
     {
       "code": "guney_delphinus",
       "name": "Delphinus Guney",
+      "character": "guney",
       "art_tags": "1boy, male focus, blue dolphin armor, sleek armor, water aura",
       "rarity": "common",
       "cost": 0,
@@ -693,6 +702,7 @@
     {
       "code": "dali_corona_borealis",
       "name": "Corona Borealis Dali",
+      "character": "dali",
       "art_tags": "1boy, male focus, crown helmet, purple armor, sleek armor, mysterious smile",
       "rarity": "common",
       "cost": 0,
@@ -763,6 +773,7 @@
     {
       "code": "hooke_compass",
       "name": "Compass Hooke",
+      "character": "hooke",
       "art_tags": "1boy, male focus, bronze armor with compass motif, sleek armor, earth aura",
       "rarity": "common",
       "cost": 0,
@@ -833,6 +844,7 @@
     {
       "code": "spear_dorado",
       "name": "Dorado Spear",
+      "character": "spear",
       "art_tags": "1boy, male focus, golden fish armor, sleek armor, holding spear",
       "rarity": "common",
       "cost": 0,
@@ -910,6 +922,7 @@
     {
       "code": "mirapolos_lynx",
       "name": "Lynx Mirapolos",
+      "character": "mirapolos",
       "art_tags": "1boy, male focus, lynx armor, sleek armor, cat-like eyes",
       "rarity": "common",
       "cost": 0,
@@ -980,6 +993,7 @@
     {
       "code": "yoshiomi_wolf",
       "name": "Wolf Yoshiomi",
+      "character": "yoshiomi",
       "art_tags": "1boy, male focus, older man, black hair, ninja, grey wolf armor, sleek armor",
       "rarity": "rare",
       "cost": 4,
@@ -1050,6 +1064,7 @@
     {
       "code": "kitalpha_equuleus",
       "name": "Equuleus Kitalpha",
+      "character": "kitalpha",
       "art_tags": "1boy, male focus, little horse armor, sleek armor, steel grey armor, defensive stance",
       "rarity": "rare",
       "cost": 4,
@@ -1120,6 +1135,7 @@
     {
       "code": "celeris_equuleus",
       "name": "Equuleus Celeris",
+      "character": "celeris",
       "art_tags": "1boy, male focus, little horse armor, sleek armor, sturdy build",
       "rarity": "rare",
       "cost": 4,
@@ -1190,6 +1206,7 @@
     {
       "code": "subaru_equuleus",
       "name": "Equuleus Subaru",
+      "character": "subaru",
       "art_tags": "1boy, male focus, teenage boy, short light brown hair, white little horse armor, sleek armor, glowing aura",
       "rarity": "epic",
       "cost": 5,
@@ -1275,6 +1292,7 @@
     {
       "code": "douglas_bear",
       "name": "Bear Douglas",
+      "character": "douglas",
       "art_tags": "1boy, male focus, muscular, large build, brown bear armor, sleek armor",
       "rarity": "common",
       "cost": 0,
@@ -1352,6 +1370,7 @@
     {
       "code": "rusk_pyxis",
       "name": "Pyxis Rusk",
+      "character": "rusk",
       "art_tags": "1boy, male focus, bronze armor with compass motif, sleek armor, commanding pose",
       "rarity": "common",
       "cost": 0,
@@ -1422,6 +1441,7 @@
     {
       "code": "ryuho_dragon",
       "name": "Ryuho de Dragón",
+      "character": "ryuho",
       "art_tags": "1boy, male focus, teenage boy, long black hair, green dragon armor, round dragon shield, sleek armor",
       "rarity": "rare",
       "cost": 1,
@@ -1499,6 +1519,7 @@
     {
       "code": "eden_andromeda",
       "name": "Eden de Andrómeda",
+      "character": "eden",
       "art_tags": "1boy, male focus, light brown hair, cold expression, purple andromeda armor, sleek armor, lightning",
       "rarity": "rare",
       "cost": 1,
@@ -1572,6 +1593,7 @@
     {
       "code": "subaru_sagittarius",
       "name": "Subaru de Sagitario",
+      "character": "subaru",
       "art_tags": "1boy, male focus, teenage boy, short light brown hair, gold armor, sagittarius gold cloth, golden wings, golden bow",
       "rarity": "epic",
       "cost": 2,
@@ -1656,6 +1678,7 @@
     {
       "code": "aria_cosmo",
       "name": "Aria",
+      "character": "aria",
       "art_tags": "1girl, long purple hair, white dress, holding golden staff, gentle expression, healing light",
       "rarity": "epic",
       "cost": 0,
@@ -1703,6 +1726,7 @@
     {
       "code": "sonia_pavo_real",
       "name": "Sonia de Pavo Real",
+      "character": "sonia",
       "art_tags": "1girl, short red hair, dark red armor, sleek armor, peacock feathers, cruel expression",
       "rarity": "rare",
       "cost": 2,
@@ -1783,6 +1807,7 @@
     {
       "code": "miguel_angel",
       "name": "Miguel de Ángel",
+      "character": "miguel_angel",
       "art_tags": "1boy, male focus, long blonde hair, white and gold armor, angel wings, divine aura",
       "rarity": "epic",
       "cost": 2,
@@ -1859,6 +1884,7 @@
     {
       "code": "integra_shield",
       "name": "Integra de Escudo",
+      "character": "integra",
       "art_tags": "1girl, long hair, determined expression, silver armor, large round shield",
       "rarity": "common",
       "cost": 1,
@@ -1904,6 +1930,7 @@
     {
       "code": "geki_bear_omega",
       "name": "Geki de Oso (Omega)",
+      "character": "geki",
       "art_tags": "1boy, male focus, muscular, large build, short dark hair, brown bear armor, sleek armor",
       "rarity": "common",
       "cost": 1,

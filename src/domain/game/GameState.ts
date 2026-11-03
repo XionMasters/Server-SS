@@ -13,7 +13,11 @@
 // ─── Zona origen para selecciones interactivas ─────────────────────────────
 export type ZoneSelectSource =
   | 'yomotsu' | 'deck' | 'hand' | 'field_knight' | 'field_technique' | 'field'
-  | 'field_opponent' | 'field_support_opponent';
+  | 'field_opponent' | 'field_support_opponent'
+  /** Caballeros de ambos campos. */
+  | 'field_any'
+  /** Una posición (0–4) del campo de caballeros de `slot_owner`, no una carta. */
+  | 'field_slot';
 
 // ─── Zona destino para envío de cartas ──────────────────────────────────────
 export type ZoneDestination = 'hand' | 'field' | 'cositos' | 'yomotsu';
@@ -76,6 +80,14 @@ export interface PendingSelection {
    * Si es undefined, el cliente muestra la zona completa sin filtro.
    */
   visible_card_ids?: string[];
+  /**
+   * Solo para zone === 'field_slot': el jugador elige una posición, no una carta.
+   * Responde con `chosen_slot`; on_select se ejecuta con 'selected' = subject_card_id.
+   */
+  slot_owner?: 1 | 2;
+  visible_slots?: number[];
+  /** Carta sobre la que actúa la selección de posición (la elegida en el paso anterior). */
+  subject_card_id?: string;
 }
 
 export interface Player {
@@ -158,6 +170,16 @@ export interface CardInGameState {
    * Permiten condiciones/filtros que matchean grupos de cartas sin depender de codes exactos.
    */
   tags: string[];
+
+  /**
+   * Personaje que representa la carta (ej: 'kanon' para Kanon v1 y v2).
+   * Junto con `unique` impide tener dos versiones del mismo personaje en el campo.
+   * Si falta, la identidad de la carta es su card_code.
+   */
+  character?: string | null;
+
+  /** Carta única: solo puede haber una con el mismo personaje en el campo de su dueño. */
+  unique?: boolean;
 
   /**
    * Habilidades de la carta pre-parseadas, listas para PassiveTriggerEngine.

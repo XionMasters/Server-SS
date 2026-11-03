@@ -255,17 +255,21 @@
       "art_tags": "1boy, male focus, Baian, light brown hair, orange bronze and gold Sea Horse Scale, rising wave, water",
       "image_url": "techniques/rising_billows.webp",
       "art_prompt": "Baian of Sea Horse performs Rising Billows, wearing his distinctive orange-bronze and gold Sea Horse Scale. His light-brown hair and determined expression are visible as he sweeps his arms upward, raising a towering spiraling column of seawater that surges toward the viewer. Dynamic low-angle action, flowing water shaped by his Cosmo. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
-      "description": "Compatible con [seahorse]. TA: Gasta 4 CP. Golpea 2 veces con CE 2.",
+      "description": "Compatible con [seahorse]. TA: Gasta 4 CP. Golpea 1 vez con CE 4 a todos los caballeros rivales. La ola los levanta: pierden el Modo Defensa o Evasión.",
       "tags": [
         "seahorse",
         "technique"
       ],
       "technique_stats": {
-        "hit_count": 2,
-        "hit_ce": 2,
+        "hit_count": 1,
+        "hit_ce": 4,
         "ta_cost": 4,
         "compatible_tags": [
           "seahorse"
+        ],
+        "target_all": true,
+        "ta_effects": [
+          { "type": "remove_mode" }
         ]
       },
       "abilities": [
@@ -273,7 +277,7 @@
           "name": "Oleaje Ascendente",
           "type": "campo",
           "ability_key": "rising_billows_ta",
-          "description": "2 golpes CE 2.",
+          "description": "1 golpe CE 4 a todos los rivales. Quita el Modo Defensa/Evasión a cada uno.",
           "effects": {
             "trigger": "NONE",
             "actions": []
@@ -299,17 +303,21 @@
       "art_tags": "1boy, male focus, Baian, light brown hair, orange bronze and gold Sea Horse Scale, wind blast",
       "image_url": "techniques/god_breath.webp",
       "art_prompt": "Baian of Sea Horse unleashes God Breath in his canonical orange-bronze and gold Sea Horse Scale. He thrusts both arms forward and releases an immense concentrated blast of wind, shown as compressed air rings, spiraling currents and debris blasted away from the underwater temple floor. Strong forward motion and a clear view of Baian's face and armor. Visual direction: Saint Seiya (Knights of the Zodiac), specifically the 1986–1989 Toei Animation television anime and its Poseidon arc; faithful to Masami Kurumada's designs and the elegant character drawing of Shingo Araki and Michi Himeno. Authentic late-1980s Japanese cel animation: clean expressive linework, sharp angular facial features, athletic heroic anatomy, dramatic hand-painted anime backgrounds, strong cel shadows, luminous Cosmo energy and cinematic composition. Preserve the character's canonical appearance, hair, clothing, colors and armor design; do not invent a generic golden armor. Vertical 3:4 illustration, no text, no letters, no card frame, no border, no watermark.",
-      "description": "Compatible con [seahorse]. TA: Gasta 6 CP. Golpea 1 vez con CE 6 (los TA ya ignoran el Modo Evasión).",
+      "description": "Compatible con [seahorse]. TA: Gasta 6 CP. Golpea 1 vez con CE 8 ignorando el Modo Defensa. El objetivo queda paralizado (PAR) durante su próximo turno.",
       "tags": [
         "seahorse",
         "technique"
       ],
       "technique_stats": {
         "hit_count": 1,
-        "hit_ce": 6,
+        "hit_ce": 8,
         "ta_cost": 6,
         "compatible_tags": [
           "seahorse"
+        ],
+        "ignore_defense_mode": true,
+        "ta_effects": [
+          { "type": "paralyzed", "turns": 2 }
         ]
       },
       "abilities": [
@@ -317,7 +325,7 @@
           "name": "Soplo Divino",
           "type": "campo",
           "ability_key": "god_breath_ta",
-          "description": "CE 6.",
+          "description": "CE 8, ignora el Modo Defensa. PAR durante el próximo turno del objetivo.",
           "effects": {
             "trigger": "NONE",
             "actions": []

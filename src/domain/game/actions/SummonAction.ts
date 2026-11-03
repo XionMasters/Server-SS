@@ -12,6 +12,9 @@
  * La carta se busca SIEMPRE en passive_watchers del estado.
  * Si no se encuentra ahí, la invocación es un no-op (guard).
  *
+ * Si la carta es única y ya hay un caballero de ese personaje en el campo de su dueño
+ * (rules/unique.rules), la invocación se cancela y la carta vuelve a su zona.
+ *
  * Post-condiciones:
  *   - La carta pasa de passive_watchers a field_knights en el GameState.
  *   - zone = 'field_knight', position = posición asignada.
@@ -27,6 +30,7 @@
 
 import type { EngineContext } from '../EngineContext';
 import { createEvent } from '../events/GameEvents';
+import { findUniqueConflict } from '../rules/unique.rules';
 
 export type SummonFromZone = 'yomotsu' | 'deck' | 'cositos';
 
@@ -77,6 +81,21 @@ export function summonKnight(
   // Guard: carta no encontrada — no-op
   if (!card || !cardPlayer) return;
 
+  const abort = () => {
+    if (fromZone === 'yomotsu') {
+      if (!Array.isArray(cardPlayer.graveyard)) cardPlayer.graveyard = [];
+      cardPlayer.graveyard.push(card);
+    } else {
+      cardPlayer.passive_watchers.push(card);
+    }
+  };
+
+  // Carta única: si ya hay un caballero de ese personaje en el campo, no entra
+  if (findUniqueConflict(cardPlayer.field_knights, card)) {
+    abort();
+    return;
+  }
+
   // ── Resolver posición libre ─────────────────────────────────────────────
   // Si la posición solicitada está ocupada, buscar la primera libre (0–4).
   const occupiedPositions = new Set(
@@ -87,12 +106,7 @@ export function summonKnight(
     const free = [0, 1, 2, 3, 4].find(p => !occupiedPositions.has(p));
     if (free === undefined) {
       // Campo lleno (5/5) — devolver la carta a su zona y abortar
-      if (fromZone === 'yomotsu') {
-        if (!Array.isArray(cardPlayer.graveyard)) cardPlayer.graveyard = [];
-        cardPlayer.graveyard.push(card);
-      } else {
-        cardPlayer.passive_watchers.push(card);
-      }
+      abort();
       return;
     }
     finalPosition = free;
@@ -108,8 +122,10 @@ export function summonKnight(
     cardPlayer.graveyard_count = Math.max(0, (cardPlayer.graveyard ?? []).length);
   } else if (fromZone === 'cositos') {
     cardPlayer.costos_count = Math.max(0, (cardPlayer.costos_count ?? 0) - 1);
+  } else if (fromZone === 'deck') {
+    // deck_count se persiste en matches.playerN_deck_size: hay que descontarlo aquí
+    cardPlayer.deck_count = Math.max(0, (cardPlayer.deck_count ?? 0) - 1);
   }
-  // 'deck': deck_count lo decrementa DrawCardAction; aquí no tocamos nada más.
 
   // ── Emitir KNIGHT_SUMMONED ─────────────────────────────────────────────
   // Sin filtro de perspectiva — cualquier carta puede reaccionar a una invocación rival.

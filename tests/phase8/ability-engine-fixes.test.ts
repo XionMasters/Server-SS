@@ -251,6 +251,45 @@ describe('Efectos varios', () => {
     expect(newState.player1.hand).toHaveLength(0);
     expect(newState.player1.costos_count).toBe(1);
   });
+
+  describe('descarte con filtro (ej: Black Alchemy solo descarta Black Saints)', () => {
+    const def = {
+      trigger: 'ACTIVE',
+      cost: [{ type: 'discard', amount: 1, filter: { tag: 'black_saint' } }],
+      actions: [{ type: 'draw_card', amount: 2 }],
+    } as any;
+    const stateWithHand = (name: string) => {
+      const state = p1TurnState(name);
+      state.player1.field_knights.push(createKnight({ id: 'k', player: 1 }));
+      state.player1.hand.push({ ...createKnight({ id: 'otra', player: 1 }), zone: 'hand', tags: ['bronze'] });
+      return state;
+    };
+
+    test('no se puede activar sin una carta válida en mano', () => {
+      const check = AbilityEngine.canActivate(def, stateWithHand('discard-filter-none'), 1, 'k', activeEvent('k'));
+      expect(check.valid).toBe(false);
+    });
+
+    test('la selección solo ofrece las cartas que cumplen el filtro', () => {
+      const state = stateWithHand('discard-filter-select');
+      state.player1.hand.push({ ...createKnight({ id: 'negro', player: 1 }), zone: 'hand', tags: ['black_saint'] });
+
+      expect(AbilityEngine.canActivate(def, state, 1, 'k', activeEvent('k')).valid).toBe(true);
+      const { newState } = AbilityEngine.execute(def, state, 1, 'k', activeEvent('k'));
+      expect(newState.pending_selection?.visible_card_ids).toEqual(['negro']);
+      expect(newState.pending_selection?.filter).toEqual({ tag: 'black_saint' });
+    });
+
+    test('el camino directo no acepta una carta que no cumple el filtro', () => {
+      const state = stateWithHand('discard-filter-direct');
+      state.player1.hand.push({ ...createKnight({ id: 'negro', player: 1 }), zone: 'hand', tags: ['black_saint'] });
+
+      const { newState, extras } = AbilityEngine.execute(def, state, 1, 'k', activeEvent('k', 'otra'));
+      expect(extras?.discard_card_id).toBeUndefined();
+      expect(newState.pending_selection?.visible_card_ids).toEqual(['negro']);
+      expect(newState.player1.hand).toHaveLength(2);
+    });
+  });
 });
 
 describe('ActionResolver — habilidades activas', () => {

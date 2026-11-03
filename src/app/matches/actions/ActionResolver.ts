@@ -16,9 +16,11 @@
 import { AbilityEngine } from '../../../domain/game/abilities/AbilityEngine';
 import { parseAbilityDef, getCosmosCost, requiresClientTarget } from '../../../domain/game/abilities/AbilityDefinition';
 import { type ConditionContext, type PlayerRef } from '../../../domain/game/conditions/ConditionRegistry';
-import { parseStatusEffects } from '../../../domain/game/StatusEffects';
+import { parseStatusEffects, getTauntingKnights, isAbilityUsedThisTurn, isImmobilized } from '../../../domain/game/StatusEffects';
+import { findUniqueConflict } from '../../../domain/game/rules/unique.rules';
 import { GameEventType, type GameEvent } from '../../../domain/game/events/GameEvents';
 import { ZoneMapper } from '../../../domain/game/ZoneMapper';
+import { normalizeCardType, playZoneForType } from '../../../domain/game/CardTypes';
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -53,9 +55,19 @@ export interface KnightValidActions {
   /** Lista de habilidades activas disponibles con nombre y costo en CP */
   active_abilities: { ability_name: string; cosmos_cost: number }[];
 
-  /** Para más adelante — siempre false hasta implementar */
   can_use_technique: boolean;
   technique_targets: string[];
+  /** Técnicas propias en juego que este caballero puede usar ahora */
+  techniques: UsableTechnique[];
+}
+
+/** Técnica utilizable por un caballero (acción TECHNIQUE_ATTACK). */
+export interface UsableTechnique {
+  technique_id: string;
+  name: string;
+  ta_cost: number;
+  /** Golpea a todos los rivales: el cliente no pide objetivo */
+  target_all: boolean;
 }
 
 /** Acciones válidas para una carta en mano */
@@ -63,6 +75,8 @@ export interface HandCardValidActions {
   can_play: boolean;
   /** Índices de slot en los que se puede jugar esta carta */
   play_slots: number[];
+  /** Zona (notación cliente) a la que va la carta: field_knight, field_technique, field_scenario… */
+  play_zone?: string;
 }
 
 export type ValidActions = KnightValidActions | HandCardValidActions | null;
@@ -140,9 +154,11 @@ export class ActionResolver {
     // Modo defensivo actual (string: 'normal' | 'defense' | 'evasion' | bool legacy)
     const currentMode: string = this._normalizeMode(knight.is_defensive_mode);
 
-    const canAttack = canActAtAll;
+    // Congelado/paralizado: no puede atacar ni usar técnicas (AttackRulesEngine / TechniqueRulesEngine)
+    const immobilized = isImmobilized(parseStatusEffects(knight.status_effects));
+    const canAttack = canActAtAll && !immobilized;
     const attackTargets = canAttack
-      ? this._resolveAttackTargets(opponentKnights)
+      ? this._resolveAttackTargets(opponentKnights, true)
       : null;
 
     // Move targets: solo casillas adyacentes (±1) que estén vacías
@@ -171,7 +187,18 @@ export class ActionResolver {
       if ((knight.current_cosmos ?? 0) < taCost) return false;
       return compatibleTags.some(tag => knightTags.includes(tag));
     });
-    const canUseTechnique = canActAtAll && compatibleTechniques.length > 0;
+    const canUseTechnique = canActAtAll && !immobilized && compatibleTechniques.length > 0;
+    const techniques: UsableTechnique[] = canUseTechnique
+      ? compatibleTechniques.map(t => {
+          const payload = this._getCardPayload(t);
+          return {
+            technique_id: t.id,
+            name: payload?.name ?? '',
+            ta_cost: payload?.card_technique?.ta_cost ?? 0,
+            target_all: payload?.card_technique?.target_all === true,
+          };
+        })
+      : [];
     const techniqueTargets = canUseTechnique ? this._resolveAttackTargets(opponentKnights) : [];
 
     // ── Habilidades activas ─────────────────────────────────────────────
@@ -193,6 +220,7 @@ export class ActionResolver {
       active_abilities: activeAbilities,
       can_use_technique: canUseTechnique,
       technique_targets: techniqueTargets,
+      techniques,
     };
   }
 
@@ -202,14 +230,17 @@ export class ActionResolver {
    *   [] (array vacío)  → ataque directo permitido (no hay knights en campo rival)
    *   [ids]             → solo estos son objetivos válidos
    *
-   * FUTURO — Habilidad "Defensor/Taunt":
-   *   const defenders = opponents.filter(k => k.card?.abilities?.includes('defender'));
-   *   if (defenders.length > 0) return defenders.map(k => k.id);
+   * Con `respectTaunt` (BA), si algún rival tiene Provocación solo él es objetivo.
+   * Las TA no están obligadas por la Provocación.
    */
-  private static _resolveAttackTargets(opponentKnights: any[]): string[] {
+  private static _resolveAttackTargets(opponentKnights: any[], respectTaunt = false): string[] {
     if (opponentKnights.length === 0) return []; // ataque directo
 
-    // TODO: filtrar por habilidad "Defensor"
+    if (respectTaunt) {
+      const withEffects = opponentKnights.map(k => ({ id: k.id, status_effects: parseStatusEffects(k.status_effects) }));
+      const taunting = getTauntingKnights(withEffects);
+      if (taunting.length > 0) return taunting.map(k => k.id);
+    }
     return opponentKnights.map(k => k.id);
   }
 
@@ -248,9 +279,13 @@ export class ActionResolver {
     const result: ResolvedAbility[] = [];
     const abilities: any[] = this._getCardPayload(knight)?.abilities ?? knight.card?.card_abilities ?? [];
     const playerNumber = knight.player_number as 1 | 2;
+    const knightEffects = parseStatusEffects(knight.status_effects);
 
     for (const raw of abilities) {
       if (raw.type !== 'activa') continue;
+      // knightManager.useAbility busca por ability_key (fallback: nombre normalizado)
+      const abilityKey: string = raw.ability_key ?? (raw.name as string).toLowerCase().replace(/\s+/g, '_');
+      if (isAbilityUsedThisTurn(knightEffects, abilityKey)) continue;
 
       const def = parseAbilityDef(raw.effects);
       if (!def || def.trigger !== GameEventType.ACTIVE) continue;
@@ -274,8 +309,7 @@ export class ActionResolver {
       const check = AbilityEngine.canActivateFromContext(def, ctx, event);
       if (check.valid) {
         result.push({
-          // knightManager.useAbility busca por ability_key (fallback: nombre normalizado)
-          ability_name: raw.ability_key ?? (raw.name as string).toLowerCase().replace(/\s+/g, '_'),
+          ability_name: abilityKey,
           cosmos_cost: getCosmosCost(def),
           ...(requiresClientTarget(def) ? { requires_target: true } : {}),
         });
@@ -331,12 +365,17 @@ export class ActionResolver {
       return { can_play: false, play_slots: [] };
     }
 
-    const cardType: string = this._getCardPayload(card)?.type ?? '';
+    const cardType: string = normalizeCardType(this._getCardPayload(card)?.type);
+    if (cardType === 'knight' && this._uniqueBlocked(card, cardsInPlay, playerNumber)) {
+      return { can_play: false, play_slots: [] };
+    }
     const playSlots = this._getPlaySlots(cardType, playerNumber, cardsInPlay);
+    const playZone = playZoneForType(cardType);
 
     return {
       can_play: playSlots.length > 0,
       play_slots: playSlots,
+      ...(playZone ? { play_zone: ZoneMapper.toClient(playZone) } : {}),
     };
   }
 
@@ -369,7 +408,6 @@ export class ActionResolver {
         return hasHelper ? [] : [0];
       }
 
-      case 'event':    // "occasion" en servidor
       case 'occasion': {
         // Eventos/ocasiones: slot único por jugador, efecto inmediato y descarte.
         const hasOccasion = cardsInPlay.some(
@@ -378,7 +416,7 @@ export class ActionResolver {
         return hasOccasion ? [] : [0];
       }
 
-      case 'item': {
+      case 'object': {
         // Objetos/equipamiento: comparten los 5 slots de la fila de técnicas.
         // Son permanentes; se asocian al caballero en el mismo slot (misma posición).
         // Si el caballero muere, el objeto pasa al yomotsu (TODO: implementar en KnightManager).
@@ -387,8 +425,7 @@ export class ActionResolver {
       }
 
       case 'stage': {
-        // El escenario siempre puede jugarse: si hay uno activo, se reemplaza.
-        // La restricción "no puede ser reemplazado" se valida en el servidor (CardManager).
+        // El escenario es compartido: si hay uno activo, se reemplaza.
         return [0];
       }
 
@@ -429,6 +466,18 @@ export class ActionResolver {
         )
         .map(c => c.position)
     );
+  }
+
+  /** Carta única cuyo personaje ya está en el campo propio (misma regla que CardRulesEngine). */
+  private static _uniqueBlocked(card: any, cardsInPlay: any[], playerNumber: number): boolean {
+    const toRef = (c: any) => {
+      const payload = this._getCardPayload(c);
+      return { instance_id: c.id, card_code: payload?.code ?? '', character: payload?.character ?? null, unique: payload?.unique === true };
+    };
+    const ownKnights = cardsInPlay
+      .filter(c => c.player_number === playerNumber && c.zone === 'field_knight')
+      .map(toRef);
+    return findUniqueConflict(ownKnights, toRef(card)) !== undefined;
   }
 
   private static _getCardPayload(card: any): any {

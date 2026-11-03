@@ -59,6 +59,8 @@ export interface PlayerRef {
   field_knights: CardRef[];
   /** Yomotsu del jugador. Ausente en contextos simplificados. */
   graveyard?: CardRef[];
+  /** Escenario en juego controlado por el jugador. Ausente en contextos simplificados. */
+  stage?: CardRef | null;
   life?: number;
   cosmos?: number;
 }
@@ -207,6 +209,16 @@ const CONDITION_REGISTRY: Record<string, ConditionFn> = {
     return (ctx.player.field_knights as any[]).some(
       (k: any) => k.card_code === code,
     );
+  },
+
+  /**
+   * Verdadero si el escenario en juego del jugador tiene el card_code indicado.
+   *
+   * Ejemplo JSON: { "type": "stage_has_card_code", "code": "north_pacific_pillar" }
+   */
+  stage_has_card_code: (cond, ctx) => {
+    const code: string | undefined = cond.code as string | undefined;
+    return !!code && (ctx.player.stage as any)?.card_code === code;
   },
 
   /**

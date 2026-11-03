@@ -369,6 +369,7 @@ function addCardsToSelection(
     // Solo aplicar límites de rareza si NO estamos en modo flexible
     if (!needsFlexibility) {
       maxQuantity = Math.min(maxQuantity, getCardDeckCopyLimit(card.max_copies));
+      // Heurística del generador (no es regla): solo una única puede estar en el campo a la vez
       if (card.unique) maxQuantity = Math.min(1, userHasQuantity);
       
       // Ajustar por rareza

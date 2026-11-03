@@ -48,10 +48,11 @@ function collectCodes(): Map<string, string[]> {
   return codes;
 }
 
+/** JSON que carga loadFromJson (excluye database/bkp/, copias antiguas que no se cargan). */
 const walk = (dir: string): string[] =>
   fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) return walk(full);
+    if (entry.isDirectory()) return entry.name === 'bkp' ? [] : walk(full);
     return entry.name.endsWith('.json') ? [full] : [];
   });
 
@@ -122,6 +123,36 @@ describe('Integridad de las habilidades en database/*.json', () => {
         // loadFromJson salta en silencio las entradas sin code/name
         if (!card?.code || !card?.name) problems.push(`${where}: falta code o name`);
         if (!rarities.has(card?.rarity)) problems.push(`${where}: rareza inválida "${card?.rarity}"`);
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  test('cada caballero único declara su personaje (character)', () => {
+    const missing: string[] = [];
+    for (const file of walk(DATABASE_DIR)) {
+      const text = fs.readFileSync(file, 'utf8');
+      if (!text.trim()) continue;
+      for (const card of JSON.parse(text).cards ?? []) {
+        if (card?.stats?.attack !== undefined && card.unique === true && typeof card.character !== 'string') {
+          missing.push(`${path.relative(DATABASE_DIR, file)}:${card.code}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  test('las técnicas solo usan ta_effects que el motor conoce', () => {
+    const problems: string[] = [];
+    for (const file of walk(DATABASE_DIR)) {
+      const text = fs.readFileSync(file, 'utf8');
+      if (!text.trim()) continue;
+      for (const card of JSON.parse(text).cards ?? []) {
+        for (const effect of card?.technique_stats?.ta_effects ?? []) {
+          if (effect.type !== 'remove_mode' && !(effect.type in EFFECT_CATEGORY)) {
+            problems.push(`${path.relative(DATABASE_DIR, file)}:${card.code}: ta_effect desconocido "${effect.type}"`);
+          }
+        }
       }
     }
     expect(problems).toEqual([]);

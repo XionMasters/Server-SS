@@ -32,3 +32,18 @@ export function normalizeCardType(type: string | null | undefined): string {
   const key = String(type ?? '').trim().toLowerCase();
   return ALIASES[key] ?? key;
 }
+
+/** Zona de juego (notación BD) que corresponde a cada tipo de carta al jugarla desde la mano. */
+export const PLAY_ZONE_BY_TYPE: Record<CardType, string> = {
+  knight: 'field_knight',
+  technique: 'field_support',
+  object: 'field_support',
+  helper: 'field_helper',
+  occasion: 'field_occasion',
+  stage: 'field_scenario',
+};
+
+/** Zona de juego del tipo de carta (normalizado), o undefined si el tipo es desconocido. */
+export function playZoneForType(type: string | null | undefined): string | undefined {
+  return PLAY_ZONE_BY_TYPE[normalizeCardType(type) as CardType];
+}

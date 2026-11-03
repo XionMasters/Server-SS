@@ -8,6 +8,7 @@
     {
       "code": "kanon_seadragon_v1",
       "name": "Kanon de Dragón Marino",
+      "character": "kanon",
       "art_tags": "1boy, male focus, long blue hair, golden scale armor, horned helmet, arrogant smile",
       "rarity": "legendary",
       "cost": 3,
@@ -94,6 +95,7 @@
     {
       "code": "kanon_seadragon_v2",
       "name": "Kanon de Dragón Marino (Redimido)",
+      "character": "kanon",
       "art_tags": "1boy, male focus, long blue hair, golden scale armor, damaged armor, determined expression",
       "rarity": "epic",
       "cost": 3,
@@ -185,6 +187,7 @@
     {
       "code": "sorrento_siren_v1",
       "name": "Sorrento de Sirena",
+      "character": "sorrento",
       "art_tags": "1boy, male focus, short light purple hair, calm expression, golden scale armor, playing flute",
       "rarity": "epic",
       "cost": 2,
@@ -342,8 +345,72 @@
       "artist": null
     },
     {
+      "code": "sorrento_siren_v2",
+      "name": "Sorrento de Sirena (Clímax)",
+      "character": "sorrento",
+      "art_tags": "1boy, male focus, short light purple hair, golden scale armor, playing flute, sound waves",
+      "rarity": "rare",
+      "cost": 2,
+      "generate": 2,
+      "faction": "Poseidon",
+      "element": "water",
+      "image_url": "generals/4.webp",
+      "art_prompt": "Sorrento, the Siren Marina General, with short lilac-purple hair, pink eyes and warm brown skin, wearing his recognizable winged Siren Scale in purple and lavender tones. He performs Dead End Climax, holding his golden flute to his lips as visible concentric sound waves and luminous musical currents expand through the underwater air, serene face contrasting with the devastating attack. Saint Seiya 1986-1989 Toei Animation anime aesthetic, faithful to the original anime character designs and Shingo Araki and Michi Himeno's elegant character proportions, hand-painted underwater fantasy background, classic 1980s cel animation with clean ink lines and dramatic cel shading, cinematic composition, vertical 3:4, no text, no lettering, no logo, no card frame, no border, no watermark.",
+      "description": "Sorrento toca la melodía final que debilita el cosmos rival.",
+      "tags": [
+        "sorrento",
+        "siren",
+        "general"
+      ],
+      "stats": {
+        "attack": 3,
+        "defense": 3,
+        "health": 8,
+        "cosmos": 9,
+        "can_defend": true,
+        "defense_reduction": 0.5
+      },
+      "abilities": [
+        {
+          "name": "Clímax de la Muerte",
+          "type": "activa",
+          "description": "Paga 4 CP; todos los caballeros rivales pierden 2 LP.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 4
+              }
+            ],
+            "conditions": [
+              {
+                "type": "cosmos_min",
+                "amount": 4
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_damage",
+                "amount": 2,
+                "target": "all_enemies"
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": [
+        "battlefield"
+      ],
+      "collection_id": "poseidon",
+      "artist": null
+    },
+    {
       "code": "isaac_kraken_v1",
       "name": "Isaac de Kraken",
+      "character": "isaac",
       "art_tags": "1boy, male focus, green hair, scar over eye, one eye closed, golden scale armor, ice",
       "rarity": "epic",
       "cost": 2,
@@ -420,6 +487,7 @@
     {
       "code": "isaac_kraken_v2",
       "name": "Isaac de Kraken (Rival de Hyoga)",
+      "character": "isaac",
       "art_tags": "1boy, male focus, green hair, scar over eye, one eye closed, golden scale armor, snow",
       "rarity": "rare",
       "cost": 2,
@@ -480,6 +548,7 @@
     {
       "code": "baian_seahorse_v1",
       "name": "Baian de Caballo Marino",
+      "character": "baian",
       "art_tags": "1boy, male focus, short hair, golden scale armor, confident stance",
       "rarity": "rare",
       "cost": 2,
@@ -496,7 +565,7 @@
       ],
       "stats": {
         "attack": 3,
-        "defense": 5,
+        "defense": 6,
         "health": 9,
         "cosmos": 8,
         "can_defend": true,
@@ -506,7 +575,8 @@
         {
           "name": "Muro de Dios",
           "type": "pasiva",
-          "description": "Al entrar en juego, Baian gana +2 AR.",
+          "ability_key": "baian_god_wall",
+          "description": "Provocación: mientras Baian esté en el campo y no esté congelado ni paralizado, los BA rivales solo pueden dirigirse a él.",
           "effects": {
             "trigger": "CARD_PLAYED",
             "conditions": [
@@ -516,10 +586,72 @@
             ],
             "actions": [
               {
-                "type": "modify_stat",
-                "stat": "defense",
-                "amount": 2,
+                "type": "apply_status",
+                "status": "taunt",
                 "target": "self"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Guardián del Pilar",
+          "type": "pasiva",
+          "ability_key": "baian_pillar_guardian",
+          "description": "Si entra en juego con tu Pilar del Pacífico Norte activo, su armadura no puede ser ignorada por los BA (el pilar la renueva cada turno).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "stage_has_card_code",
+                "code": "north_pacific_pillar"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "self",
+                "duration": 1
+              }
+            ]
+          }
+        },
+        {
+          "name": "Corrientes del Pacífico",
+          "type": "activa",
+          "ability_key": "baian_pacific_currents",
+          "description": "Paga 2 CP: elige un caballero (tuyo o rival) y muévelo a otra posición de su campo. Si la posición está ocupada, intercambia los dos caballeros.",
+          "effects": {
+            "trigger": "ACTIVE",
+            "cost": [
+              {
+                "type": "cosmos",
+                "amount": 2
+              }
+            ],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "field_any",
+                "filter": {
+                  "type": "knight"
+                },
+                "destination": "field",
+                "on_select": [
+                  {
+                    "type": "request_slot_selection",
+                    "target": "selected",
+                    "on_select": [
+                      {
+                        "type": "move_to_slot",
+                        "target": "selected"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -535,8 +667,9 @@
     },
     {
       "code": "baian_seahorse_v2",
-      "name": "Baian de Caballo Marino (Guardián del Pacífico Norte)",
-      "art_tags": "1boy, male focus, short hair, scale armor, guarding, arms crossed, giant pillar",
+      "name": "Baian de Caballo Marino (Soplo Divino)",
+      "character": "baian",
+      "art_tags": "1boy, male focus, short hair, golden scale armor, wind blast",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -560,7 +693,7 @@
       },
       "abilities": [
         {
-          "name": "Primera Línea",
+          "name": "Ráfaga del Pacífico",
           "type": "activa",
           "description": "Paga 3 CP; un caballero aliado gana +2 AR hasta tu próximo turno.",
           "effects": {
@@ -596,6 +729,32 @@
               }
             ]
           }
+        },
+        {
+          "name": "Guardián del Pilar",
+          "type": "pasiva",
+          "ability_key": "baian_pillar_guardian",
+          "description": "Si entra en juego con tu Pilar del Pacífico Norte activo, su armadura no puede ser ignorada por los BA (el pilar la renueva cada turno).",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [
+              {
+                "type": "event_source_is_self"
+              },
+              {
+                "type": "stage_has_card_code",
+                "code": "north_pacific_pillar"
+              }
+            ],
+            "actions": [
+              {
+                "type": "apply_status",
+                "status": "armor_unbreakable",
+                "target": "self",
+                "duration": 1
+              }
+            ]
+          }
         }
       ],
       "max_copies": 3,
@@ -609,6 +768,7 @@
     {
       "code": "io_scylla_v1",
       "name": "Io de Scylla",
+      "character": "io",
       "art_tags": "1boy, male focus, short hair, golden scale armor, beast spirits",
       "rarity": "epic",
       "cost": 2,
@@ -663,8 +823,9 @@
     },
     {
       "code": "io_scylla_v2",
-      "name": "Io de Scylla (Guardián del Pacífico Sur)",
-      "art_tags": "1boy, male focus, short hair, scale armor, fighting stance, battle damage, determined",
+      "name": "Io de Scylla (Gran Tornado)",
+      "character": "io",
+      "art_tags": "1boy, male focus, short hair, golden scale armor, tornado",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -735,6 +896,7 @@
     {
       "code": "kaysa_lymnades_v1",
       "name": "Kaysa de Lymnades",
+      "character": "kaysa",
       "art_tags": "1boy, male focus, long white hair, sly smile, golden scale armor",
       "rarity": "epic",
       "cost": 2,
@@ -827,6 +989,7 @@
     {
       "code": "kaysa_lymnades_v2",
       "name": "Kaysa de Lymnades (Mil Rostros)",
+      "character": "kaysa",
       "art_tags": "1boy, male focus, long white hair, deceptive smile, golden scale armor, illusion",
       "rarity": "rare",
       "cost": 1,
@@ -894,6 +1057,7 @@
     {
       "code": "krishna_chrysaor_v1",
       "name": "Krishna de Chrysaor",
+      "character": "krishna",
       "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, holding golden spear",
       "rarity": "epic",
       "cost": 2,
@@ -959,8 +1123,9 @@
     },
     {
       "code": "krishna_chrysaor_v2",
-      "name": "Krishna de Chrysaor (Kundalini)",
-      "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, meditation, glowing chakras",
+      "name": "Krishna de Chrysaor (Maha Roshini)",
+      "character": "krishna",
+      "art_tags": "1boy, male focus, bald, dark skin, golden scale armor, blinding light",
       "rarity": "rare",
       "cost": 2,
       "generate": 2,
@@ -1019,7 +1184,7 @@
             ]
           }
         }
-      ],
+      ],  
       "max_copies": 2,
       "unique": true,
       "playable_zones": [

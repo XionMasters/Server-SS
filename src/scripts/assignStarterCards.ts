@@ -29,28 +29,28 @@ export const assignStarterCards = async (userId: string, transaction?: Transacti
     }
 
     // Obtener las cartas del deck inicial desde la base de datos
-    const cardIds = STARTER_DECK_CARDS.map(dc => dc.card_id);
+    const cardCodes = STARTER_DECK_CARDS.map(dc => dc.card_code);
     const cards = await Card.findAll({
       where: {
-        id: cardIds
+        code: cardCodes
       },
       transaction
     });
 
     if (cards.length === 0) {
-      throw new Error('No se encontraron cartas para el deck inicial. Configura starter-deck.config.ts con IDs válidos.');
+      throw new Error('No se encontraron cartas para el deck inicial. Carga las cartas con "npm run seed:cards" o revisa los card_code de starter-deck.config.ts.');
     }
 
-    // Mapa de cartas por ID para fácil acceso
-    const cardMap = new Map(cards.map(card => [card.id, card]));
+    // Mapa de cartas por código para fácil acceso
+    const cardMap = new Map(cards.map(card => [card.code, card]));
 
     // Asignar cartas al usuario (UserCard)
     let totalCardsAssigned = 0;
     for (const deckCard of STARTER_DECK_CARDS) {
-      const card = cardMap.get(deckCard.card_id);
+      const card = cardMap.get(deckCard.card_code);
       
       if (!card) {
-        console.warn(`⚠️  Carta ${deckCard.card_id} no encontrada en la base de datos. Saltando...`);
+        console.warn(`⚠️  Carta ${deckCard.card_code} no encontrada en la base de datos. Saltando...`);
         continue;
       }
 
@@ -146,10 +146,10 @@ export const assignStarterCards = async (userId: string, transaction?: Transacti
 
     // Agregar las cartas al deck (DeckCard)
     const deckCardEntries = STARTER_DECK_CARDS
-      .filter(dc => cardMap.has(dc.card_id))
+      .filter(dc => cardMap.has(dc.card_code))
       .map(dc => ({
         deck_id: deck.id,
-        card_id: dc.card_id,
+        card_id: cardMap.get(dc.card_code)!.id,
         quantity: dc.quantity
       }));
 

@@ -8,6 +8,7 @@
         {
           "code": "aiolia_leo",
           "name": "Aiolia de Leo",
+          "character": "aiolia",
           "art_tags": "1boy, male focus, short brown hair, gold armor, leo gold cloth, lion helmet, lightning",
           "art_negative": "long hair, blonde hair, mane, cape",
           "rarity": "legendary",
@@ -71,6 +72,7 @@
     {
       "code": "mu_aries",
       "name": "Mu de Aries",
+      "character": "mu",
       "art_tags": "ar13smucdz, 1boy, male focus, long purple hair, aries gold cloth",
       "art_loras": { "ar13smucdz": 0.8 },
       "rarity": "legendary",
@@ -134,6 +136,7 @@
     {
       "code": "aldebaran_taurus",
       "name": "Aldebaran de Tauro",
+      "character": "aldebaran",
       "art_tags": "1boy, male focus, muscular, giant, dark skin, gold armor, taurus gold cloth, bull horns helmet",
       "rarity": "legendary",
       "cost": 7,
@@ -190,6 +193,7 @@
     {
       "code": "aioros_sagittarius",
       "name": "Aioros de Sagitario",
+      "character": "aioros",
       "art_tags": "1boy, male focus, short brown hair, gold armor, sagittarius gold cloth, golden wings, golden bow",
       "rarity": "legendary",
       "cost": 7,
@@ -249,6 +253,7 @@
     {
       "code": "deathmask_cancer",
       "name": "Deathmask de Cancer",
+      "character": "deathmask",
       "art_tags": "1boy, male focus, short spiky blue hair, evil grin, gold armor, cancer gold cloth, ghosts, dead faces",
       "rarity": "legendary",
       "cost": 7,
@@ -301,6 +306,7 @@
     {
       "code": "saga_gemini",
       "name": "Saga de Géminis",
+      "character": "saga",
       "art_tags": "1boy, male focus, long blue hair, gold armor, gemini gold cloth, two-faced helmet, dark aura",
       "rarity": "legendary",
       "cost": 8,
@@ -400,6 +406,7 @@
     {
       "code": "shaka_virgo",
       "name": "Shaka de Virgo",
+      "character": "shaka",
       "art_tags": "1boy, male focus, very long blonde hair, closed eyes, gold armor, virgo gold cloth, meditating, lotus",
       "rarity": "legendary",
       "cost": 8,
@@ -485,6 +492,7 @@
     {
       "code": "milo_scorpio",
       "name": "Milo de Escorpio",
+      "character": "milo",
       "art_tags": "1boy, male focus, long wavy blue hair, gold armor, scorpio gold cloth, scorpion tail, red fingernail",
       "rarity": "legendary",
       "cost": 7,
@@ -581,6 +589,7 @@
     {
       "code": "shura_capricorn",
       "name": "Shura de Capricornio",
+      "character": "shura",
       "art_tags": "1boy, male focus, short black hair, gold armor, capricorn gold cloth, goat horns helmet, glowing arm blade",
       "rarity": "legendary",
       "cost": 7,
@@ -664,6 +673,7 @@
     {
       "code": "camus_aquarius",
       "name": "Camus de Acuario",
+      "character": "camus",
       "art_tags": "1boy, male focus, long dark red hair, calm expression, gold armor, aquarius gold cloth, ice crystals",
       "rarity": "legendary",
       "cost": 7,
@@ -753,6 +763,7 @@
     {
       "code": "aphrodite_pisces",
       "name": "Afrodita de Piscis",
+      "character": "aphrodite",
       "art_tags": "1boy, male focus, androgynous, long light blue hair, beauty mark, gold armor, pisces gold cloth, red roses",
       "rarity": "legendary",
       "cost": 7,

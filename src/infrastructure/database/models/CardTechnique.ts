@@ -18,6 +18,8 @@ class CardTechnique extends Model {
   public ta_cost!: number;
   public compatible_tags!: string[];
   public ignore_ar!: boolean;
+  public ignore_defense_mode!: boolean;
+  public target_all!: boolean;
   public ta_effects!: Array<{ type: string; value?: number; turns?: number }>;
 }
 
@@ -60,6 +62,18 @@ CardTechnique.init(
       allowNull: false,
       defaultValue: false,
       comment: 'Si true: el TA ignora la AR del defensor y la reducción de Modo Defensa',
+    },
+    ignore_defense_mode: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      comment: 'Si true: el Modo Defensa del defensor no reduce el daño del TA (la AR sí cuenta)',
+    },
+    target_all: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      comment: 'Si true: el TA golpea a todos los caballeros rivales',
     },
     ta_effects: {
       type: DataTypes.JSONB,

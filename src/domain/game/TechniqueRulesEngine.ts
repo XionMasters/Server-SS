@@ -14,9 +14,11 @@
  * Reglas clave (de GameDesign.md):
  * - Modo Evasión del defensor NO aplica a TA (solo a BA).
  * - Modo Defensa DEL defensor SÍ reduce daño (floor(hit_ce/2) por golpe).
- * - ta_ignore_block_mode: cancela el efecto de Modo Defensa.
+ * - ta_ignore_block_mode (estado) o ignore_defense_mode (técnica): cancelan el Modo Defensa.
  * - Costo CP se deduce de la carta caballero (current_cosmos), no del jugador.
  * - Multi-hit: hit_count golpes independientes de max(1, hit_ce - ar).
+ * - target_all: los golpes y ta_effects se aplican a cada caballero rival; los ta_* del
+ *   atacante (Dark Effects) solo al objetivo principal (el indicado, o el primero).
  *
  * 100% puro: sin await, sin BD, sin side effects
  */
@@ -33,6 +35,8 @@ import {
   consumeTechniqueAttackEffects,
   getActiveTaModifiers,
   getTechniqueAttackEffectRule,
+  isModeEffectType,
+  deriveModeFromEffects,
 } from './StatusEffects';
 import { createEngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
@@ -44,7 +48,10 @@ import { applyTechniqueSemanticEffect } from './technique/TechniqueEffectRegistr
 
 /** Efecto inherente de la técnica que se aplica al defensor cuando el TA conecta. */
 export interface TaEffect {
-  /** StatusEffectType a aplicar al defensor. */
+  /**
+   * StatusEffectType a aplicar al defensor, o 'remove_mode' para quitarle el
+   * Modo Defensa/Evasión (queda en modo normal).
+   */
   type: string;
   /** Valor del efecto (e.g., daño por turno para burn/poison). */
   value?: number;
@@ -60,6 +67,10 @@ export interface TechniqueStats {
   compatible_tags: string[];
   /** Si true: el TA ignora la AR del defensor y cualquier reducción de Modo Defensa. */
   ignore_ar?: boolean;
+  /** Si true: el Modo Defensa del defensor no reduce el daño (la AR sí cuenta). */
+  ignore_defense_mode?: boolean;
+  /** Si true: golpea a todos los caballeros rivales; el defensor indicado es solo el principal. */
+  target_all?: boolean;
   /** Efectos inherentes de la técnica aplicados al defensor al conectar el TA. */
   ta_effects?: TaEffect[];
 }
@@ -130,6 +141,35 @@ export class TechniqueRulesEngine {
       ...(d.value !== undefined ? { value: d.value } : {}),
       source: { card_instance_id: sourceCardId, player: playerNumber, type: 'passive' },
     });
+  }
+
+  /** Efectos inherentes de la técnica (technique_stats.ta_effects) sobre un defensor. */
+  private static _applyTaEffects(
+    defender: CardInGameState,
+    taEffects: TaEffect[],
+    knightCardId: string,
+    playerNumber: 1 | 2,
+  ): void {
+    for (const eff of taEffects) {
+      if (eff.type === 'remove_mode') {
+        // La técnica saca al defensor de su Modo Defensa/Evasión
+        defender.status_effects = (defender.status_effects ?? [])
+          .filter(e => !isModeEffectType(e.type));
+        defender.mode = deriveModeFromEffects(defender.status_effects);
+        continue;
+      }
+      if (isStatusBlocked(defender.status_effects ?? [], eff.type)) continue;
+      const immobilizes = eff.type === 'frozen' || eff.type === 'paralyzed';
+      defender.status_effects = addOrRefreshEffect(
+        defender.status_effects ?? [],
+        {
+          type: eff.type as StatusEffectType,
+          remaining_turns: eff.turns ?? (immobilizes ? IMMOBILIZE_DEFAULT_TURNS : 1),
+          ...(eff.value !== undefined ? { value: eff.value } : {}),
+          source: { card_instance_id: knightCardId, player: playerNumber, type: 'technique' },
+        },
+      );
+    }
   }
 
   private static _applyTechniqueModifiers(params: {
@@ -261,36 +301,51 @@ export class TechniqueRulesEngine {
     let totalDamage         = 0;
     let damageToPlayer      = 0;
     const attackerEffects   = knight.status_effects ?? [];
-    const ignoreBlock       = attackerTaIgnoresBlockMode(attackerEffects);
+    const ignoreBlock       = stats.ignore_defense_mode === true || attackerTaIgnoresBlockMode(attackerEffects);
 
-    if (!defenderCardId) {
+    // Objetivos: todos los rivales (target_all) o el defensor indicado. Sin objetivos → ataque directo.
+    const targetIds: string[] = stats.target_all
+      ? defenderPlayer.field_knights.map(c => c.instance_id)
+      : (defenderCardId ? [defenderCardId] : []);
+    const primaryId: string | null = targetIds.length === 0
+      ? null
+      : (defenderCardId && targetIds.includes(defenderCardId) ? defenderCardId : targetIds[0]);
+    const damageByTarget = new Map<string, number>();
+
+    if (targetIds.length === 0) {
       // Ataque directo al jugador: misma regla que BA directo
       damageToPlayer = 2;
-    } else {
-      const defender = defenderPlayer.field_knights.find(c => c.instance_id === defenderCardId)!;
+    }
+
+    for (const targetId of targetIds) {
+      const defender = defenderPlayer.field_knights.find(c => c.instance_id === targetId);
+      if (!defender) continue;
 
       // Modo Evasión NO se aplica a TA (regla de diseño).
-      // Modo Defensa SÍ reduce daño (a menos que el atacante tenga ta_ignore_block_mode).
+      // Modo Defensa SÍ reduce daño (salvo ta_ignore_block_mode o ignore_defense_mode).
       const defenderMode = defender.mode ?? 'normal';
       const effectiveMode: 'normal' | 'defense' =
         (defenderMode === 'defense' && !ignoreBlock) ? 'defense' : 'normal';
 
+      let dealt = 0;
       for (let i = 0; i < stats.hit_count; i++) {
         const hitDamage = stats.ignore_ar
           // Daño directo: ignora AR y la reducción de Modo Defensa.
           ? Math.max(0, stats.hit_ce)
           : Math.max(1, (effectiveMode === 'defense' ? Math.floor(stats.hit_ce / 2) : stats.hit_ce) - (defender.ar ?? 0));
-        totalDamage += hitDamage;
+        dealt += hitDamage;
         // Aplicar daño de golpe individual
-        applyDamage(engineCtx, defenderCardId, hitDamage, knightCardId);
+        applyDamage(engineCtx, targetId, hitDamage, knightCardId);
         // Si la carta muere a mitad de multi-hit, los golpes restantes se abortan
-        const stillAlive = defenderPlayer.field_knights.find(c => c.instance_id === defenderCardId);
+        const stillAlive = defenderPlayer.field_knights.find(c => c.instance_id === targetId);
         if (!stillAlive) {
           // Al morir genera 1 DIP
           damageToPlayer += 1;
           break;
         }
       }
+      damageByTarget.set(targetId, dealt);
+      totalDamage += dealt;
     }
 
     // ─ 3. Detectar ta_* side-effects ANTES de consumirlos ───────────────────
@@ -302,7 +357,7 @@ export class TechniqueRulesEngine {
         type: 'ATTACK_CONNECTED',
         playerNumber,
         sourceCardId: knightCardId,
-        ...(defenderCardId ? { targetCardId: defenderCardId } : {}),
+        ...(primaryId ? { targetCardId: primaryId } : {}),
         origin: 'player',
         payload: {
           attack_type: 'TA',
@@ -310,7 +365,7 @@ export class TechniqueRulesEngine {
           damage_to_player: damageToPlayer,
           technique_card_id: techniqueCardId,
           hit_count: stats.hit_count,
-          ...(defenderCardId ? { defender_card_id: defenderCardId } : {}),
+          ...(primaryId ? { defender_card_id: primaryId } : {}),
         },
       }),
     );
@@ -321,7 +376,7 @@ export class TechniqueRulesEngine {
         type: GameEventType.TA_DEALT,
         playerNumber,
         sourceCardId: knightCardId,
-        ...(defenderCardId ? { targetCardId: defenderCardId } : {}),
+        ...(primaryId ? { targetCardId: primaryId } : {}),
         origin: 'system',
         payload: {
           attack_type: 'TA' as const,
@@ -329,27 +384,27 @@ export class TechniqueRulesEngine {
           hit_count: stats.hit_count,
           attacker_card_id: knightCardId,
           technique_card_id: techniqueCardId,
-          ...(defenderCardId ? { defender_card_id: defenderCardId } : {}),
+          ...(primaryId ? { defender_card_id: primaryId } : {}),
         },
       }),
     );
 
-    // TA_RECEIVED — perspectiva del defensor
-    if (defenderCardId) {
+    // TA_RECEIVED — perspectiva de cada defensor golpeado
+    for (const [targetId, dealt] of damageByTarget) {
       engineCtx.bus.emit(
         createEvent({
           type: GameEventType.TA_RECEIVED,
           playerNumber: defenderPlayerNumber,
-          sourceCardId: defenderCardId,
+          sourceCardId: targetId,
           targetCardId: knightCardId,
           origin: 'system',
           payload: {
             attack_type: 'TA' as const,
-            total_damage: totalDamage,
+            total_damage: dealt,
             hit_count: stats.hit_count,
             attacker_card_id: knightCardId,
             technique_card_id: techniqueCardId,
-            defender_card_id: defenderCardId,
+            defender_card_id: targetId,
           },
         }),
       );
@@ -360,30 +415,17 @@ export class TechniqueRulesEngine {
 
     // ─ 5.5. Aplicar efectos inherentes de la técnica (ta_effects) ────────────
     // Estos efectos vienen de technique_stats en DB y aplican independientemente
-    // de los ta_* status effects del caballero.
-    if (stats.ta_effects && stats.ta_effects.length > 0 && defenderCardId) {
-      const defenderForTaEffects = defenderPlayer.field_knights
-        .find(c => c.instance_id === defenderCardId) ?? null;
-      if (defenderForTaEffects) {
-        for (const eff of stats.ta_effects) {
-          if (isStatusBlocked(defenderForTaEffects.status_effects ?? [], eff.type)) continue;
-          const immobilizes = eff.type === 'frozen' || eff.type === 'paralyzed';
-          defenderForTaEffects.status_effects = addOrRefreshEffect(
-            defenderForTaEffects.status_effects ?? [],
-            {
-              type: eff.type as StatusEffectType,
-              remaining_turns: eff.turns ?? (immobilizes ? IMMOBILIZE_DEFAULT_TURNS : 1),
-              ...(eff.value !== undefined ? { value: eff.value } : {}),
-              source: { card_instance_id: knightCardId, player: playerNumber, type: 'technique' },
-            },
-          );
-        }
+    // de los ta_* status effects del caballero. Con target_all, a cada rival golpeado que siga vivo.
+    if (stats.ta_effects && stats.ta_effects.length > 0) {
+      for (const targetId of targetIds) {
+        const defenderForTaEffects = defenderPlayer.field_knights.find(c => c.instance_id === targetId);
+        if (defenderForTaEffects) this._applyTaEffects(defenderForTaEffects, stats.ta_effects, knightCardId, playerNumber);
       }
     }
 
     // ─ 6. Aplicar ta_* side-effects (declarativo + semántico) ───────────────
-    const defenderAfter = defenderCardId
-      ? defenderPlayer.field_knights.find(c => c.instance_id === defenderCardId) ?? null
+    const defenderAfter = primaryId
+      ? defenderPlayer.field_knights.find(c => c.instance_id === primaryId) ?? null
       : null;
     this._applyTechniqueModifiers({
       activeEffects: activeTaMods,

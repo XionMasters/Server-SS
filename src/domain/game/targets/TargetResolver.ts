@@ -19,6 +19,7 @@
  *   'random_ally' → un caballero aliado aleatorio en campo (para habilidades de soporte que no requieren un objetivo específico)
  *   'other_allies' → todos los caballeros propios excepto el que activa la habilidad (para habilidades de soporte que no deben aplicarse a sí mismas)
 *   'lowest_health_enemy' → el caballero rival con menos HP en campo (para habilidades que priorizan objetivos debilitados)
+ *   'copies_in_deck' → las otras copias de la carta que activa que siguen en el mazo propio (ej: Sombras del Fénix)
   *
  * Para añadir un nuevo target:
  *   TargetResolver.register('nombre', fn);
@@ -155,6 +156,21 @@ const TARGET_REGISTRY: Record<string, TargetFn> = {
       }
     }
     return [lowestHpEnemy];
+  },
+
+  /**
+   * Las otras copias (mismo card_code) de la carta fuente que siguen en el mazo propio.
+   * El mazo no está en el GameState: solo se ven las copias que viajan en passive_watchers,
+   * es decir, las que tienen alguna pasiva reactiva (trigger distinto de CARD_PLAYED/ACTIVE).
+   */
+  copies_in_deck: ({ state, playerNumber, sourceCardId }) => {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    const source = [...player.field_knights, ...player.hand, ...player.passive_watchers]
+      .find(c => c.instance_id === sourceCardId);
+    if (!source) return [];
+    return player.passive_watchers.filter(c =>
+      c.zone === 'deck' && c.card_code === source.card_code && c.instance_id !== sourceCardId,
+    );
   },
 
   /**

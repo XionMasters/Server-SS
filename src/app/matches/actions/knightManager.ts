@@ -333,13 +333,15 @@ export class KnightManager {
         };
 
         // â”€â”€ Validar & ejecutar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        // Misma clave que ofrece ActionResolver (límite de una vez por turno)
+        const abilityKey: string = abilityRecord.ability_key ?? abilityRecord.name.toLowerCase().replace(/\s+/g, '_');
         const validation = KnightRulesEngine.validateUseAbility(
-          state, playerNumber, cardInPlayId, abilityDef, gameEvent,
+          state, playerNumber, cardInPlayId, abilityDef, gameEvent, abilityKey,
         );
         if (!validation.valid) throw new Error(validation.error ?? 'Validacion fallida');
 
         const execution = KnightRulesEngine.useAbility(
-          state, playerNumber, cardInPlayId, abilityDef, gameEvent,
+          state, playerNumber, cardInPlayId, abilityDef, gameEvent, abilityKey,
         );
 
         // â”€â”€ Persistir status_effects con O(1) cardMap â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -357,8 +359,8 @@ export class KnightManager {
 
           await record.update(
             {
-              // Columna JSONB â€” pasar el objeto directamente, sin JSON.stringify
-              status_effects: updatedCard.status_effects,
+              // Columna TEXT (CardInPlay.status_effects): se guarda serializada, como en MatchRepository
+              status_effects: JSON.stringify(updatedCard.status_effects ?? []),
               current_cosmos: updatedCard.current_cosmos,
               ...(updatedCard.current_health !== undefined
                 ? { current_health: updatedCard.current_health }

@@ -56,7 +56,7 @@ export class MatchStateService {
           {
             model: Card,
             as: 'card',
-            attributes: ['id', 'code', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element', 'tags'],
+            attributes: ['id', 'code', 'name', 'type', 'rarity', 'cost', 'generate', 'image_url', 'description', 'faction', 'element', 'tags', 'character', 'unique'],
             include: [
               { model: CardKnight, as: 'card_knight' },
               { model: CardTechnique, as: 'card_technique' },

@@ -9,6 +9,7 @@ import Card from '../infrastructure/database/models/Card';
 
 interface CardSummary {
   id: string;
+  code: string;
   name: string;
   type: string;
   rarity: string;
@@ -33,7 +34,7 @@ const listCardsForStarterDeck = async () => {
         ['cost', 'ASC'],
         ['name', 'ASC']
       ],
-      attributes: ['id', 'name', 'type', 'rarity', 'cost', 'element', 'faction']
+      attributes: ['id', 'code', 'name', 'type', 'rarity', 'cost', 'element', 'faction']
     });
 
     if (cards.length === 0) {
@@ -101,9 +102,9 @@ const listCardsForStarterDeck = async () => {
     console.log('\n📋 TEMPLATE DE CONFIGURACIÓN:\n');
     console.log('Copia los IDs de las cartas que quieras y reemplaza en src/config/starter-deck.config.ts\n');
     console.log('Ejemplo:');
-    console.log('{ card_id: "id-de-la-carta", quantity: 3 }, // 3 copias');
-    console.log('{ card_id: "id-de-la-carta", quantity: 2 }, // 2 copias');
-    console.log('{ card_id: "id-de-la-carta", quantity: 1 }, // 1 copia\n');
+    console.log('{ card_code: "codigo-de-la-carta", quantity: 3 }, // 3 copias');
+    console.log('{ card_code: "codigo-de-la-carta", quantity: 2 }, // 2 copias');
+    console.log('{ card_code: "codigo-de-la-carta", quantity: 1 }, // 1 copia\n');
 
     // Generar sugerencia automática balanceada
     console.log('═'.repeat(120));
@@ -115,42 +116,42 @@ const listCardsForStarterDeck = async () => {
     // Caballeros comunes (12 cartas = 4 tipos × 3 copias)
     const commonKnights = cardsByType['caballero']?.filter(c => c.rarity === 'comun').slice(0, 4) || [];
     commonKnights.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 3 }, // ${card.name} (Común)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 3 }, // ${card.name} (Común)`);
       totalSuggested += 3;
     });
 
     // Caballeros raros (8 cartas = 4 tipos × 2 copias)
     const rareKnights = cardsByType['caballero']?.filter(c => c.rarity === 'rara').slice(0, 4) || [];
     rareKnights.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 2 }, // ${card.name} (Raro)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 2 }, // ${card.name} (Raro)`);
       totalSuggested += 2;
     });
 
     // Técnicas raras (10 cartas = 5 tipos × 2 copias)
     const rareTechs = cardsByType['tecnica']?.filter(c => c.rarity === 'rara').slice(0, 5) || [];
     rareTechs.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 2 }, // ${card.name} (Técnica Rara)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 2 }, // ${card.name} (Técnica Rara)`);
       totalSuggested += 2;
     });
 
     // Objetos (6 cartas = 3 tipos × 2 copias)
     const objects = cardsByType['objeto']?.slice(0, 3) || [];
     objects.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 2 }, // ${card.name} (Objeto)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 2 }, // ${card.name} (Objeto)`);
       totalSuggested += 2;
     });
 
     // Ayudantes (2 cartas = 1 tipo × 2 copias)
     const helpers = cardsByType['ayudante']?.slice(0, 1) || [];
     helpers.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 2 }, // ${card.name} (Ayudante)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 2 }, // ${card.name} (Ayudante)`);
       totalSuggested += 2;
     });
 
     // Ocasiones (2 cartas = 1 tipo × 2 copias)
     const occasions = cardsByType['ocasion']?.slice(0, 1) || [];
     occasions.forEach(card => {
-      suggestions.push(`  { card_id: '${card.id}', quantity: 2 }, // ${card.name} (Ocasión)`);
+      suggestions.push(`  { card_code: '${card.code}', quantity: 2 }, // ${card.name} (Ocasión)`);
       totalSuggested += 2;
     });
 

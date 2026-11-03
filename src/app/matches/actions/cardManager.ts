@@ -221,7 +221,7 @@ export class CardManager {
         // Validar con el motor puro.
         const v = CardRulesEngine.validatePlayCard(
           state, playerNumber, cardId, dbZone, position,
-          bdStats.cost, zoneCurrentCount, positionOccupied,
+          bdStats.cost, zoneCurrentCount, positionOccupied, bdStats.card_type,
         );
         if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
 

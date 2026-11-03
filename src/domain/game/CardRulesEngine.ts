@@ -17,6 +17,8 @@
 
 import { GameState, Player, CardInGameState } from './GameState';
 import { ZoneMapper } from './ZoneMapper';
+import { findUniqueConflict } from './rules/unique.rules';
+import { playZoneForType } from './CardTypes';
 
 // ─── Clone helpers ─────────────────────────────────────────────────────────────
 // Selectivos: más baratos que structuredClone para mutaciones de player-level.
@@ -65,30 +67,39 @@ export class CardRulesEngine {
   /**
    * Valida que una carta pueda ser jugada.
    *
-   * NOTA: La verificación "carta está en mano" NO se hace aquí porque
-   * MatchStateMapper aún no puebla player.hand desde cards_in_play.
-   * CardManager.playCard ya la valida con CardInPlay.findOne({ zone:'hand', lock })
-   * dentro de la misma transacción — más robusto que cualquier check en GameState.
+   * NOTA: La verificación "carta está en mano" la hace CardManager.playCard con
+   * CardInPlay.findOne({ zone:'hand', lock }) dentro de la misma transacción.
+   * Aquí solo se lee player.hand para la regla de cartas únicas.
    *
    * @param state              GameState actual (cosmos del jugador)
    * @param playerNumber       1 o 2
+   * @param cardId             instance_id de la carta en mano
    * @param dbZone             Zona destino en notación BD (usa ZoneMapper.toDatabase primero)
    * @param position           Posición en la zona (0-based)
    * @param cost               Costo de cosmos de la carta (de BD)
    * @param zoneCurrentCount   Cantidad actual de cartas en dbZone (leída con lock)
    * @param positionOccupied   True si la posición ya está ocupada (leída con lock)
+   * @param cardType           Tipo de la carta (de BD): debe corresponder a dbZone
    */
   static validatePlayCard(
     state: GameState,
     playerNumber: 1 | 2,
-    _cardId: string,         // reservado para cuando el mapper pueble player.hand
+    cardId: string,
     dbZone: string,
     position: number,
     cost: number,
     zoneCurrentCount: number,
     positionOccupied: boolean,
+    cardType?: string,
   ): ValidationResult {
     const player = playerNumber === 1 ? state.player1 : state.player2;
+
+    // Cada tipo de carta tiene su zona
+    if (cardType !== undefined) {
+      const expected = playZoneForType(cardType);
+      if (expected !== dbZone)
+        return { valid: false, error: `Una carta de tipo ${cardType} no puede jugarse en ${dbZone}` };
+    }
 
     // Cosmos suficiente
     if (player.cosmos < cost)
@@ -102,6 +113,14 @@ export class CardRulesEngine {
     // Posición libre
     if (positionOccupied)
       return { valid: false, error: `La posición ${position} en ${dbZone} ya está ocupada` };
+
+    // Carta única: un solo caballero de ese personaje en el campo propio
+    if (dbZone === 'field_knight') {
+      const card = player.hand.find(c => c.instance_id === cardId);
+      const conflict = card && findUniqueConflict(player.field_knights, card);
+      if (conflict)
+        return { valid: false, error: 'Ya tienes en el campo un caballero de ese personaje (carta única)' };
+    }
 
     return { valid: true };
   }

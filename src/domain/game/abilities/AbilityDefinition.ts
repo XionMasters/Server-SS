@@ -77,6 +77,7 @@ export type TargetType =
 // ─── Trigger types ────────────────────────────────────────────────────────────
 
 import type { GameEventType } from '../events/GameEvents';
+import type { SelectionFilter } from '../GameState';
 
 /**
  * Triggers reconocidos por el motor.
@@ -95,6 +96,8 @@ export interface ApplyStatusAction {
   /** Duración en turnos. null = permanente, 0 = expira al inicio del turno siguiente. */
   duration?: number;
   value?: number;
+  /** Configuración de los modificadores TA configurables (ta_apply_status, ta_combo). */
+  params?: Record<string, unknown>;
 }
 
 /**
@@ -228,6 +231,8 @@ export interface CostDefinition {
   /** Para 'life' y 'player_cosmos': cantidad a pagar por el jugador que activa. */
   /** Para 'discard': zona de origen. 'self_hand' = mano del jugador. */
   target?: 'self_hand';
+  /** Para 'discard': solo se puede descartar una carta que cumpla el filtro (ej: { tag: 'black_saint' }). */
+  filter?: SelectionFilter;
 }
 
 // ─── AbilityDefinition ────────────────────────────────────────────────────────

@@ -1,0 +1,139 @@
+{
+  "_schema": 1,
+  "_note": "Cartas de tipo 'occasion' de los Black Saints. Su habilidad CARD_PLAYED se resuelve al jugarse.",
+  "saga": "Black Saint Series",
+  "type": "occasion",
+  "cards": [
+    {
+      "code": "black_saints_ambush",
+      "name": "Emboscada de los Black Saints",
+      "art_tags": "night, black armored warriors jumping from shadows, dark alley, glowing eyes",
+      "rarity": "rare",
+      "cost": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "occasions/black_saints_ambush.webp",
+      "description": "Tus caballeros [black_saint] ganan +2 CE durante este turno.",
+      "tags": ["black_saint"],
+      "abilities": [
+        {
+          "name": "Ataque desde las Sombras",
+          "type": "activa",
+          "description": "Al jugarse, tus caballeros [black_saint] ganan +2 CE durante este turno.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_status", "status": "ce_boost", "target": "all_allies", "filter": { "tag": "black_saint" }, "value": 2, "duration": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "black_phoenix_legion",
+      "name": "Legión de Fénix Negros",
+      "art_tags": "many black phoenix warriors rising from black flames, dark wings, volcanic island",
+      "rarity": "epic",
+      "cost": 3,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "occasions/black_phoenix_legion.webp",
+      "description": "Como los incontables Fénix Negros de Ikki, los Black Saints nunca se acaban. Elige un caballero [black_saint] de tu yomotsu y ponlo en el campo.",
+      "tags": ["black_saint", "phoenix"],
+      "abilities": [
+        {
+          "name": "Renacer en Negro",
+          "type": "activa",
+          "description": "Al jugarse, elige un caballero [black_saint] de tu yomotsu y ponlo en el campo.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "conditions": [{ "type": "yomotsu_not_empty" }],
+            "actions": [
+              {
+                "type": "request_selection",
+                "zone": "yomotsu",
+                "filter": { "type": "knight", "tag": "black_saint" },
+                "destination": "field",
+                "on_select": [
+                  { "type": "send_to_zone", "target": "selected", "destination": "field" }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "max_copies": 2,
+      "unique": true,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "gold_cloth_theft",
+      "name": "Robo de la Gold Cloth",
+      "art_tags": "black armored thieves carrying golden cloth box, night, explosion, colosseum",
+      "rarity": "rare",
+      "cost": 2,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "occasions/gold_cloth_theft.webp",
+      "description": "El oponente pierde 2 PCP y tú robas 1 carta.",
+      "tags": ["black_saint"],
+      "abilities": [
+        {
+          "name": "Golpe en el Coliseo",
+          "type": "activa",
+          "description": "Al jugarse, el oponente pierde 2 PCP y tú robas 1 carta.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_cosmos_damage", "target": "opponent", "amount": 2 },
+              { "type": "draw_card", "amount": 1 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    },
+    {
+      "code": "hatred_oath",
+      "name": "Juramento de Odio",
+      "art_tags": "1boy, clenched fist, blood dripping, black flames, hateful eyes, close-up",
+      "rarity": "common",
+      "cost": 1,
+      "faction": "Black Saints",
+      "element": "dark",
+      "image_url": "occasions/hatred_oath.webp",
+      "description": "Pierdes 1 LP. Tus caballeros [black_saint] recuperan 2 CP.",
+      "tags": ["black_saint", "death_queen"],
+      "abilities": [
+        {
+          "name": "Odio Juramentado",
+          "type": "activa",
+          "description": "Al jugarse, pierdes 1 LP y tus caballeros [black_saint] recuperan 2 CP.",
+          "effects": {
+            "trigger": "CARD_PLAYED",
+            "actions": [
+              { "type": "apply_player_damage", "target": "self", "amount": 1 },
+              { "type": "restore_cosmos", "target": "all_allies", "filter": { "tag": "black_saint" }, "amount": 2 }
+            ]
+          }
+        }
+      ],
+      "max_copies": 3,
+      "unique": false,
+      "playable_zones": ["battlefield"],
+      "collection_id": "black_saints",
+      "artist": null
+    }
+  ]
+}
