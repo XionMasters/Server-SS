@@ -10,6 +10,8 @@
     "audit:user-cards": "ts-node scripts/audit-user-cards.ts",
     "seed:cards": "ts-node scripts/loadFromJson.ts",
     "seed:cards:dry": "ts-node scripts/loadFromJson.ts --dry-run",
+    "decks:random": "ts-node scripts/giveRandomDecks.ts",
+    "decks:random:dry": "ts-node scripts/giveRandomDecks.ts --dry-run",
     "generate:packs": "ts-node src/scripts/generatePacks.ts",
     "generate:images": "ts-node src/scripts/generateCardsWithAI.ts",
     "generate:images:no-ai": "ts-node src/scripts/generateCardsWithAI.ts --no-ai",

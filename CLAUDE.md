@@ -27,7 +27,9 @@ Requiere `.env` (ver `.env.example`): `DB_*`, `JWT_SECRET`, `ADMIN_PASSWORD`, `C
 
 Imágenes de carta: `tools/card-generator/` (Python + Pillow). `generate_art.py` genera el arte con IA en `art/{code}.jpg` (usa `art_prompt` de la carta o lo construye); `generate_v2.py --all` compone la carta completa en `src/assets/cards/{code}.webp`. `loadFromJson` usa ese archivo como `image_url` si existe y, si no, el `image_url` del JSON. El cliente muestra `image_url` tal cual (sin marco propio).
 
-Otros scripts de datos (escriben en la base de datos de `.env`): `generate:packs`, `seed:ta:all` y `migrate:status-sources[:dry]`.
+Fondos de partida: cuando hay una carta de escenario (`stage`) en juego, el cliente pide `/assets/stage-backgrounds/{code}.webp` (`src/assets/stage-backgrounds/`, panorámica 16:9, ej. 1920×1080) y la pone a pantalla completa; si no existe, mantiene el fondo de cosmos base.
+
+Otros scripts de datos (escriben en la base de datos de `.env`): `generate:packs`, `seed:ta:all`, `migrate:status-sources[:dry]` y `decks:random[:dry]`. Este último (`scripts/giveRandomDecks.ts`, admite `--user` y `--faction`) crea para cada usuario un mazo aleatorio jugable (`app/decks/randomDeckBuilder.ts`), le entrega las copias que le falten (`ADMIN_GIFT`) y lo deja activo.
 
 ## Esquema y migraciones
 

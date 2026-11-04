@@ -43,10 +43,8 @@
  */
 
 import { sequelize } from '../../../config/database';
-import Match from '../../../infrastructure/database/models/Match';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
-import Card from '../../../infrastructure/database/models/Card';
-import CardAbility from '../../../infrastructure/database/models/CardAbility';
+import { attachCardDefinitions } from './attachCardDefinitions';
 import { TurnRulesEngine } from '../../../domain/game/TurnRulesEngine';
 import { MatchStateMapper } from '../mappers/MatchStateMapper';
 import { MatchRepository } from '../../../infrastructure/database/repositories/MatchRepository';
@@ -105,21 +103,16 @@ export class TurnManager {
           // ====================================================================
           // PASO 2: LOCK DE FILA (con cartas para que el engine pueda operar)
           // ====================================================================
-          await match.reload({
-            lock: { level: transaction.LOCK.UPDATE, of: Match },
+          await match.reload({ lock: transaction.LOCK.UPDATE, transaction });
+          const cardsInPlay = await CardInPlay.findAll({
+            where: { match_id: match.id },
             transaction,
-            include: [
-              {
-                model: CardInPlay,
-                as: 'cards_in_play',
-                include: [{
-                  model: Card,
-                  as: 'card',
-                  include: [{ model: CardAbility, as: 'card_abilities' }]
-                }]
-              }
-            ]
+            lock: transaction.LOCK.UPDATE,
           });
+          // Definiciones completas (card_knight incluido): sin ellas max_health se toma
+          // de current_health y las curas de TURN_START/TURN_END no curan nada.
+          await attachCardDefinitions(cardsInPlay, transaction);
+          (match as any).cards_in_play = cardsInPlay;
           const cachedInTransaction = await ProcessedActionsRegistry.find(actionId, {
             transaction,
             matchId: match.id,

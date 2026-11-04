@@ -490,6 +490,7 @@
           "description": "Sólo funciona cuando el usuario está en la sección Yomotsu. Regresa al campo cuando un caballero aliado muere.",
           "effects": {
             "trigger": "ALLY_DIED",
+            "conditions": [{ "type": "self_in_zone", "zone": "yomotsu" }],
             "actions": [
               {
                 "type": "send_to_zone",
@@ -942,6 +943,7 @@
           "description": "Sólo funciona desde el Yomotsu. Regresa al campo cuando un soldado aliado muere.",
           "effects": {
             "trigger": "ALLY_DIED",
+            "conditions": [{ "type": "self_in_zone", "zone": "yomotsu" }],
             "actions": [
               {
                 "type": "send_to_zone",

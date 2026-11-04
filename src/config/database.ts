@@ -146,6 +146,17 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Columna rank agregada.');
         }
 
+        const cardInPlayColumns = await queryInterface.describeTable('cards_in_play');
+        if (cardInPlayColumns['is_defensive_mode']?.type === 'BOOLEAN') {
+          console.log('🔧 Aplicando migración 012 (cards_in_play.is_defensive_mode BOOLEAN → VARCHAR)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/012_cards_in_play_defensive_mode_varchar.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 012 aplicada.');
+        }
+
         if (!deckColumns['deck_cover_card_id']) {
           console.log('🔧 Agregando columna deck_cover_card_id a tabla decks...');
           await sequelize.query(`

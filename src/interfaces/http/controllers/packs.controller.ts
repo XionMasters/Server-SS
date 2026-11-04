@@ -127,7 +127,8 @@ export const openPack = async (req: Request, res: Response): Promise<void> => {
         where: whereClause,
         include: [{ model: Pack, as: 'Pack' }],
         transaction,
-        lock: transaction.LOCK.UPDATE,
+        // Bloquear solo user_packs: Postgres no admite FOR UPDATE sobre el lado nulable del LEFT JOIN.
+        lock: { level: transaction.LOCK.UPDATE, of: UserPack },
       });
 
       if (!userPack || userPack.quantity < 1) {

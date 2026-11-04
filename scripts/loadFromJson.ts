@@ -109,11 +109,17 @@ function toAbilityKey(name: string): string {
 /** Cartas compuestas por tools/card-generator/generate_v2.py (servidas en /assets/cards/). */
 const GENERATED_CARDS_DIR = path.join(__dirname, '..', 'src', 'assets', 'cards');
 
+/** Rutas relativas del JSON → `/assets/...` (el cliente solo trata como asset lo que empieza por `/assets/`). */
+function toAssetUrl(imageUrl: string): string {
+  if (!imageUrl || /^https?:\/\//.test(imageUrl) || imageUrl.startsWith('/assets/')) return imageUrl;
+  return `/assets/${imageUrl.replace(/^\/+/, '')}`;
+}
+
 /** La carta generada tiene prioridad; si aún no existe, se usa el image_url del JSON. */
 function resolveImageUrl(card: CardEntry): string {
   const generated = `${card.code}.webp`;
-  if (fs.existsSync(path.join(GENERATED_CARDS_DIR, generated))) return `cards/${generated}`;
-  return card.image_url ?? '';
+  if (fs.existsSync(path.join(GENERATED_CARDS_DIR, generated))) return `/assets/cards/${generated}`;
+  return toAssetUrl(card.image_url ?? '');
 }
 
 function stripMeta(obj: Record<string, unknown>): Record<string, unknown> {

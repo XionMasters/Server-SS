@@ -7,6 +7,9 @@
         {
             "name": "ccg",
             "path": "../../../Nacho/Projects/ccg"
+        },
+        {
+            "path": "../../ccc"
         }
     ]
 }

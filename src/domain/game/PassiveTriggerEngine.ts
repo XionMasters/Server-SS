@@ -10,9 +10,9 @@
  * ── Zonas revisadas ──────────────────────────────────────────────────────────
  *   Campo (field_knights, field_techniques, field_helper, field_occasion)
  *   Cartas fuera del campo (passive_watchers): yomotsu, mazo, etc.
- *   → Ejemplos canónicos:
- *       Ikki en yomotsu → trigger KNIGHT_DIED (¿es el caballero con phoenix_rebirth?)
- *       Shun en mazo    → trigger ALLY_DIED   (condición: ally_code === 'ikki_phoenix')
+ *   Solo reaccionan las habilidades que lo declaran (ver declaresOffFieldReaction):
+ *       «Inmortal» / Sombra del Fénix → KNIGHT_DIED con event_target_is_self (su propia muerte)
+ *       «Return» de Ikki              → ALLY_DIED con self_in_zone: yomotsu
  *
  * ── Filtro de perspectiva ────────────────────────────────────────────────────
  *   Algunos eventos son relativos al observador (ALLY_DREW_CARD, OPPONENT_DREW_CARD).
@@ -97,6 +97,20 @@ function getAllPassiveWatchers(state: GameState): CardInGameState[] {
   ];
 }
 
+/**
+ * Fuera del campo (mazo, yomotsu, cositos) una habilidad solo reacciona si lo declara:
+ *   - `event_target_is_self`: responde a lo que le pasa a la propia carta (p. ej. su muerte:
+ *     «Inmortal», las Sombras del Fénix).
+ *   - `self_in_zone` con una zona que no es del campo (p. ej. el «Return» de Ikki desde el yomotsu).
+ * El resto de pasivas («al inicio de tu turno…», «cuando muere un aliado…») son del caballero
+ * en juego y no deben dispararse con la carta en el mazo o en el yomotsu.
+ */
+function declaresOffFieldReaction(conditions: Array<{ type?: string; zone?: string }> | undefined): boolean {
+  return (conditions ?? []).some(cond =>
+    cond?.type === 'event_target_is_self'
+    || (cond?.type === 'self_in_zone' && typeof cond.zone === 'string' && !cond.zone.startsWith('field')));
+}
+
 function isPerspectiveAllowed(
   card: CardInGameState,
   event: GameEvent,
@@ -130,9 +144,10 @@ export const PassiveTriggerEngine = {
   ): void {
     // Snapshot de cartas ANTES de iterar: la misma pasiva no debe reaccionar
     // a eventos causados por ella misma en la misma cadena de llamadas.
+    const watchers = new Set(getAllPassiveWatchers(ctx.state));
     const allCards = [
       ...getAllFieldCards(ctx.state),
-      ...getAllPassiveWatchers(ctx.state),
+      ...watchers,
     ];
 
     for (const card of allCards) {
@@ -143,6 +158,7 @@ export const PassiveTriggerEngine = {
         // Las activas de caballero requieren acción explícita del jugador
         const def = rawAbility.effects;
         if (!isReactiveAbility(card, rawAbility.type, def.trigger, event)) continue;
+        if (watchers.has(card) && !declaresOffFieldReaction(def.conditions)) continue;
 
         try {
           // Validar condiciones antes de ejecutar
