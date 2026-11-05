@@ -1,5 +1,6 @@
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../../domain/game/StatusEffects';
 import { ZoneMapper } from '../../../domain/game/ZoneMapper';
+import { parseAttachedCards } from '../mappers/MatchStateMapper';
 
 export function serializeCardInPlay(cardInPlay: any) {
   // Cartas en deck: payload mínimo — el cliente solo necesita el conteo, nunca las renderiza
@@ -113,6 +114,9 @@ export function serializeCardInPlay(cardInPlay: any) {
 
     // Efectos activos para que el cliente los muestre
     status_effects: effects,
+
+    // Objetos equipados (instance_ids): el cliente los muestra en el caballero y en el objeto
+    attached_cards: cardInPlay.zone === 'field_knight' ? parseAttachedCards(cardInPlay.attached_cards) : [],
 
     can_attack_this_turn: cardInPlay.can_attack_this_turn,
     has_attacked_this_turn: cardInPlay.has_attacked_this_turn,

@@ -16,6 +16,7 @@
 
 import { GameState, Player, resolveWinCondition } from './GameState';
 import { BASE_MATCH_RULES } from './rules/base.rules';
+import { addPlayerCosmos, isPlayerCosmosFull, MAX_PLAYER_COSMOS } from './rules/cosmos.rules';
 import { AbilityEngine } from './abilities/AbilityEngine';
 import type { AbilityDefinition } from './abilities/AbilityDefinition';
 import type { GameEvent } from './events/GameEvents';
@@ -78,11 +79,17 @@ export class KnightRulesEngine {
     state: GameState,
     playerNumber: 1 | 2,
   ): ValidationResult {
-    return this.validateTurn(state, playerNumber);
+    const turn = this.validateTurn(state, playerNumber);
+    if (!turn.valid) return turn;
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    if (isPlayerCosmosFull(player.cosmos)) {
+      return { valid: false, error: `Tu cosmo ya está al máximo (${MAX_PLAYER_COSMOS})` };
+    }
+    return { valid: true };
   }
 
   /**
-   * Otorga cosmos_per_charge al jugador (según BASE_MATCH_RULES).
+   * Otorga cosmos_per_charge al jugador (según BASE_MATCH_RULES), sin pasar del máximo.
    * Acción: Cargar Cosmo (Carregar Cosmo).
    */
   static chargeKnightCosmos(
@@ -92,8 +99,7 @@ export class KnightRulesEngine {
     const newState = cloneState(state);
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
-    const cosmosGained = this.simulateChargeKnightCosmos(state);
-    player.cosmos += cosmosGained;
+    const cosmosGained = addPlayerCosmos(player, this.simulateChargeKnightCosmos(state));
 
     newState.updated_at = Date.now();
     return { newState, cosmosGained };

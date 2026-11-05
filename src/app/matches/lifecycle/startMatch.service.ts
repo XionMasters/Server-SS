@@ -18,6 +18,7 @@ import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 import { Op } from 'sequelize';
 import { MatchMode } from '../../../domain/game/rules/types';
 import { BASE_MATCH_RULES } from '../../../domain/game/rules/base.rules';
+import { clampPlayerCosmos } from '../../../domain/game/rules/cosmos.rules';
 import { GameStateBuilder } from '../actions/GameStateBuilder';
 import { DeckService } from '../../decks/deck.service';
 import { MatchSetupService } from './matchSetup.service';
@@ -78,6 +79,7 @@ export class StartMatchService {
       locked.player2_deck_id = player2Deck.id;
       locked.phase = 'starting';
       locked.current_player = firstPlayer;
+      locked.first_player = firstPlayer;
       locked.started_at = new Date();
       await locked.save({ transaction });
       return locked;
@@ -106,9 +108,9 @@ export class StartMatchService {
     const cosmosRule = BASE_MATCH_RULES.turn.cosmos_on_turn_start;
     const cosmosOnStart = typeof cosmosRule === 'function' ? cosmosRule(1) : cosmosRule;
     if (firstPlayer === 1) {
-      waitingMatch.player1_cosmos = Math.min((waitingMatch.player1_cosmos ?? 0) + cosmosOnStart, 12);
+      waitingMatch.player1_cosmos = clampPlayerCosmos((waitingMatch.player1_cosmos ?? 0) + cosmosOnStart);
     } else {
-      waitingMatch.player2_cosmos = Math.min((waitingMatch.player2_cosmos ?? 0) + cosmosOnStart, 12);
+      waitingMatch.player2_cosmos = clampPlayerCosmos((waitingMatch.player2_cosmos ?? 0) + cosmosOnStart);
     }
     await waitingMatch.save();
 
@@ -294,6 +296,7 @@ export class StartMatchService {
    */
   private static async _createNewMatchState(userId1: string, userId2: string, deck1: any, deck2: any, isTest: boolean): Promise<any> {
     const rng = new SeededRNG(randomBytes(4).readUInt32BE(0));
+    const firstPlayer: 1 | 2 = isTest ? 1 : rng.next() < 0.5 ? 1 : 2;
     const newMatch = await Match.create({
       player1_id: userId1,
       player2_id: userId2,
@@ -301,7 +304,8 @@ export class StartMatchService {
       player2_deck_id: deck2.id,
       phase: 'starting',
       current_turn: 1,
-      current_player: isTest ? 1 : rng.next() < 0.5 ? 1 : 2,
+      current_player: firstPlayer,
+      first_player: firstPlayer,
       rng_seed: rng.getSeed(),
       player1_life: BASE_MATCH_RULES.initial_life,
       player2_life: BASE_MATCH_RULES.initial_life,

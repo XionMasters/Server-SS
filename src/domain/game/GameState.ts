@@ -197,6 +197,12 @@ export interface CardInGameState {
   /** Stats base, sin boosts. Necesarios para recomputar al expirar efectos. */
   base_ce: number;
   base_ar: number;
+
+  /**
+   * Caballeros: instance_ids de los objetos equipados (columna attached_cards).
+   * Van al yomotsu cuando el caballero sale del campo (rules/equipment.rules.ts).
+   */
+  attached_cards?: string[];
 }
 
 export interface GameScenario extends CardInGameState {
@@ -211,6 +217,8 @@ export interface GameState {
   // Turno y fase
   current_turn: number; // 1, 2, 3, ...
   current_player: 1 | 2; // Quién juega ahora
+  /** Jugador que empezó la partida (para detectar el primer turno: ver rules/opening-turn.rules.ts) */
+  first_player?: 1 | 2;
   phase: 'player1_turn' | 'player2_turn' | 'game_over';
 
   // Jugadores

@@ -47,7 +47,8 @@ export type GameEventType = typeof GameEventType[keyof typeof GameEventType];
 
 export interface EventPayloadMap {
   ACTIVE:        { cost?: number };
-  CARD_PLAYED:   { zone: string; position: number };
+  /** equip_target_id: caballero al que se equipó el objeto jugado (rules/equipment.rules.ts). */
+  CARD_PLAYED:   { zone: string; position: number; equip_target_id?: string };
   ATTACK_CONNECTED: {
     attack_type: 'BA' | 'TA';
     damage_to_card: number;

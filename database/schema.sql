@@ -412,6 +412,7 @@ CREATE TABLE matches (
     player2_deck_id     UUID             REFERENCES decks(id),
     current_turn        INTEGER          NOT NULL DEFAULT 1,
     current_player      INTEGER          NOT NULL DEFAULT 1 CHECK (current_player IN (1, 2)),
+    first_player        SMALLINT         NOT NULL DEFAULT 1 CHECK (first_player IN (1, 2)),
     phase               match_phase_enum NOT NULL DEFAULT 'waiting',
     winner_id           UUID             REFERENCES users(id),
     player1_life        INTEGER          NOT NULL DEFAULT 12,
@@ -494,6 +495,27 @@ CREATE TABLE processed_actions (
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- -------------------------------------------------------------
+-- match_replays / match_replay_frames (repeticiones, migración 014)
+-- -------------------------------------------------------------
+CREATE TABLE match_replays (
+    match_id     UUID        PRIMARY KEY REFERENCES matches(id) ON DELETE CASCADE,
+    player1_id   UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    player2_id   UUID        REFERENCES users(id) ON DELETE CASCADE,
+    is_test      BOOLEAN     NOT NULL DEFAULT FALSE,
+    frame_count  INTEGER     NOT NULL DEFAULT 0,
+    finished_at  TIMESTAMPTZ,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE match_replay_frames (
+    match_id    UUID        NOT NULL REFERENCES match_replays(match_id) ON DELETE CASCADE,
+    seq         INTEGER     NOT NULL,
+    data        BYTEA       NOT NULL,  -- JSON del fotograma comprimido con gzip
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (match_id, seq)
+);
+
 -- =============================================================
 -- ÍNDICES
 -- =============================================================
@@ -511,6 +533,9 @@ CREATE INDEX idx_user_cards_card   ON user_cards(card_id);
 CREATE INDEX idx_matches_p1        ON matches(player1_id);
 CREATE INDEX idx_matches_p2        ON matches(player2_id);
 CREATE INDEX idx_matches_phase     ON matches(phase);
+
+CREATE INDEX idx_match_replays_player1 ON match_replays(player1_id, finished_at DESC);
+CREATE INDEX idx_match_replays_player2 ON match_replays(player2_id, finished_at DESC);
 
 CREATE INDEX idx_cards_in_play_match    ON cards_in_play(match_id);
 CREATE INDEX idx_cards_in_play_zone     ON cards_in_play(match_id, zone);

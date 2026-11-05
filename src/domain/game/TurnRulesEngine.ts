@@ -20,6 +20,7 @@
 import { GameState } from './GameState';
 import { deriveModeFromEffects, computeCeBonus, computeArBonus, computeHpBonus, tickStatusEffects } from './StatusEffects';
 import { BASE_MATCH_RULES } from './rules/base.rules';
+import { addPlayerCosmos } from './rules/cosmos.rules';
 import { createEngineContext, type EngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
 import type { GameEvent } from './events/GameEvents';
@@ -166,7 +167,7 @@ export class TurnRulesEngine {
     const cosmosOnTurnStart = BASE_MATCH_RULES.turn.cosmos_on_turn_start;
     const cosmosIncrease = typeof cosmosOnTurnStart === 'function' ? cosmosOnTurnStart(newState.current_turn) : cosmosOnTurnStart;
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
-    nextPlayerObj.cosmos += cosmosIncrease;
+    addPlayerCosmos(nextPlayerObj, cosmosIncrease); // tope: BASE_MATCH_RULES.max_cosmos
 
     // Contexto para enrutamiento unificado de daño (DOTs pasan por DamageAction).
     const dotCtx = createEngineContext(newState);

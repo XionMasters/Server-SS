@@ -68,6 +68,14 @@ src/config          → BD, reglas de mazo y mazo inicial
 
 Las acciones originadas por HTTP (por ejemplo, abandonar) notifican por WS mediante `matchesCoordinator.setNotifier`.
 
+**Repeticiones** (`app/replays/`, tablas `match_replays`/`match_replay_frames`, migración 014): cada `match_update` que difunde `MatchesCoordinator._buildMatchUpdateResult` **con una acción** se guarda como fotograma (estado sin perspectiva, sin cartas del mazo ni `valid_actions`, JSON comprimido con gzip). También se graban el inicio (`startFirstTurn` en TEST; en PvP el `match_start`) y el abandono. Al terminar la partida se conservan solo las repeticiones que están entre las últimas 5 de alguno de sus jugadores. `GET /api/matches/:id/replay` (solo participantes, respuesta gzip) devuelve los fotogramas con la visibilidad de quien la pide (`frameForViewer`); `recent_matches` del perfil trae `has_replay`. En el cliente, `MatchSessionService.start_replay` abre GameMatch en modo repetición y `game/match/ReplayControls.gd` aplica los fotogramas como `match_update` normales.
+
+## Reglas de partida
+
+- **Primer turno**: quien empieza (`matches.first_player`, migración 013) no puede atacar al jugador rival en su turno 1 (BA ni TA directos; atacar caballeros sí). `domain/game/rules/opening-turn.rules.ts`, aplicado en `AttackRulesEngine`/`TechniqueRulesEngine` y en `ActionResolver`. `current_turn` solo sube cuando vuelve a jugar el jugador 1, por eso hace falta `first_player`.
+- **Cosmo del jugador**: entre 0 y `BASE_MATCH_RULES.max_cosmos` (12). Todo lo que lo modifica pasa por `domain/game/rules/cosmos.rules.ts` (`addPlayerCosmos`/`clampPlayerCosmos`); con el cosmo lleno no se ofrece ni se acepta Cargar Cosmo.
+- **Pasivas fuera del campo** (mazo/yomotsu, `passive_watchers`): solo reaccionan si la habilidad lo declara con `event_target_is_self` o `self_in_zone` de una zona que no es del campo (`PassiveTriggerEngine`).
+
 ## Habilidades de cartas (reglas no obvias)
 
 - Las habilidades son JSON en `card_abilities.effects` (`{ trigger, cost?, conditions?, actions[] }`), interpretados por `AbilityEngine`/`ActionRegistry`/`ConditionRegistry`/`TargetResolver`. `tests/cards/card-data-integrity.test.ts` valida que los JSON de `database/` solo usen nombres que el motor conoce: si añades una acción, condición, objetivo o estado, regístralo también en el catálogo de `src/views/admin.html`.

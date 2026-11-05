@@ -18,7 +18,9 @@
 import { GameState, Player, CardInGameState } from './GameState';
 import { ZoneMapper } from './ZoneMapper';
 import { findUniqueConflict } from './rules/unique.rules';
+import { addPlayerCosmos } from './rules/cosmos.rules';
 import { playZoneForType } from './CardTypes';
+import { equipEligibleKnights, pickEquipSlot } from './rules/equipment.rules';
 
 // ─── Clone helpers ─────────────────────────────────────────────────────────────
 // Selectivos: más baratos que structuredClone para mutaciones de player-level.
@@ -126,6 +128,37 @@ export class CardRulesEngine {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
+  // EQUIP (objetos)
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Un objeto se juega equipándolo a un caballero propio (rules/equipment.rules.ts).
+   * Valida el caballero elegido (por su posición en el campo) y decide en qué posición
+   * de la fila de técnicas/objetos queda el objeto.
+   */
+  static resolveEquip(
+    state: GameState,
+    playerNumber: 1 | 2,
+    objectCardId: string,
+    knightPosition: number,
+  ): { valid: true; knightId: string; supportPosition: number } | { valid: false; error: string } {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    const knight = player.field_knights.find(k => k.position === knightPosition);
+    if (!knight) return { valid: false, error: 'Elige uno de tus caballeros para equiparle el objeto' };
+
+    const object = player.hand.find(c => c.instance_id === objectCardId);
+    const eligible = equipEligibleKnights(object?.raw_abilities, player.field_knights);
+    if (!eligible.some(k => k.instance_id === knight.instance_id))
+      return { valid: false, error: 'Este objeto no se puede equipar a ese caballero' };
+
+    const supportPosition = pickEquipSlot(knight.position, player.field_techniques.map(c => c.position));
+    if (supportPosition < 0)
+      return { valid: false, error: 'No queda espacio en tu fila de técnicas y objetos' };
+
+    return { valid: true, knightId: knight.instance_id, supportPosition };
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
   // EXECUTE PLAY CARD
   // ══════════════════════════════════════════════════════════════════════════
 
@@ -154,7 +187,7 @@ export class CardRulesEngine {
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
     const cosmosDelta = (bdStats.generate ?? 0) - (bdStats.cost ?? 0);
-    player.cosmos = Math.max(0, player.cosmos + cosmosDelta);
+    addPlayerCosmos(player, cosmosDelta); // entre 0 y el máximo (BASE_MATCH_RULES.max_cosmos)
 
     // Mover carta de hand → zone en GameState
     const handIdx = player.hand.findIndex(c => c.instance_id === cardId);

@@ -22,6 +22,7 @@ import { GameState, Player, CardInGameState, createEmptyGameState } from '../../
 import { normalizeCardType } from '../../../domain/game/CardTypes';
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../../domain/game/StatusEffects';
 import { xmur3 } from '../../../domain/game/combat/RNG';
+import { clampPlayerCosmos } from '../../../domain/game/rules/cosmos.rules';
 import { parseAbilityDef, type RawAbility } from '../../../domain/game/abilities/AbilityDefinition';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 
@@ -69,6 +70,7 @@ export class MatchStateMapper {
     // Llenar datos del turno
     state.current_turn = match.current_turn;
     state.current_player = match.current_player;
+    state.first_player = Number(match.first_player) === 2 ? 2 : 1;
     state.phase = toEnginePhase(match.phase);
 
     // (FUTURO) Llenar cartas en juego
@@ -168,6 +170,15 @@ export class MatchStateMapper {
       }
     }
 
+    // Equipamiento: solo cuentan los objetos que siguen en la fila de técnicas/objetos
+    // del dueño (uno destruido o devuelto por un efecto deja de estar equipado).
+    for (const player of [state.player1, state.player2]) {
+      const supportIds = new Set(player.field_techniques.map(c => c.instance_id));
+      for (const knight of player.field_knights) {
+        knight.attached_cards = (knight.attached_cards ?? []).filter(id => supportIds.has(id));
+      }
+    }
+
     // Sincronizar graveyard_count desde el array (fuente de verdad)
     state.player1.graveyard_count = state.player1.graveyard.length;
     state.player2.graveyard_count = state.player2.graveyard.length;
@@ -194,10 +205,11 @@ export class MatchStateMapper {
   static getUpdatesFromState(state: GameState): Partial<Match> {
     return {
       player1_life: state.player1.life,
-      player1_cosmos: state.player1.cosmos,
+      // Salvaguarda: el cosmo del jugador nunca se guarda fuera de 0..max_cosmos
+      player1_cosmos: clampPlayerCosmos(state.player1.cosmos),
       player1_deck_size: state.player1.deck_count,
       player2_life: state.player2.life,
-      player2_cosmos: state.player2.cosmos,
+      player2_cosmos: clampPlayerCosmos(state.player2.cosmos),
       player2_deck_size: state.player2.deck_count,
       current_turn: state.current_turn,
       current_player: state.current_player,
@@ -269,6 +281,18 @@ export class MatchStateMapper {
       current_health: card.current_health ?? 0,
       max_health: card.card?.card_knight?.health ?? card.current_health ?? 0,
       current_cosmos: card.current_cosmos ?? 0,
+
+      // Objetos equipados (solo caballeros en campo; ver rules/equipment.rules.ts)
+      attached_cards: parseAttachedCards(card.attached_cards),
     };
   }
+}
+
+/** Columna attached_cards: JSON con un array de instance_ids. */
+export function parseAttachedCards(raw: unknown): string[] {
+  let value: unknown = raw;
+  if (typeof raw === 'string') {
+    try { value = JSON.parse(raw); } catch { return []; }
+  }
+  return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
 }

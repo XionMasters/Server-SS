@@ -23,6 +23,7 @@ router.get('/test/resume', matchesController.resumeTestMatch);
 
 router.post('/find', disableLegacyMatchmaking);
 router.post('/cancel-search', disableLegacyMatchmaking);
+router.get('/:id/replay', matchesController.getReplay);
 router.get('/:id', matchesController.getMatchState);
 
 router.post('/:id/abandon', matchesController.abandonMatch);

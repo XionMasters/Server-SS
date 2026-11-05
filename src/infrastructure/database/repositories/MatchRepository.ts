@@ -110,6 +110,10 @@ export class MatchRepository {
             // Sincronizar zona y posición (maneja transiciones yomotsu → campo / campo → mano)
             zone: card.zone as any,
             position: card.position,
+            // Objetos equipados al caballero (fuera del campo queda vacío)
+            ...(Array.isArray(card.attached_cards)
+              ? { attached_cards: JSON.stringify(card.zone === 'field_knight' ? card.attached_cards : []) }
+              : {}),
           },
           { where: { id: card.instance_id }, transaction }
         );

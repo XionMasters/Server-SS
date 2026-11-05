@@ -23,6 +23,7 @@
 import type { EngineContext } from '../EngineContext';
 import { resolveWinCondition } from '../GameState';
 import { createEvent } from '../events/GameEvents';
+import { releaseEquipment } from '../rules/equipment.rules';
 
 /**
  * Elimina una carta del campo y emite los eventos de muerte.
@@ -60,6 +61,9 @@ export function killKnight(
   if (!Array.isArray(cardPlayer.graveyard)) cardPlayer.graveyard = [];
   cardPlayer.graveyard.push(card);
   cardPlayer.graveyard_count = cardPlayer.graveyard.length;
+
+  // 2b. Los objetos equipados al caballero también van al yomotsu
+  releaseEquipment(state, card);
 
   // 3. Mover a passive_watchers si tiene triggers reactivos
   //    Así la carta puede responder a su propia muerte (p.ej. Ikki).

@@ -18,6 +18,8 @@ import { parseAbilityDef, getCosmosCost, requiresClientTarget } from '../../../d
 import { type ConditionContext, type PlayerRef } from '../../../domain/game/conditions/ConditionRegistry';
 import { parseStatusEffects, getTauntingKnights, isAbilityUsedThisTurn, isImmobilized } from '../../../domain/game/StatusEffects';
 import { findUniqueConflict } from '../../../domain/game/rules/unique.rules';
+import { isOpeningTurn } from '../../../domain/game/rules/opening-turn.rules';
+import { isPlayerCosmosFull } from '../../../domain/game/rules/cosmos.rules';
 import { GameEventType, type GameEvent } from '../../../domain/game/events/GameEvents';
 import { ZoneMapper } from '../../../domain/game/ZoneMapper';
 import { normalizeCardType, playZoneForType } from '../../../domain/game/CardTypes';
@@ -156,7 +158,13 @@ export class ActionResolver {
 
     // Congelado/paralizado: no puede atacar ni usar técnicas (AttackRulesEngine / TechniqueRulesEngine)
     const immobilized = isImmobilized(parseStatusEffects(knight.status_effects));
-    const canAttack = canActAtAll && !immobilized;
+    // Primer turno de la partida: sin caballeros rivales el ataque sería directo, y no se permite
+    const directAttackBlocked = opponentKnights.length === 0 && isOpeningTurn({
+      current_turn: Number(matchState.current_turn),
+      current_player: Number(matchState.current_player) as 1 | 2,
+      first_player: matchState.first_player,
+    });
+    const canAttack = canActAtAll && !immobilized && !directAttackBlocked;
     const attackTargets = canAttack
       ? this._resolveAttackTargets(opponentKnights, true)
       : null;
@@ -166,7 +174,9 @@ export class ActionResolver {
     const canMove = canActAtAll && adjacentEmptySlots.length > 0;
     const moveTargets = canMove ? adjacentEmptySlots : [];
 
-    const canCharge   = canActAtAll;
+    // Cargar Cosmo no sirve si el cosmo del jugador ya está al máximo
+    const playerCosmos = knight.player_number === 1 ? matchState.player1_cosmos : matchState.player2_cosmos;
+    const canCharge   = canActAtAll && !isPlayerCosmosFull(playerCosmos);
     const canEvade    = canActAtAll
       && currentMode !== 'evasion'
       && this._noScenarioPreventsEvasion(matchState);
@@ -187,7 +197,8 @@ export class ActionResolver {
       if ((knight.current_cosmos ?? 0) < taCost) return false;
       return compatibleTags.some(tag => knightTags.includes(tag));
     });
-    const canUseTechnique = canActAtAll && !immobilized && compatibleTechniques.length > 0;
+    // Sin caballeros rivales toda TA sería directa: en el primer turno no se permite
+    const canUseTechnique = canActAtAll && !immobilized && !directAttackBlocked && compatibleTechniques.length > 0;
     const techniques: UsableTechnique[] = canUseTechnique
       ? compatibleTechniques.map(t => {
           const payload = this._getCardPayload(t);

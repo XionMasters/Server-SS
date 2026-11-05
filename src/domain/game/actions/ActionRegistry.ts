@@ -40,7 +40,8 @@ const STATUS_REMOVES: Record<string, string[]> = {
   immune_negative: ['burn', 'poison', 'paralyzed', 'frozen'],
 };
 import type { ActionDefinition, ApplyStatusAction, CoinFlipAction, KillAction } from '../abilities/AbilityDefinition';
-import { normalizeCardType } from '../CardTypes';
+import { matchesCardFilter } from '../targets/CardFilter';
+import { releaseEquipment } from '../rules/equipment.rules';
 import {
   addOrRefreshEffect, removeEffect, computeCeBonus, computeArBonus, deriveModeFromEffects,
   isModeEffectType, isStatusBlocked, type StatusEffectType,
@@ -204,26 +205,8 @@ function _targetContext(ctx: ActionContext, result: ActionResult): TargetContext
   };
 }
 
-/**
- * Filtro declarativo común a targets y selecciones.
- * Estructura: { type?, code?, tag?: string | string[], health_max?, status? }
- * Si la carta tiene varios tags, basta con que coincida uno.
- */
-export function matchesCardFilter(card: any, filter: any): boolean {
-  if (!filter) return true;
-  if (filter.type) {
-    const wanted = (Array.isArray(filter.type) ? filter.type : [filter.type]).map(normalizeCardType);
-    if (!wanted.includes(card.card_type)) return false;
-  }
-  if (filter.code && card.card_code !== filter.code) return false;
-  if (filter.tag) {
-    const tags: string[] = Array.isArray(filter.tag) ? filter.tag : [filter.tag];
-    if (!Array.isArray(card.tags) || !tags.some(t => card.tags.includes(t))) return false;
-  }
-  if (typeof filter.health_max === 'number' && (card.current_health ?? 0) > filter.health_max) return false;
-  if (filter.status && !(card.status_effects ?? []).some((e: any) => e.type === filter.status)) return false;
-  return true;
-}
+// Filtro declarativo común (re-exportado: AbilityEngine y otros lo importan desde aquí)
+export { matchesCardFilter };
 
 /** Resuelve el target declarado y aplica `action.filter` si existe. */
 function _resolveTargets(action: any, ctx: ActionContext, result: ActionResult, fallback: string): any[] {
@@ -532,6 +515,21 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       const visible = candidates.filter((c: any) => matchesCardFilter(c, action.filter));
       result.state.pending_selection.visible_card_ids = visible.map((c: any) => c.instance_id);
 
+      // Objeto equipado: el caballero propio ya lo eligió el jugador al jugarlo
+      // (rules/equipment.rules.ts), así que el efecto se le aplica sin volver a preguntar.
+      const equipTargetId = (ctx.event?.payload as { equip_target_id?: string } | undefined)?.equip_target_id;
+      if (
+        action.zone === 'field'
+        && equipTargetId
+        && ctx.event.sourceCardId === ctx.sourceCardId
+        && visible.some((c: any) => c.instance_id === equipTargetId)
+      ) {
+        result.state.pending_selection = null;
+        result.extras.equip_target_id = equipTargetId;
+        ActionRegistry.executeAll(action.on_select ?? [], { ...ctx, selectedCardId: equipTargetId }, result);
+        return;
+      }
+
       // Sin opciones válidas: no bloquear la partida esperando una selección imposible.
       if (visible.length === 0) {
         result.state.pending_selection = null;
@@ -640,6 +638,8 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
       } else {
         const detached = _detachCardFromKnownZones(result.state, cardId);
         if (!detached) continue;
+        // Un caballero que sale del campo suelta sus objetos (van al yomotsu)
+        if (detached.from === 'field_knight') releaseEquipment(result.state, detached.card);
         if (destination === 'hand') {
           _sendCardToHand(detached.player, detached.card);
         } else if (destination === 'cositos') {

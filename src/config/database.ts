@@ -82,6 +82,27 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Columna rng_seed agregada y normalizada.');
         }
 
+        if (!matchColumns['first_player']) {
+          console.log('🔧 Aplicando migración 013 (matches.first_player)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/013_add_first_player_to_matches.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 013 aplicada.');
+        }
+
+        const tables = (await queryInterface.showAllTables()).map((t: any) => (typeof t === 'string' ? t : t.tableName));
+        if (!tables.includes('match_replays') || !tables.includes('match_replay_frames')) {
+          console.log('🔧 Aplicando migración 014 (repeticiones de partidas)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/014_create_match_replays.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 014 aplicada.');
+        }
+
         const userColumns = await queryInterface.describeTable('users');
         if (!userColumns['blocked_at']) {
           console.log('🔧 Agregando columna blocked_at a tabla users...');

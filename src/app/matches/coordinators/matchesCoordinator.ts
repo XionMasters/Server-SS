@@ -27,6 +27,8 @@ import { MatchCoordinator } from './matchCoordinator';
 import { ActionResolver } from '../actions/ActionResolver';
 import { RecoverMatchOnConnectUseCase } from '../recover-match-on-connect.use-case';
 import { SequelizeMatchRecoveryRepository } from '../../../infrastructure/database/repositories/SequelizeMatchRecoveryRepository';
+import { filterEngineEventsForPlayer } from '../serializers/engineEventsVisibility';
+import { ReplayService } from '../../replays/replay.service';
 
 const recoverMatchOnConnect = new RecoverMatchOnConnectUseCase(
   new SequelizeMatchRecoveryRepository(),
@@ -70,11 +72,7 @@ export class MatchesCoordinator {
    *   resto              → ambos jugadores lo ven
    */
   private _filterEngineEventsForPlayer(events: any[], forPlayerNumber: number): any[] {
-    return events.filter(evt => {
-      if (evt.type === 'ALLY_DREW_CARD')     return evt.playerNumber === forPlayerNumber;
-      if (evt.type === 'OPPONENT_DREW_CARD') return evt.playerNumber !== forPlayerNumber;
-      return true;
-    });
+    return filterEngineEventsForPlayer(events, forPlayerNumber);
   }
 
   private normalizeEvents(result: any, userId: string) {
@@ -153,6 +151,12 @@ export class MatchesCoordinator {
     const player2Id = matchData.player2?.id || matchData.player2_id;
     const isTestMatch = player1Id && player1Id === player2Id;
     const engineEvents: any[] = actionResult?.events ?? [];
+
+    // Repetición: guardar este estado como fotograma (y cerrarla si la partida terminó).
+    // Solo los estados que responden a una acción: una lectura sin acción no es un fotograma.
+    if (lastAction) {
+      await ReplayService.recordFrame(matchId, matchData, lastAction, engineEvents);
+    }
 
     if (isTestMatch) {
       // En TEST: el jugador activo ve su mano; el inactivo ve dorsos
@@ -459,6 +463,16 @@ export class MatchesCoordinator {
   async abandonMatch(matchId: string, userId: string) {
     const result = await AbandonMatchService.abandonMatch(matchId, userId);
 
+    if (result.success) {
+      // Último fotograma de la repetición (partida terminada por abandono); al estar
+      // 'finished', ReplayService cierra la repetición y recorta las antiguas
+      try {
+        await this.buildMatchUpdateEvents(matchId, { type: 'abandon', abandoned_by: userId });
+      } catch (error: any) {
+        console.error('[MatchesCoordinator] No se pudo grabar el final de la repetición:', error?.message ?? error);
+      }
+    }
+
     if (result.success && result.player_ids && this.notifier) {
       this.notifier(result.player_ids, 'match_finished', {
         match_id: matchId,
@@ -508,6 +522,10 @@ export class MatchesCoordinator {
    */
   async startFirstTurn(matchId: string, userId: string) {
     const result = await StartFirstTurnService.execute(matchId, userId);
+    if (result?.success) {
+      // Primer fotograma de la repetición: el tablero inicial con el primer turno ya empezado
+      await this.buildMatchUpdateEvents(matchId, { type: 'match_start' });
+    }
     return this.normalizeEvents(result, userId);
   }
 

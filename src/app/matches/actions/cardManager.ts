@@ -28,6 +28,7 @@ import { normalizeCardType } from '../../../domain/game/CardTypes';
 import { createEngineContext } from '../../../domain/game/EngineContext';
 import { GameEventType, createEvent } from '../../../domain/game/events/GameEvents';
 import { createCardDefinitionCache } from '../../../infrastructure/cache/card-definition.cache';
+import { attachEquipment } from '../../../domain/game/rules/equipment.rules';
 import { attachCardDefinitions } from './attachCardDefinitions';
 
 // Card definition cache
@@ -229,6 +230,11 @@ export class CardManager {
         const { newState } = CardRulesEngine.executePlayCard(
           state, playerNumber, cardId, dbZone, position, bdStats,
         );
+        if (equipTargetId) {
+          const owner = playerNumber === 1 ? newState.player1 : newState.player2;
+          const knight = owner.field_knights.find(k => k.instance_id === equipTargetId);
+          if (knight) attachEquipment(knight, cardId);
+        }
 
         // Mueve zona+posicion en BD; stats los persiste applyState step 4.
         await (cardInPlay as any).update({ zone: dbZone, position }, { transaction: tx });
@@ -241,7 +247,7 @@ export class CardManager {
           type: GameEventType.CARD_PLAYED,
           playerNumber,
           sourceCardId: cardId,
-          payload: { zone: dbZone, position },
+          payload: { zone: dbZone, position, ...(equipTargetId ? { equip_target_id: equipTargetId } : {}) },
         }));
         return { newState: ctx.state, events: [...ctx.bus.events] };
       },

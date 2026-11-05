@@ -10,6 +10,8 @@ interface MatchAttributes {
   player2_deck_id: string | null;
   current_turn: number;
   current_player: number; // 1 o 2
+  /** Jugador que empezó la partida (primer turno sin ataques directos) */
+  first_player: number;
   phase: 'waiting' | 'starting' | 'player1_turn' | 'player2_turn' | 'finished';
   winner_id?: string;
   player1_life: number;
@@ -29,7 +31,7 @@ interface MatchAttributes {
   updated_at?: Date;
 }
 
-interface MatchCreationAttributes extends Optional<MatchAttributes, 'id' | 'player2_id' | 'player2_deck_id' | 'current_turn' | 'current_player' | 'phase' | 'winner_id' | 'player1_life' | 'player2_life' | 'player1_cosmos' | 'player2_cosmos' | 'started_at' | 'finished_at' | 'created_at' | 'updated_at'> {}
+interface MatchCreationAttributes extends Optional<MatchAttributes, 'id' | 'player2_id' | 'player2_deck_id' | 'current_turn' | 'current_player' | 'first_player' | 'phase' | 'winner_id' | 'player1_life' | 'player2_life' | 'player1_cosmos' | 'player2_cosmos' | 'started_at' | 'finished_at' | 'created_at' | 'updated_at'> {}
 
 class Match extends Model<MatchAttributes, MatchCreationAttributes> implements MatchAttributes {
   public id!: string;
@@ -39,6 +41,7 @@ class Match extends Model<MatchAttributes, MatchCreationAttributes> implements M
   public player2_deck_id!: string | null;
   public current_turn!: number;
   public current_player!: number;
+  public first_player!: number;
   public phase!: 'waiting' | 'starting' | 'player1_turn' | 'player2_turn' | 'finished';
   public winner_id?: string;
   public player1_life!: number;
@@ -171,6 +174,14 @@ Match.init(
       type: DataTypes.BIGINT,
       allowNull: false,
       defaultValue: 0
+    },
+    first_player: {
+      type: DataTypes.SMALLINT,
+      allowNull: false,
+      defaultValue: 1,
+      validate: {
+        isIn: [[1, 2]]
+      }
     },
     started_at: {
       type: DataTypes.DATE,

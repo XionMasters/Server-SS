@@ -11,6 +11,7 @@ import Deck from '../../infrastructure/database/models/Deck';
 import Match from '../../infrastructure/database/models/Match';
 import User from '../../infrastructure/database/models/User';
 import { buildRecentMatches, computeMatchStats, FinishedMatchRow } from './profile-stats';
+import { ReplayService } from '../replays/replay.service';
 
 const avatarImageUrl = (avatarId: string) => `/profile/avatar/${avatarId}/image`;
 
@@ -42,6 +43,10 @@ export class ProfileService {
 
     const deckBack = (activeDeck as any)?.deck_back;
 
+    // Historial: marcar qué partidas tienen repetición guardada
+    const recentMatches = buildRecentMatches(matchRows, userId);
+    const withReplay = await ReplayService.availableFor(recentMatches.map(m => m.match_id));
+
     return {
       profile: {
         ...(profile?.toJSON() || {}),
@@ -52,7 +57,7 @@ export class ProfileService {
         member_since: user?.created_at ?? null,
       },
       stats: computeMatchStats(matchRows, userId),
-      recent_matches: buildRecentMatches(matchRows, userId),
+      recent_matches: recentMatches.map(m => ({ ...m, has_replay: withReplay.has(m.match_id) })),
       collection: {
         ...collection,
         decks: deckCount,

@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { StartMatchService } from '../../../app/matches/lifecycle/startMatch.service';
 import { matchesCoordinator } from '../../../app/matches/coordinators/matchesCoordinator';
+import { ReplayService } from '../../../app/replays/replay.service';
+import { validate as isUuid } from 'uuid';
+import { gzipSync } from 'zlib';
 
 export const getMatchState = async (req: Request, res: Response) => {
   try {
@@ -20,6 +23,34 @@ export const getMatchState = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error obteniendo estado de partida:', error);
     return res.status(500).json({ error: 'Error obteniendo estado de partida' });
+  }
+};
+
+export const getReplay = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const { id } = req.params;
+    if (!isUuid(String(id))) {
+      return res.status(400).json({ error: 'ID de partida inválido', code: 'INVALID_MATCH_ID' });
+    }
+
+    const result = await ReplayService.getForUser(String(id), user.id);
+    if (!result.success) {
+      return res.status(result.statusCode).json({ error: result.error, code: result.code });
+    }
+
+    // Una repetición son cientos de KB de JSON muy repetitivo: comprimir si el cliente lo acepta
+    const body = JSON.stringify(result.data);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    if (/\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''))) {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Vary', 'Accept-Encoding');
+      return res.send(gzipSync(body));
+    }
+    return res.send(body);
+  } catch (error: any) {
+    console.error('Error obteniendo repetición:', error);
+    return res.status(500).json({ error: 'Error obteniendo la repetición' });
   }
 };
 

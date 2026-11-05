@@ -1,6 +1,7 @@
 import Match from '../../../infrastructure/database/models/Match';
 import { MatchStateService } from './matchState.service';
 import { applyHandVisibility } from '../serializers/handVisibility';
+import { clampPlayerCosmos } from '../../../domain/game/rules/cosmos.rules';
 
 export class StartFirstTurnService {
   static async execute(matchId: string, userId: string): Promise<any> {
@@ -35,11 +36,12 @@ export class StartFirstTurnService {
       const firstPlayer = match.current_player === 2 ? 2 : 1;
       match.phase = firstPlayer === 1 ? 'player1_turn' : 'player2_turn';
       match.current_player = firstPlayer;
+      match.first_player = firstPlayer;
       match.current_turn = 1;
       if (firstPlayer === 1) {
-        match.player1_cosmos = Math.min((match.player1_cosmos || 0) + 1, 12);
+        match.player1_cosmos = clampPlayerCosmos((match.player1_cosmos || 0) + 1);
       } else {
-        match.player2_cosmos = Math.min((match.player2_cosmos || 0) + 1, 12);
+        match.player2_cosmos = clampPlayerCosmos((match.player2_cosmos || 0) + 1);
       }
 
       const player1DeckOrder = JSON.parse((match as any).player1_deck_order || '[]');

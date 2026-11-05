@@ -43,6 +43,7 @@ import { applyDamage } from './actions/DamageAction';
 import { createEvent, GameEventType } from './events/GameEvents';
 import type { GameEvent } from './events/GameEvents';
 import { applyTechniqueSemanticEffect } from './technique/TechniqueEffectRegistry';
+import { isOpeningTurn, OPENING_TURN_DIRECT_ATTACK_ERROR } from './rules/opening-turn.rules';
 
 // ─── Tipos públicos ───────────────────────────────────────────────────────────
 
@@ -263,6 +264,14 @@ export class TechniqueRulesEngine {
       if (!defender) {
         return { valid: false, error: 'Carta defensora no encontrada en campo del oponente' };
       }
+    }
+
+    // 9. Primer turno de la partida: no se puede golpear al jugador rival.
+    //    La TA es directa si no hay objetivos (sin defensor, o target_all sin caballeros rivales).
+    const opponent = playerNumber === 1 ? state.player2 : state.player1;
+    const hitsPlayerDirectly = stats.target_all ? opponent.field_knights.length === 0 : defenderCardId === null;
+    if (hitsPlayerDirectly && isOpeningTurn(state)) {
+      return { valid: false, error: OPENING_TURN_DIRECT_ATTACK_ERROR };
     }
 
     return { valid: true };

@@ -8,6 +8,7 @@ import { MatchRules } from './types';
 export const BASE_MATCH_RULES: MatchRules = {
   initial_life: 12,
   initial_cosmos: 0,
+  max_cosmos: 12,
   initial_hand_size: 5,
 
   deck: {

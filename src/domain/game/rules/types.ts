@@ -24,6 +24,9 @@ export interface MatchRules {
   /** Cosmos inicial */
   initial_cosmos: number;
 
+  /** Cosmos máximo que puede acumular un jugador */
+  max_cosmos: number;
+
   /** Cantidad de cartas en mano al inicio */
   initial_hand_size: number;
 

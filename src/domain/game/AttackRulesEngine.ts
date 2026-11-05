@@ -36,6 +36,7 @@ import { applyDamage } from './actions/DamageAction';
 import { createEvent } from './events/GameEvents';
 import type { GameEvent } from './events/GameEvents';
 import { applyBasicAttackSideEffects } from './attack/AttackEffectRegistry';
+import { isOpeningTurn, OPENING_TURN_DIRECT_ATTACK_ERROR } from './rules/opening-turn.rules';
 
 export class AttackRulesEngine {
   private static _validateTurnAndPhase(
@@ -104,6 +105,9 @@ export class AttackRulesEngine {
       if (!defender) {
         return { valid: false, error: 'Carta defensora no encontrada en campo' };
       }
+    } else if (isOpeningTurn(state)) {
+      // Primer turno de la partida: el rival aún no pudo defenderse
+      return { valid: false, error: OPENING_TURN_DIRECT_ATTACK_ERROR };
     }
 
     // Provocación: si un rival la tiene, el BA debe ir contra él

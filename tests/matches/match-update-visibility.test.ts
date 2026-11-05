@@ -1,6 +1,7 @@
 import { MatchesCoordinator } from '../../src/app/matches/coordinators/matchesCoordinator';
 import { MatchStateService } from '../../src/app/matches/lifecycle/matchState.service';
 import { AbandonMatchService } from '../../src/app/matches/lifecycle/abandonMatch.service';
+import { ReplayService } from '../../src/app/replays/replay.service';
 
 jest.mock('../../src/app/matches/lifecycle/matchState.service', () => ({
   MatchStateService: { buildBroadcastMatchState: jest.fn() },
@@ -12,6 +13,10 @@ jest.mock('../../src/app/matches/actions/ActionResolver', () => ({
 
 jest.mock('../../src/app/matches/lifecycle/abandonMatch.service', () => ({
   AbandonMatchService: { abandonMatch: jest.fn() },
+}));
+
+jest.mock('../../src/app/replays/replay.service', () => ({
+  ReplayService: { recordFrame: jest.fn().mockResolvedValue(undefined) },
 }));
 
 const handCard = (id: string, player: number) => ({
@@ -51,6 +56,38 @@ describe('MatchesCoordinator match updates', () => {
     const p2Sees = Object.fromEntries(forP2.payload.cards_in_play.map((c: any) => [c.id, c]));
     expect(p2Sees.a).toMatchObject({ hidden: true, card: null, card_id: null });
     expect(p2Sees.b.hidden).toBe(false);
+  });
+
+  test('cada match_update se graba como fotograma de la repetición (estado sin perspectiva)', async () => {
+    const data = {
+      player1_id: 'user-1',
+      player2_id: 'user-2',
+      current_player: 1,
+      cards_in_play: [handCard('a', 1), handCard('b', 2)],
+    };
+    (MatchStateService.buildBroadcastMatchState as jest.Mock).mockResolvedValue({ success: true, data });
+    const engineEvents = [{ type: 'DAMAGE_DEALT' }];
+
+    await new MatchesCoordinator().buildMatchUpdateEvents('match-1', { type: 'attack' }, engineEvents);
+
+    expect(ReplayService.recordFrame).toHaveBeenCalledWith('match-1', data, { type: 'attack' }, engineEvents);
+    // Se graba el estado completo, con ambas manos visibles: la visibilidad se aplica al reproducir
+    const recorded = (ReplayService.recordFrame as jest.Mock).mock.calls[0][1];
+    expect(recorded.cards_in_play.every((c: any) => c.card !== null)).toBe(true);
+  });
+
+  test('al abandonar se graba un último fotograma (cierra la repetición)', async () => {
+    (AbandonMatchService.abandonMatch as jest.Mock).mockResolvedValue({ success: true, winner_id: 'user-2', player_ids: [] });
+    (MatchStateService.buildBroadcastMatchState as jest.Mock).mockResolvedValue({
+      success: true,
+      data: { player1_id: 'user-1', player2_id: 'user-2', current_player: 1, phase: 'finished', cards_in_play: [] },
+    });
+
+    await new MatchesCoordinator().abandonMatch('match-1', 'user-1');
+
+    expect(ReplayService.recordFrame).toHaveBeenCalledWith(
+      'match-1', expect.objectContaining({ phase: 'finished' }), { type: 'abandon', abandoned_by: 'user-1' }, [],
+    );
   });
 
   test('abandonMatch notifies both players when it succeeds', async () => {

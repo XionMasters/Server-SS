@@ -7,6 +7,7 @@ import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 import User from '../../../infrastructure/database/models/User';
 import { GameStateBuilder } from '../actions/GameStateBuilder';
 import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
+import { BASE_MATCH_RULES } from '../../../domain/game/rules/base.rules';
 
 export const getPerspectivePlayerNumber = (
   player1Id: string,
@@ -98,6 +99,8 @@ export class MatchStateService {
           player2_name: (match.get('player2') as any)?.username,
           current_turn: match.current_turn,
           current_player: match.current_player,
+          first_player: match.first_player ?? 1,
+          max_cosmos: BASE_MATCH_RULES.max_cosmos,
           phase: match.phase,
           current_phase: match.phase,
           winner_id: match.winner_id ?? null,

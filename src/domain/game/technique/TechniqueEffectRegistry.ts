@@ -1,4 +1,5 @@
 import { CardInGameState, Player } from '../GameState';
+import { addPlayerCosmos } from '../rules/cosmos.rules';
 import {
   StatusEffect,
   StatusEffectType,
@@ -117,7 +118,7 @@ function executeTaAction(sub: TaComboAction, ctx: TechniqueSemanticContext): voi
       ctx.defenderPlayer.life = Math.max(0, (ctx.defenderPlayer.life ?? 0) - Math.max(0, value));
       break;
     case 'modify_defender_cosmos':
-      ctx.defenderPlayer.cosmos = Math.max(0, (ctx.defenderPlayer.cosmos ?? 0) + value);
+      addPlayerCosmos(ctx.defenderPlayer, value);
       break;
     case 'drain_target_cosmos':
       if (ctx.defenderCard) ctx.defenderCard.current_cosmos = 0;
@@ -160,7 +161,7 @@ const HANDLERS: Partial<Record<StatusEffectType, TechniqueSemanticHandler>> = {
   },
   // Nuevo modo configurable: modifica cosmos del jugador defensor con value.
   ta_modify_defender_cosmos: (ctx) => {
-    ctx.defenderPlayer.cosmos = Math.max(0, (ctx.defenderPlayer.cosmos ?? 0) + getNumericValue(ctx.effect, 0));
+    addPlayerCosmos(ctx.defenderPlayer, getNumericValue(ctx.effect, 0));
   },
   // Combo: ejecuta múltiples sub-acciones en orden desde params.actions[].
   ta_combo: (ctx) => {
