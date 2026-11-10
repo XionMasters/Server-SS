@@ -90,11 +90,62 @@ export class StartMatchService {
       return null;
     }
 
+    return this._dealAndBegin(waitingMatch, waitingMatch.player1_deck_id, player2Deck.id, firstPlayer);
+  }
+
+  /**
+   * Partida directa contra un rival concreto con su mazo (p. ej. la IA del servidor), sin cola.
+   * player1 es quien la pide (se valida su mazo activo y que no tenga otra partida en curso);
+   * el mazo del rival lo elige el llamador. Empieza al azar y queda ya en playerN_turn.
+   */
+  static async startDirectMatch(player1Id: string, player2Id: string, player2DeckId: string): Promise<any> {
+    const active = await Match.findOne({
+      where: {
+        phase: { [Op.in]: ['starting', 'player1_turn', 'player2_turn'] },
+        [Op.or]: [{ player1_id: player1Id }, { player2_id: player1Id }],
+      },
+    });
+    if (active) {
+      throw new Error('Ya tienes una partida activa en curso. Termínala o abandónala antes de empezar otra.');
+    }
+
+    const { deck: player1Deck } = await this._getAndValidateActiveDeck(player1Id);
+    // Si estaba buscando rival, deja la cola
+    await Match.destroy({ where: { player1_id: player1Id, phase: 'waiting' } });
+
+    const firstPlayer: 1 | 2 = randomInt(1, 3) as 1 | 2;
+    const match = await Match.create({
+      player1_id: player1Id,
+      player2_id: player2Id,
+      player1_deck_id: player1Deck.id,
+      player2_deck_id: player2DeckId,
+      phase: 'starting',
+      player1_life: BASE_MATCH_RULES.initial_life,
+      player2_life: BASE_MATCH_RULES.initial_life,
+      player1_cosmos: BASE_MATCH_RULES.initial_cosmos,
+      player2_cosmos: BASE_MATCH_RULES.initial_cosmos,
+      current_turn: 1,
+      current_player: firstPlayer,
+      first_player: firstPlayer,
+      rng_seed: randomBytes(4).readUInt32BE(0),
+      started_at: new Date(),
+    });
+
+    return this._dealAndBegin(match, player1Deck.id, player2DeckId, firstPlayer);
+  }
+
+  /**
+   * Reparte las cartas de una partida en 'starting', empieza el primer turno
+   * (fase playerN_turn y cosmo de inicio de turno) y devuelve el payload de match_found.
+   */
+  private static async _dealAndBegin(match: Match, deck1Id: string, deck2Id: string, firstPlayer: 1 | 2): Promise<any> {
+    const waitingMatch = match;
+    const player2Id = waitingMatch.player2_id as string;
     try {
       await MatchSetupService.initializeMatchCards(
         waitingMatch,
-        waitingMatch.player1_deck_id,
-        player2Deck.id,
+        deck1Id,
+        deck2Id,
         BASE_MATCH_RULES.initial_hand_size
       );
     } catch (error) {

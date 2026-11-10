@@ -14,6 +14,33 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+/**
+ * Autenticación opcional: si llega un token válido deja `req.user`; si no hay token o no es
+ * válido, sigue sin usuario (nunca responde 401). Para rutas públicas que añaden datos del jugador.
+ */
+export const optionalAuthenticate = async (
+  req: AuthenticatedRequest,
+  _res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) {
+      const decoded = verifyUserAccessToken(token);
+      const session = await getActiveUserSession(decoded.userId, decoded.sessionId, token);
+      if (session) {
+        const user = await User.findByPk(decoded.userId, {
+          attributes: { exclude: ['password_hash', 'email_verification_token'] }
+        });
+        if (user && !user.blocked_at) req.user = user;
+      }
+    }
+  } catch {
+    // Token caducado o inválido: la ruta sigue siendo pública
+  }
+  next();
+};
+
 export const authenticateToken = async (
   req: AuthenticatedRequest,
   res: Response,

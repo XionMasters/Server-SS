@@ -23,6 +23,7 @@ import { normalizeCardType } from '../../../domain/game/CardTypes';
 import { StatusEffect, deriveModeFromEffects, computeCeBonus, computeArBonus, parseStatusEffects } from '../../../domain/game/StatusEffects';
 import { xmur3 } from '../../../domain/game/combat/RNG';
 import { clampPlayerCosmos } from '../../../domain/game/rules/cosmos.rules';
+import { readKnightPlayCounters, toStoredTurnCounters } from '../../../domain/game/rules/knight-play.rules';
 import { parseAbilityDef, type RawAbility } from '../../../domain/game/abilities/AbilityDefinition';
 import CardInPlay from '../../../infrastructure/database/models/CardInPlay';
 
@@ -72,6 +73,10 @@ export class MatchStateMapper {
     state.current_player = match.current_player;
     state.first_player = Number(match.first_player) === 2 ? 2 : 1;
     state.phase = toEnginePhase(match.phase);
+
+    // Contadores por turno (un caballero por turno: rules/knight-play.rules.ts)
+    Object.assign(state.player1, readKnightPlayCounters(match.turn_counters, 1));
+    Object.assign(state.player2, readKnightPlayCounters(match.turn_counters, 2));
 
     // (FUTURO) Llenar cartas en juego
     // if (match.cardsInPlay && match.cardsInPlay.length > 0) {
@@ -220,6 +225,7 @@ export class MatchStateMapper {
       updated_at: new Date(),
       // Persistir selección pendiente en BD (para sobrevivir entre requests)
       pending_selection: state.pending_selection ?? null,
+      turn_counters: toStoredTurnCounters(state.player1, state.player2),
     };
   }
 

@@ -48,23 +48,35 @@ Referencia de validacion de posiciones: ActionResolver.
 ## Sistema de Cosmos
 
 ### PCP (cosmos del jugador)
+- Empieza en 0 (`BASE_MATCH_RULES.initial_cosmos`).
 - +1 al inicio de turno.
-- maximo recomendado: 10.
-- no se resetea al cambiar turno.
+- Maximo 12 (`BASE_MATCH_RULES.max_cosmos`); todo cambio pasa por `domain/game/rules/cosmos.rules.ts`.
+- No se resetea al cambiar turno.
 
 ### Costos
 - Jugar carta: descuenta PCP segun costo.
 - Activar habilidad: descuenta PCP y/o recurso propio segun definicion.
 
 ### Accion explicita de carga
-- CHARGE_COSMOS: gana 3 CP para el jugador activo.
-- Esta accion debe respetar reglas de turno/fase y limites de recursos.
+- CHARGE_COSMOS: +1 CP para el jugador activo (`BASE_MATCH_RULES.turn.cosmos_per_charge`), sin pasar del maximo.
+- Es la accion de un caballero: requiere `knight_id` (caballero propio en campo que no haya actuado) y gasta su accion del turno.
+- Con el cosmo lleno no se ofrece ni se acepta.
 
 ## Combate
 
+### Accion del caballero (una por turno)
+Regla en `domain/game/rules/knight-action.rules.ts`: BA, TA, CC, EV, DEF y MOV gastan la accion del caballero (`attacked_this_turn` / `is_exhausted`, se limpian al inicio del siguiente turno de su dueno). SAC lo retira del campo. Las habilidades activas no gastan la accion (cada una se usa una vez por turno).
+
+- MOVE_KNIGHT: solo a una casilla adyacente vacia (±1) y gasta la accion.
+- Ataque directo al jugador: 2 de vida. Derrotar a un caballero rival con BA: 1 de vida a su dueno.
+
 ## Acciones principales
 - ATTACK
+- TECHNIQUE_ATTACK
 - CHANGE_DEFENSIVE_MODE
+- CHARGE_COSMOS
+- MOVE_KNIGHT
+- SACRIFICE_KNIGHT
 - USE_ABILITY
 
 ## Posturas
@@ -123,6 +135,9 @@ Eventos de entrada del cliente:
 - use_ability
 - start_first_turn
 - request_match_state
+- request_ai_match (partida inmediata contra la IA; ver `docs/JUGADOR-VS-IA.md`)
+
+Las acciones de partida (incluidas charge_cosmos, sacrifice_knight, move_knight y technique_attack) tambien llegan por el evento generico `match_action` con `{ type, match_id, action_id, ... }`. charge_cosmos lleva `knight_id`.
 
 Mapeo interno en router/coordinator a tipo de accion:
 - PLAY_CARD

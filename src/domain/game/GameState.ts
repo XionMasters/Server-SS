@@ -115,6 +115,10 @@ export interface Player {
    * Subset de graveyard (yomotsu) + deck cards con pasivas.
    */
   passive_watchers: CardInGameState[];
+  /** Caballeros jugados desde la mano este turno (rules/knight-play.rules.ts). */
+  knights_played_this_turn?: number;
+  /** Caballeros adicionales que una habilidad permite jugar este turno. */
+  extra_knight_plays?: number;
 }
 
 // Re-exportar desde StatusEffects.ts para compatibilidad con importaciones existentes

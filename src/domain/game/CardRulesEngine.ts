@@ -21,6 +21,7 @@ import { findUniqueConflict } from './rules/unique.rules';
 import { addPlayerCosmos } from './rules/cosmos.rules';
 import { playZoneForType } from './CardTypes';
 import { equipEligibleKnights, pickEquipSlot } from './rules/equipment.rules';
+import { canPlayKnightThisTurn, registerKnightPlayed, KNIGHT_PLAY_LIMIT_ERROR } from './rules/knight-play.rules';
 
 // ─── Clone helpers ─────────────────────────────────────────────────────────────
 // Selectivos: más baratos que structuredClone para mutaciones de player-level.
@@ -116,8 +117,12 @@ export class CardRulesEngine {
     if (positionOccupied)
       return { valid: false, error: `La posición ${position} en ${dbZone} ya está ocupada` };
 
-    // Carta única: un solo caballero de ese personaje en el campo propio
     if (dbZone === 'field_knight') {
+      // Un caballero por turno, salvo que una habilidad permita jugar más (rules/knight-play.rules.ts)
+      if (!canPlayKnightThisTurn(player))
+        return { valid: false, error: KNIGHT_PLAY_LIMIT_ERROR };
+
+      // Carta única: un solo caballero de ese personaje en el campo propio
       const card = player.hand.find(c => c.instance_id === cardId);
       const conflict = card && findUniqueConflict(player.field_knights, card);
       if (conflict)
@@ -135,19 +140,23 @@ export class CardRulesEngine {
    * Un objeto se juega equipándolo a un caballero propio (rules/equipment.rules.ts).
    * Valida el caballero elegido (por su posición en el campo) y decide en qué posición
    * de la fila de técnicas/objetos queda el objeto.
+   *
+   * @param rawAbilities Habilidades del objeto (de BD). Si no se pasan, se usan las de la
+   *                     carta en la mano del estado.
    */
   static resolveEquip(
     state: GameState,
     playerNumber: 1 | 2,
     objectCardId: string,
     knightPosition: number,
+    rawAbilities?: any[],
   ): { valid: true; knightId: string; supportPosition: number } | { valid: false; error: string } {
     const player = playerNumber === 1 ? state.player1 : state.player2;
     const knight = player.field_knights.find(k => k.position === knightPosition);
     if (!knight) return { valid: false, error: 'Elige uno de tus caballeros para equiparle el objeto' };
 
     const object = player.hand.find(c => c.instance_id === objectCardId);
-    const eligible = equipEligibleKnights(object?.raw_abilities, player.field_knights);
+    const eligible = equipEligibleKnights(rawAbilities ?? object?.raw_abilities, player.field_knights);
     if (!eligible.some(k => k.instance_id === knight.instance_id))
       return { valid: false, error: 'Este objeto no se puede equipar a ese caballero' };
 
@@ -156,6 +165,25 @@ export class CardRulesEngine {
       return { valid: false, error: 'No queda espacio en tu fila de técnicas y objetos' };
 
     return { valid: true, knightId: knight.instance_id, supportPosition };
+  }
+
+  /**
+   * Igual que resolveEquip, con el caballero indicado por su instance_id
+   * (el `equip_target_id` de la acción PLAY_CARD).
+   */
+  static resolveEquipTarget(
+    state: GameState,
+    playerNumber: 1 | 2,
+    objectCardId: string,
+    knightInstanceId: string | undefined,
+    rawAbilities?: any[],
+  ): { valid: true; knightId: string; supportPosition: number } | { valid: false; error: string } {
+    const player = playerNumber === 1 ? state.player1 : state.player2;
+    const knight = knightInstanceId
+      ? player.field_knights.find(k => k.instance_id === knightInstanceId)
+      : undefined;
+    if (!knight) return { valid: false, error: 'Elige uno de tus caballeros para equiparle el objeto' };
+    return this.resolveEquip(state, playerNumber, objectCardId, knight.position, rawAbilities);
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -202,7 +230,10 @@ export class CardRulesEngine {
         if (!card.ar)             { card.ar = bdStats.defense ?? 0; card.base_ar = bdStats.defense ?? 0; }
         if (!card.current_cosmos) card.current_cosmos = bdStats.cosmos ?? 0;
       }
-      if      (dbZone === 'field_knight')   player.field_knights.push(card);
+      if (dbZone === 'field_knight') {
+        player.field_knights.push(card);
+        registerKnightPlayed(player); // cupo de caballeros del turno
+      }
       else if (dbZone === 'field_support')  player.field_techniques.push(card);
       else if (dbZone === 'field_helper')   player.field_helper = card;
       else if (dbZone === 'field_occasion') player.field_occasion = card;

@@ -29,6 +29,7 @@ import { createEngineContext } from '../../../domain/game/EngineContext';
 import { killKnight } from '../../../domain/game/actions/KillAction';
 import { createCardDefinitionCache } from '../../../infrastructure/cache/card-definition.cache';
 import { attachCardDefinitions } from './attachCardDefinitions';
+import { hasKnightActed, markKnightActed, KNIGHT_ALREADY_ACTED_ERROR } from '../../../domain/game/rules/knight-action.rules';
 
 // Ability cache
 // Cacheamos por card_id para evitar N+1 queries a card_abilities.
@@ -134,6 +135,7 @@ export class KnightManager {
     match: any,
     playerNumber: 1 | 2,
     actionId: string,
+    knightId: string,
   ): Promise<{
     success: boolean;
     newState: GameState | null;
@@ -144,9 +146,10 @@ export class KnightManager {
     const result = await this.runAction(
       match, playerNumber, actionId, 'charge_cosmos',
       async (state) => {
-        const v = KnightRulesEngine.validateChargeKnightCosmos(state, playerNumber);
+        // Cargar Cosmo gasta la acción del caballero que carga (rules/knight-action.rules.ts)
+        const v = KnightRulesEngine.validateChargeKnightCosmos(state, playerNumber, knightId);
         if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
-        const execution = KnightRulesEngine.chargeKnightCosmos(state, playerNumber);
+        const execution = KnightRulesEngine.chargeKnightCosmos(state, playerNumber, knightId);
         const ctx = createEngineContext(execution.newState);
         const player = playerNumber === 1 ? ctx.state.player1 : ctx.state.player2;
         ctx.bus.emit(createEvent({
@@ -251,7 +254,14 @@ export class KnightManager {
         const stateCard = player.field_knights.find((k: any) => k.instance_id === cardInPlayId);
         if (!stateCard) throw new Error('Carta de caballero no encontrada en GameState');
 
+        // Mover es la acción del caballero (rules/knight-action.rules.ts): una casilla adyacente
+        if (hasKnightActed(stateCard)) throw new Error(KNIGHT_ALREADY_ACTED_ERROR);
+        if (Math.abs(targetPosition - oldPosition) !== 1) {
+          throw new Error('Solo puedes mover el caballero a una casilla adyacente');
+        }
+
         stateCard.position = targetPosition;
+        markKnightActed(stateCard);
         state.updated_at = Date.now();
 
         return { newState: state, oldPosition, newPosition: targetPosition };

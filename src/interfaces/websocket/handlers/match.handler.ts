@@ -3,6 +3,7 @@ import { GameStateBuilder } from '../../../app/matches/actions/GameStateBuilder'
 import { SelectionService } from '../../../app/matches/actions/SelectionService';
 import { StartMatchService } from '../../../app/matches/lifecycle/startMatch.service';
 import { matchesCoordinator } from '../../../app/matches/coordinators/matchesCoordinator';
+import { AiOpponentService } from '../../../app/matches/ai/aiOpponent.service';
 import { AuthenticatedWebSocket } from '../../../infrastructure/websocket/middleware/auth.middleware';
 import { WebSocketPresenceService } from '../../../infrastructure/websocket/presence.service';
 import { RouterEventHandler } from '../../../infrastructure/websocket/websocket-router';
@@ -222,6 +223,36 @@ export function createMatchHandlers(
     }
   };
 
+  // Jugador vs IA: partida inmediata contra el rival del servidor (app/matches/ai).
+  // Mismo flujo que al encontrar rival en PvP: match_found y a continuación match_update.
+  const handleRequestAiMatch = async (ws: AuthenticatedWebSocket, data: any) => {
+    try {
+      console.log(`🤖 ${ws.username} pide partida contra la IA`);
+      const faction = typeof data?.faction === 'string' && data.faction ? data.faction : undefined;
+      const result = await AiOpponentService.createAiMatch(ws.userId!, faction);
+      const matchRecord = await Match.findByPk(result.match_id);
+      const gameState = matchRecord
+        ? await GameStateBuilder.buildFromMatch(matchRecord, { perspectivePlayer: 1 })
+        : result;
+      presenceService.sendToUsers([ws.userId!], 'match_found', {
+        match_id: result.match_id,
+        game_state: gameState,
+        vs_ai: true,
+        ai_faction: result.ai_faction,
+      });
+      // El match_update dispara también el primer turno de la IA si empieza ella
+      await broadcastMatchUpdate(result.match_id, { type: 'match_start' });
+      await refreshAdminStats();
+    } catch (error: any) {
+      console.error('❌ Error en request_ai_match:', error);
+      const message: string = error?.message || 'Error creando la partida contra la IA';
+      const code = message.includes('mazo activo') || message.includes('Necesita mínimo') || message.includes('máximo permitido')
+        ? 'NO_ACTIVE_DECK'
+        : message.includes('partida activa') ? 'ALREADY_IN_MATCH' : 'AI_MATCH_ERROR';
+      presenceService.sendToSocket(ws, 'match_error', { code, message, error: message });
+    }
+  };
+
   const handleResumeTestMatch = async (ws: AuthenticatedWebSocket) => {
     try {
       console.log(`♻️ ${ws.username} solicita reanudar partida TEST`);
@@ -266,13 +297,15 @@ export function createMatchHandlers(
 
   const handlers: Record<string, RouterEventHandler> = {
     request_test_match: ws => handleRequestTestMatch(ws),
+    request_ai_match: (ws, data) => handleRequestAiMatch(ws, data),
     resume_test_match: ws => handleResumeTestMatch(ws),
     abandon_test_match: (ws, data) => handleAbandonTestMatch(ws, data),
     search_match: ws => handleSearchMatch(ws),
     cancel_search: ws => handleCancelSearch(ws),
     resolve_selection: (ws, data) => handleResolveSelection(ws, data),
     request_match_state: (ws, data) => handleRequestMatchState(ws, data),
-    play_card: action('PLAY_CARD', ['card_id', 'zone', 'position']),
+    // equip_target_id: caballero propio al que se equipa un objeto (domain/game/rules/equipment.rules.ts)
+    play_card: action('PLAY_CARD', ['card_id', 'zone', 'position', 'equip_target_id']),
     declare_attack: action('ATTACK', ['attacker_id', 'defender_id']),
     end_turn: action('END_TURN', []),
     start_first_turn: action('START_FIRST_TURN', []),

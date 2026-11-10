@@ -65,6 +65,7 @@ export function buildMatchInspection(match: MatchRecord, resolveValidActions: Re
     player2_life: match.player2_life,
     player1_cosmos: match.player1_cosmos,
     player2_cosmos: match.player2_cosmos,
+    turn_counters: match.turn_counters ?? {},
   };
   const validActionsMap = new Map<string, any>();
   for (const currentPlayer of [1, 2]) {

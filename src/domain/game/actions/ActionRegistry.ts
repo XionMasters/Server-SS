@@ -9,6 +9,7 @@
  *   coin_flip_then  → lanza una moneda; ejecuta heads[]/on_heads[] si cara, tails[]/on_fail[] si cruz
  *   modify_stat     → modifica permanentemente attack/defense/cosmos/health
  *   heal_player     → cura LP de un jugador
+ *   grant_extra_knight_play → permite jugar otro caballero desde la mano este turno
  *   (ver cada entrada del registro para el resto)
  *
  * Las acciones con target aceptan `filter` ({ type, code, tag, health_max, status })
@@ -26,6 +27,7 @@
  */
 
 import { resolveWinCondition, type GameState } from '../GameState';
+import { grantExtraKnightPlays } from '../rules/knight-play.rules';
 
 /**
  * Efectos que, al aplicarse, limpian otros de la carta objetivo.
@@ -932,6 +934,20 @@ const ACTION_REGISTRY: Record<string, ActionFn<any>> = {
     targetPlayer.life += amount;
     if (!Array.isArray(result.extras.player_heal_applied)) result.extras.player_heal_applied = [];
     (result.extras.player_heal_applied as any[]).push({ target_player: targetPlayerNumber, amount });
+  },
+
+  /**
+   * Permite a un jugador jugar caballeros adicionales desde la mano este turno
+   * (la regla base es uno por turno: rules/knight-play.rules.ts). Caduca al cambiar de turno.
+   * Estructura: { type: 'grant_extra_knight_play', target?: 'self'|'opponent', amount?: number (1) }
+   */
+  grant_extra_knight_play: (action: any, ctx, result) => {
+    const amount: number = action.amount ?? 1;
+    const targetPlayerNumber: 1 | 2 = action.target === 'opponent'
+      ? (ctx.playerNumber === 1 ? 2 : 1)
+      : ctx.playerNumber;
+    const targetPlayer = targetPlayerNumber === 1 ? result.state.player1 : result.state.player2;
+    grantExtraKnightPlays(targetPlayer, amount);
   },
 };
 

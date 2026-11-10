@@ -23,6 +23,9 @@ export const BASE_MATCH_RULES: MatchRules = {
     cosmos_on_turn_start: 1,
 
     // Cosmos ganado al usar la acción Cargar Cosmo
-    cosmos_per_charge: 1
+    cosmos_per_charge: 1,
+
+    // Caballeros jugados desde la mano por turno (las habilidades pueden dar más: knight-play.rules.ts)
+    knights_per_turn: 1
   }
 };

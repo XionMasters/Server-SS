@@ -134,6 +134,25 @@ describe('Cosmo máximo del jugador', () => {
     expect(cosmosGained).toBe(1);
   });
 
+  test('Cargar Cosmo gasta la acción del caballero que carga', () => {
+    const s = state(3, 1, 1);
+    s.player1.cosmos = 4;
+    s.player1.field_knights.push(knight('k1', 1), knight('k2', 1, { position: 1 }));
+
+    expect(KnightRulesEngine.validateChargeKnightCosmos(s, 1, 'k1').valid).toBe(true);
+    const { newState } = KnightRulesEngine.chargeKnightCosmos(s, 1, 'k1');
+    expect(newState.player1.cosmos).toBe(5);
+    expect(newState.player1.field_knights.find(k => k.instance_id === 'k1')!.attacked_this_turn).toBe(true);
+    // El original no se muta
+    expect(s.player1.field_knights[0].attacked_this_turn).toBe(false);
+
+    // Ese caballero ya no puede volver a cargar; otro sí
+    expect(KnightRulesEngine.validateChargeKnightCosmos(newState, 1, 'k1').valid).toBe(false);
+    expect(KnightRulesEngine.validateChargeKnightCosmos(newState, 1, 'k2').valid).toBe(true);
+    // Un caballero que no es del jugador no puede cargar
+    expect(KnightRulesEngine.validateChargeKnightCosmos(newState, 1, 'ajeno').valid).toBe(false);
+  });
+
   test('jugar una carta que genera cosmo no pasa de 12', () => {
     const s = state(3, 1, 1);
     s.player1.cosmos = 11;

@@ -8,13 +8,13 @@
 -- =============================================================
 -- PACKS
 -- =============================================================
-INSERT INTO packs (name, description, price, cards_per_pack, guaranteed_rarity, is_active, image_url)
+-- Mismos sobres que src/config/packs.config.ts (npm run generate:packs los mantiene al día)
+INSERT INTO packs (code, name, description, price, cards_per_pack, guaranteed_rarity, is_active, image_url, collections, coming_soon, pity_threshold, sort_order)
 VALUES
-  ('Sobre Básico',       'Un sobre económico con 3 cartas aleatorias. Ideal para probar suerte sin gastar mucho.',                                                   50,  3,  NULL,          TRUE, '/assets/examples/seiya.png'),
-  ('Sobre de Bronce',    'Contiene 5 cartas con énfasis en cartas comunes y raras. Perfecto para comenzar tu colección.',                                             100, 5,  'rare',       TRUE, '/assets/examples/seiya.png'),
-  ('Sobre de Plata',     'Contiene 7 cartas con mayor probabilidad de cartas épicas. ¡Una inversión inteligente!',                                                   200, 7,  'epic',       TRUE, '/assets/examples/seiya.png'),
-  ('Sobre de Oro',       'El sobre premium con 10 cartas y garantía de al menos 1 carta legendaria. ¡Para verdaderos coleccionistas!',                               400, 10, 'legendary',  TRUE, '/assets/examples/seiya.png'),
-  ('Mega Pack',          'El pack definitivo con 15 cartas, garantizando al menos 1 legendaria y 2 épicas. ¡Solo para los más valientes!',                           750, 15, 'legendary',  TRUE, '/assets/examples/seiya.png');
+  ('santuario',              'Sobre del Santuario',                         '5 cartas de la saga del Santuario. Cada 10 sobres sin épica, el siguiente trae una asegurada.',                     100, 5, NULL, TRUE, NULL, '{santuario}',              FALSE, 10, 0),
+  ('santuario_black_saints', 'Sobre del Santuario y los Caballeros Negros', '5 cartas del Santuario y de los Caballeros Negros. Cada 10 sobres sin épica, el siguiente trae una asegurada.', 150, 5, NULL, TRUE, NULL, '{santuario,black_saints}', FALSE, 10, 1),
+  ('poseidon',               'Sobre de Poseidón',                           '5 cartas de la saga de Poseidón. Cada 10 sobres sin épica, el siguiente trae una asegurada.',                      150, 5, NULL, TRUE, NULL, '{poseidon}',               FALSE, 10, 2),
+  ('omega',                  'Sobre de Omega',                              '5 cartas de la saga Omega. Próximamente.',                                                                         150, 5, NULL, TRUE, NULL, '{omega}',                  TRUE,  10, 3);
 
 -- =============================================================
 -- PROFILE AVATARS

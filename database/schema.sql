@@ -28,7 +28,7 @@ CREATE TYPE knight_rank_enum AS ENUM (
 );
 
 CREATE TYPE card_rarity_enum AS ENUM (
-    'common', 'rare', 'epic', 'legendary', 'divine'
+    'common', 'uncommon', 'rare', 'epic', 'legendary', 'divine'
 );
 
 CREATE TYPE card_element_enum AS ENUM (
@@ -63,7 +63,7 @@ CREATE TYPE transaction_reason_enum AS ENUM (
     'REGISTRATION_BONUS', 'DAILY_LOGIN', 'MATCH_WIN', 'MATCH_PARTICIPATION',
     'ACHIEVEMENT', 'QUEST_REWARD', 'ADMIN_GIFT', 'EVENT_REWARD',
     'PACK_PURCHASE', 'CARD_PURCHASE', 'UPGRADE_COST', 'TOURNAMENT_FEE',
-    'PREMIUM_FEATURE'
+    'PREMIUM_FEATURE', 'PACK_REFUND'
 );
 
 CREATE TYPE card_transaction_type_enum AS ENUM ('ACQUIRE', 'LOSE');
@@ -221,6 +221,12 @@ CREATE TABLE packs (
     guaranteed_rarity   pack_guaranteed_rarity_enum,
     is_active           BOOLEAN                      NOT NULL DEFAULT TRUE,
     image_url           VARCHAR(255),
+    -- Sobres v2 (migración 016): contenido por colecciones (cards.collection_id) y garantía
+    code                VARCHAR(50)                  UNIQUE,
+    collections         TEXT[]                       NOT NULL DEFAULT '{}',
+    coming_soon         BOOLEAN                      NOT NULL DEFAULT FALSE,
+    pity_threshold      INTEGER                      NOT NULL DEFAULT 10 CHECK (pity_threshold >= 1),
+    sort_order          INTEGER                      NOT NULL DEFAULT 0,
     created_at          TIMESTAMPTZ                  NOT NULL DEFAULT NOW(),
     updated_at          TIMESTAMPTZ                  NOT NULL DEFAULT NOW()
 );
@@ -311,6 +317,17 @@ CREATE TABLE user_packs (
     pack_id     UUID        NOT NULL REFERENCES packs(id) ON DELETE CASCADE,
     quantity    INTEGER     NOT NULL DEFAULT 1 CHECK (quantity >= 1),
     acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- -------------------------------------------------------------
+-- user_pack_pity  (sobres seguidos sin épica o superior, por jugador y sobre)
+-- -------------------------------------------------------------
+CREATE TABLE user_pack_pity (
+    user_id            UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    pack_id            UUID        NOT NULL REFERENCES packs(id) ON DELETE CASCADE,
+    packs_without_epic INTEGER     NOT NULL DEFAULT 0 CHECK (packs_without_epic >= 0),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, pack_id)
 );
 
 -- -------------------------------------------------------------
@@ -425,6 +442,7 @@ CREATE TABLE matches (
     player2_deck_index  INTEGER          NOT NULL DEFAULT 0,
     rng_seed            BIGINT           NOT NULL DEFAULT 0,
     pending_selection   JSONB,
+    turn_counters       JSONB            NOT NULL DEFAULT '{}'::jsonb,
     started_at          TIMESTAMPTZ,
     finished_at         TIMESTAMPTZ,
     created_at          TIMESTAMPTZ      NOT NULL DEFAULT NOW(),

@@ -24,6 +24,7 @@ import UserDeckBackUnlock from '../src/infrastructure/database/models/UserDeckBa
 import transactionService from '../src/infrastructure/database/services/transaction.service';
 import { buildRandomDeck, CatalogCard } from '../src/app/decks/randomDeckBuilder';
 import { validateDeck } from '../src/app/decks/deckValidator';
+import { AI_SYSTEM_USER_IDS } from '../src/app/matches/ai/aiBot';
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
@@ -133,9 +134,11 @@ async function giveDeck(user: User, catalog: CatalogCard[]): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  // La IA del servidor tiene sus propios mazos (app/matches/ai/aiOpponent.service.ts)
+  const notSystem = { id: { [Op.notIn]: AI_SYSTEM_USER_IDS } };
   const where = USER_ARG
-    ? { [Op.or]: [{ username: USER_ARG }, ...(/^[0-9a-f-]{36}$/i.test(USER_ARG) ? [{ id: USER_ARG }] : [])] }
-    : {};
+    ? { [Op.or]: [{ username: USER_ARG }, ...(/^[0-9a-f-]{36}$/i.test(USER_ARG) ? [{ id: USER_ARG }] : [])], ...notSystem }
+    : notSystem;
   const users = await User.findAll({ where, order: [['username', 'ASC']] });
   if (users.length === 0) {
     console.log(USER_ARG ? `No se encontró el usuario "${USER_ARG}"` : 'No hay usuarios');

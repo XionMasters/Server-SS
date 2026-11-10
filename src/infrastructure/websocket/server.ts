@@ -7,6 +7,9 @@ import Match from '../database/models/Match';
 import UserProfile from '../database/models/UserProfile';
 import ProfileAvatar from '../database/models/ProfileAvatar';
 import { matchesCoordinator } from '../../app/matches/coordinators/matchesCoordinator';
+import { aiTurnRunner } from '../../app/matches/ai/aiTurnRunner';
+import { isAiBot } from '../../app/matches/ai/aiBot';
+import { GameStateBuilder } from '../../app/matches/actions/GameStateBuilder';
 import { authenticateSocket, AuthenticatedWebSocket } from './middleware/auth.middleware';
 import { WebSocketPresenceService } from './presence.service';
 import { WebSocketChatHandler } from '../../interfaces/websocket/handlers/chat.handler';
@@ -40,6 +43,9 @@ const { handlers: matchHandlers, broadcastMatchUpdate } = createMatchHandlers(
 matchesCoordinator.setNotifier((userIds, event, payload) => {
   presenceService.sendToUsers(userIds, event, payload);
 });
+
+// Jugador vs IA: la IA juega sus turnos cuando cambia el estado de una partida suya
+aiTurnRunner.attach();
 
 const withAdmin = (handler: RouterEventHandler): RouterEventHandler => {
   return async (ws, data) => {
@@ -129,9 +135,10 @@ async function setupConnection(ws: AuthenticatedWebSocket, req: IncomingMessage)
       return true;
     }
 
+    // La IA nunca tiene socket, pero siempre está "presente" en sus partidas
     const recoveryResult = await matchesCoordinator.recoverOnSocketConnect(
       ws.userId!,
-      (userId: string) => presenceService.isUserOnline(userId)
+      (userId: string) => isAiBot(userId) || presenceService.isUserOnline(userId)
     );
 
     if (!recoveryResult.success) {
@@ -148,13 +155,36 @@ async function setupConnection(ws: AuthenticatedWebSocket, req: IncomingMessage)
     }
 
     const resumed = recoveryResult.success ? recoveryResult.data?.matchResumed : null;
+    const vsAi = !!resumed && (isAiBot(resumed.player1?.id) || isAiBot(resumed.player2?.id));
+    // PvP y contra la IA: el cliente entra directo al tablero con el estado de su perspectiva.
+    // Las partidas TEST mantienen su flujo (el cliente pregunta Reanudar/Abandonar).
+    const resumeDirectly = !!resumed && resumed.player1?.id !== resumed.player2?.id;
     if (resumed) {
       console.log(`♻️ ${ws.username} tiene partida activa para reanudar: ${resumed.match_id} (${resumed.phase})`);
-      presenceService.sendToSocket(ws, 'match_resumed', resumed);
+      let payload: any = resumed;
+      if (resumeDirectly) {
+        const match = await Match.findByPk(resumed.match_id);
+        if (match) {
+          const perspectivePlayer = match.player1_id === ws.userId ? 1 : 2;
+          payload = {
+            ...resumed,
+            game_state: await GameStateBuilder.buildFromMatch(match, { perspectivePlayer }),
+            vs_ai: vsAi,
+          };
+        }
+      }
+      presenceService.sendToSocket(ws, 'match_resumed', payload);
     }
 
     presenceService.registerConnection(ws, ws.userId!, ws.username!, avatarUrl);
     broadcastOnlineUsers();
+
+    if (resumed && resumeDirectly) {
+      // Estado completo con valid_actions, como tras match_found
+      await broadcastMatchUpdate(resumed.match_id);
+    }
+    // Si la partida es contra la IA y le tocaba (p. ej. tras reiniciar el servidor), que siga
+    if (resumed && vsAi) aiTurnRunner.schedule(resumed.match_id);
 
     console.log(`✅ Usuario conectado: ${ws.username} (${ws.userId})`);
 

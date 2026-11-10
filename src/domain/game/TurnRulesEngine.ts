@@ -21,6 +21,7 @@ import { GameState } from './GameState';
 import { deriveModeFromEffects, computeCeBonus, computeArBonus, computeHpBonus, tickStatusEffects } from './StatusEffects';
 import { BASE_MATCH_RULES } from './rules/base.rules';
 import { addPlayerCosmos } from './rules/cosmos.rules';
+import { resetKnightPlays } from './rules/knight-play.rules';
 import { createEngineContext, type EngineContext } from './EngineContext';
 import { applyDamage } from './actions/DamageAction';
 import type { GameEvent } from './events/GameEvents';
@@ -168,6 +169,10 @@ export class TurnRulesEngine {
     const cosmosIncrease = typeof cosmosOnTurnStart === 'function' ? cosmosOnTurnStart(newState.current_turn) : cosmosOnTurnStart;
     const nextPlayerObj = newState[nextPlayer === 1 ? 'player1' : 'player2'];
     addPlayerCosmos(nextPlayerObj, cosmosIncrease); // tope: BASE_MATCH_RULES.max_cosmos
+
+    // Cupo de caballeros del turno: se reinicia para los dos (los permisos extra caducan)
+    resetKnightPlays(newState.player1);
+    resetKnightPlays(newState.player2);
 
     // Contexto para enrutamiento unificado de daño (DOTs pasan por DamageAction).
     const dotCtx = createEngineContext(newState);

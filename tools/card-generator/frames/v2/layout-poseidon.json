@@ -1,0 +1,49 @@
+{
+  "_comment": "Layout de frame-poseidon.png (Generales Marinos y dioses de la saga Poseidón; base: frames/Poseidon.png), 1024x1536. Centros y radios en px.",
+
+  "art_window": { "x": 185, "y": 133, "w": 772, "h": 674, "bleed": 6 },
+
+  "name": {
+    "x": 235, "y": 30, "w": 570, "h": 80,
+    "font_size": 56, "min_font_size": 32,
+    "fill": [246, 214, 130], "stroke": [10, 24, 50], "stroke_width": 3
+  },
+
+  "faction_icon": { "cx": 144, "cy": 166, "r": 58 },
+
+  "cost": {
+    "cx": 882, "cy": 145, "r": 40,
+    "font_size": 56,
+    "fill": [255, 255, 255], "stroke": [10, 20, 40], "stroke_width": 4,
+    "gem": [210, 170, 60]
+  },
+
+  "stats": {
+    "font_size": 60, "label_size": 21, "r": 58,
+    "items": [
+      { "key": "health",  "label": "LP", "cx": 133, "cy": 334, "gem": [170, 25, 35] },
+      { "key": "cosmos",  "label": "CP", "cx": 133, "cy": 497, "gem": [25, 70, 170] },
+      { "key": "attack",  "label": "CE", "cx": 133, "cy": 660, "gem": [215, 105, 20] },
+      { "key": "defense", "label": "AR", "cx": 133, "cy": 818, "gem": [110, 120, 135] }
+    ]
+  },
+
+  "rank_label": {
+    "x": 300, "y": 828, "w": 540, "h": 70,
+    "font_size": 44, "min_font_size": 28,
+    "fill": [246, 214, 130], "stroke": [10, 20, 40], "stroke_width": 3
+  },
+
+  "element_socket": { "cx": 254, "cy": 862, "r": 26 },
+  "type_socket":    { "cx": 906, "cy": 862, "r": 27 },
+
+  "abilities": {
+    "x": 150, "y": 945, "w": 725, "h": 340,
+    "font_size_name": 32, "font_size_desc": 28, "min_font_size_desc": 20,
+    "line_spacing": 6, "gap": 14,
+    "name_color": [20, 55, 110], "desc_color": [35, 25, 15],
+    "divider_color": [60, 110, 170]
+  },
+
+  "bottom_medallion": { "cx": 512, "cy": 1442, "r": 48 }
+}

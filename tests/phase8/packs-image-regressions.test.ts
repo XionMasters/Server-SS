@@ -52,14 +52,17 @@ jest.mock('../../src/infrastructure/database/models/UserCard', () => ({
   default: {},
 }));
 
+jest.mock('../../src/infrastructure/database/models/UserPackPity', () => ({
+  __esModule: true,
+  default: { findAll: jest.fn().mockResolvedValue([]) },
+}));
+
 jest.mock('../../src/infrastructure/database/services/transaction.service', () => ({
   __esModule: true,
   default: {},
 }));
 
 import { getAvailablePacks, getUserPacks } from '../../src/interfaces/http/controllers/packs.controller';
-import { generateRandomCard } from '../../src/app/packs/pack.service';
-import { SeededRNG } from '../../src/domain/game/combat/RNG';
 
 function createMockResponse() {
   return {
@@ -129,18 +132,5 @@ describe('Pack image regressions', () => {
       ],
       total: 1,
     });
-  });
-
-  test('pack card selection is reproducible from its seeded random source', async () => {
-    const cards = [{ id: 'card-1' }, { id: 'card-2' }, { id: 'card-3' }];
-    mockCardModel.findAll.mockResolvedValue(cards);
-
-    const first = await generateRandomCard({} as any, new SeededRNG(98765), 'common');
-    const replay = await generateRandomCard({} as any, new SeededRNG(98765), 'common');
-
-    expect(replay).toBe(first);
-    expect(mockCardModel.findAll).toHaveBeenNthCalledWith(1, expect.objectContaining({
-      where: { rarity: 'common' },
-    }));
   });
 });

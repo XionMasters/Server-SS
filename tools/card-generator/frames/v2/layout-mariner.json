@@ -1,0 +1,47 @@
+{
+  "_comment": "Layout de frame-mariner.png (soldados marinos de Poseidón; base: frames/Poseidon_base.png), 1024x1536. Centros y radios en px. Sin medallón inferior.",
+
+  "art_window": { "x": 149, "y": 120, "w": 825, "h": 760, "bleed": 6 },
+
+  "name": {
+    "x": 240, "y": 22, "w": 590, "h": 80,
+    "font_size": 56, "min_font_size": 32,
+    "fill": [235, 240, 250], "stroke": [10, 24, 50], "stroke_width": 3
+  },
+
+  "faction_icon": { "cx": 127, "cy": 105, "r": 70 },
+
+  "cost": {
+    "cx": 918, "cy": 100, "r": 44,
+    "font_size": 58,
+    "fill": [255, 255, 255], "stroke": [10, 20, 40], "stroke_width": 4,
+    "gem": [180, 190, 210]
+  },
+
+  "stats": {
+    "font_size": 60, "label_size": 21, "r": 58,
+    "items": [
+      { "key": "health",  "label": "LP", "cx": 124, "cy": 296, "gem": [170, 25, 35] },
+      { "key": "cosmos",  "label": "CP", "cx": 124, "cy": 462, "gem": [25, 70, 170] },
+      { "key": "attack",  "label": "CE", "cx": 124, "cy": 626, "gem": [215, 105, 20] },
+      { "key": "defense", "label": "AR", "cx": 124, "cy": 794, "gem": [110, 120, 135] }
+    ]
+  },
+
+  "rank_label": {
+    "x": 200, "y": 900, "w": 640, "h": 70,
+    "font_size": 44, "min_font_size": 28,
+    "fill": [235, 240, 250], "stroke": [10, 20, 40], "stroke_width": 3
+  },
+
+  "element_socket": { "cx": 125, "cy": 935, "r": 40 },
+  "type_socket":    { "cx": 908, "cy": 935, "r": 40 },
+
+  "abilities": {
+    "x": 95, "y": 1020, "w": 835, "h": 380,
+    "font_size_name": 32, "font_size_desc": 28, "min_font_size_desc": 20,
+    "line_spacing": 6, "gap": 14,
+    "name_color": [20, 55, 110], "desc_color": [35, 25, 15],
+    "divider_color": [60, 110, 170]
+  }
+}

@@ -3,7 +3,7 @@
 import { CardAdminError, CardRecord } from './card-admin';
 
 export const CARD_TYPES = ['knight', 'technique', 'object', 'stage', 'helper', 'occasion'] as const;
-export const CARD_RARITIES = ['common', 'rare', 'epic', 'legendary', 'divine'] as const;
+export const CARD_RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'divine'] as const;
 export const CARD_ELEMENTS = ['steel', 'fire', 'water', 'earth', 'wind', 'light', 'dark'] as const;
 
 type FieldKind = 'string' | 'text' | 'int' | 'bool' | 'stringArray';

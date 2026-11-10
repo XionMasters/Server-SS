@@ -92,6 +92,35 @@ export const connectDatabase = async (): Promise<void> => {
           console.log('✅ Migración 013 aplicada.');
         }
 
+        if (!matchColumns['turn_counters']) {
+          console.log('🔧 Aplicando migración 015 (matches.turn_counters)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/015_add_turn_counters_to_matches.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 015 aplicada.');
+        }
+
+        // 016: el enum de cards.rarity se llama distinto según cómo se creó la BD
+        // (schema.sql: card_rarity_enum; sequelize.sync: enum_cards_rarity): se mira el de la columna
+        const packColumns = await queryInterface.describeTable('packs');
+        const [uncommonRows] = await sequelize.query(`
+          SELECT 1 FROM information_schema.columns c
+            JOIN pg_type t ON t.typname = c.udt_name
+            JOIN pg_enum e ON e.enumtypid = t.oid AND e.enumlabel = 'uncommon'
+           WHERE c.table_schema = current_schema() AND c.table_name = 'cards' AND c.column_name = 'rarity'
+        `);
+        if (!packColumns['code'] || (uncommonRows as unknown[]).length === 0) {
+          console.log('🔧 Aplicando migración 016 (sobres v2 y rareza uncommon)...');
+          const sql = fs.readFileSync(
+            path.resolve(__dirname, '../../src/migrations/sql/016_packs_v2_and_uncommon.sql'),
+            'utf8'
+          );
+          await sequelize.query(sql);
+          console.log('✅ Migración 016 aplicada.');
+        }
+
         const tables = (await queryInterface.showAllTables()).map((t: any) => (typeof t === 'string' ? t : t.tableName));
         if (!tables.includes('match_replays') || !tables.includes('match_replay_frames')) {
           console.log('🔧 Aplicando migración 014 (repeticiones de partidas)...');

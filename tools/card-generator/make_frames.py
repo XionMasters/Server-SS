@@ -13,6 +13,11 @@ Uso:
     python make_frames.py                       # usa Designer.png → frames/v2/
     python make_frames.py --base otro.png --out frames/v3
     python make_frames.py --base Designer-object.png --only-type object   # marco propio de objetos
+    python make_frames.py --base frames/Poseidon_base.png --key-only mariner   # marco de facción
+
+--key-only NOMBRE: el marco ya viene terminado (p. ej. los de Poseidón): solo se recorta la
+ventana verde y se guarda como frame-NOMBRE.png, sin retintar metal ni paneles. Su geometría
+va en layout-NOMBRE.json (generate_v2.py lo usa automáticamente con ese marco).
 """
 
 from __future__ import annotations
@@ -97,6 +102,28 @@ def green_mask(rgb: np.ndarray) -> np.ndarray:
     return (g > 0.45) & (g > r * 1.6) & (g > b * 1.6)
 
 
+def art_window_alpha(rgb: np.ndarray) -> np.ndarray:
+    """Canal alfa: 0 en la ventana de arte, 255 en el resto.
+
+    Solo cuenta el verde conectado con el centro de la ventana, así otros verdes del marco
+    (vegetación, reflejos) no se vuelven agujeros. Se expande 2px para comerse el halo verde.
+    """
+    from PIL import ImageDraw, ImageFilter
+
+    # copy(): la imagen creada con fromarray comparte memoria y floodfill no la modificaría
+    mask = Image.fromarray((green_mask(rgb) * 255).astype(np.uint8)).copy()
+    ys, xs = np.nonzero(np.asarray(mask))
+    if len(xs) == 0:
+        raise SystemExit("No se encontró la ventana verde (#00FF00) en el marco base")
+    # Semilla: el pixel verde más cercano al centro de la caja de todos los verdes
+    cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+    i = int(np.argmin((xs - cx) ** 2 + (ys - cy) ** 2))
+    ImageDraw.floodfill(mask, (int(xs[i]), int(ys[i])), 128)
+    window = Image.fromarray(((np.asarray(mask) == 128) * 255).astype(np.uint8))
+    window = window.filter(ImageFilter.MaxFilter(5))
+    return 255 - np.asarray(window)
+
+
 def metal_weight(hsv: np.ndarray) -> np.ndarray:
     """Peso 0..1 de 'cuánto es dorado' cada pixel (transición suave)."""
     h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
@@ -145,6 +172,9 @@ def main():
     parser.add_argument("--only-type", default=None, choices=list(TYPES),
                         help="Base exclusiva de un tipo: genera solo frame-{tipo}-{metal}.png "
                              "(usar con su layout-{tipo}.json)")
+    parser.add_argument("--key-only", default=None, metavar="NOMBRE",
+                        help="Marco ya terminado: solo recorta la ventana verde y guarda "
+                             "frame-NOMBRE.png (usar con su layout-NOMBRE.json)")
     args = parser.parse_args()
 
     out_dir = Path(args.out)
@@ -152,16 +182,20 @@ def main():
 
     img = Image.open(args.base).convert("RGB")
     rgb = np.asarray(img).astype(np.float64) / 255
-    hsv = rgb_to_hsv(rgb)
 
-    # Ventana de arte → transparente. Se expande 2px para comerse el halo verde.
-    mask_img = Image.fromarray((green_mask(rgb) * 255).astype(np.uint8))
-    from PIL import ImageFilter
-    mask_img = mask_img.filter(ImageFilter.MaxFilter(5))
-    alpha = 255 - np.asarray(mask_img)
-
+    # Ventana de arte → transparente
+    alpha = art_window_alpha(rgb)
     ys, xs = np.nonzero(alpha == 0)
     print(f"Ventana de arte: x={xs.min()}..{xs.max()}  y={ys.min()}..{ys.max()}")
+
+    if args.key_only:
+        rgba = np.dstack([np.asarray(img), alpha.astype(np.uint8)])
+        path = out_dir / f"frame-{args.key_only}.png"
+        Image.fromarray(rgba, "RGBA").save(path)
+        print(f"  ✓ {path}")
+        return
+
+    hsv = rgb_to_hsv(rgb)
 
     weight = metal_weight(hsv)
     weight[alpha == 0] = 0

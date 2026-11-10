@@ -8,6 +8,7 @@ import User from '../../../infrastructure/database/models/User';
 import { GameStateBuilder } from '../actions/GameStateBuilder';
 import { serializeCardInPlay } from '../serializers/cardInPlay.serializer';
 import { BASE_MATCH_RULES } from '../../../domain/game/rules/base.rules';
+import { knightPlaysLeft, readKnightPlayCounters } from '../../../domain/game/rules/knight-play.rules';
 
 export const getPerspectivePlayerNumber = (
   player1Id: string,
@@ -119,6 +120,10 @@ export class MatchStateService {
           player2_graveyard: player2GraveyardCards,
           // Selección interactiva pendiente (null si no hay ninguna)
           pending_selection: (match as any).pending_selection ?? null,
+          // Contadores por turno: ActionResolver los usa para el cupo de caballeros
+          turn_counters: match.turn_counters ?? {},
+          player1_knight_plays_left: knightPlaysLeft(readKnightPlayCounters(match.turn_counters, 1)),
+          player2_knight_plays_left: knightPlaysLeft(readKnightPlayCounters(match.turn_counters, 2)),
           cards_in_play: cardsData
         }
       };

@@ -18,7 +18,7 @@ const ABILITY_TYPES = new Set(['activa', 'pasiva', 'equipamiento', 'campo']);
 const TRIGGERS = new Set<string>([...Object.values(GameEventType), 'NONE']);
 const COST_TYPES = new Set(['cosmos', 'discard', 'life', 'player_cosmos']);
 /** Acciones cuyo `target` es un jugador, no una carta. */
-const PLAYER_ACTIONS = new Set(['apply_player_damage', 'apply_cosmos_damage', 'heal_player']);
+const PLAYER_ACTIONS = new Set(['apply_player_damage', 'apply_cosmos_damage', 'heal_player', 'grant_extra_knight_play']);
 const AMOUNT_ACTIONS = new Set([
   'heal', 'apply_damage', 'restore_cosmos', 'apply_player_damage',
   'apply_cosmos_damage', 'heal_player', 'permanent_ar_reduce', 'modify_stat',
@@ -113,7 +113,7 @@ function checkActions(actions: any[], report: (msg: string) => void): void {
 
 describe('Integridad de las habilidades en database/*.json', () => {
   test('cada carta tiene code, name y una rareza del ENUM de cards', () => {
-    const rarities = new Set(['common', 'rare', 'epic', 'legendary', 'divine']);
+    const rarities = new Set(['common', 'uncommon', 'rare', 'epic', 'legendary', 'divine']);
     const problems: string[] = [];
     for (const file of walk(DATABASE_DIR)) {
       const text = fs.readFileSync(file, 'utf8');

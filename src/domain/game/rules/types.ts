@@ -15,6 +15,8 @@ export interface TurnRules {
   cosmos_on_turn_start: number | ((turnNumber: number) => number);
   /** Cosmos ganado por la acción Cargar Cosmo (Carregar Cosmo) */
   cosmos_per_charge: number | ((turnNumber: number) => number);
+  /** Caballeros que se pueden jugar desde la mano por turno (sin contar permisos extra de habilidades) */
+  knights_per_turn: number;
 }
 
 export interface MatchRules {

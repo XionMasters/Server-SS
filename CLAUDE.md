@@ -29,7 +29,7 @@ Imágenes de carta: `tools/card-generator/` (Python + Pillow). `generate_art.py`
 
 Fondos de partida: cuando hay una carta de escenario (`stage`) en juego, el cliente pide `/assets/stage-backgrounds/{code}.webp` (`src/assets/stage-backgrounds/`, panorámica 16:9, ej. 1920×1080) y la pone a pantalla completa; si no existe, mantiene el fondo de cosmos base.
 
-Otros scripts de datos (escriben en la base de datos de `.env`): `generate:packs`, `seed:ta:all`, `migrate:status-sources[:dry]` y `decks:random[:dry]`. Este último (`scripts/giveRandomDecks.ts`, admite `--user` y `--faction`) crea para cada usuario un mazo aleatorio jugable (`app/decks/randomDeckBuilder.ts`), le entrega las copias que le falten (`ADMIN_GIFT`) y lo deja activo.
+Otros scripts de datos (escriben en la base de datos de `.env`): `generate:packs` (ver "Sobres"), `seed:ta:all`, `migrate:status-sources[:dry]` y `decks:random[:dry]`. Este último (`scripts/giveRandomDecks.ts`, admite `--user` y `--faction`) crea para cada usuario un mazo aleatorio jugable (`app/decks/randomDeckBuilder.ts`), le entrega las copias que le falten (`ADMIN_GIFT`) y lo deja activo.
 
 ## Esquema y migraciones
 
@@ -68,12 +68,16 @@ src/config          → BD, reglas de mazo y mazo inicial
 
 Las acciones originadas por HTTP (por ejemplo, abandonar) notifican por WS mediante `matchesCoordinator.setNotifier`.
 
+**Jugador vs IA** (`app/matches/ai/`, guía completa en `docs/JUGADOR-VS-IA.md`): el evento WS `request_ai_match` crea una partida directa (`StartMatchService.startDirectMatch`) contra un usuario de sistema con id fijo (`aiBot.ts`, `isAiBot`), con un mazo por facción generado por `randomDeckBuilder` (`aiOpponent.service.ts`). El cliente recibe `match_found` + `match_update` igual que en PvP. `aiTurnRunner` se suscribe a `matchesCoordinator.onMatchStateChanged` y, mientras le toque (turno o `pending_selection` suya), ejecuta la jugada que elige `aiDecision.decideAiMove` por la misma puerta que un jugador (`handleAction` / `SelectionService`), solo entre las `valid_actions` de `ActionResolver`; una jugada rechazada no se repite en el turno. La IA cuenta como "conectada" al reconectar, y `match_resumed` de partidas PvP/IA trae `game_state` para entrar directo al tablero. Pausa entre jugadas: `AI_MOVE_DELAY_MS` (1100 por defecto). **Autojuego**: `npm run ai:selfplay -- --games 20 [--faction X] [--ai-faction Y] [--out informe.json]` juega partidas IA contra IA con cartas reales y lista jugadas rechazadas, errores del motor y partidas atascadas (sirve para encontrar cartas rotas).
+
 **Repeticiones** (`app/replays/`, tablas `match_replays`/`match_replay_frames`, migración 014): cada `match_update` que difunde `MatchesCoordinator._buildMatchUpdateResult` **con una acción** se guarda como fotograma (estado sin perspectiva, sin cartas del mazo ni `valid_actions`, JSON comprimido con gzip). También se graban el inicio (`startFirstTurn` en TEST; en PvP el `match_start`) y el abandono. Al terminar la partida se conservan solo las repeticiones que están entre las últimas 5 de alguno de sus jugadores. `GET /api/matches/:id/replay` (solo participantes, respuesta gzip) devuelve los fotogramas con la visibilidad de quien la pide (`frameForViewer`); `recent_matches` del perfil trae `has_replay`. En el cliente, `MatchSessionService.start_replay` abre GameMatch en modo repetición y `game/match/ReplayControls.gd` aplica los fotogramas como `match_update` normales.
 
 ## Reglas de partida
 
 - **Primer turno**: quien empieza (`matches.first_player`, migración 013) no puede atacar al jugador rival en su turno 1 (BA ni TA directos; atacar caballeros sí). `domain/game/rules/opening-turn.rules.ts`, aplicado en `AttackRulesEngine`/`TechniqueRulesEngine` y en `ActionResolver`. `current_turn` solo sube cuando vuelve a jugar el jugador 1, por eso hace falta `first_player`.
 - **Cosmo del jugador**: entre 0 y `BASE_MATCH_RULES.max_cosmos` (12). Todo lo que lo modifica pasa por `domain/game/rules/cosmos.rules.ts` (`addPlayerCosmos`/`clampPlayerCosmos`); con el cosmo lleno no se ofrece ni se acepta Cargar Cosmo.
+- **Acción del caballero**: BA, TA, Cargar Cosmo, Evasión, Defensa y Mover gastan la única acción del turno del caballero (`domain/game/rules/knight-action.rules.ts`). `CHARGE_COSMOS` exige `knight_id` y da +1 CP; `MOVE_KNIGHT` solo a una casilla adyacente.
+- **Un caballero por turno**: solo se juega un caballero desde la mano por turno (`BASE_MATCH_RULES.turn.knights_per_turn`, `domain/game/rules/knight-play.rules.ts`, validado en `CardRulesEngine.validatePlayCard` y en `ActionResolver`). Una habilidad da más con la acción `grant_extra_knight_play` (`amount`, 1 por defecto). Las invocaciones por habilidad no cuentan. Los contadores se guardan en `matches.turn_counters` (JSONB, migración 015) y se ponen a cero al cambiar de turno, así que los permisos extra caducan.
 - **Pasivas fuera del campo** (mazo/yomotsu, `passive_watchers`): solo reaccionan si la habilidad lo declara con `event_target_is_self` o `self_in_zone` de una zona que no es del campo (`PassiveTriggerEngine`).
 
 ## Habilidades de cartas (reglas no obvias)
@@ -88,7 +92,15 @@ Las acciones originadas por HTTP (por ejemplo, abandonar) notifican por WS media
 - Los bonos de escenario se aplican con `duration: 1` al entrar y en cada `TURN_START` del dueño (el descuento de efectos ocurre antes, así que cubren el turno rival). Un caballero que entra después no los recibe hasta el siguiente turno, salvo que tenga su propia pasiva de entrada con `stage_has_card_code` (ej: Baian con el Pilar del Pacífico Norte).
 - Una selección puede encadenar otra: `request_slot_selection` en el `on_select` pide una posición (zona `field_slot`, el cliente responde `chosen_slot`) y `move_to_slot` mueve/intercambia.
 - Cada habilidad activa se usa **una vez por turno y caballero** (marker `ability_used`, que `KnightRulesEngine` añade y `ActionResolver` respeta). Toda `pending_selection` debe llevar `visible_card_ids` (o `visible_slots`): el cliente solo muestra esas opciones.
+- Los objetos se juegan **equipándolos a un caballero propio** (`domain/game/rules/equipment.rules.ts`): `valid_actions.equip_targets` lista los caballeros que cumplen el filtro de la selección de campo propio del objeto, el cliente envía el elegido como `equip_target_id` en `PLAY_CARD` y `CardRulesEngine.resolveEquipTarget` lo valida y elige la posición de la fila de técnicas (la columna del caballero o la primera libre; la `position` del cliente no cuenta). Esa selección del efecto de entrada se resuelve sola con el caballero equipado, y al salir del campo sus objetos van al yomotsu (`releaseEquipment`).
 - Cada tipo de carta tiene su zona (`PLAY_ZONE_BY_TYPE` en `domain/game/CardTypes.ts`): el escenario va a `field_scenario` (`state.scenario`, con `player_number` del dueño) y `valid_actions.play_zone` le dice al cliente a dónde va cada carta de la mano.
+
+## Sobres
+
+- Rarezas (6): `common, uncommon, rare, epic, legendary, divine` (migración 016 añadió `uncommon`).
+- Los sobres se definen en `src/config/packs.config.ts` y `npm run generate:packs[:dry]` los sincroniza por `code`: retira los que no estén, devolviendo su precio a quien los tenga sin abrir (`PACK_REFUND`). El contenido de cada sobre son las cartas de sus `collections` (`cards.collection_id`, que es la saga del JSON). Si `coming_soon` está activo, el sobre se ve en la tienda pero no se puede comprar.
+- Motor puro en `src/domain/packs/`: 5 cartas por sobre y una rareza sorteada por carta (`PackConfig.rarityProbabilities`, calibradas por sobre con 1 − (1 − p)^(1/5)). **Garantía**: `user_pack_pity` cuenta, por jugador y sobre, los sobres seguidos sin épica o superior. Si uno trae una, la cuenta vuelve a 0. Al llegar a `pity_threshold` (10) sin ninguna, una carta al azar se reemplaza por una épica real del sobre. Una rareza sin cartas en el sobre sale como la más cercana por debajo. La apertura (`app/packs/pack.service.openPackForUser`) es una sola transacción y guarda la semilla y el `opening_id` en `user_card_transactions`.
+- `GET /api/packs/available` es pública, pero con token añade `progress` (`packs_until_guarantee`) a cada sobre; `/packs/progress` devuelve lo mismo. `/packs/open` devuelve además `guarantee`, `progress` y `from_guarantee` por carta.
 
 ## Otros
 

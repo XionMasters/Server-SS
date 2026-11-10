@@ -51,7 +51,7 @@ Card.init(
       allowNull: false,
     },
     rarity: {
-      type: DataTypes.ENUM('common', 'rare', 'epic', 'legendary', 'divine'),
+      type: DataTypes.ENUM('common', 'uncommon', 'rare', 'epic', 'legendary', 'divine'),
       allowNull: false,
     },
     cost: {

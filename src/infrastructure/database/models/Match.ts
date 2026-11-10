@@ -25,6 +25,8 @@ interface MatchAttributes {
   rng_seed: number;
   /** Selección interactiva pendiente (JSONB). null si no hay ninguna. */
   pending_selection?: any;
+  /** Contadores por turno de cada jugador (JSONB, ver domain/game/rules/knight-play.rules.ts). */
+  turn_counters?: any;
   started_at?: Date;
   finished_at?: Date;
   created_at?: Date;
@@ -54,6 +56,7 @@ class Match extends Model<MatchAttributes, MatchCreationAttributes> implements M
   public player2_deck_index?: number;
   public rng_seed!: number;
   public pending_selection?: any;
+  public turn_counters?: any;
   public started_at?: Date;
   public finished_at?: Date;
   public readonly created_at!: Date;
@@ -169,6 +172,11 @@ Match.init(
       type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: null
+    },
+    turn_counters: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: {}
     },
     rng_seed: {
       type: DataTypes.BIGINT,

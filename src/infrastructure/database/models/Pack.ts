@@ -11,6 +11,12 @@ class Pack extends Model {
   public guaranteed_rarity!: string | null;
   public is_active!: boolean;
   public image_url!: string | null;
+  /** Sobres v2 (migración 016) */
+  public code!: string | null;
+  public collections!: string[];
+  public coming_soon!: boolean;
+  public pity_threshold!: number;
+  public sort_order!: number;
   public created_at!: Date;
   public updated_at!: Date;
 }
@@ -57,6 +63,33 @@ Pack.init(
     image_url: {
       type: DataTypes.STRING(255),
       allowNull: true,
+    },
+    code: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      unique: true,
+    },
+    // cards.collection_id cuyas cartas pueden salir en el sobre
+    collections: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      allowNull: false,
+      defaultValue: [],
+    },
+    coming_soon: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    pity_threshold: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 10,
+      validate: { min: 1 },
+    },
+    sort_order: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
   },
   {

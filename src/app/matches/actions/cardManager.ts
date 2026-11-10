@@ -157,6 +157,7 @@ export class CardManager {
     targetZone: string,    // zona en notacion cliente
     position: number,
     actionId: string,
+    equipTargetId?: string, // instance_id del caballero propio al que se equipa un objeto (opcional)
   ): Promise<{
     success: boolean;
     newState: GameState | null;
@@ -179,6 +180,19 @@ export class CardManager {
         // Cargar definicion (cache)
         const { bdStats, abilities } = await getCardDef((cardInPlay as any).card_id, tx);
 
+        // ── Objetos: se equipan a un caballero propio (rules/equipment.rules.ts) ──
+        // El caballero debe cumplir el filtro del objeto, y el objeto queda en la columna
+        // de ese caballero (o la primera libre) de la fila de técnicas/objetos: la posición
+        // que mande el cliente no cuenta. Para el resto de cartas equip_target_id se ignora.
+        let playPosition = position;
+        let equipKnightId: string | undefined;
+        if (bdStats.card_type === 'object') {
+          const equip = CardRulesEngine.resolveEquipTarget(state, playerNumber, cardId, equipTargetId, abilities);
+          if (!equip.valid) throw new Error(equip.error);
+          playPosition = equip.supportPosition;
+          equipKnightId = equip.knightId;
+        }
+
         // ── Leer conteo de zona con lock (evita race condition) ────────────
         // Para field_scenario: no filtramos por player_number (el escenario es compartido).
         const scenarioZone = dbZone === 'field_scenario';
@@ -197,7 +211,7 @@ export class CardManager {
         // Si ya existe un escenario, verificar si puede ser reemplazado.
         // Si puede, moverlo al yomotsu antes de validar la nueva jugada.
         let effectiveCount = zoneCards.length;
-        let effectivePositionOccupied = zoneCards.some((c: any) => c.position === position);
+        let effectivePositionOccupied = zoneCards.some((c: any) => c.position === playPosition);
 
         if (scenarioZone && zoneCards.length > 0) {
           const existing = zoneCards[0] as any;
@@ -221,23 +235,23 @@ export class CardManager {
 
         // Validar con el motor puro.
         const v = CardRulesEngine.validatePlayCard(
-          state, playerNumber, cardId, dbZone, position,
+          state, playerNumber, cardId, dbZone, playPosition,
           bdStats.cost, zoneCurrentCount, positionOccupied, bdStats.card_type,
         );
         if (!v.valid) throw new Error(v.error ?? 'Validacion fallida');
 
         // Calcular nuevo estado de cosmos.
         const { newState } = CardRulesEngine.executePlayCard(
-          state, playerNumber, cardId, dbZone, position, bdStats,
+          state, playerNumber, cardId, dbZone, playPosition, bdStats,
         );
-        if (equipTargetId) {
+        if (equipKnightId) {
           const owner = playerNumber === 1 ? newState.player1 : newState.player2;
-          const knight = owner.field_knights.find(k => k.instance_id === equipTargetId);
+          const knight = owner.field_knights.find(k => k.instance_id === equipKnightId);
           if (knight) attachEquipment(knight, cardId);
         }
 
         // Mueve zona+posicion en BD; stats los persiste applyState step 4.
-        await (cardInPlay as any).update({ zone: dbZone, position }, { transaction: tx });
+        await (cardInPlay as any).update({ zone: dbZone, position: playPosition }, { transaction: tx });
 
         // Emitir CARD_PLAYED: dispara las pasivas de entrada de la propia carta
         // (con raw_abilities cargadas por attachCardDefinitions), el efecto de
@@ -247,7 +261,7 @@ export class CardManager {
           type: GameEventType.CARD_PLAYED,
           playerNumber,
           sourceCardId: cardId,
-          payload: { zone: dbZone, position, ...(equipTargetId ? { equip_target_id: equipTargetId } : {}) },
+          payload: { zone: dbZone, position: playPosition, ...(equipKnightId ? { equip_target_id: equipKnightId } : {}) },
         }));
         return { newState: ctx.state, events: [...ctx.bus.events] };
       },

@@ -21,6 +21,7 @@ import { AbilityEngine } from './abilities/AbilityEngine';
 import type { AbilityDefinition } from './abilities/AbilityDefinition';
 import type { GameEvent } from './events/GameEvents';
 import { isAbilityUsedThisTurn, markAbilityUsed } from './StatusEffects';
+import { hasKnightActed, markKnightActed, KNIGHT_ALREADY_ACTED_ERROR } from './rules/knight-action.rules';
 
 // Las habilidades activas ahora viven como AbilityDefinition en card_abilities.effects (JSONB).
 // Ver AbilityEngine para la lógica de ejecución. No hay handlers por carta aquí.
@@ -75,9 +76,14 @@ export class KnightRulesEngine {
   // CHARGE_COSMOS
   // ══════════════════════════════════════════════════════════════════════════
 
+  /**
+   * Cargar Cosmo es la acción de un caballero (rules/knight-action.rules.ts): con `knightId`
+   * se exige que esté en el campo del jugador y que no haya actuado este turno.
+   */
   static validateChargeKnightCosmos(
     state: GameState,
     playerNumber: 1 | 2,
+    knightId?: string,
   ): ValidationResult {
     const turn = this.validateTurn(state, playerNumber);
     if (!turn.valid) return turn;
@@ -85,21 +91,36 @@ export class KnightRulesEngine {
     if (isPlayerCosmosFull(player.cosmos)) {
       return { valid: false, error: `Tu cosmo ya está al máximo (${MAX_PLAYER_COSMOS})` };
     }
+    if (knightId !== undefined) {
+      const knight = player.field_knights.find(k => k.instance_id === knightId);
+      if (!knight) return { valid: false, error: 'Caballero no encontrado en tu campo' };
+      if (hasKnightActed(knight)) return { valid: false, error: KNIGHT_ALREADY_ACTED_ERROR };
+    }
     return { valid: true };
   }
 
   /**
    * Otorga cosmos_per_charge al jugador (según BASE_MATCH_RULES), sin pasar del máximo.
-   * Acción: Cargar Cosmo (Carregar Cosmo).
+   * Acción: Cargar Cosmo (Carregar Cosmo). Con `knightId`, ese caballero gasta su acción del turno.
    */
   static chargeKnightCosmos(
     state: GameState,
     playerNumber: 1 | 2,
+    knightId?: string,
   ): { newState: GameState; cosmosGained: number } {
     const newState = cloneState(state);
     const player = playerNumber === 1 ? newState.player1 : newState.player2;
 
     const cosmosGained = addPlayerCosmos(player, this.simulateChargeKnightCosmos(state));
+
+    if (knightId !== undefined) {
+      const index = player.field_knights.findIndex(k => k.instance_id === knightId);
+      if (index !== -1) {
+        const knight = { ...player.field_knights[index] };
+        markKnightActed(knight);
+        player.field_knights[index] = knight;
+      }
+    }
 
     newState.updated_at = Date.now();
     return { newState, cosmosGained };

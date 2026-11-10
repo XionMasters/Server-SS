@@ -68,7 +68,8 @@ export class MatchCoordinator {
     cardId: string,
     zone: string,
     position: number,
-    actionId: string
+    actionId: string,
+    equipTargetId?: string,
   ) {
     const match = await Match.findByPk(matchId);
     if (!match) {
@@ -84,7 +85,7 @@ export class MatchCoordinator {
       return { success: false, error: 'Match no está activo' };
     }
 
-    return await CardManager.playCard(match, playerNumber, cardId, zone, position, actionId);
+    return await CardManager.playCard(match, playerNumber, cardId, zone, position, actionId, equipTargetId);
   }
 
   /**
@@ -144,13 +145,14 @@ export class MatchCoordinator {
   }
 
   /**
-   * Cargar Cosmo: otorga cosmos_per_charge CP al jugador activo.
+   * Cargar Cosmo: otorga cosmos_per_charge CP al jugador activo y gasta la acción del caballero.
    * DELEGA: KnightManager
    */
   static async chargeKnightCosmos(
     matchId: string,
     userId: string,
-    actionId: string
+    actionId: string,
+    knightId: string,
   ) {
     const match = await Match.findByPk(matchId);
     if (!match) return { success: false, error: 'Match no encontrado' };
@@ -160,7 +162,7 @@ export class MatchCoordinator {
 
     if (match.phase === 'finished') return { success: false, error: 'Match no está activo' };
 
-    return await KnightManager.chargeKnightCosmos(match, playerNumber, actionId);
+    return await KnightManager.chargeKnightCosmos(match, playerNumber, actionId, knightId);
   }
 
   /**

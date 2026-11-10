@@ -276,19 +276,20 @@ describe('Manager zone regressions', () => {
       match as any,
       1,
       'knight-1',
-      2,
+      1,
       '33333333-3333-4333-8333-333333333333',
     );
 
     expect(result.success).toBe(true);
     expect(result.oldPosition).toBe(0);
-    expect(result.newPosition).toBe(2);
+    expect(result.newPosition).toBe(1);
+    // Mover es la acción del caballero: queda marcado como que ya actuó
     expect(mockedApplyState).toHaveBeenCalledWith(
       match,
       expect.objectContaining({
         player1: expect.objectContaining({
           field_knights: expect.arrayContaining([
-            expect.objectContaining({ instance_id: 'knight-1', position: 2 }),
+            expect.objectContaining({ instance_id: 'knight-1', position: 1, attacked_this_turn: true }),
           ]),
         }),
       }),

@@ -23,6 +23,8 @@ import { isPlayerCosmosFull } from '../../../domain/game/rules/cosmos.rules';
 import { GameEventType, type GameEvent } from '../../../domain/game/events/GameEvents';
 import { ZoneMapper } from '../../../domain/game/ZoneMapper';
 import { normalizeCardType, playZoneForType } from '../../../domain/game/CardTypes';
+import { equipEligibleKnights } from '../../../domain/game/rules/equipment.rules';
+import { canPlayKnightThisTurn, readKnightPlayCounters } from '../../../domain/game/rules/knight-play.rules';
 // ─────────────────────────────────────────────────────────────────────────────
 // TIPOS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,6 +81,11 @@ export interface HandCardValidActions {
   play_slots: number[];
   /** Zona (notación cliente) a la que va la carta: field_knight, field_technique, field_scenario… */
   play_zone?: string;
+  /**
+   * Solo objetos: instance_ids de los caballeros propios a los que se puede equipar
+   * (rules/equipment.rules.ts). El cliente envía el elegido como equip_target_id en PLAY_CARD.
+   */
+  equip_targets?: string[];
 }
 
 export type ValidActions = KnightValidActions | HandCardValidActions | null;
@@ -380,8 +387,29 @@ export class ActionResolver {
     if (cardType === 'knight' && this._uniqueBlocked(card, cardsInPlay, playerNumber)) {
       return { can_play: false, play_slots: [] };
     }
+    // Un caballero por turno, salvo permisos extra de habilidades (rules/knight-play.rules.ts)
+    if (cardType === 'knight'
+      && !canPlayKnightThisTurn(readKnightPlayCounters(matchState.turn_counters, playerNumber as 1 | 2))) {
+      return { can_play: false, play_slots: [] };
+    }
     const playSlots = this._getPlaySlots(cardType, playerNumber, cardsInPlay);
     const playZone = playZoneForType(cardType);
+
+    // Objetos: se juegan equipándolos a un caballero propio que cumpla su filtro
+    if (cardType === 'object') {
+      const payload = this._getCardPayload(card);
+      const ownKnights = cardsInPlay
+        .filter(c => c.player_number === playerNumber && c.zone === 'field_knight')
+        .map(c => ({ ...this._toCardRef(c), card_type: normalizeCardType(this._getCardPayload(c)?.type) }));
+      const equipTargets = equipEligibleKnights(payload?.abilities ?? card.card?.card_abilities ?? [], ownKnights)
+        .map(k => k.instance_id);
+      return {
+        can_play: playSlots.length > 0 && equipTargets.length > 0,
+        play_slots: playSlots,
+        ...(playZone ? { play_zone: ZoneMapper.toClient(playZone) } : {}),
+        equip_targets: equipTargets,
+      };
+    }
 
     return {
       can_play: playSlots.length > 0,
@@ -429,8 +457,8 @@ export class ActionResolver {
 
       case 'object': {
         // Objetos/equipamiento: comparten los 5 slots de la fila de técnicas.
-        // Son permanentes; se asocian al caballero en el mismo slot (misma posición).
-        // Si el caballero muere, el objeto pasa al yomotsu (TODO: implementar en KnightManager).
+        // Son permanentes y se equipan a un caballero propio (equip_targets en _handCardActions);
+        // si el caballero sale del campo, el objeto va al yomotsu (releaseEquipment).
         const occupied = this._occupiedSupportPositions(cardsInPlay, playerNumber);
         return [0, 1, 2, 3, 4].filter(i => !occupied.has(i));
       }

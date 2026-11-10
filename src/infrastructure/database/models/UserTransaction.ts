@@ -13,6 +13,7 @@ export type TransactionReason =
   | 'QUEST_REWARD'
   | 'ADMIN_GIFT'
   | 'EVENT_REWARD'
+  | 'PACK_REFUND'
   // Gastos
   | 'PACK_PURCHASE'
   | 'CARD_PURCHASE'
@@ -65,7 +66,8 @@ UserTransaction.init(
       type: DataTypes.ENUM(
         'REGISTRATION_BONUS', 'DAILY_LOGIN', 'MATCH_WIN', 'MATCH_PARTICIPATION',
         'ACHIEVEMENT', 'QUEST_REWARD', 'ADMIN_GIFT', 'EVENT_REWARD',
-        'PACK_PURCHASE', 'CARD_PURCHASE', 'UPGRADE_COST', 'TOURNAMENT_FEE', 'PREMIUM_FEATURE'
+        'PACK_PURCHASE', 'CARD_PURCHASE', 'UPGRADE_COST', 'TOURNAMENT_FEE', 'PREMIUM_FEATURE',
+        'PACK_REFUND'
       ),
       allowNull: false,
     },

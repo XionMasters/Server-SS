@@ -35,11 +35,14 @@ const recoverMatchOnConnect = new RecoverMatchOnConnectUseCase(
 );
 
 type MatchNotifier = (userIds: string[], event: string, payload: any) => void;
+/** Se llama cada vez que se construye un match_update (tras una acción, el inicio, una selección…). */
+export type MatchStateListener = (matchId: string, state: { player1Id?: string; player2Id?: string; phase?: string }) => void;
 
 const MAX_CLAIM_ATTEMPTS = 3;
 
 export class MatchesCoordinator {
   private notifier: MatchNotifier | null = null;
+  private stateListeners: MatchStateListener[] = [];
 
   /**
    * Permite a la capa de transporte (WebSocket) recibir notificaciones
@@ -47,6 +50,30 @@ export class MatchesCoordinator {
    */
   setNotifier(notifier: MatchNotifier) {
     this.notifier = notifier;
+  }
+
+  /** Suscribe a los cambios de estado de las partidas (lo usa la IA para saber cuándo le toca). */
+  onMatchStateChanged(listener: MatchStateListener) {
+    this.stateListeners.push(listener);
+  }
+
+  /** Entrega eventos ya construidos ({ type, payload, recipients: users }) a sus destinatarios. */
+  publishEvents(events: any[]) {
+    if (!this.notifier) return;
+    for (const evt of events ?? []) {
+      const userIds: string[] = evt?.recipients?.userIds ?? [];
+      if (evt?.type && userIds.length > 0) this.notifier(userIds, evt.type, evt.payload);
+    }
+  }
+
+  private _emitStateChanged(matchId: string, state: { player1Id?: string; player2Id?: string; phase?: string }) {
+    for (const listener of this.stateListeners) {
+      try {
+        listener(matchId, state);
+      } catch (error: any) {
+        console.error('[MatchesCoordinator] Error en listener de estado:', error?.message ?? error);
+      }
+    }
   }
 
   /**
@@ -158,6 +185,8 @@ export class MatchesCoordinator {
       await ReplayService.recordFrame(matchId, matchData, lastAction, engineEvents);
     }
 
+    this._emitStateChanged(matchId, { player1Id, player2Id, phase: matchData.phase });
+
     if (isTestMatch) {
       // En TEST: el jugador activo ve su mano; el inactivo ve dorsos
       const activePlayer: number = matchData.current_player || 1;
@@ -240,12 +269,17 @@ export class MatchesCoordinator {
         }
 
         const cardId = action.cardId || action.card_id;
-        const result = await MatchCoordinator.playCard(matchId, userId, cardId, action.zone, action.position, actionId);
+        // Objetos: caballero propio al que se equipa (opcional; ver domain/game/rules/equipment.rules.ts)
+        const equipTargetId = action.equip_target_id || action.equipTargetId || undefined;
+        const result = await MatchCoordinator.playCard(
+          matchId, userId, cardId, action.zone, action.position, actionId, equipTargetId,
+        );
         return this._buildMatchUpdateResult(result, matchId, userId, {
           type: 'play_card',
           card_id: cardId,
           zone: action.zone,
           position: action.position,
+          ...(equipTargetId ? { equip_target_id: equipTargetId } : {}),
         });
       }
 
@@ -322,8 +356,13 @@ export class MatchesCoordinator {
           return { success: false, code: 'ACTION_ID_REQUIRED', error: 'actionId es requerido' };
         }
 
-        const result = await MatchCoordinator.chargeKnightCosmos(matchId, userId, actionId);
-        return this._buildMatchUpdateResult(result, matchId, userId, { type: 'charge_cosmos' });
+        // Cargar Cosmo es la acción de un caballero: hace falta saber cuál carga
+        const knightId = action.knight_id || action.knightId || action.card_id || action.cardId;
+        if (!knightId) {
+          return { success: false, code: 'KNIGHT_ID_REQUIRED', error: 'knight_id es requerido' };
+        }
+        const result = await MatchCoordinator.chargeKnightCosmos(matchId, userId, actionId, knightId);
+        return this._buildMatchUpdateResult(result, matchId, userId, { type: 'charge_cosmos', knight_id: knightId });
       }
 
       case 'SACRIFICE_KNIGHT': {

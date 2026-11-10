@@ -1,94 +1,49 @@
 // src/scripts/generatePacks.ts
+// Sincroniza los sobres de la BD con src/config/packs.config.ts (ver app/packs/packCatalog.service.ts).
+//   npm run generate:packs        → aplica los cambios
+//   npm run generate:packs:dry    → muestra qué haría, sin escribir nada
 import { sequelize } from '../config/database';
-import Pack from '../infrastructure/database/models/Pack';
+import '../infrastructure/database/models/associations';
+import { PACK_DEFINITIONS } from '../config/packs.config';
+import { syncPackCatalog } from '../app/packs/packCatalog.service';
 
 const generatePacks = async () => {
+  const dryRun = process.argv.includes('--dry-run');
   try {
-    console.log('🎁 Generando packs de cartas...');
+    await sequelize.authenticate();
+    const packColumns = await sequelize.getQueryInterface().describeTable('packs');
+    if (!packColumns['code']) {
+      console.error('❌ Falta la migración 016 (src/migrations/sql/016_packs_v2_and_uncommon.sql).');
+      console.error('   Arranca el servidor con NODE_ENV=development (la aplica sola) o ejecuta ese SQL a mano.');
+      process.exit(1);
+    }
+    console.log(dryRun ? '🎁 Sobres (DRY-RUN: no se escribe nada)\n' : '🎁 Sincronizando sobres...\n');
 
-    const packsData = [
-      {
-        name: 'Sobre de Bronce',
-        description: 'Contiene 5 cartas con énfasis en cartas comunes y raras. Perfecto para comenzar tu colección.',
-        price: 100,
-        cards_per_pack: 5,
-        guaranteed_rarity: 'rare',
-        is_active: true,
-        image_url: null
-      },
-      {
-        name: 'Sobre de Plata',
-        description: 'Contiene 7 cartas con mayor probabilidad de cartas épicas. ¡Una inversión inteligente!',
-        price: 200,
-        cards_per_pack: 7,
-        guaranteed_rarity: 'epic',
-        is_active: true,
-        image_url: null
-      },
-      {
-        name: 'Sobre de Oro',
-        description: 'El sobre premium con 10 cartas y garantía de al menos 1 carta legendaria. ¡Para verdaderos coleccionistas!',
-        price: 400,
-        cards_per_pack: 10,
-        guaranteed_rarity: 'legendary',
-        is_active: true,
-        image_url: null
-      },
-      {
-        name: 'Sobre Básico',
-        description: 'Un sobre económico con 3 cartas aleatorias. Ideal para probar suerte sin gastar mucho.',
-        price: 50,
-        cards_per_pack: 3,
-        guaranteed_rarity: null,
-        is_active: true,
-        image_url: null
-      },
-      {
-        name: 'Mega Pack',
-        description: 'El pack definitivo con 15 cartas, garantizando al menos 1 legendaria y 2 épicas. ¡Solo para los más valientes!',
-        price: 750,
-        cards_per_pack: 15,
-        guaranteed_rarity: 'legendary',
-        is_active: true,
-        image_url: null
-      }
-    ];
+    const report = await syncPackCatalog(PACK_DEFINITIONS, { dryRun });
 
-    let createdCount = 0;
+    for (const removed of report.removed) console.log(`🗑️  Retirado: ${removed.name}${removed.code ? ` (${removed.code})` : ''}`);
+    const refunded = report.refunds.reduce((sum, r) => sum + r.amount, 0);
+    if (report.refunds.length > 0) {
+      console.log(`💰 Devoluciones: ${report.refunds.length} (${refunded} monedas en total)`);
+      for (const r of report.refunds) console.log(`     ${r.user_id}: ${r.quantity}x ${r.pack_name} → +${r.amount}`);
+    }
+    for (const code of report.created) console.log(`✅ Creado: ${code}`);
+    for (const code of report.updated) console.log(`♻️  Actualizado: ${code}`);
 
-    for (const packData of packsData) {
-      try {
-        // Verificar si el pack ya existe
-        const existingPack = await Pack.findOne({
-          where: { name: packData.name }
-        });
-
-        if (existingPack) {
-          console.log(`⚠️  Pack ya existe: ${packData.name}`);
-          continue;
-        }
-
-        // Crear pack
-        await Pack.create(packData);
-        createdCount++;
-        console.log(`✅ Pack creado: ${packData.name} - ${packData.price} monedas`);
-
-      } catch (error) {
-        console.error(`❌ Error creando pack ${packData.name}:`, error);
+    console.log('\n📊 Cartas por rareza en cada sobre:');
+    for (const pool of report.pools) {
+      const counts = Object.entries(pool.counts).map(([r, n]) => `${r} ${n}`).join(' · ');
+      console.log(`   ${pool.code}: ${counts}`);
+      if (pool.missing.length > 0) {
+        console.log(`     ⚠️  Sin cartas de: ${pool.missing.join(', ')} (salen como la rareza más cercana por debajo)`);
       }
     }
+    if (dryRun) console.log('\n(DRY-RUN: no se aplicó ningún cambio)');
 
-    console.log(`🎉 ¡${createdCount} packs creados exitosamente!`);
-    console.log('📊 Resumen de packs disponibles:');
-    console.log('   🥉 Sobre Básico: 50 monedas (3 cartas)');
-    console.log('   🥈 Sobre de Bronce: 100 monedas (5 cartas, 1 rara garantizada)');
-    console.log('   🥇 Sobre de Plata: 200 monedas (7 cartas, 1 épica garantizada)');
-    console.log('   💎 Sobre de Oro: 400 monedas (10 cartas, 1 legendaria garantizada)');
-    console.log('   🌟 Mega Pack: 750 monedas (15 cartas, 1 legendaria garantizada)');
-
+    await sequelize.close();
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error generando packs:', error);
+    console.error('❌ Error sincronizando sobres:', error);
     process.exit(1);
   }
 };

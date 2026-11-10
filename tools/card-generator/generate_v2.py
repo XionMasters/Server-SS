@@ -7,7 +7,8 @@ banda, elemento en la ranura y habilidades con separadores y coste.
 Las técnicas muestran GOL/CP/CE en las gemas; el resto de tipos no lleva gemas,
 muestra su tipo en la banda y toma el metal del marco de su rareza.
 El marco es frame-{tipo}-{metal}.png (color de paneles por tipo, ver make_frames.py);
-si no existe se usa frame-{metal}.png.
+si no existe se usa frame-{metal}.png. Algunos caballeros usan un marco propio de su facción
+(SAGA_RANK_FRAME: soldados y generales de Poseidón) con su layout-{nombre}.json.
 
 Salida por defecto: src/assets/cards/{code}.webp (servido en /assets/cards/).
 El arte se toma de art/{code}.* (generate_art.py lo genera con IA).
@@ -53,6 +54,15 @@ RANK_METAL = {
     "Mariner":        "bronze",
     "Marine General": "gold",
     "God":            "gold",
+}
+
+# Marcos propios de facción para caballeros: (saga, rango) → frame-{nombre}.png con su
+# layout-{nombre}.json (se recortan con make_frames.py --key-only). Tienen prioridad
+# sobre RANK_METAL; "frame_metal" en la carta o --metal los siguen pudiendo forzar.
+SAGA_RANK_FRAME = {
+    ("Poseidon", "Mariner"):        "mariner",    # soldados: frames/Poseidon_base.png (plata, sobrio)
+    ("Poseidon", "Marine General"): "poseidon",   # generales: frames/Poseidon.png (oro, tridentes)
+    ("Poseidon", "God"):            "poseidon",
 }
 
 RANK_LABEL_ES = {
@@ -118,10 +128,15 @@ def frame_path(card_type: str, metal: str) -> Path:
     return typed if typed.exists() else V2_DIR / f"frame-{metal}.png"
 
 
-def load_layout(card_type: str) -> dict:
-    """layout-{tipo}.json si el tipo tiene marco propio; si no, el layout.json común."""
-    typed = V2_DIR / f"layout-{card_type}.json"
-    with open(typed if typed.exists() else V2_DIR / "layout.json", encoding="utf-8") as f:
+def load_layout(card_type: str, frame: Path | None = None) -> dict:
+    """Geometría del marco: layout propio del marco (frame-poseidon.png → layout-poseidon.json),
+    si no, layout-{tipo}.json si el tipo tiene marco propio, y si no, el layout.json común."""
+    candidates = []
+    if frame is not None:
+        candidates.append(V2_DIR / f"layout-{frame.stem.removeprefix('frame-')}.json")
+    candidates += [V2_DIR / f"layout-{card_type}.json", V2_DIR / "layout.json"]
+    path = next(p for p in candidates if p.exists())
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -264,6 +279,23 @@ def draw_abilities(draw: ImageDraw.ImageDraw, abilities: list[dict], cfg: dict):
             y += cfg["gap"]
 
 
+def draw_flavor(draw: ImageDraw.ImageDraw, text: str, cfg: dict):
+    """Cartas sin habilidades (soldados rasos): su descripción como cita centrada."""
+    text = f"«{text.strip()}»"
+    size = cfg["font_size_desc"] + 2
+    while True:
+        font = get_font(size)
+        lines = wrap(text, font, int(cfg["w"] * 0.85))
+        total = len(lines) * (size + cfg["line_spacing"])
+        if total <= cfg["h"] or size <= cfg["min_font_size_desc"]:
+            break
+        size -= 1
+    y = cfg["y"] + (cfg["h"] - total) / 2
+    for line in lines:
+        draw.text((cfg["x"] + cfg["w"] / 2, y), line, font=font, fill=tuple(cfg["desc_color"]), anchor="ma")
+        y += size + cfg["line_spacing"]
+
+
 def tint_icon(path: Path, color) -> Image.Image:
     """Retinta un icono según su luminancia: sombras oscuras, brillos casi blancos."""
     icon = Image.open(path).convert("RGBA")
@@ -306,14 +338,18 @@ def card_gems(card: dict, layout_stats: dict) -> list[tuple[dict, str, object]]:
 
 
 def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out_dir: Path) -> Path:
-    L = load_layout(card.get("_type", "knight"))
     code = card["code"]
     rank = card.get("_rank", "")
     is_knight = card.get("_type", "knight") == "knight"
-    default_metal = RANK_METAL.get(rank, "gold") if is_knight else RARITY_METAL.get(card.get("rarity", ""), "bronze")
+    if is_knight:
+        default_metal = SAGA_RANK_FRAME.get((card.get("_saga", ""), rank)) or RANK_METAL.get(rank, "gold")
+    else:
+        default_metal = RARITY_METAL.get(card.get("rarity", ""), "bronze")
     metal = metal or card.get("frame_metal") or default_metal
 
-    frame = Image.open(frame_path(card.get("_type", "knight"), metal)).convert("RGBA")
+    f_path = frame_path(card.get("_type", "knight"), metal)
+    L = load_layout(card.get("_type", "knight"), f_path)
+    frame = Image.open(f_path).convert("RGBA")
     canvas = Image.new("RGBA", frame.size, (0, 0, 0, 0))
 
     # Arte (detrás del marco)
@@ -392,7 +428,10 @@ def compose_card_v2(card: dict, metal: str | None, art_override: str | None, out
 
     # Habilidades
     draw = ImageDraw.Draw(canvas)
-    draw_abilities(draw, card.get("abilities", []), L["abilities"])
+    if card.get("abilities"):
+        draw_abilities(draw, card["abilities"], L["abilities"])
+    elif card.get("description"):
+        draw_flavor(draw, card["description"], L["abilities"])
 
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{code}.webp"
@@ -406,7 +445,8 @@ def main():
     parser.add_argument("code", nargs="?")
     parser.add_argument("--json", default=None, help="Limitar a un JSON (por defecto: todo database/)")
     parser.add_argument("--art", default=None)
-    parser.add_argument("--metal", default=None, choices=["gold", "bronze", "silver", "black"])
+    parser.add_argument("--metal", default=None,
+                        choices=["gold", "bronze", "silver", "black", *sorted(set(SAGA_RANK_FRAME.values()))])
     # Por defecto se escribe donde el servidor sirve las cartas: /assets/cards/{code}.webp
     parser.add_argument("--out", default=str(SERVER_CARDS_DIR))
     parser.add_argument("--all", action="store_true")
