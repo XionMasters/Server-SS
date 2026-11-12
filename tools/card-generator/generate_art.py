@@ -2,9 +2,10 @@
 generate_art.py  —  Arte de cartas con IA para generate_v2.py
 =============================================================
 Recorre las cartas de database/**/*.json y, para cada una sin arte en art/,
-genera una ilustración y la guarda como art/{code}.jpg (Pollinations) o
-art/{code}.png (Stable Diffusion). generate_v2.py la encuentra después por el
-code de la carta.
+genera una ilustración y la guarda como {code}.jpg (Pollinations) o {code}.png
+(Stable Diffusion) en la carpeta que espeja su JSON, en minúsculas:
+database/Poseidon/Knight/marines.json → art/poseidon/knight/marines/{code}.jpg.
+generate_v2.py la encuentra después por el code de la carta.
 
 Backends:
     pollinations  (por defecto) servicio web gratuito, sin configuración.
@@ -45,7 +46,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from generate import ART_DIR, DATABASE_DIR, find_art
+from generate import ART_DIR, DATABASE_DIR, art_dir_for, find_art
 
 API_URL = "https://image.pollinations.ai/prompt/"
 # Proporción vertical: el recorte de generate_v2 centra en art_focus (por defecto, tercio superior)
@@ -124,6 +125,7 @@ def iter_cards(json_path: str | None):
                 card["_type"] = data.get("type", "")
                 card["_rank"] = data.get("rank", "")
                 card["_saga"] = data.get("saga", "")
+                card["_source_file"] = str(path)   # art_dir_for: carpeta de arte según el JSON
                 yield card
 
 
@@ -219,12 +221,16 @@ def generate_for(card: dict, force: bool, dry_run: bool, backend: str) -> bool:
     print(f"• {code} …", flush=True)
     start = time.time()
     data, ext = (fetch_sd(prompt, negative, seed), "png") if backend == "sd" else (fetch(prompt, seed), "jpg")
-    ART_DIR.mkdir(parents=True, exist_ok=True)
-    # find_art prioriza .jpg: se borra el arte anterior en otro formato para que no tape al nuevo
-    for old in ART_DIR.glob(f"{code}.*"):
-        old.unlink()
-    (ART_DIR / f"{code}.{ext}").write_bytes(data)
-    print(f"  ✓ art/{code}.{ext} ({len(data) // 1024} KB, {time.time() - start:.0f} s)", flush=True)
+    target_dir = art_dir_for(card)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    # find_art prioriza .jpg y la carpeta de la carta: se borra el arte anterior (en cualquier
+    # formato, también el antiguo suelto en la raíz de art/) para que no tape al nuevo
+    for folder in {target_dir, ART_DIR}:
+        for old in folder.glob(f"{code}.*"):
+            old.unlink()
+    target = target_dir / f"{code}.{ext}"
+    target.write_bytes(data)
+    print(f"  ✓ {target.relative_to(ART_DIR.parent).as_posix()} ({len(data) // 1024} KB, {time.time() - start:.0f} s)", flush=True)
     return True
 
 

@@ -166,7 +166,8 @@ async function loadPackPool(pack: any, transaction: Transaction) {
   const collections: string[] = Array.isArray(pack.collections) ? pack.collections : [];
   if (collections.length === 0) throw new PackRequestError('Este sobre no tiene cartas configuradas', 409);
   const candidates = await Card.findAll({
-    where: { collection_id: { [Op.in]: collections } },
+    // max_copies > 0: las cartas no coleccionables (transformaciones como Virgo Shun) no salen en sobres
+    where: { collection_id: { [Op.in]: collections }, max_copies: { [Op.gt]: 0 } },
     attributes: ['id', 'rarity'],
     transaction,
   });

@@ -77,7 +77,7 @@ RANK_LABEL_ES = {
 
 # Cartas que no son caballero: el metal sale de la rareza y la banda muestra el tipo
 RARITY_METAL = {
-    "common": "bronze", "rare": "silver", "epic": "gold", "legendary": "gold", "divine": "black",
+    "common": "bronze", "uncommon": "bronze", "rare": "silver", "epic": "gold", "legendary": "gold", "divine": "black",
 }
 
 TYPE_LABEL_ES = {

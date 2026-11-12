@@ -214,28 +214,48 @@ def load_all_cards(json_path: str) -> list[dict]:
 # ─────────────────────────────────────────────────────────────────────────────
 ART_EXTENSIONS = [".jpg", ".jpeg", ".jfif", ".png", ".webp"]
 
+def art_dir_for(card: dict) -> Path:
+    """Carpeta de arte de la carta: espeja su JSON de origen en database/, en minúsculas.
+    database/Poseidon/Knight/marines.json → art/poseidon/knight/marines/
+    Sin JSON de origen conocido (o fuera de database/) devuelve la raíz de art/."""
+    source = card.get("_source_file")
+    if not source:
+        return ART_DIR
+    try:
+        rel = Path(source).resolve().relative_to(DATABASE_DIR.resolve()).with_suffix("")
+    except ValueError:
+        return ART_DIR
+    return ART_DIR.joinpath(*[part.lower() for part in rel.parts])
+
+
 def find_art(card: dict, art_override: str | None = None) -> Path | None:
     """Busca el archivo de arte para la carta."""
     if art_override:
         p = Path(art_override)
         return p if p.exists() else None
 
-    # 1) Buscar por code en art/
-    for ext in ART_EXTENSIONS:
-        p = ART_DIR / f"{card['code']}{ext}"
-        if p.exists():
-            return p
+    # Primero la carpeta de su JSON; después la raíz de art/ (arte antiguo sin organizar)
+    search_dirs = [art_dir_for(card)]
+    if ART_DIR not in search_dirs:
+        search_dirs.append(ART_DIR)
+
+    # 1) Buscar por code
+    for folder in search_dirs:
+        for ext in ART_EXTENSIONS:
+            p = folder / f"{card['code']}{ext}"
+            if p.exists():
+                return p
 
     # 2) Buscar por image_url relativo a assets/cards/ del servidor
     image_url = card.get("image_url", "")
     if image_url:
-        # Intentar en art/ directamente (nombre del archivo)
-        filename = Path(image_url).name
-        for ext in ART_EXTENSIONS:
-            stem = Path(filename).stem
-            p = ART_DIR / f"{stem}{ext}"
-            if p.exists():
-                return p
+        # Intentar en art/ (nombre del archivo)
+        stem = Path(Path(image_url).name).stem
+        for folder in search_dirs:
+            for ext in ART_EXTENSIONS:
+                p = folder / f"{stem}{ext}"
+                if p.exists():
+                    return p
         # Intentar src/assets/cards/ del servidor
         server_assets = BASE_DIR.parents[1] / "src" / "assets" / "cards"
         p = server_assets / image_url

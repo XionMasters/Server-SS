@@ -14,6 +14,8 @@ import { createEngineContext } from '../../src/domain/game/EngineContext';
 import { createEvent } from '../../src/domain/game/events/GameEvents';
 import { equipEligibleKnights, releaseEquipment } from '../../src/domain/game/rules/equipment.rules';
 import { ActionResolver } from '../../src/app/matches/actions/ActionResolver';
+import { killKnight } from '../../src/domain/game/actions/KillAction';
+import { ActionRegistry, type ActionResult } from '../../src/domain/game/actions/ActionRegistry';
 
 const objects = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '../../database/Santuario/objects.json'), 'utf8'),
@@ -155,6 +157,40 @@ describe('Equipamiento: liberar al salir el caballero', () => {
     expect(state.player1.field_techniques).toHaveLength(0);
     expect(state.player1.graveyard.map(c => c.instance_id)).toEqual(['t0']);
     expect(seiya.attached_cards).toEqual([]);
+  });
+
+  /** Seiya (con el objeto t0 equipado) y Shiryu en campo. */
+  function equippedBoard() {
+    const state = boardWith([bronze('seiya', 0), bronze('shiryu', 1)], [0]);
+    state.player1.field_knights[0].attached_cards = ['t0'];
+    return createEngineContext(state);
+  }
+  const objectOnField = (s: GameState) => s.player1.field_techniques.some(c => c.instance_id === 't0');
+  const objectInYomotsu = (s: GameState) => s.player1.graveyard.some(c => c.instance_id === 't0');
+
+  test.each(['damage', 'sacrifice'] as const)('al morir el caballero (%s) el objeto va al yomotsu', reason => {
+    const ctx = equippedBoard();
+    killKnight(ctx, 'seiya', undefined, reason);
+    expect(objectOnField(ctx.state)).toBe(false);
+    expect(objectInYomotsu(ctx.state)).toBe(true);
+  });
+
+  test('si el caballero vuelve a la mano, el objeto va al yomotsu', () => {
+    const ctx = equippedBoard();
+    const result: ActionResult = { state: ctx.state, affectedIds: [], extras: {} };
+    ActionRegistry.executeAll([{ type: 'send_to_zone', target: 'selected', destination: 'hand' }], {
+      playerNumber: 1, sourceCardId: 'x', selectedCardId: 'seiya',
+      event: { type: 'ACTIVE', playerNumber: 1 } as any, rng: () => 0.5, bus: ctx.bus, engineContext: ctx,
+    }, result);
+    expect(result.state.player1.hand.some(c => c.instance_id === 'seiya')).toBe(true);
+    expect(objectOnField(result.state)).toBe(false);
+    expect(objectInYomotsu(result.state)).toBe(true);
+  });
+
+  test('si muere otro caballero, el objeto sigue en campo', () => {
+    const ctx = equippedBoard();
+    killKnight(ctx, 'shiryu', undefined, 'damage');
+    expect(objectOnField(ctx.state)).toBe(true);
   });
 });
 

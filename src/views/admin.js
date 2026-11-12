@@ -557,7 +557,7 @@ async function loadCards(offset) {
 }
 
 function renderCardsTable(cards, total, offset) {
-    const rarityColors = { common:'#9ca3af', rare:'#3b82f6', epic:'#8b5cf6', legendary:'#f59e0b', divine:'#ec4899' };
+    const rarityColors = { common:'#9ca3af', uncommon:'#22c55e', rare:'#3b82f6', epic:'#8b5cf6', legendary:'#f59e0b', divine:'#ec4899' };
     const typeEmoji = { knight:'⚔️', technique:'✨', item:'📦', stage:'🗺️', helper:'🤝', event:'🎴' };
     const wrap = document.getElementById('cards-table-wrap');
     const pag = document.getElementById('cards-pagination');
